@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>Gestion finance</title>
+  <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,900;1,400;1,900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
@@ -1340,11 +1341,77 @@
   .mode-segment { display: inline-flex; align-items: stretch; border: 1px solid var(--line-strong); border-radius: 10px; overflow: hidden; background: var(--panel-bg); backdrop-filter: var(--panel-blur); box-shadow: var(--shadow); }
     .mode-segment button { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; background: transparent; color: var(--muted); font-family: var(--font-body); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: color 0.18s ease, background 0.18s ease; white-space: nowrap; }
     .mode-segment button svg { width: 16px; height: 16px; flex-shrink: 0; }
-    .mode-segment button.is-active { color: var(--button-primary-text, #090a1f); background: var(--button-primary-bg); }
-    .mode-segment button:not(.is-active):hover { color: var(--text); background: var(--button-active-bg, rgba(129,140,248,0.08)); }
-    body[data-theme="brutal"] .mode-segment { border-radius: 0; }
-    body[data-theme="brutal"] .mode-segment button { text-transform: uppercase; font-family: var(--font-heading); }
-    @media (max-width: 560px) { .mode-segment button { padding: 8px 14px; font-size: 0.82rem; } }
+  .mode-segment button.is-active { color: var(--button-primary-text, #090a1f); background: var(--button-primary-bg); }
+  .mode-segment button:not(.is-active):hover { color: var(--text); background: var(--button-active-bg, rgba(129,140,248,0.08)); }
+  body[data-theme="brutal"] .mode-segment { border-radius: 0; }
+  body[data-theme="brutal"] .mode-segment button { text-transform: uppercase; font-family: var(--font-heading); }
+  @media (max-width: 560px) { .mode-segment button { padding: 8px 14px; font-size: 0.82rem; } }
+
+  /* Navigation PC compacte : le menu inférieur reste réservé au mobile. */
+  .app-header { position: relative; align-items: center; min-height: 64px; padding: 8px 0 20px; border-bottom: 1px solid var(--line); }
+  .brand { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; }
+  .brand-mark { width: 42px; height: 42px; display: inline-grid; place-items: center; color: var(--accent); background: color-mix(in srgb, var(--accent), transparent 86%); border: 1px solid color-mix(in srgb, var(--accent), transparent 62%); border-radius: 12px; }
+  .brand-mark svg { width: 32px; height: 32px; }
+  .brand-copy { display: grid; gap: 2px; }
+  .desktop-nav { display: flex; align-items: center; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-bg); backdrop-filter: var(--panel-blur); }
+  .desktop-nav-link { min-height: 36px; padding: 7px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font: 700 0.84rem var(--font-body); }
+  .desktop-nav-link:hover, .desktop-nav-link.is-active { color: var(--text); background: var(--button-active-bg); }
+  .desktop-nav-link.is-active { color: var(--accent); }
+  .profile-menu { position: relative; }
+  .profile-trigger { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 4px 8px 4px 5px; border: var(--panel-border); border-radius: 12px; background: var(--panel-bg); color: var(--text); box-shadow: var(--shadow); }
+  .profile-trigger svg { width: 15px; height: 15px; color: var(--muted); }
+  .profile-avatar { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 9px; background: var(--button-primary-bg); color: var(--button-primary-text); font-size: 0.82rem; font-weight: 900; }
+  .profile-trigger-label { max-width: 132px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.82rem; font-weight: 800; }
+  .profile-popover { position: absolute; top: calc(100% + 10px); right: 0; z-index: 80; display: grid; gap: 8px; width: min(280px, calc(100vw - 28px)); padding: 12px; border: var(--panel-border); border-radius: 14px; background: var(--panel-solid); color: var(--text); box-shadow: 0 18px 48px rgba(0,0,0,.28); backdrop-filter: var(--panel-blur); }
+  .profile-popover[hidden] { display: none; }
+  .profile-popover-account { display: grid; gap: 3px; padding: 3px 4px 9px; border-bottom: 1px solid var(--line); }
+  .profile-popover-kicker { color: var(--muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .profile-popover-account strong { overflow-wrap: anywhere; font-size: .86rem; }
+  .profile-popover .status-pill { justify-self: start; min-height: 30px; padding: 5px 9px; background: var(--panel-bg); box-shadow: none; }
+  .profile-menu-link { min-height: 38px; padding: 8px 10px; border: 0; border-radius: 9px; background: transparent; color: var(--text); text-align: left; font: 700 .84rem var(--font-body); }
+  .profile-menu-link:hover { background: var(--button-active-bg); color: var(--accent); }
+  .profile-menu-link-danger { color: var(--red); border-top: 1px solid var(--line); border-radius: 0; }
+  .dashboard-control-row { display: flex; align-items: flex-end; justify-content: flex-end; gap: 12px; min-height: 48px; }
+  .dashboard-control-row .sheet-status-bar { margin: 0; flex: 0 0 auto; }
+  .dashboard-controls { display: grid; grid-template-columns: 110px 150px 188px auto; align-items: end; gap: 8px; }
+  .dashboard-controls label { gap: 4px; color: var(--muted); font-size: .69rem; }
+  .dashboard-controls .custom-select-trigger { min-height: 38px; padding: 7px 9px; font-size: .81rem; }
+  .dashboard-controls .custom-select-option { padding: 8px 9px; font-size: .82rem; }
+  .dashboard-controls .sync-sheet-btn { min-height: 38px; padding: 8px 11px; border-radius: 10px; box-shadow: none; }
+  .settings-reset-section { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 12px 18px; padding: 16px 18px; text-align: left; }
+  .settings-reset-copy { display: grid; gap: 4px; }
+  .settings-reset-copy h3 { font: 800 .95rem var(--font-heading); color: var(--text); }
+  .settings-reset-copy p { margin: 0; color: var(--muted); font-size: .8rem; line-height: 1.45; }
+  .settings-reset-section .settings-reset-btn, .settings-reset-section .settings-delete-btn { justify-self: end; min-height: 34px; padding: 7px 10px; font-size: .76rem; border-radius: 8px; }
+  .settings-reset-section .settings-delete-btn { grid-column: 2; }
+  .settings-reset-section .settings-reset-hint { display: none; }
+  .settings-footer { justify-content: center; gap: 8px; padding: 10px 0 4px; }
+  .settings-footer-link { text-decoration: none; padding: 5px 8px; }
+  .settings-footer-link + .settings-footer-link { border-left: 1px solid var(--line); }
+  .settings-reset-btn, .settings-delete-btn { color: var(--red); border-color: color-mix(in srgb, var(--red), transparent 55%); background: color-mix(in srgb, var(--red), transparent 92%); }
+  .settings-reset-btn:hover, .settings-delete-btn:hover { color: var(--red); border-color: var(--red); background: color-mix(in srgb, var(--red), transparent 84%); }
+  .sync-sheet-btn { box-shadow: none; }
+  .sync-sheet-btn:hover { box-shadow: var(--shadow); }
+  body[data-theme="brutal"] .brand-mark, body[data-theme="brutal"] .desktop-nav, body[data-theme="brutal"] .desktop-nav-link, body[data-theme="brutal"] .profile-trigger, body[data-theme="brutal"] .profile-avatar, body[data-theme="brutal"] .profile-popover, body[data-theme="brutal"] .profile-menu-link, body[data-theme="brutal"] .dashboard-controls .sync-sheet-btn, body[data-theme="brutal"] .settings-reset-section .settings-reset-btn, body[data-theme="brutal"] .settings-reset-section .settings-delete-btn { border-radius: 0 !important; }
+  @media (max-width: 820px) {
+    .desktop-nav { order: 3; width: 100%; justify-content: center; }
+    .app-header { flex-wrap: wrap; }
+    .dashboard-control-row { align-items: stretch; flex-direction: column; }
+    .dashboard-controls { grid-template-columns: repeat(3, minmax(0,1fr)) auto; }
+  }
+  @media (max-width: 720px) {
+    .app-header { padding-bottom: 14px; }
+    .desktop-nav, .profile-trigger-label { display: none; }
+    .topbar { flex-direction: row; }
+    .brand .eyebrow, .brand .subtitle { display: none; }
+    .brand h1 { font-size: 1.18rem; }
+    .brand-mark { width: 38px; height: 38px; }
+    .dashboard-controls { grid-template-columns: 1fr 1fr; }
+    .dashboard-controls label:last-of-type { grid-column: span 2; }
+    .dashboard-controls .sync-sheet-btn { grid-column: span 2; }
+    .settings-reset-section { grid-template-columns: 1fr; }
+    .settings-reset-section .settings-reset-btn, .settings-reset-section .settings-delete-btn { justify-self: start; grid-column: auto; }
+  }
   </style>
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard">
@@ -1378,27 +1445,48 @@
     </div>
   </div>
   <main class="app">
-    <header class="topbar">
-      <div class="brand"><span class="eyebrow">Pilotage financier</span><h1>Gestion finance</h1><p class="subtitle">Tableau de bord · Tableur multi-feuilles · Sync cloud</p></div>
-      <div class="top-actions"><div class="status-pill" id="connectionStatus"><span class="status-dot"></span><span id="connectionText">Non connecté</span></div><div class="server-control" id="serverControl" style="display:none"><button class="server-control-toggle" id="serverControlButton" type="button" title="Serveur local" aria-label="Contrôle du serveur" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6.8 6.8a7.35 7.35 0 1 0 10.4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><button class="server-stop-button" id="stopServerButton" type="button">Arrêter</button></div></div>
+    <header class="topbar app-header">
+      <div class="brand" aria-label="Gestion Finance">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><path d="M12 49h40" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><path d="M18 43V34M31 43V26M44 43V17" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><path d="M16 27 29 14l8 8 13-14" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 8h8v8" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div class="brand-copy"><span class="eyebrow">Pilotage financier</span><h1>Gestion Finance</h1><p class="subtitle">Tableau de bord · Tableur multi-feuilles · Sync cloud</p></div>
+      </div>
+      <nav class="desktop-nav" aria-label="Navigation principale">
+        <button class="desktop-nav-link" id="desktopHomeButton" type="button" data-page="dashboard">Accueil</button>
+        <button class="desktop-nav-link" id="desktopSheetButton" type="button" data-page="sheet">Tableur</button>
+        <button class="desktop-nav-link" id="desktopSettingsButton" type="button" data-page="settings">Paramètres</button>
+      </nav>
+      <div class="top-actions">
+        <div class="profile-menu" id="profileMenu">
+          <button class="profile-trigger" id="profileMenuButton" type="button" aria-expanded="false" aria-controls="profilePopover"><span class="profile-avatar" id="profileAvatar">?</span><span class="profile-trigger-label" id="profileLabel">Profil</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="profile-popover" id="profilePopover" hidden>
+            <div class="profile-popover-account"><span class="profile-popover-kicker">Compte</span><strong id="profileEmail">Non connecté</strong></div>
+            <div class="status-pill" id="connectionStatus"><span class="status-dot"></span><span id="connectionText">Non connecté</span></div>
+            <button class="profile-menu-link" id="profileSettingsButton" type="button">Paramètres</button>
+            <button class="profile-menu-link profile-menu-link-danger" id="accountLogoutBtn" type="button" hidden>Se déconnecter</button>
+          </div>
+        </div>
+        <div class="server-control" id="serverControl" style="display:none"><button class="server-control-toggle" id="serverControlButton" type="button" title="Serveur local" aria-label="Contrôle du serveur" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6.8 6.8a7.35 7.35 0 1 0 10.4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><button class="server-stop-button" id="stopServerButton" type="button">Arrêter</button></div>
+      </div>
     </header>
     <section class="app-page" id="dashboardPage">
       <section class="content">
-        <div class="sheet-status-bar" id="sheetStatusBar">
-          <span class="sheet-status-dot not-loaded" id="sheetStatusDot"></span>
-          <span class="sheet-status-label">Tableur</span>
-          <span class="sheet-status-info">i
-            <span class="sheet-status-tooltip">
-              <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--red,#fb7185)"></span> Non chargé</span>
-              <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:#3b82f6"></span> Connecté hors-ligne</span>
-              <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--green,#2ed47a)"></span> Connecté en ligne</span>
+        <section class="dashboard-control-row" aria-label="Filtres et statut du tableur">
+          <div class="sheet-status-bar" id="sheetStatusBar">
+            <span class="sheet-status-dot not-loaded" id="sheetStatusDot"></span>
+            <span class="sheet-status-label">Tableur</span>
+            <span class="sheet-status-info" aria-label="Aide sur le statut du tableur">i
+              <span class="sheet-status-tooltip">
+                <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--red,#fb7185)"></span> Non chargé</span>
+                <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:#3b82f6"></span> Connecté hors-ligne</span>
+                <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--green,#2ed47a)"></span> Connecté en ligne</span>
+              </span>
             </span>
-          </span>
-        </div>
-        <section class="panel toolbar" aria-label="Filtres">
-          <label>Année<select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label><label>Mois<select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
-          <label>Vue<select id="viewSelect" class="native-select-hidden"><option value="pie">Camembert</option><option value="grouped">Comparatif — tous les mois</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label>
-          <button type="button" id="syncSheetButton" class="sync-sheet-btn" title="Recharger les données du tableur dans le tableau de bord"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Recharger</span></button>
+          </div>
+          <div class="dashboard-controls">
+            <label><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label><label><span>Mois</span><select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
+            <label><span>Vue</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Camembert</option><option value="grouped">Comparatif — tous les mois</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label>
+            <button type="button" id="syncSheetButton" class="sync-sheet-btn" title="Recharger les données du tableur dans le tableau de bord" aria-label="Recharger les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Recharger</span></button>
+          </div>
         </section>
         <section class="metrics" aria-label="Résumé">
           <article class="metric-card"><span class="metric-label">Salaire moyen</span><strong class="metric-value" id="avgSalary">-</strong><span class="metric-note" id="avgSalaryNote">Tous les mois</span></article>
@@ -1481,7 +1569,10 @@
         </div>
       </div>
       <div class="sheet-wrap"><div id="sheetApp"></div></div>
-        <!-- Sections secondaires -->
+      <!-- Configuration liée aux données : elle appartient au tableur. -->
+      <section class="settings-section panel category-settings sheet-rules-section" id="categorySettings" hidden><div class="settings-section-head category-settings-title"><div><h3>Catégories détectées</h3><p>Associe les catégories détectées à la bonne règle.</p></div></div><div class="category-settings-list" id="categorySettingsList"></div></section>
+      <section class="settings-section panel custom-rules-section sheet-rules-section"><div class="settings-section-head"><div><h3>Gestion des règles</h3><p>Crée, modifie ou supprime tes propres règles de catégorisation.</p></div></div><div class="custom-rule-inputs"><input type="text" id="customRuleName" placeholder="Ex : Bourse, Crypto, Immobilier" /><button id="btnAddCustomRule" type="button">Ajouter la règle</button></div><div id="customRulesList"></div><p class="hint" style="margin-top: 12px;">Les règles système (Dépense, Épargne, Ignorer) sont toujours disponibles. Une règle utilisée par une catégorie ne peut pas être supprimée.</p></section>
+        <!-- Objectif après les règles du tableur. -->
         <section class="settings-section panel" id="savingsGoalSection">
           <div class="settings-section-head"><div><h3>Objectif d'épargne</h3><p>Définis ton objectif et suis ta progression sur le tableau de bord.</p></div></div>
           <div class="settings-field">
@@ -1503,7 +1594,7 @@
       <section class="settings-section panel account-section" aria-label="Compte">
         <div class="panel-title"><h2>Compte</h2></div>
         <div class="account-panel">
-          <div class="settings-intro">
+          <div class="settings-intro" id="accountIntro">
             <strong>Connexion par email</strong>
             <p>Crée un compte pour protéger ton accès et synchroniser tes données entre appareils.</p>
           </div>
@@ -1542,12 +1633,6 @@
           <p class="account-status" id="accountStatus">Non configuré</p>
         </div>
       </section>
-
-
-        <!-- Réglages de catégorisation -->
-      <section class="settings-section panel category-settings" id="categorySettings" hidden><div class="settings-section-head category-settings-title"><div><h3>Catégories détectées</h3><p>Associe les catégories détectées à la bonne règle.</p></div></div><div class="category-settings-list" id="categorySettingsList"></div></section>
-      <!-- Gestion des règles -->
-      <section class="settings-section panel custom-rules-section"><div class="settings-section-head"><div><h3>Gestion des règles</h3><p>Crée, modifie ou supprime tes propres règles de catégorisation.</p></div></div><div class="custom-rule-inputs"><input type="text" id="customRuleName" placeholder="Ex : Bourse, Crypto, Immobilier" /><button id="btnAddCustomRule" type="button">Ajouter la règle</button></div><div id="customRulesList"></div><p class="hint" style="margin-top: 12px;">Les règles système (Dépense, Épargne, Ignorer) sont toujours disponibles. Une règle utilisée par une catégorie ne peut pas être supprimée.</p></section>
                 <section class="settings-section panel" id="friendsSection">
           <div class="settings-section-head"><div><h3>Amis</h3><p>Invite tes proches par e-mail pour partager des infos financières.</p></div></div>
           <div id="friendsContainer"></div>
@@ -1562,12 +1647,9 @@
           <div class="settings-section-head split" style="margin-top: 20px;"><div><h3>Mode d'affichage</h3><p>Clair ou sombre — garde la personnalité du thème.</p></div><div class="mode-segment" id="modeToggle" role="group" aria-label="Mode d'affichage"><button type="button" data-mode-option="light"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Clair</button><button type="button" data-mode-option="dark"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sombre</button></div></div>
         </section>
 
-        <!-- Boutons de gestion de compte (tout en bas, avant le footer) -->
+        <!-- Actions sensibles : sobres et séparées du pied de page. -->
         <div class="settings-reset-section">
-          <button type="button" class="settings-reset-btn settings-signout-btn" id="accountLogoutBtn">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 17l5-5-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13 5V4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <span>Se déconnecter</span>
-          </button>
+          <div class="settings-reset-copy"><h3>Données et compte</h3><p>Réinitialise l’application locale ou supprime définitivement les données synchronisées.</p></div>
           <button type="button" class="settings-reset-btn" id="settingsResetBtn">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" style="flex-shrink:0"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 3v5h5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span>Réinitialiser le compte</span>
@@ -2106,7 +2188,7 @@
     function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
     function updateChartColorTokens(){ const styles=getComputedStyle(document.body); COLORS.salary=readCssVar(styles,"--chart-salary",COLORS.salary); COLORS.expenses=readCssVar(styles,"--chart-expenses",COLORS.expenses); COLORS.savings=readCssVar(styles,"--chart-savings",COLORS.savings); COLORS.grid=readCssVar(styles,"--chart-grid",COLORS.grid); COLORS.tick=readCssVar(styles,"--chart-tick",COLORS.tick); COLORS.text=readCssVar(styles,"--chart-text",COLORS.text); }
     function readCssVar(styles,name,fallback){ return styles.getPropertyValue(name).trim()||fallback; }
-    function setPage(page){ state.page=(page==="settings"||page==="sheet")?page:"dashboard"; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; elements.settingsButton.classList.toggle("is-active",state.page==="settings"); if(elements.sheetButton) elements.sheetButton.classList.toggle("is-active",state.page==="sheet"); if(elements.homeButton) elements.homeButton.classList.toggle("is-active",state.page==="dashboard"); if(state.page=="sheet"&&window.FinanceSheet){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} }
+    function setPage(page){ state.page=(page==="settings"||page==="sheet")?page:"dashboard"; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="sheet"&&window.FinanceSheet){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} }
     window.setPage = setPage;
     window.setTheme = setTheme;
     window.setMode = setMode;
@@ -2352,7 +2434,10 @@ function resetDataState(){
       }
       // Événement pour vider l'état du dashboard (appelé par le bouton admin)
       window.addEventListener("financeClearData", () => { resetDataState(); updateInterface(); });
-      elements.settingsButton.addEventListener("click",()=>setPage("settings")); if(elements.sheetButton){elements.sheetButton.addEventListener("click",()=>setPage("sheet"));} if(elements.homeButton){elements.homeButton.addEventListener("click",()=>setPage("dashboard"));}
+      document.querySelectorAll("[data-page]").forEach(function(button){ button.addEventListener("click",function(){ setPage(button.dataset.page); }); });
+      var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileSettings=document.getElementById("profileSettingsButton");
+      if(profileButton && profilePopover){ profileButton.addEventListener("click",function(){ var open=profilePopover.hidden; profilePopover.hidden=!open; profileButton.setAttribute("aria-expanded",String(open)); }); document.addEventListener("click",function(event){ if(profileMenu && !profileMenu.contains(event.target)){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); document.addEventListener("keydown",function(event){ if(event.key==="Escape"){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); }
+      if(profileSettings){ profileSettings.addEventListener("click",function(){ setPage("settings"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
       elements.backDashboardButton.addEventListener("click",()=>setPage("dashboard"));
       elements.themeButtons.forEach(btn=>btn.addEventListener("click",()=>setTheme(btn.dataset.themeOption)));
       Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.addEventListener("click",()=>setMode(btn.dataset.modeOption)));
@@ -4405,6 +4490,17 @@ function resetDataState(){
      La clé anon est publique par conception (protégée par les RLS Supabase). */
   var sb = { config: null, client: null, user: null };
   function el(id){ return document.getElementById(id); }
+  function translateAuthError(error){
+    var raw = String((error && error.message) || error || "").trim();
+    var normalized = raw.toLowerCase();
+    if(/invalid login credentials|invalid credentials/.test(normalized)) return "Email ou mot de passe incorrect.";
+    if(/email not confirmed|email.*not.*confirm/.test(normalized)) return "Ton adresse email n’est pas encore confirmée.";
+    if(/user already registered|already.*registered/.test(normalized)) return "Un compte existe déjà avec cette adresse email.";
+    if(/password should be at least|password.*least/.test(normalized)) return "Le mot de passe doit contenir au moins 8 caractères.";
+    if(/rate limit|too many requests/.test(normalized)) return "Trop de tentatives. Réessaie dans quelques instants.";
+    if(/network|fetch/.test(normalized)) return "Impossible de contacter le service de connexion. Vérifie ta connexion internet.";
+    return raw || "Une erreur est survenue. Réessaie.";
+  }
 
   async function loadConfig(){
     // La clé publishable est nécessaire côté navigateur, mais doit rester
@@ -4477,11 +4573,16 @@ function resetDataState(){
 
   function renderAuth(){
     var form = el("accountForm"); var userInfo = el("accountUserInfo");
-    var hint = el("accountHint"); var status = el("accountStatus"); var logoutButton = el("accountLogoutBtn");
+    var hint = el("accountHint"); var status = el("accountStatus"); var logoutButton = el("accountLogoutBtn"); var intro = el("accountIntro");
+    var profileAvatar = el("profileAvatar"); var profileLabel = el("profileLabel"); var profileEmail = el("profileEmail");
     if(!sb.client){
       if(form) form.style.display = "none";
       if(userInfo) userInfo.style.display = "none";
-      if(logoutButton) logoutButton.style.display = "none";
+      if(logoutButton){ logoutButton.hidden = true; logoutButton.style.display = "none"; }
+      if(intro) intro.style.display = "";
+      if(profileAvatar) profileAvatar.textContent = "?";
+      if(profileLabel) profileLabel.textContent = "Profil";
+      if(profileEmail) profileEmail.textContent = "Non connecté";
       if(hint){ hint.style.display = ""; hint.innerHTML = "Pour activer la connexion par email, crée un projet Supabase gratuit puis renseigne son URL et sa clé publique (anon key) dans le fichier <code>supabase_config.json</code>."; }
       if(status) status.textContent = "Non configuré";
       return;
@@ -4489,15 +4590,23 @@ function resetDataState(){
     if(sb.user){
       if(form) form.style.display = "none";
       if(userInfo) userInfo.style.display = "";
-      if(logoutButton) logoutButton.style.display = "inline-flex";
+      if(logoutButton){ logoutButton.hidden = false; logoutButton.style.display = "inline-flex"; }
+      if(intro) intro.style.display = "none";
       var d = el("accountEmailDisplay"); if(d) d.textContent = sb.user.email || "";
       var av = el("accountUserAvatar"); if(av) av.textContent = (sb.user.email || "?").charAt(0).toUpperCase();
+      if(profileAvatar) profileAvatar.textContent = (sb.user.email || "?").charAt(0).toUpperCase();
+      if(profileLabel) profileLabel.textContent = "Profil";
+      if(profileEmail) profileEmail.textContent = sb.user.email || "Connecté";
       if(status) status.textContent = "Connecté";
       if(hint) hint.style.display = "none";
     }else{
       if(form) form.style.display = "";
       if(userInfo) userInfo.style.display = "none";
-      if(logoutButton) logoutButton.style.display = "none";
+      if(logoutButton){ logoutButton.hidden = true; logoutButton.style.display = "none"; }
+      if(intro) intro.style.display = "";
+      if(profileAvatar) profileAvatar.textContent = "?";
+      if(profileLabel) profileLabel.textContent = "Profil";
+      if(profileEmail) profileEmail.textContent = "Non connecté";
       if(status) status.textContent = "Déconnecté";
       if(hint) hint.style.display = "none";
     }
@@ -4520,7 +4629,7 @@ function resetDataState(){
         password: pw,
         options: { emailRedirectTo: window.location.origin + window.location.pathname }
       });
-      if(res.error){ msg(res.error.message); return; }
+      if(res.error){ msg(translateAuthError(res.error)); return; }
       sb.lastWasSignup = true;
       if(res.data.session){ msg("Compte créé — vous êtes connecté.", "ok"); }
       else {
@@ -4529,7 +4638,7 @@ function resetDataState(){
       }
     }catch(e){
       console.error("Register error:", e);
-      msg(e.message||"Erreur lors de l'inscription. Vérifiez votre connexion.");
+      msg(translateAuthError(e));
     }
     finally{ setLoading(false); }
   }
@@ -4540,7 +4649,7 @@ function resetDataState(){
     setLoading(true); clearMsg();
     try{
       var res = await sb.client.auth.resend({ email: email, type: "signup" });
-      if(res.error){ msg(res.error.message); return; }
+      if(res.error){ msg(translateAuthError(res.error)); return; }
       msg("Email de confirmation renvoyé. Vérifiez votre boîte de réception (et les spams).", "ok");
     }catch(e){ msg(e.message||"Erreur lors du renvoi."); }
     finally{ setLoading(false); }
@@ -4555,11 +4664,11 @@ function resetDataState(){
       var res = await sb.client.auth.signInWithPassword({ email: email, password: pw });
       if(res.error){
         var unconfirmed = /not confirmed|non confirm/i.test(res.error.message || "");
-        msg(res.error.message);
+        msg(translateAuthError(res.error));
         if(unconfirmed) showResend(true);
         return;
       }
-    }catch(e){ msg(e.message||"Erreur lors de la connexion."); }
+    }catch(e){ msg(translateAuthError(e)); }
     finally{ setLoading(false); }
   }
 
@@ -4582,9 +4691,9 @@ function resetDataState(){
       var res = await sb.client.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + window.location.pathname
       });
-      if(res.error){ msg(res.error.message); return; }
+      if(res.error){ msg(translateAuthError(res.error)); return; }
       msg("Email de réinitialisation envoyé. Vérifie ta boîte de réception (et les spams).", "ok");
-    }catch(e){ msg(e.message||"Erreur lors de la demande de réinitialisation."); }
+    }catch(e){ msg(translateAuthError(e)); }
     finally{ setLoading(false); }
   }
 

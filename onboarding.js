@@ -337,9 +337,11 @@
 
   function finishWizard() {
     // Sauvegarde le montant actuel comme solde de départ
-    if (wizardData.currentAmount) {
+    if (wizardData.currentAmount !== "" && wizardData.currentAmount !== null && wizardData.currentAmount !== undefined) {
       wizardData.startingCash = wizardData.currentAmount;
-      wizardData.currentCashDate = new Date().toISOString().slice(0, 10);
+      wizardData.currentCashDate = /^\d{4}-\d{2}$/.test(String(wizardData.startingMonth || ""))
+        ? wizardData.startingMonth + "-01"
+        : new Date().toISOString().slice(0, 10);
     }
     store(STORAGE.profile, wizardData);
     store(STORAGE.onboarding, true);
@@ -369,12 +371,25 @@
   }
 
   // === Import handlers ===
-  window.onbHandleImport = function(input) {
+  window.onbHandleImport = async function(input) {
     if (input.files && input.files[0]) {
-      if (typeof window.importFinanceFile === "function") {
-        window.importFinanceFile(input.files[0]);
+      var file = input.files[0];
+      try {
+        // Le même importeur alimente désormais le tableur ET le dashboard :
+        // aucune donnée n'est perdue lorsque le tutoriel se ferme.
+        if (window.FinanceSheet && typeof window.FinanceSheet.importXlsx === "function") {
+          var imported = await window.FinanceSheet.importXlsx(file, { mode: "replace", silent: true });
+          if (!imported) return;
+        } else if (typeof window.importFinanceFile === "function") {
+          await window.importFinanceFile(file);
+        } else {
+          return;
+        }
+        wizardData.importedFile = true;
+        store(STORAGE.profile, wizardData);
+      } catch (e) {
+        console.error("Erreur d'import pendant la configuration", e);
       }
-      store(STORAGE.profile, Object.assign(wizardData, { importedFile: true }));
     }
   };
   window.onbSkipImport = function() {

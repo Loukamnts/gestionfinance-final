@@ -66,8 +66,8 @@
 
 /* Cartes de solde au-dessus du tableur */
 .sheet-balance-cards {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
-  padding: 0 12px 8px; margin: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(180px, 280px)); gap: 10px;
+  justify-content: start; padding: 0 12px 8px; margin: 0;
 }
 @media (max-width: 640px) {
   .sheet-balance-cards { grid-template-columns: repeat(2, 1fr); }
@@ -108,6 +108,14 @@
 .sheet-table .row-head { left: 0; z-index: 3; min-width: 48px; width: 48px; cursor: pointer; box-shadow: 2px 0 8px -3px rgba(0,0,0,0.45); position: sticky; }
 .sheet-table .row-head:hover { color: var(--accent); }
 .sheet-table .row-head .rh-edit-btn { position: absolute; top: 50%; right: 1px; transform: translateY(-50%); }
+
+/* Deux niveaux d'en-têtes : A/B/C pour les formules, puis le mois. */
+.sheet-table thead th.col-letter { top: 0; z-index: 5; height: 24px; min-width: 116px; color: var(--muted-2); font-size: .68rem; letter-spacing: .08em; background: var(--panel-solid, var(--bg)); }
+.sheet-table thead th.col-head { top: 24px; z-index: 4; }
+.sheet-table .corner-head { z-index: 7; min-width: 210px; width: 210px; }
+.sheet-table .row-head { min-width: 210px; width: 210px; text-align: left; }
+.sheet-table .row-head .rh-label { padding: 6px 38px 6px 12px; text-align: left; font-size: .86rem; line-height: 22px; }
+.sheet-table .row-head .rh-edit-btn { right: 7px; min-width: 28px; min-height: 28px; padding: 4px 6px; opacity: .78; }
 
 .sheet-table td.cell { position: relative; height: 34px; min-width: 116px; background: transparent; color: var(--text); cursor: cell; user-select: none; }
 .sheet-table td.cell.selected { outline: 2px solid var(--accent, #818cf8); outline-offset: -2px; z-index: 1; }
@@ -230,14 +238,15 @@ body[data-theme="brutal"] .sheet-divider { background: var(--line-strong, #fff);
   .sheet-bar .icon-btn svg { width: 17px; height: 17px; flex: 0 0 17px; }
   .sheet-bar .hide-sm { display: none; }
   .sheet-table th, .sheet-table td { min-width: 104px; }
+  .sheet-table .corner-head, .sheet-table .row-head { min-width: 164px; width: 164px; }
+  .sheet-table .row-head .rh-label { padding-left: 10px; padding-right: 34px; font-size: .82rem; }
   .sheet-fx .fx-preview { display: none; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   BARRE DE NAVIGATION INFÉRIEURE (Accueil / Tableur / Paramètres)
-   Style app mobile type Instagram / Clash Royale.
+   BARRE DE NAVIGATION INFÉRIEURE — exclusivement mobile.
    ═══════════════════════════════════════════════════════════════ */
-body { padding-bottom: 74px; }
+body { padding-bottom: 0; }
 
 .bottom-nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
@@ -268,6 +277,9 @@ body { padding-bottom: 74px; }
 body[data-theme="brutal"] .bottom-nav { border-radius: 0; box-shadow: 0 -6px 0 var(--line-strong, #fff); }
 body[data-theme="brutal"] .bottom-nav-btn { border-radius: 0; }
 
+@media (min-width: 721px) {
+  .bottom-nav { display: none; }
+}
 @media (max-width: 720px) {
   body { padding-bottom: 66px; }
   .bottom-nav-btn svg { width: 20px; height: 20px; flex: 0 0 20px; }
@@ -309,7 +321,7 @@ body[data-theme="brutal"] .bottom-nav-btn { border-radius: 0; }
 .settings-hint strong { color: var(--text); }
 
 /* Sections des paramètres et du tableur */
-body { padding-bottom: 78px; }
+body { padding-bottom: 0; }
 .config-section { position: static; }
 .config-section .panel-title { margin-bottom: 12px; }
 .sheet-rules-section { margin-top: 18px; }
@@ -390,6 +402,21 @@ body { padding-bottom: 78px; }
   font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.15s;
 }
 .account-btn-danger:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.5); }
+
+/* Les composants historiques utilisent désormais les mêmes variables que les
+   trois thèmes. Aucun violet fixe ne doit survivre à un changement de thème. */
+.balance-card.balance-card-accent { background: color-mix(in srgb, var(--accent), transparent 84%); border-color: color-mix(in srgb, var(--accent), transparent 62%); }
+.account-btn-primary { background: var(--button-primary-bg); color: var(--button-primary-text); border-radius: var(--control-radius, 12px); }
+.account-btn-secondary { border-color: var(--line-strong); background: var(--panel-bg); color: var(--text); border-radius: var(--control-radius, 12px); }
+.account-btn-secondary:hover { background: var(--button-active-bg); border-color: var(--accent); }
+.account-user-avatar { background: var(--button-primary-bg); color: var(--button-primary-text); border-radius: var(--control-radius, 50%); }
+.account-btn-danger { color: var(--red); border-color: color-mix(in srgb, var(--red), transparent 56%); background: color-mix(in srgb, var(--red), transparent 92%); border-radius: var(--control-radius, 12px); }
+body[data-theme="brutal"] .balance-card,
+body[data-theme="brutal"] .account-btn-primary,
+body[data-theme="brutal"] .account-btn-secondary,
+body[data-theme="brutal"] .account-user-avatar,
+body[data-theme="brutal"] .account-btn-danger { border-radius: 0 !important; }
+@media (max-width: 720px) { body { padding-bottom: 66px; } }
 
 /* === Sync status badge === */
 .sync-badge {

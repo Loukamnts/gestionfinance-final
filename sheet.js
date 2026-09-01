@@ -249,8 +249,14 @@
     cellMap.clear(); rowHeadEls = []; colHeadEls = [];
     const scroll = document.createElement("div"); scroll.className = "sheet-scroll";
     const table = document.createElement("table"); table.className = "sheet-table";
+    const lettersRow = document.createElement("tr");
     const hRow = document.createElement("tr");
-    const corner = document.createElement("th"); corner.className = "corner-head"; hRow.appendChild(corner);
+    const corner = document.createElement("th"); corner.className = "corner-head"; corner.rowSpan = 2; corner.title = "Intitulés des lignes"; lettersRow.appendChild(corner);
+    for (let c = 0; c < state.cols; c++) {
+      const letter = document.createElement("th"); letter.className = "col-letter"; letter.dataset.c = c; letter.textContent = colToLetter(c); letter.title = "Colonne " + colToLetter(c);
+      letter.addEventListener("click", () => selectCol(c));
+      lettersRow.appendChild(letter); colHeadEls.push(letter);
+    }
     for (let c = 0; c < state.cols; c++) {
       const th = document.createElement("th"); th.className = "col-head"; th.dataset.c = c;
       const sp = document.createElement("span"); sp.className = "h-label"; sp.textContent = headerLabel(c);
@@ -259,7 +265,7 @@
       // Pas de dblclick sur les en-têtes de colonnes : les mois ne sont pas renommables
       hRow.appendChild(th); colHeadEls.push(th);
     }
-    thead = document.createElement("thead"); thead.appendChild(hRow); table.appendChild(thead);
+    thead = document.createElement("thead"); thead.appendChild(lettersRow); thead.appendChild(hRow); table.appendChild(thead);
     tbody = document.createElement("tbody");
     for (let r = 0; r < state.rows; r++) {
       const tr = document.createElement("tr");
@@ -851,19 +857,20 @@
     }
   }
 
-  async function importXlsx(file) {
-    if (typeof XLSX === "undefined") { toast("Bibliothèque Excel non chargée."); return; }
+  async function importXlsx(file, options) {
+    options = options || {};
+    if (typeof XLSX === "undefined") { toast("Bibliothèque Excel non chargée."); return false; }
     let wb;
     try { wb = await readWorkbook(file); }
-    catch (err) { toast("Import impossible : " + (err && err.message ? err.message : "erreur")); return; }
+    catch (err) { toast("Import impossible : " + (err && err.message ? err.message : "erreur")); return false; }
     const sheetsData = (wb.SheetNames || []).map((name) => {
       const ws = wb.Sheets[name];
       const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true });
       return { name, aoa, ws };
     }).filter((s) => s.aoa && s.aoa.length);
-    if (!sheetsData.length) { toast("Aucune feuille exploitable dans ce fichier."); return; }
-    const mode = await importChoiceDialog(sheetsData.length);
-    if (!mode) return;
+    if (!sheetsData.length) { toast("Aucune feuille exploitable dans ce fichier."); return false; }
+    const mode = options.mode || await importChoiceDialog(sheetsData.length);
+    if (!mode) return false;
     if (mode === "replace") {
       state.sheets = [];
       const created = sheetsData.map((s) => {
@@ -893,9 +900,10 @@
       });
       if (created.length) state.activeSheetId = created[0].id;
     }
-    buildTable(); renderValues(); renderTabs(); scheduleSave();
+    buildTable(); renderValues(); renderTabs(); scheduleSave(); notifyDashboard();
     if (typeof window.populateYearSelect === "function") { try { window.populateYearSelect(); } catch(e){} }
-    toast(sheetsData.length + " feuille(s) importée(s).");
+    if (!options.silent) toast(sheetsData.length + " feuille(s) importée(s).");
+    return true;
   }
   function exportXlsx() {
     if (typeof XLSX === "undefined") { toast("Bibliothèque Excel non chargée."); return; }
@@ -1149,7 +1157,7 @@
     });
     const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener("click", fn); };
     bind("btnSheetExport", exportXlsx);
-    bind("btnSheetImport", () => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".xlsx,.xls,.xlsm,.csv"; inp.addEventListener("change", () => { const f = inp.files[0]; if (!f) return; if (typeof window.importFinanceFile === "function") window.importFinanceFile(f); importXlsx(f); }); inp.click(); });
+    bind("btnSheetImport", () => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".xlsx,.xls,.xlsm,.csv"; inp.addEventListener("change", () => { const f = inp.files[0]; if (!f) return; importXlsx(f); }); inp.click(); });
     bind("btnSheetClear", async () => { if (await confirmDialog("Vider la feuille active ?")) { const sheet = activeSheet(); sheet.cells = {}; sheet.rowHeaders = []; sheet.rows = DEFAULT_ROWS; enforceMonthHeaders(sheet); buildTable(); renderValues(); scheduleSave(); } });
     bind("btnSheetCalc", openCalculator);
     bind("sheetBackBtn", () => { const b = document.getElementById("backDashboardButton"); if (b) b.click(); });
@@ -1218,42 +1226,60 @@
     var balRemaining = document.getElementById("balRemaining");
     if (!balStart) return; // les cartes n'existent pas encore
 
-    // Récupère le solde actuel et sa date de référence depuis le profil wizard
+    // Le solde est un calcul de flux : les soldes des comptes (Livret, PEA,
+    // Revolut...) ne sont jamais assimilés à des revenus.
     var startingCash = 0;
     var refDate = null;
+    var hasStartingCash = false;
     try {
       var profile = JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile") || "null");
-      if (profile && profile.startingCash) startingCash = parseFloat(profile.startingCash) || 0;
+      if (profile && profile.startingCash !== "" && profile.startingCash !== null && profile.startingCash !== undefined) {
+        startingCash = parseFloat(profile.startingCash) || 0;
+        hasStartingCash = true;
+      }
       if (profile && profile.currentCashDate) {
         var parsed = new Date(profile.currentCashDate + "T00:00:00");
         if (!isNaN(parsed.getTime())) refDate = parsed;
       }
+      if (!refDate && profile && /^\d{4}-\d{2}$/.test(String(profile.startingMonth || ""))) {
+        refDate = new Date(profile.startingMonth + "-01T00:00:00");
+      }
     } catch(e) {}
-    if (!refDate) refDate = new Date(); // par défaut : aujourd'hui
 
-    // Parcourt TOUTES les feuilles d'année pour calculer revenus et dépenses
+    function rowKind(label) {
+      var key = String(label || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      if (/solde|depart|restant|reste|disponible|compte|livret|epargne|pea|bourse|placement|wallet|revolut|boursobank|bourso|banque/.test(key)) return "ignore";
+      if (/salaire|revenu|prime|allocation|apl|caf|rsa|remuneration|paie|paye|indemnite|remboursement/.test(key)) return "income";
+      if (/depense|loyer|charge|carte|facture|abonnement|frais|impot|taxe|assurance|transport|course|restaurant|achat|credit/.test(key)) return "expense";
+      return "ignore";
+    }
+
+    // Parcourt toutes les feuilles, en ne retenant que les lignes classées
+    // comme revenus ou dépenses. Sans montant de départ, tous les mois importés
+    // sont pris en compte ; sinon, seulement ceux postérieurs au mois choisi.
     var totalIncome = 0, totalExpense = 0;
-    var refMonthStart = new Date(refDate.getFullYear(), refDate.getMonth(), 1);
+    var refMonthStart = refDate ? new Date(refDate.getFullYear(), refDate.getMonth(), 1) : null;
     (state.sheets || []).forEach(function(sheet) {
       if (!sheet || !sheet.cells) return;
       // Année de la feuille (le nom de feuille est généralement l'année)
       var yearMatch = String(sheet.name || "").match(/^(19|20|21)\d{2}$/);
       var sheetYear = yearMatch ? parseInt(yearMatch[0], 10) : null;
       var computed = recompute(sheet.cells);
-      var ignoreRe = /solde|d[ée]part|restant|reste|disponible/i;
       for (var r = 0; r < (sheet.rowHeaders || []).length; r++) {
         var rowLabel = (sheet.rowHeaders[r] || "").trim();
-        if (ignoreRe.test(rowLabel)) continue;
+        var kind = rowKind(rowLabel);
+        if (kind === "ignore") continue;
         for (var c = 0; c < (sheet.headers || []).length; c++) {
-          // Ignore les mois antérieurs à la date de référence (solde inconnu)
-          if (sheetYear !== null && new Date(sheetYear, c, 1) < refMonthStart) continue;
+          // Ignore les mois antérieurs à la date de référence si un montant de
+          // départ a été saisi. On n'utilise jamais la date système par défaut.
+          if (hasStartingCash && refMonthStart && sheetYear !== null && new Date(sheetYear, c, 1) < refMonthStart) continue;
           var key = r + "," + c;
           var res = computed[key];
           if (!res || res.error) continue;
           var v = res.value;
           if (typeof v !== "number" || !Number.isFinite(v)) continue;
-          if (v > 0) totalIncome += v;
-          else if (v < 0) totalExpense += Math.abs(v);
+          if (kind === "income") totalIncome += v;
+          else if (kind === "expense") totalExpense += Math.abs(v);
         }
       }
     });

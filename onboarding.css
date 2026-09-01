@@ -398,3 +398,39 @@ body[data-theme="editorial"] .mode-segment button.is-active { box-shadow: 2px 2p
 
 /* === Boutons wizard alignés à droite === */
 .wizard-buttons { justify-content: flex-end !important; }
+
+/* Tous les éléments de l'onboarding consomment les tokens du thème actif. */
+body[data-theme] .onboarding-overlay {
+  --wiz-bg: var(--panel-solid); --wiz-text: var(--text); --wiz-accent: var(--accent);
+  --wiz-accent-text: var(--button-primary-text); --wiz-muted: var(--muted);
+  --wiz-field-bg: var(--input-bg); --wiz-border: var(--line-strong);
+  --wiz-shadow: var(--shadow);
+  background: color-mix(in srgb, var(--body-bg), transparent 28%);
+}
+body[data-theme] .wizard-header h2 { background: var(--title-gradient); -webkit-background-clip: text; background-clip: text; }
+body[data-theme="brutal"] .wizard-header h2 { background: none; color: var(--accent); }
+body[data-theme] .wizard-btn-primary,
+body[data-theme] .wizard-auth-submit,
+body[data-theme] .friends-copy-btn,
+body[data-theme] .friends-add-btn,
+body[data-theme] .tutorial-tooltip .tutorial-btn { background: var(--button-primary-bg); color: var(--button-primary-text); box-shadow: none; }
+body[data-theme] .wizard-choice:hover,
+body[data-theme] .wizard-info-box,
+body[data-theme] .friends-code-box,
+body[data-theme] .friends-perm-badge.active { background: var(--button-active-bg); border-color: var(--accent); }
+body[data-theme] .wizard-theme-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 76%); }
+body[data-theme] .friends-avatar { background: var(--button-primary-bg); color: var(--button-primary-text); }
+body[data-theme] .wizard-btn-ghost { color: var(--muted) !important; border-color: var(--line-strong) !important; }
+body[data-theme] .wizard-btn-ghost:hover { color: var(--text) !important; border-color: var(--accent) !important; }
+body[data-theme] .wizard-eye-btn { color: var(--muted); }
+body[data-theme] .wizard-eye-btn:hover { color: var(--text); }
+body[data-theme] .tutorial-tooltip { background: var(--panel-solid); border-color: var(--line-strong); box-shadow: var(--shadow); }
+body[data-theme="brutal"] .onboarding-overlay,
+body[data-theme="brutal"] .wizard-card,
+body[data-theme="brutal"] .wizard-btn,
+body[data-theme="brutal"] .wizard-field input,
+body[data-theme="brutal"] .wizard-choice,
+body[data-theme="brutal"] .wizard-theme-card,
+body[data-theme="brutal"] .wizard-auth-choice,
+body[data-theme="brutal"] .wizard-auth-submit,
+body[data-theme="brutal"] .tutorial-tooltip { border-radius: 0 !important; }
