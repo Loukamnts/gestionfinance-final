@@ -1,0 +1,10 @@
+# Never commit local secrets or deployment credentials.
+.env
+.env.*
+!.env.example
+supabase/.temp/
+
+# Local tooling artefacts.
+node_modules/
+.vercel/
+*.log
