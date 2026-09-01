@@ -4507,6 +4507,7 @@ function resetDataState(){
   function translateAuthError(error){
     var raw = String((error && error.message) || error || "").trim();
     var normalized = raw.toLowerCase();
+    if(/database error saving new user|error saving new user/.test(normalized)) return "La création du compte a échoué côté base de données. Le correctif Supabase doit être appliqué par l’administrateur du projet.";
     if(/invalid login credentials|invalid credentials/.test(normalized)) return "Email ou mot de passe incorrect.";
     if(/email not confirmed|email.*not.*confirm/.test(normalized)) return "Ton adresse email n’est pas encore confirmée.";
     if(/user already registered|already.*registered/.test(normalized)) return "Un compte existe déjà avec cette adresse email.";
@@ -4545,6 +4546,19 @@ function resetDataState(){
     }
   }
 
+  // Filet de securite : si un ancien trigger n'a pas cree le profil au moment
+  // de l'inscription, le premier login le cree avec les droits de son owner.
+  async function ensureProfile(user){
+    if(!sb.client || !user || !user.id) return;
+    try{
+      var result = await sb.client.from("profiles").upsert(
+        { id: user.id, email: user.email || null },
+        { onConflict: "id", ignoreDuplicates: true }
+      );
+      if(result && result.error) console.warn("Profile repair skipped:", result.error.message || result.error);
+    }catch(e){ console.warn("Profile repair skipped:", e); }
+  }
+
   function initClient(config){
     try{
       // Construit l'URL de redirection pour les emails de confirmation
@@ -4556,6 +4570,7 @@ function resetDataState(){
       var arrivedFromEmail = /([?&]code=|#access_token=)/.test(location.href);
       sb.client.auth.onAuthStateChange(function(evt, session){
         sb.user = (session && session.user) ? session.user : null;
+        if(sb.user) ensureProfile(sb.user);
         renderAuth();
         // Notifie les autres modules (amis, sync) du changement d'état
         window.dispatchEvent(new CustomEvent("authStateChanged", { detail: { user: sb.user, event: evt } }));
@@ -4569,6 +4584,7 @@ function resetDataState(){
       sb.client.auth.getSession().then(function(res){
         if(res && res.data && res.data.session && res.data.session.user){
           sb.user = res.data.session.user;
+          ensureProfile(sb.user);
         }
         renderAuth();
       }).catch(function(e){

@@ -26,6 +26,7 @@ Cette version est un site statique : `index.html`, CSS et JavaScript sont à la 
 Conserve ton projet Supabase actuel ou crée-en un nouveau.
 
 1. Dans **SQL Editor**, exécute entièrement `supabase_schema.sql`.
+   - Si le projet avait déjà été configuré et que l'inscription affiche `Database error saving new user`, exécute une fois `supabase_fix_new_users.sql`. Ce correctif répare le déclencheur de création de profil sans supprimer de comptes ni de données.
 2. Dans **Authentication → Providers**, active Email. Garde la confirmation d'e-mail activée en production.
 3. Dans **Authentication → URL Configuration** :
    - `Site URL` : `https://ton-domaine.fr` ou l'URL Vercel de production ;
@@ -92,6 +93,11 @@ Teste dans cet ordre :
 - Vérifie que la fonction `delete-account` est déployée.
 - Vérifie que le secret `ALLOWED_ORIGIN` correspond exactement à l'URL de production.
 - Teste depuis l'URL de production, pas une URL d'aperçu.
+
+**`Database error saving new user` lors de la création d'un compte**
+
+- Ouvre **Supabase → SQL Editor**, colle le contenu de `supabase_fix_new_users.sql`, puis clique sur **Run**.
+- Le script est réexécutable sans risque : il remet en place le profil automatique et laisse toujours Supabase Auth créer le compte, même si un ancien profil est incomplet.
 
 ## Limites de sécurité à connaître
 
