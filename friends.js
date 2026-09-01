@@ -27,8 +27,9 @@
     var sb = getSupabase(); var user = getUser();
     if(!sb || !user) return { friends: [], pending: [], sent: [] };
     try{
-      // Amis acceptés (où je suis owner ou friend)
-      var res = await sb.from("friendships").select("id,owner_id,friend_id,status,created_at").or("owner_id.eq." + user.id + ",friend_id.eq." + user.id);
+      // Lecture via RPC : elle ne renvoie que les relations de l'utilisateur
+      // connecté et reste fiable même avec des RLS strictes.
+      var res = await sb.rpc("get_my_friendships");
       if(res.error || !res.data) return { friends: [], pending: [], sent: [] };
 
       var friends = [];
@@ -40,15 +41,11 @@
         var otherId = f.owner_id === user.id ? f.friend_id : f.owner_id;
         var isRequester = f.owner_id === user.id;
 
-        // Récupérer le profil de l'autre personne
-        var profileRes = await sb.from("profiles").select("display_name,email").eq("id", otherId).single();
-        var profile = (profileRes.data && !profileRes.error) ? profileRes.data : {};
-
         var friendObj = {
-          friendshipId: f.id,
+          friendshipId: f.friendship_id,
           friendId: otherId,
-          displayName: profile.display_name || (profile.email ? profile.email.split("@")[0] : "Ami"),
-          email: profile.email || "",
+          displayName: f.other_display_name || (f.other_email ? f.other_email.split("@")[0] : "Ami"),
+          email: f.other_email || "",
           status: f.status,
           isRequester: isRequester
         };
@@ -115,8 +112,8 @@
     var sb = getSupabase(); var user = getUser();
     if(!sb || !user) return { error: "Non connecté" };
     try{
-      var res = await sb.from("friendships").update({ status: "accepted" }).eq("id", friendshipId);
-      if(res.error) return { error: res.error.message };
+      var res = await sb.rpc("respond_to_friend_request", { p_friendship_id: friendshipId, p_accept: true });
+      if(res.error) return { error: "Impossible d'accepter cette demande. Réessaie dans un instant." };
       return { success: true };
     }catch(e){ return { error: e.message }; }
   }
@@ -126,8 +123,8 @@
     var sb = getSupabase(); var user = getUser();
     if(!sb || !user) return { error: "Non connecté" };
     try{
-      var res = await sb.from("friendships").delete().eq("id", friendshipId);
-      if(res.error) return { error: res.error.message };
+      var res = await sb.rpc("respond_to_friend_request", { p_friendship_id: friendshipId, p_accept: false });
+      if(res.error) return { error: "Impossible de refuser cette demande. Réessaie dans un instant." };
       return { success: true };
     }catch(e){ return { error: e.message }; }
   }
