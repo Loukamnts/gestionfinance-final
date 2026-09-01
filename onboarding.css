@@ -408,7 +408,8 @@ body[data-theme] .onboarding-overlay {
   background: color-mix(in srgb, var(--body-bg), transparent 28%);
 }
 body[data-theme] .wizard-header h2 { background: var(--title-gradient); -webkit-background-clip: text; background-clip: text; }
-body[data-theme="brutal"] .wizard-header h2 { background: none; color: var(--accent); }
+body[data-theme="brutal"] .wizard-header h2,
+body[data-theme="editorial"] .wizard-header h2 { background: none; -webkit-background-clip: initial; background-clip: initial; color: var(--accent); }
 body[data-theme] .wizard-btn-primary,
 body[data-theme] .wizard-auth-submit,
 body[data-theme] .friends-copy-btn,

@@ -206,6 +206,16 @@
               }
               if (!allValid) return;
             }
+            // Conserve explicitement les valeurs avant que le rendu suivant
+            // remplace les champs de la situation financière.
+            var amountInput = document.getElementById("wbCurrentAmount");
+            var monthInput = document.getElementById("wbStartingMonth");
+            var accountsInput = document.getElementById("wbAccounts");
+            var savingsInput = document.getElementById("wbSavings");
+            if (amountInput) wizardData.currentAmount = amountInput.value.trim();
+            if (monthInput) wizardData.startingMonth = monthInput.value;
+            if (accountsInput) wizardData.accounts = accountsInput.value.trim();
+            if (savingsInput) wizardData.savingsGoal = savingsInput.value.trim();
           }
           if (currentStep < 3) { currentStep++; renderWizardStep(); }
           else finishWizard();
@@ -266,6 +276,11 @@
         <h3>Situation financière</h3>
         <p class="step-desc">Quelques informations pour personnaliser ton tableau de bord.</p>
         <div class="wizard-field">
+          <label>Argent actuel (€)</label>
+          <input type="number" id="wbCurrentAmount" min="0" step="0.01" placeholder="Ex : 1000" value="${d.currentAmount || ''}" oninput="wizardData.currentAmount=this.value">
+          <p class="field-hint">Ce montant sera utilisé comme solde de départ dans le tableur.</p>
+        </div>
+        <div class="wizard-field">
           <label>Mois de départ <span class="required-mark">*</span></label>
           <input type="month" id="wbStartingMonth" required value="${currentMonth}" oninput="wizardData.startingMonth=this.value" class="wizard-month-input">
           <p class="field-hint">Le solde ne sera calculé qu'à partir de ce mois. Les données antérieures seront ignorées.</p>
@@ -273,11 +288,6 @@
         <div class="wizard-field">
           <label>Comptes utilisés <span class="required-mark">*</span></label>
           <input type="text" id="wbAccounts" required placeholder="Ex : Revolut, BoursoBank, Livret A" value="${d.accounts}" oninput="wizardData.accounts=this.value">
-        </div>
-        <div class="wizard-field">
-          <label>Argent actuel (€)</label>
-          <input type="number" id="wbCurrentAmount" min="0" step="0.01" placeholder="Ex : 1000" value="${d.currentAmount || ''}" oninput="wizardData.currentAmount=this.value">
-          <p class="field-hint">Ce montant sera utilisé comme solde de départ dans le tableur.</p>
         </div>
         <div class="wizard-field">
           <label>Objectif d'épargne (€) <span class="required-mark">*</span></label>
@@ -336,6 +346,12 @@
   }
 
   function finishWizard() {
+    // Relit les champs affichés : un clic immédiat sur « Terminer » ne doit
+    // jamais faire perdre le dernier montant saisi par l'utilisateur.
+    var currentAmountInput = document.getElementById("wbCurrentAmount");
+    var startingMonthInput = document.getElementById("wbStartingMonth");
+    if (currentAmountInput) wizardData.currentAmount = currentAmountInput.value.trim();
+    if (startingMonthInput) wizardData.startingMonth = startingMonthInput.value;
     // Sauvegarde le montant actuel comme solde de départ
     if (wizardData.currentAmount !== "" && wizardData.currentAmount !== null && wizardData.currentAmount !== undefined) {
       wizardData.startingCash = wizardData.currentAmount;
@@ -366,6 +382,10 @@
     }
     // Retour à la page d'accueil
     if (typeof window.setPage === "function") window.setPage("dashboard");
+    // Les cartes du tableau de bord lisent le profil qui vient d'être enregistré.
+    if (typeof window.FinanceSheet !== "undefined" && typeof window.FinanceSheet.updateSheetBalanceCards === "function") {
+      try { window.FinanceSheet.updateSheetBalanceCards(); } catch (e) {}
+    }
     // Start tutorial
     setTimeout(() => startTutorial(), 600);
   }
@@ -409,12 +429,29 @@
     if (emailInput) emailInput.focus();
   };
 
+  function authErrorMessage(error) {
+    var message = (error && error.message) || String(error || "");
+    if (/invalid login credentials/i.test(message)) return "Email ou mot de passe incorrect.";
+    if (/email not confirmed/i.test(message)) return "Confirme d'abord ton adresse email, puis reconnecte-toi.";
+    if (/user already registered/i.test(message)) return "Un compte existe déjà avec cet email. Connecte-toi.";
+    if (/password should be at least/i.test(message)) return "Le mot de passe doit comporter au moins 8 caractères.";
+    return message || "Une erreur est survenue. Réessaie dans un instant.";
+  }
+
+  function continueAfterSuccessfulAuth(statusEl) {
+    wizardData.authConnected = true;
+    if (statusEl) statusEl.textContent = "Connecté ! Passage à la configuration…";
+    // La connexion menait auparavant à un nouveau rendu de la même question,
+    // sans confirmation visible. On enchaîne maintenant directement.
+    setTimeout(function() { currentStep = 1; renderWizardStep(); }, 500);
+  }
+
   window.onbSubmitAuth = function() {
     var email = (document.getElementById("wbAuthEmail").value || "").trim();
     var pw = document.getElementById("wbAuthPw").value || "";
     var statusEl = document.getElementById("wbAuthStatus");
     if (!email || !pw) { if (statusEl) statusEl.textContent = "Renseigne un email et un mot de passe."; return; }
-    if (pw.length < 6) { if (statusEl) statusEl.textContent = "Le mot de passe doit faire au moins 6 caractères."; return; }
+    if (pw.length < 8) { if (statusEl) statusEl.textContent = "Le mot de passe doit comporter au moins 8 caractères."; return; }
     if (statusEl) { statusEl.textContent = authMode === "signup" ? "Création du compte..." : "Connexion..."; }
     var submitBtn = document.getElementById("wbAuthSubmit");
     if (submitBtn) submitBtn.disabled = true;
@@ -427,37 +464,31 @@
     var redirectUrl = window.location.origin + window.location.pathname;
     if (authMode === "signup") {
       sb.auth.signUp({ email: email, password: pw, options: { emailRedirectTo: redirectUrl } }).then(function(res) {
-        if (res.error) { if (statusEl) statusEl.textContent = res.error.message; if (submitBtn) submitBtn.disabled = false; return; }
+        if (res.error) { if (statusEl) statusEl.textContent = authErrorMessage(res.error); if (submitBtn) submitBtn.disabled = false; return; }
         if (res.data.session) {
-          if (statusEl) statusEl.textContent = "Compte créé ! Connecté.";
-          wizardData.authConnected = true;
           // Définit l'utilisateur et notifie les autres modules
           if (res.data.session.user) window.__account.user = res.data.session.user;
           window.dispatchEvent(new CustomEvent("authStateChanged", { detail: { user: window.__account.user, event: "SIGNED_IN" } }));
           if (submitBtn) submitBtn.disabled = false;
-          renderWizardStep(); // Met à jour le bouton en "Suivant →"
+          continueAfterSuccessfulAuth(statusEl);
         } else {
           if (statusEl) statusEl.textContent = "Compte créé ! Vérifie ton email pour confirmer.";
-          wizardData.authConnected = true;
           if (submitBtn) submitBtn.disabled = false;
-          renderWizardStep(); // Met à jour le bouton en "Suivant →"
         }
       }).catch(function(e) {
-        if (statusEl) statusEl.textContent = e.message || "Erreur.";
+        if (statusEl) statusEl.textContent = authErrorMessage(e);
         if (submitBtn) submitBtn.disabled = false;
       });
     } else {
       sb.auth.signInWithPassword({ email: email, password: pw }).then(function(res) {
-        if (res.error) { if (statusEl) statusEl.textContent = res.error.message; if (submitBtn) submitBtn.disabled = false; return; }
-        if (statusEl) statusEl.textContent = "Connecté !";
-        wizardData.authConnected = true;
+        if (res.error) { if (statusEl) statusEl.textContent = authErrorMessage(res.error); if (submitBtn) submitBtn.disabled = false; return; }
         // Définit l'utilisateur et notifie les autres modules
         if (res.data.session && res.data.session.user) window.__account.user = res.data.session.user;
         window.dispatchEvent(new CustomEvent("authStateChanged", { detail: { user: window.__account.user, event: "SIGNED_IN" } }));
         if (submitBtn) submitBtn.disabled = false;
-        renderWizardStep(); // Met à jour le bouton en "Suivant →"
+        continueAfterSuccessfulAuth(statusEl);
       }).catch(function(e) {
-        if (statusEl) statusEl.textContent = e.message || "Erreur.";
+        if (statusEl) statusEl.textContent = authErrorMessage(e);
         if (submitBtn) submitBtn.disabled = false;
       });
     }
