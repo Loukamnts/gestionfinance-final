@@ -82,38 +82,31 @@
   }
 
   // === Envoyer une invitation par e-mail ===
+  function translateFriendRequestError(error){
+    var message = String((error && error.message) || error || "").toLowerCase();
+    if(/user_not_found/.test(message)) return "Aucun utilisateur trouvé avec cet e-mail";
+    if(/cannot_add_self/.test(message)) return "Tu ne peux pas t'ajouter toi-même";
+    if(/request_already_sent/.test(message)) return "Demande déjà envoyée";
+    if(/request_already_received/.test(message)) return "Cette personne t'a déjà envoyé une demande";
+    if(/already_friends/.test(message)) return "Déjà amis";
+    if(/friend_request_blocked/.test(message)) return "Cette demande ne peut pas être envoyée";
+    if(/send_friend_request_by_email/.test(message)) return "Le système d'amis est en cours de mise à jour. Réessaie dans un instant.";
+    return "Impossible d'envoyer la demande d'ami. Réessaie dans un instant.";
+  }
+
   async function sendFriendRequestByEmail(email){
     var sb = getSupabase(); var user = getUser();
     if(!sb || !user) return { error: "Non connecté" };
     if(!email || email.length < 5 || email.indexOf("@") === -1) return { error: "E-mail invalide" };
 
     try{
-      // Trouver l'utilisateur par e-mail
-      var profileRes = await sb.from("profiles").select("id,display_name,email").eq("email", email.toLowerCase().trim()).single();
-      if(profileRes.error || !profileRes.data) return { error: "Aucun utilisateur trouvé avec cet e-mail" };
-
-      var friendId = profileRes.data.id;
-      if(friendId === user.id) return { error: "Tu ne peux pas t'ajouter toi-même" };
-
-      // Vérifier si déjà amis
-      var existingRes = await sb.from("friendships").select("id,status,owner_id,friend_id").eq("owner_id", user.id).eq("friend_id", friendId).single();
-      if(existingRes.data){
-        if(existingRes.data.status === "pending") return { error: "Demande déjà envoyée" };
-        if(existingRes.data.status === "accepted") return { error: "Déjà amis" };
-      }
-      // Vérifier l'inverse
-      var existingRes2 = await sb.from("friendships").select("id,status").eq("owner_id", friendId).eq("friend_id", user.id).single();
-      if(existingRes2.data){
-        if(existingRes2.data.status === "pending") return { error: "Cette personne t'a déjà envoyé une demande" };
-        if(existingRes2.data.status === "accepted") return { error: "Déjà amis" };
-      }
-
-      // Créer la demande
-      var res = await sb.from("friendships").insert({ owner_id: user.id, friend_id: friendId, status: "pending" });
-      if(res.error) return { error: res.error.message };
+      // La recherche et l'insertion sont faites par une RPC securisee : les
+      // RLS ne doivent pas exposer les profils de tous les utilisateurs.
+      var res = await sb.rpc("send_friend_request_by_email", { p_email: email.trim().toLowerCase() });
+      if(res.error) return { error: translateFriendRequestError(res.error) };
       return { success: true };
     }catch(e){
-      return { error: e.message || "Erreur" };
+      return { error: translateFriendRequestError(e) };
     }
   }
 
