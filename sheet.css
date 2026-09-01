@@ -94,7 +94,7 @@
   background: var(--panel-solid, rgba(0,0,0,0.04));
   box-shadow: var(--shadow, none);
 }
-.sheet-scroll { height: min(64vh, 620px); overflow: auto; -webkit-overflow-scrolling: touch; }
+.sheet-scroll { position: relative; height: min(64vh, 620px); overflow: auto; -webkit-overflow-scrolling: touch; }
 .sheet-table { border-collapse: separate; border-spacing: 0; table-layout: fixed; font-family: var(--font-body, inherit); font-size: 0.9rem; }
 .sheet-table th, .sheet-table td { border-right: 1px solid var(--line, rgba(0,0,0,0.1)); border-bottom: 1px solid var(--line, rgba(0,0,0,0.1)); padding: 0; margin: 0; }
 .sheet-table thead th, .sheet-table .row-head {
@@ -114,11 +114,14 @@
 .sheet-table thead th.col-head { top: 24px; z-index: 4; }
 .sheet-table .corner-head { z-index: 7; min-width: 210px; width: 210px; }
 .sheet-table .row-head { min-width: 210px; width: 210px; text-align: left; }
-.sheet-table .row-head .rh-label { padding: 6px 38px 6px 12px; text-align: left; font-size: .86rem; line-height: 22px; }
+.sheet-table .row-head .rh-number { display: inline-flex; align-items: center; justify-content: center; width: 30px; min-width: 30px; min-height: 22px; margin: 6px 7px 6px 9px; border-right: 1px solid var(--line); color: var(--muted); font-size: .72rem; font-variant-numeric: tabular-nums; }
+.sheet-table .row-head .rh-label { display: inline-block; max-width: calc(100% - 86px); padding: 6px 38px 6px 0; text-align: left; font-size: .86rem; line-height: 22px; vertical-align: top; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sheet-table .row-head .rh-edit-btn { right: 7px; min-width: 28px; min-height: 28px; padding: 4px 6px; opacity: .78; }
 
 .sheet-table td.cell { position: relative; height: 34px; min-width: 116px; background: transparent; color: var(--text); cursor: cell; user-select: none; }
 .sheet-table td.cell.selected { outline: 2px solid var(--accent, #818cf8); outline-offset: -2px; z-index: 1; }
+.sheet-fill-handle { position: absolute; z-index: 10; display: block; width: 11px; height: 11px; margin: 0; padding: 0; border: 2px solid var(--input-focus-bg, #fff); border-radius: 3px; background: var(--accent, #818cf8); box-shadow: 0 1px 4px rgba(0,0,0,.35); cursor: crosshair; touch-action: none; }
+.sheet-fill-handle:hover { transform: scale(1.18); }
 /* En édition : on retire le contour de sélection, seul reste le contour du champ (cell-edit). */
 .sheet-table td.cell.editing { outline: none; }
 /* Cellules : teinte semi-transparente (le panau opaque reste visible derrière) */
@@ -239,7 +242,8 @@ body[data-theme="brutal"] .sheet-divider { background: var(--line-strong, #fff);
   .sheet-bar .hide-sm { display: none; }
   .sheet-table th, .sheet-table td { min-width: 104px; }
   .sheet-table .corner-head, .sheet-table .row-head { min-width: 164px; width: 164px; }
-  .sheet-table .row-head .rh-label { padding-left: 10px; padding-right: 34px; font-size: .82rem; }
+  .sheet-table .row-head .rh-number { width: 24px; min-width: 24px; margin-left: 6px; margin-right: 5px; }
+  .sheet-table .row-head .rh-label { max-width: calc(100% - 70px); padding-right: 30px; font-size: .82rem; }
   .sheet-fx .fx-preview { display: none; }
 }
 
@@ -299,7 +303,7 @@ body[data-theme="brutal"] .bottom-nav-btn { border-radius: 0; }
 .sheet-tab.add:hover { color: var(--accent); border-color: var(--accent); background: var(--button-active-bg); }
 .sheet-tab.add.add-before { margin-right: 4px; }
 .row-head { cursor: pointer; user-select: none; }
-.row-head .rh-label { display: block; }
+.row-head .rh-label { display: inline-block; }
 .row-head .rh-edit-btn {
   display: block; position: absolute; top: 50%; right: 2px; transform: translateY(-50%);
   background: transparent; border: none; color: var(--muted, #888); cursor: pointer;

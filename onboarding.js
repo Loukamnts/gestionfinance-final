@@ -18,6 +18,7 @@
   ];
 
   let currentStep = 0;
+  let onboardingStartupInFlight = false;
   let wizardData = {
     startingCash: "",
     accounts: "",
@@ -45,6 +46,37 @@
   // === Wizard ===
   function shouldShowOnboarding() {
     return !load(STORAGE.onboarding);
+  }
+
+  function wait(ms) { return new Promise(function(resolve) { setTimeout(resolve, ms); }); }
+  async function restoreCloudBeforeOnboarding() {
+    if (!shouldShowOnboarding() || onboardingStartupInFlight) return false;
+    onboardingStartupInFlight = true;
+    try {
+      // Une session restaurée (ou Google) peut arriver quelques instants après le chargement.
+      // On laisse donc le module de synchronisation récupérer le snapshot avant de toucher au tableur local.
+      for (let attempt = 0; attempt < 8 && !(window.__account && window.__account.user); attempt++) await wait(250);
+      if (window.__account && window.__account.user) {
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (window.__gfSync && window.__gfSync.pullFromCloud) {
+            var pulled = await window.__gfSync.pullFromCloud();
+            if (pulled) {
+              store(STORAGE.onboarding, true);
+              var overlay = $("onboardingOverlay"), blocker = $("wizardBlocker");
+              if (overlay) overlay.classList.add("hidden");
+              if (blocker) blocker.classList.add("hidden");
+              if (typeof window.setPage === "function") window.setPage("dashboard");
+              return true;
+            }
+          }
+          await wait(550);
+        }
+      }
+      startWizard(true);
+      return false;
+    } finally {
+      onboardingStartupInFlight = false;
+    }
   }
 
   function startWizard(clearData) {
@@ -438,12 +470,29 @@
     return message || "Une erreur est survenue. Réessaie dans un instant.";
   }
 
-  function continueAfterSuccessfulAuth(statusEl) {
+  async function continueAfterSuccessfulAuth(statusEl) {
+    if (wizardData.authRestoring) return;
+    wizardData.authRestoring = true;
     wizardData.authConnected = true;
+    if (statusEl) statusEl.textContent = "Connexion réussie — récupération de tes données…";
+    // Un ancien compte ne doit jamais repartir dans le questionnaire : il peut
+    // déjà posséder un snapshot complet dans le cloud, même sur un nouvel appareil.
+    for (var attempt = 0; attempt < 3; attempt++) {
+      if (window.__gfSync && window.__gfSync.pullFromCloud) {
+        var pulled = await window.__gfSync.pullFromCloud();
+        if (pulled) {
+          store(STORAGE.onboarding, true);
+          var overlay = $("onboardingOverlay"), blocker = $("wizardBlocker");
+          if (overlay) overlay.classList.add("hidden");
+          if (blocker) blocker.classList.add("hidden");
+          if (typeof window.setPage === "function") window.setPage("dashboard");
+          return;
+        }
+      }
+      await wait(500);
+    }
     if (statusEl) statusEl.textContent = "Connecté ! Passage à la configuration…";
-    // La connexion menait auparavant à un nouveau rendu de la même question,
-    // sans confirmation visible. On enchaîne maintenant directement.
-    setTimeout(function() { currentStep = 1; renderWizardStep(); }, 500);
+    setTimeout(function() { currentStep = 1; renderWizardStep(); }, 250);
   }
 
   window.onbSubmitAuth = function() {
@@ -916,9 +965,12 @@
     }
 
     // Check if onboarding should show
-    if (shouldShowOnboarding()) {
-      setTimeout(() => startWizard(true), 600);
-    }
+    if (shouldShowOnboarding()) setTimeout(restoreCloudBeforeOnboarding, 700);
+    window.addEventListener("authStateChanged", function(event) {
+      if (event.detail && event.detail.user && shouldShowOnboarding() && !$("onboardingOverlay")?.classList.contains("hidden")) {
+        continueAfterSuccessfulAuth($("wbAuthStatus"));
+      }
+    });
 
     // Event listeners pour repositionner le tutoriel au scroll/resize
     window.addEventListener("scroll", onTutorialScrollThrottled, true);

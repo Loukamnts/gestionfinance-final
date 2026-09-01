@@ -51,16 +51,23 @@
         };
 
         if(f.status === "accepted"){
-          // Récupérer les permissions que j'ai accordées (si je suis owner) ou reçues
-          var permissionOwnerId = isRequester ? user.id : otherId;
-          var permissionFriendId = isRequester ? otherId : user.id;
-          var permRes = await sb.from("share_permissions")
+          // Chaque personne est propriétaire de ses propres données, peu importe
+          // qui a envoyé l'invitation. Les deux amis peuvent donc partager dans
+          // les deux sens avec leurs réglages respectifs.
+          var ownPermRes = await sb.from("share_permissions")
             .select("can_view_dashboard,can_view_sheet,can_view_categories")
-            .eq("owner_id", permissionOwnerId)
-            .eq("friend_id", permissionFriendId)
+            .eq("owner_id", user.id)
+            .eq("friend_id", otherId)
             .is("year", null).is("month", null).is("row_key", null)
             .maybeSingle();
-          friendObj.permissions = (permRes.data && !permRes.error) ? permRes.data : { can_view_dashboard: false, can_view_sheet: false, can_view_categories: false };
+          var receivedPermRes = await sb.from("share_permissions")
+            .select("can_view_dashboard,can_view_sheet,can_view_categories")
+            .eq("owner_id", otherId)
+            .eq("friend_id", user.id)
+            .is("year", null).is("month", null).is("row_key", null)
+            .maybeSingle();
+          friendObj.permissions = (ownPermRes.data && !ownPermRes.error) ? ownPermRes.data : { can_view_dashboard: false, can_view_sheet: false, can_view_categories: false };
+          friendObj.receivedPermissions = (receivedPermRes.data && !receivedPermRes.error) ? receivedPermRes.data : { can_view_dashboard: false, can_view_sheet: false, can_view_categories: false };
           friends.push(friendObj);
         } else if(f.status === "pending"){
           if(isRequester) sent.push(friendObj);
@@ -165,6 +172,7 @@
         .select("id")
         .eq("owner_id", user.id).eq("friend_id", friendId)
         .is("year", null).is("month", null).is("row_key", null)
+        .limit(1)
         .maybeSingle();
       if(existing.error) return { error: existing.error.message };
       var res = existing.data
@@ -184,6 +192,15 @@
       if(res.error || !res.data || !res.data.payload) return { error: "Données non disponibles" };
       var snap = typeof res.data.payload === "string" ? JSON.parse(res.data.payload) : res.data.payload;
       return { success: true, snapshot: snap };
+    }catch(e){ return { error: e.message }; }
+  }
+  async function loadFriendDashboard(friendId){
+    var sb = getSupabase(); var user = getUser();
+    if(!sb || !user) return { error: "Non connecté" };
+    try{
+      var res = await sb.from("finance_dashboard_snapshots").select("payload").eq("owner_id", friendId).single();
+      if(res.error || !res.data || !res.data.payload) return { error: "Dashboard non disponible" };
+      return { success: true, dashboard: typeof res.data.payload === "string" ? JSON.parse(res.data.payload) : res.data.payload };
     }catch(e){ return { error: e.message }; }
   }
 
@@ -260,17 +277,10 @@
         html += '<div class="friends-name">' + escapeHtml(f.displayName) + '</div>';
         html += '<div class="friends-perms">';
 
-        // Toggle permissions (seulement si je suis le requester)
-        if(f.isRequester){
-          html += '<label class="friends-perm-toggle"><input type="checkbox" ' + (f.permissions.can_view_sheet ? "checked" : "") + ' onchange="window.FriendsSystem.togglePerm(\'' + f.friendId + '\',\'can_view_sheet\',this.checked)" /> Tableur</label>';
-          html += '<label class="friends-perm-toggle"><input type="checkbox" ' + (f.permissions.can_view_dashboard ? "checked" : "") + ' onchange="window.FriendsSystem.togglePerm(\'' + f.friendId + '\',\'can_view_dashboard\',this.checked)" /> Dashboard</label>';
-          html += '<label class="friends-perm-toggle"><input type="checkbox" ' + (f.permissions.can_view_categories ? "checked" : "") + ' onchange="window.FriendsSystem.togglePerm(\'' + f.friendId + '\',\'can_view_categories\',this.checked)" /> Catégories</label>';
-        } else {
-          // Je suis l'ami, je peux voir ce qu'il m'a autorisé
-          html += '<span class="friends-perm-badge ' + (f.permissions.can_view_sheet ? "active" : "") + '">Tableur</span>';
-          html += '<span class="friends-perm-badge ' + (f.permissions.can_view_dashboard ? "active" : "") + '">Dashboard</span>';
-          html += '<span class="friends-perm-badge ' + (f.permissions.can_view_categories ? "active" : "") + '">Catégories</span>';
-        }
+        // Les autorisations sont toujours celles de mes propres données.
+        html += '<label class="friends-perm-toggle"><input type="checkbox" ' + (f.permissions.can_view_sheet ? "checked" : "") + ' onchange="window.FriendsSystem.togglePerm(\'' + f.friendId + '\',\'can_view_sheet\',this.checked)" /> Mon tableur</label>';
+        html += '<label class="friends-perm-toggle"><input type="checkbox" ' + (f.permissions.can_view_dashboard ? "checked" : "") + ' onchange="window.FriendsSystem.togglePerm(\'' + f.friendId + '\',\'can_view_dashboard\',this.checked)" /> Mon dashboard</label>';
+        html += '<label class="friends-perm-toggle"><input type="checkbox" ' + (f.permissions.can_view_categories ? "checked" : "") + ' onchange="window.FriendsSystem.togglePerm(\'' + f.friendId + '\',\'can_view_categories\',this.checked)" /> Mes catégories</label>';
 
         html += '</div>';
         html += '<button class="friends-reject-btn" onclick="window.FriendsSystem.remove(\'' + f.friendshipId + '\')">Supprimer</button>';
@@ -283,10 +293,112 @@
     container.innerHTML = html;
   }
 
+  function el(tag, className, text){
+    var node = document.createElement(tag);
+    if(className) node.className = className;
+    if(text !== undefined) node.textContent = text;
+    return node;
+  }
+  function permissionToggle(friend, label, key, onChanged){
+    var labelEl = el("label", "sharing-permission");
+    var input = document.createElement("input"); input.type = "checkbox"; input.checked = !!friend.permissions[key];
+    input.addEventListener("change", async function(){
+      var next = Object.assign({}, friend.permissions, {}); next[key] = input.checked;
+      input.disabled = true;
+      var res = await updatePermissions(friend.friendId, next);
+      input.disabled = false;
+      if(res.error){ input.checked = !input.checked; alert("Impossible d’enregistrer l’autorisation. Réessaie dans un instant."); return; }
+      friend.permissions = next;
+      if(onChanged) onChanged();
+    });
+    labelEl.append(input, document.createTextNode(label));
+    return labelEl;
+  }
+  function friendlyValue(raw){
+    var value = String(raw == null ? "" : raw).trim();
+    if(value.charAt(0) === "=") return "Formule";
+    return value || "—";
+  }
+  function snapshotSheet(snapshot){
+    return snapshot && snapshot.sheets && snapshot.sheets.length ? snapshot.sheets[0] : null;
+  }
+  function renderSharedTable(container, snapshot, friend){
+    var sheet = snapshotSheet(snapshot);
+    container.replaceChildren();
+    if(!sheet){ container.hidden = false; container.append(el("p", "", "Aucune donnée de tableur n’est disponible pour le moment.")); return; }
+    container.hidden = false;
+    container.append(el("h3", "", "Tableur partagé — " + friend.displayName));
+    container.append(el("p", "", "Consultation seule : tes propres données ne sont jamais modifiées."));
+    var wrap = el("div", "shared-table-wrap"), table = el("table", "shared-table"), head = document.createElement("thead"), row = document.createElement("tr");
+    row.append(el("th", "", "Ligne"));
+    var cols = Math.min(Number(sheet.cols) || 0, 10);
+    for(var c = 0; c < cols; c++) row.append(el("th", "", (sheet.headers && sheet.headers[c]) || String.fromCharCode(65 + c)));
+    head.append(row); table.append(head);
+    var body = document.createElement("tbody"), rows = Math.min(Number(sheet.rows) || 0, 18);
+    for(var r = 0; r < rows; r++){
+      var tr = document.createElement("tr"); tr.append(el("th", "", (sheet.rowHeaders && sheet.rowHeaders[r]) || String(r + 1)));
+      for(var c2 = 0; c2 < cols; c2++){
+        var cell = sheet.cells && sheet.cells[r + "," + c2]; tr.append(el("td", "", friendlyValue(cell && cell.raw)));
+      }
+      body.append(tr);
+    }
+    table.append(body); wrap.append(table); container.append(wrap);
+  }
+  function renderSharedDashboard(container, dashboard, friend){
+    container.replaceChildren(); container.hidden = false;
+    container.append(el("h3", "", "Dashboard partagé — " + friend.displayName));
+    container.append(el("p", "", "Aperçu en lecture seule : aucun contenu de cellule ou formule n’est transmis."));
+    var months = (dashboard && dashboard.months) || [];
+    if(!months.length){ container.append(el("div", "sharing-empty", "Aucune donnée de dashboard n’est disponible pour le moment.")); return; }
+    var totalSalary = months.reduce(function(sum, month){ return sum + Number(month.salary || 0); }, 0);
+    var totalSavings = months.reduce(function(sum, month){ return sum + Number(month.savingsTotal || 0); }, 0);
+    var totalExpenses = months.reduce(function(sum, month){ return sum + Math.abs(Number(month.expenses || 0)); }, 0);
+    var latest = months[months.length - 1] || {};
+    var grid = el("div", "chart-detail-grid");
+    [["Mois analysés", String(months.length)], ["Revenus", totalSalary.toLocaleString("fr-FR", {style:"currency",currency:"EUR"})], ["Dépenses", totalExpenses.toLocaleString("fr-FR", {style:"currency",currency:"EUR"})], ["Épargne", totalSavings.toLocaleString("fr-FR", {style:"currency",currency:"EUR"})]].forEach(function(item){ var card=el("div"), label=el("span", "", item[0]), value=el("strong", "", item[1]); card.append(label,value); grid.append(card); });
+    container.append(grid);
+    var note = el("p", "", "Dernier mois : " + (latest.label || "—") + "."); note.style.marginTop = "14px"; container.append(note);
+  }
+  async function viewShared(friend, mode){
+    var target = document.getElementById("sharedView");
+    if(!target) return;
+    target.hidden = false; target.replaceChildren(el("p", "", "Chargement du contenu partagé…"));
+    var result = mode === "dashboard" ? await loadFriendDashboard(friend.friendId) : await loadFriendSnapshot(friend.friendId);
+    if(result.error){ target.replaceChildren(el("p", "", "Le contenu n’est pas disponible : " + result.error)); return; }
+    if(mode === "dashboard") renderSharedDashboard(target, result.dashboard, friend);
+    else renderSharedTable(target, result.snapshot, friend);
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  async function renderSharing(container){
+    if(!container) return;
+    var user = getUser();
+    if(!user){ container.replaceChildren(el("div", "sharing-empty", "Connecte-toi pour gérer les partages.")); return; }
+    container.replaceChildren(el("div", "sharing-empty", "Chargement des partages…"));
+    var data = await loadFriends();
+    var layout = el("div", "sharing-layout");
+    var invite = el("section", "sharing-card"); invite.append(el("h3", "", "Inviter un proche"), el("p", "", "Une invitation est envoyée par e-mail. Chaque personne garde le contrôle de ses données."));
+    var email = document.createElement("input"); email.type = "email"; email.placeholder = "nom@exemple.com"; email.autocomplete = "email";
+    var inviteButton = el("button", "sharing-action", "Envoyer l’invitation"); inviteButton.type = "button";
+    inviteButton.addEventListener("click", async function(){ var result = await sendFriendRequestByEmail(email.value.trim()); if(result.error){ alert(result.error); return; } email.value=""; renderSharing(container); });
+    var inputRow = el("div", "sharing-email"); inputRow.append(email, inviteButton); invite.append(inputRow); layout.append(invite);
+    var received = el("section", "sharing-card"); received.append(el("h3", "", "Demandes reçues"), el("p", "", "Accepte une demande avant de définir les accès."));
+    if(!data.pending.length) received.append(el("div", "sharing-empty", "Aucune demande en attente."));
+    data.pending.forEach(function(request){ var item=el("div", "sharing-person"), info=el("div"); info.append(el("h4", "", request.displayName),el("p", "", request.email)); var actions=el("div", "sharing-actions"), accept=el("button", "sharing-action", "Accepter"), decline=el("button", "sharing-action", "Refuser"); accept.type=decline.type="button"; accept.addEventListener("click",async function(){ var result=await acceptFriend(request.friendshipId); if(result.error){alert(result.error);return;} renderSharing(container); tryRenderFriends(); }); decline.addEventListener("click",async function(){ var result=await declineFriend(request.friendshipId); if(result.error){alert(result.error);return;} renderSharing(container); tryRenderFriends(); }); actions.append(accept,decline); item.append(info,actions); received.append(item); }); layout.append(received);
+    var manage = el("section", "sharing-card wide"); manage.append(el("h3", "", "Ce que tu partages"), el("p", "", "Active uniquement les accès que tu souhaites donner. Les autorisations sont séparées dans chaque sens."));
+    if(!data.friends.length) manage.append(el("div", "sharing-empty", "Ajoute un ami pour définir des autorisations."));
+    data.friends.forEach(function(friend){ var item=el("div", "sharing-person"), info=el("div"); info.append(el("h4", "", friend.displayName),el("p", "", friend.email || "Ami")); var perms=el("div", "sharing-permissions"); perms.append(permissionToggle(friend,"Dashboard","can_view_dashboard"),permissionToggle(friend,"Tableur","can_view_sheet"),permissionToggle(friend,"Catégories","can_view_categories")); item.append(info,perms); manage.append(item); }); layout.append(manage);
+    var access = el("section", "sharing-card wide"); access.append(el("h3", "", "Partagé avec moi"), el("p", "", "Ouvre le dashboard ou le tableur d’un ami sans mélanger ses données aux tiennes."));
+    var hasAccess = false;
+    data.friends.forEach(function(friend){ var perms=friend.receivedPermissions || {}; if(!perms.can_view_dashboard && !perms.can_view_sheet) return; hasAccess=true; var item=el("div", "sharing-person"),info=el("div"); info.append(el("h4", "", friend.displayName),el("p", "", "Accès accordés par cet ami")); var actions=el("div", "sharing-actions"); if(perms.can_view_dashboard){var dashboard=el("button", "sharing-action", "Voir son dashboard"); dashboard.type="button"; dashboard.addEventListener("click",function(){viewShared(friend,"dashboard");}); actions.append(dashboard);} if(perms.can_view_sheet){var sheet=el("button", "sharing-action", "Voir son tableur"); sheet.type="button"; sheet.addEventListener("click",function(){viewShared(friend,"sheet");}); actions.append(sheet);} item.append(info,actions); access.append(item); });
+    if(!hasAccess) access.append(el("div", "sharing-empty", "Aucun contenu partagé avec toi pour le moment.")); layout.append(access);
+    container.replaceChildren(layout);
+  }
+
   // === API publique ===
   window.FriendsSystem = {
     loadFriends: loadFriends,
     renderFriends: renderFriends,
+    renderSharing: renderSharing,
     sendFriendRequest: sendFriendRequestByEmail,
     acceptFriend: acceptFriend,
     declineFriend: declineFriend,
@@ -308,22 +420,24 @@
         alert("Invitation envoyée !");
         var container = document.getElementById("friendsContainer");
         if(container) renderFriends(container);
+        var sharing = document.getElementById("sharingContainer");
+        if(sharing) renderSharing(sharing);
       }
     },
     accept: async function(friendshipId){
       var res = await acceptFriend(friendshipId);
       if(res.error) alert(res.error);
-      else { var container = document.getElementById("friendsContainer"); if(container) renderFriends(container); }
+      else { var container = document.getElementById("friendsContainer"); if(container) renderFriends(container); var sharing = document.getElementById("sharingContainer"); if(sharing) renderSharing(sharing); }
     },
     decline: async function(friendshipId){
       var res = await declineFriend(friendshipId);
       if(res.error) alert(res.error);
-      else { var container = document.getElementById("friendsContainer"); if(container) renderFriends(container); }
+      else { var container = document.getElementById("friendsContainer"); if(container) renderFriends(container); var sharing = document.getElementById("sharingContainer"); if(sharing) renderSharing(sharing); }
     },
     remove: async function(friendshipId){
       var res = await removeFriend(friendshipId);
       if(res.error) alert(res.error);
-      else { var container = document.getElementById("friendsContainer"); if(container) renderFriends(container); }
+      else { var container = document.getElementById("friendsContainer"); if(container) renderFriends(container); var sharing = document.getElementById("sharingContainer"); if(sharing) renderSharing(sharing); }
     },
     togglePerm: async function(friendId, perm, value){
       var data = await loadFriends();

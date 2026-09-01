@@ -238,7 +238,7 @@
   }
 
   // ═════════════════════════ Rendu ════════════════════════════════
-  let tbody, thead, container, tabsEl;
+  let tbody, thead, container, tabsEl, sheetScroll, fillHandle;
   let lastComputed = {};
   const cellMap = new Map();
   let rowHeadEls = [];
@@ -247,7 +247,7 @@
   function buildTable() {
     container.innerHTML = "";
     cellMap.clear(); rowHeadEls = []; colHeadEls = [];
-    const scroll = document.createElement("div"); scroll.className = "sheet-scroll";
+    const scroll = document.createElement("div"); scroll.className = "sheet-scroll"; sheetScroll = scroll;
     const table = document.createElement("table"); table.className = "sheet-table";
     const lettersRow = document.createElement("tr");
     const hRow = document.createElement("tr");
@@ -270,8 +270,9 @@
     for (let r = 0; r < state.rows; r++) {
       const tr = document.createElement("tr");
       const rh = document.createElement("th"); rh.className = "row-head"; rh.dataset.r = r;
-      const rhLabel = document.createElement("span"); rhLabel.className = "rh-label"; rhLabel.textContent = rowLabel(r);
-      rh.appendChild(rhLabel);
+      const rhNumber = document.createElement("span"); rhNumber.className = "rh-number"; rhNumber.textContent = String(r + 1); rhNumber.title = "Ligne " + (r + 1);
+      const rhLabel = document.createElement("span"); rhLabel.className = "rh-label"; rhLabel.textContent = state.rowHeaders[r] || "";
+      rh.append(rhNumber, rhLabel);
       const rhEdit = document.createElement("button"); rhEdit.className = "rh-edit-btn"; rhEdit.type = "button"; rhEdit.textContent = "✎"; rhEdit.title = "Renommer la ligne"; rhEdit.setAttribute("aria-label", "Renommer la ligne " + (r + 1));
       rhEdit.addEventListener("click", function(e) { e.stopPropagation(); editRowHeader(r); });
       rh.appendChild(rhEdit);
@@ -291,6 +292,8 @@
       tbody.appendChild(tr);
     }
     table.appendChild(tbody); scroll.appendChild(table);
+    fillHandle = document.createElement("button"); fillHandle.type = "button"; fillHandle.className = "sheet-fill-handle"; fillHandle.title = "Faire glisser pour recopier"; fillHandle.setAttribute("aria-label", "Faire glisser pour recopier la sélection");
+    fillHandle.addEventListener("pointerdown", beginFillDrag); scroll.appendChild(fillHandle);
     const addBar = document.createElement("div"); addBar.className = "sheet-addrows";
     const addBtn = document.createElement("button"); addBtn.className = "button button-ghost"; addBtn.textContent = "+ 10 lignes";
     addBtn.addEventListener("click", () => { state.rows += 10; buildTable(); renderValues(); });
@@ -445,6 +448,68 @@
 
     prevInRange = nextInRange;
     prevActiveKey = activeKey;
+    positionFillHandle();
+  }
+
+  // Poignée de recopie : même geste qu'Excel, avec décalage des références
+  // relatives dans les formules (A1 devient A2 en descendant d'une ligne).
+  let fillDrag = null;
+  function positionFillHandle() {
+    if (!fillHandle || !sheetScroll || state.editing) return;
+    const target = cellEl(state.range.r1, state.range.c1);
+    if (!target) { fillHandle.style.display = "none"; return; }
+    fillHandle.style.display = "block";
+    fillHandle.style.left = (target.offsetLeft + target.offsetWidth - 6) + "px";
+    fillHandle.style.top = (target.offsetTop + target.offsetHeight - 6) + "px";
+  }
+  function beginFillDrag(e) {
+    if (e.button !== 0 || state.editing) return;
+    e.preventDefault(); e.stopPropagation();
+    fillDrag = { source: { r0: state.range.r0, c0: state.range.c0, r1: state.range.r1, c1: state.range.c1 } };
+    document.addEventListener("pointermove", onFillDragMove);
+    document.addEventListener("pointerup", endFillDrag, { once: true });
+    document.addEventListener("pointercancel", endFillDrag, { once: true });
+  }
+  function onFillDragMove(e) {
+    if (!fillDrag) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const td = el && el.closest ? el.closest("td.cell") : null;
+    if (!td) return;
+    fillDrag.target = { r: +td.dataset.r, c: +td.dataset.c };
+  }
+  function endFillDrag() {
+    document.removeEventListener("pointermove", onFillDragMove);
+    const drag = fillDrag; fillDrag = null;
+    if (!drag || !drag.target) return;
+    fillSelectionTo(drag.source, drag.target);
+  }
+  function shiftFormulaForFill(raw, deltaR, deltaC) {
+    if (typeof raw !== "string" || raw.charAt(0) !== "=") return raw;
+    return raw.replace(/(\$?)([A-Z]+)(\$?)(\d+)/gi, function(match, absCol, letters, absRow, number) {
+      const nextCol = absCol ? letterToCol(letters) : Math.max(0, letterToCol(letters) + deltaC);
+      const nextRow = absRow ? Number(number) : Math.max(1, Number(number) + deltaR);
+      return (absCol || "") + colToLetter(nextCol) + (absRow || "") + nextRow;
+    });
+  }
+  function fillSelectionTo(source, target) {
+    let destination = null;
+    if (target.r > source.r1) destination = { r0: source.r1 + 1, c0: source.c0, r1: target.r, c1: source.c1 };
+    else if (target.r < source.r0) destination = { r0: target.r, c0: source.c0, r1: source.r0 - 1, c1: source.c1 };
+    else if (target.c > source.c1) destination = { r0: source.r0, c0: source.c1 + 1, r1: source.r1, c1: target.c };
+    else if (target.c < source.c0) destination = { r0: source.r0, c0: target.c, r1: source.r1, c1: source.c0 - 1 };
+    if (!destination) return;
+    const sourceRows = source.r1 - source.r0 + 1, sourceCols = source.c1 - source.c0 + 1;
+    for (let r = destination.r0; r <= destination.r1; r++) {
+      for (let c = destination.c0; c <= destination.c1; c++) {
+        const sourceR = source.r0 + ((r - source.r0) % sourceRows + sourceRows) % sourceRows;
+        const sourceC = source.c0 + ((c - source.c0) % sourceCols + sourceCols) % sourceCols;
+        const raw = getCell(sourceR, sourceC).raw;
+        setRaw(r, c, shiftFormulaForFill(raw, r - sourceR, c - sourceC));
+      }
+    }
+    state.active = { r: destination.r0, c: destination.c0 };
+    setRange(Math.min(source.r0, destination.r0), Math.min(source.c0, destination.c0), Math.max(source.r1, destination.r1), Math.max(source.c1, destination.c1));
+    renderValues(); scheduleSave();
   }
 
   let activeEdit = null;

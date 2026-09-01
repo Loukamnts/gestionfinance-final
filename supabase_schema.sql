@@ -108,12 +108,23 @@ create table if not exists public.finance_snapshots (
   updated_at timestamptz not null default now()
 );
 
+-- Version dérivée, sans cellules ni formules, pour les personnes auxquelles
+-- seul le dashboard a été partagé.
+create table if not exists public.finance_dashboard_snapshots (
+  owner_id uuid primary key references auth.users(id) on delete cascade,
+  payload jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
 -- Index
 create index if not exists idx_finance_rows_owner on public.finance_rows(owner_id, year);
 create index if not exists idx_finance_cells_row on public.finance_cells(row_id);
 create index if not exists idx_friendships_owner on public.friendships(owner_id);
 create index if not exists idx_friendships_friend on public.friendships(friend_id);
 create index if not exists idx_share_perm_friend on public.share_permissions(friend_id);
+create unique index if not exists idx_share_permissions_global_unique
+  on public.share_permissions(owner_id, friend_id)
+  where year is null and month is null and row_key is null;
 
 -- ============================================================
 -- Row Level Security - la securite est appliquee par la base
@@ -124,6 +135,7 @@ alter table public.finance_cells enable row level security;
 alter table public.friendships enable row level security;
 alter table public.share_permissions enable row level security;
 alter table public.finance_snapshots enable row level security;
+alter table public.finance_dashboard_snapshots enable row level security;
 
 -- Profils : chacun lit le sien et ceux avec lesquels une relation existe.
 -- Les recherches par e-mail passent exclusivement par la RPC securisee plus bas.
@@ -135,6 +147,7 @@ create policy "profiles_self_or_friend_select" on public.profiles for select usi
     select 1 from public.friendships f
     where ((f.owner_id = auth.uid() and f.friend_id = profiles.id)
         or (f.friend_id = auth.uid() and f.owner_id = profiles.id))
+      and f.status = 'accepted'
   )
 );
 create policy "profiles_self_insert" on public.profiles for insert with check (auth.uid() = id);
@@ -245,7 +258,9 @@ create policy "share_perm_owner_all" on public.share_permissions
 create policy "share_perm_friend_select" on public.share_permissions
   for select using (auth.uid() = friend_id);
 
--- Snapshot : le propriétaire écrit; un ami accepté ne lit qu'avec l'autorisation Tableur.
+-- Snapshot complet : le propriétaire écrit; un ami accepté ne lit qu'avec
+-- l'autorisation Tableur. La relation d'amitié est testée dans les deux sens.
+drop policy if exists "snapshots_owner_or_authorized_friend_select" on public.finance_snapshots;
 create policy "snapshots_owner_write" on public.finance_snapshots
   for insert with check (auth.uid() = owner_id);
 create policy "snapshots_owner_update" on public.finance_snapshots
@@ -264,8 +279,29 @@ create policy "snapshots_owner_or_authorized_friend_select" on public.finance_sn
        and p.year is null and p.month is null and p.row_key is null
        and p.can_view_sheet = true
       where f.status = 'accepted'
-        and f.owner_id = finance_snapshots.owner_id
-        and f.friend_id = auth.uid()
+        and ((f.owner_id = finance_snapshots.owner_id and f.friend_id = auth.uid())
+          or (f.friend_id = finance_snapshots.owner_id and f.owner_id = auth.uid()))
+    )
+  );
+
+-- Dashboard dérivé : l'accès Dashboard ne peut pas servir à lire le snapshot
+-- complet (tableur, formules et cellules restent dans finance_snapshots).
+create policy "dashboard_snapshots_owner_all" on public.finance_dashboard_snapshots
+  for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+create policy "dashboard_snapshots_authorized_friend_select" on public.finance_dashboard_snapshots
+  for select using (
+    auth.uid() = owner_id
+    or exists (
+      select 1
+      from public.friendships f
+      join public.share_permissions p
+        on p.owner_id = finance_dashboard_snapshots.owner_id
+       and p.friend_id = auth.uid()
+       and p.year is null and p.month is null and p.row_key is null
+       and p.can_view_dashboard = true
+      where f.status = 'accepted'
+        and ((f.owner_id = finance_dashboard_snapshots.owner_id and f.friend_id = auth.uid())
+          or (f.friend_id = finance_dashboard_snapshots.owner_id and f.owner_id = auth.uid()))
     )
   );
 
