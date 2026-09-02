@@ -295,8 +295,9 @@
     fillHandle = document.createElement("button"); fillHandle.type = "button"; fillHandle.className = "sheet-fill-handle"; fillHandle.title = "Faire glisser pour recopier"; fillHandle.setAttribute("aria-label", "Faire glisser pour recopier la sélection");
     fillHandle.addEventListener("pointerdown", beginFillDrag); scroll.appendChild(fillHandle);
     const addBar = document.createElement("div"); addBar.className = "sheet-addrows";
-    const addBtn = document.createElement("button"); addBtn.className = "button button-ghost"; addBtn.textContent = "+ 10 lignes";
-    addBtn.addEventListener("click", () => { state.rows += 10; buildTable(); renderValues(); });
+    const addBtn = document.createElement("button"); addBtn.className = "button button-ghost"; addBtn.textContent = "+ 1 ligne";
+    addBtn.title = "Ajouter une ligne";
+    addBtn.addEventListener("click", () => { state.rows += 1; buildTable(); renderValues(); scheduleSave(); });
     addBar.appendChild(addBtn);
     container.appendChild(scroll); container.appendChild(addBar);
     applySelectionStyle();
@@ -841,7 +842,9 @@
       dataRowIndex++;
     }
     sheet.cols = Math.max(DEFAULT_COLS, maxC + 1);
-    sheet.rows = Math.max(DEFAULT_ROWS, maxR + 3);
+    // Un import ne doit pas créer quarante lignes vides : on garde seulement
+    // une petite marge de saisie après la dernière ligne importée.
+    sheet.rows = Math.max(8, maxR + 3);
     for (let c = 0; c < sheet.cols; c++) if (!sheet.headers[c]) sheet.headers[c] = colToLetter(c);
     enforceMonthHeaders(sheet);
   }
@@ -1128,7 +1131,53 @@
 
   // ═════════════════════════ Sauvegarde ═══════════════════════════
   let saveTimer = null;
-  function scheduleSave() { state.dirty = true; updateStatus(); if (saveTimer) clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 400); notifyDashboard(); }
+  let undoHistory = [], redoHistory = [], restoringHistory = false;
+  const HISTORY_LIMIT = 80;
+  function historySnapshot() { return JSON.stringify({ sheets: serializeSheets(), activeSheetId: state.activeSheetId }); }
+  function updateHistoryControls() {
+    const undo = document.getElementById("btnSheetUndo"), redo = document.getElementById("btnSheetRedo");
+    if (undo) undo.disabled = undoHistory.length < 2;
+    if (redo) redo.disabled = redoHistory.length === 0;
+  }
+  function recordHistory() {
+    if (restoringHistory) return;
+    const snapshot = historySnapshot();
+    if (undoHistory[undoHistory.length - 1] === snapshot) return;
+    undoHistory.push(snapshot);
+    if (undoHistory.length > HISTORY_LIMIT) undoHistory.shift();
+    redoHistory = [];
+    updateHistoryControls();
+  }
+  function restoreHistory(snapshot) {
+    try {
+      const data = JSON.parse(snapshot);
+      if (!data || !Array.isArray(data.sheets) || !data.sheets.length) return false;
+      restoringHistory = true;
+      state.sheets = data.sheets.map((s) => ({
+        id: s.id || sheetId(), name: s.name || "Feuille", cells: s.cells || {}, headers: s.headers || [],
+        rowHeaders: s.rowHeaders || [], rows: s.rows || DEFAULT_ROWS, cols: s.cols || DEFAULT_COLS,
+      }));
+      for (const sheet of state.sheets) enforceMonthHeaders(sheet);
+      state.activeSheetId = data.activeSheetId || state.sheets[0].id;
+      state.active = { r: 0, c: 0 }; state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
+      buildTable(); renderValues(); renderTabs();
+      return true;
+    } catch (e) { return false; }
+    finally { restoringHistory = false; }
+  }
+  function undo() {
+    if (undoHistory.length < 2) { toast("Aucune modification à annuler."); return; }
+    const current = undoHistory.pop(); redoHistory.push(current);
+    if (restoreHistory(undoHistory[undoHistory.length - 1])) { scheduleSave(); toast("Modification annulée."); }
+    updateHistoryControls();
+  }
+  function redo() {
+    if (!redoHistory.length) { toast("Aucune modification à rétablir."); return; }
+    const next = redoHistory.pop(); undoHistory.push(next);
+    if (restoreHistory(next)) { scheduleSave(); toast("Modification rétablie."); }
+    updateHistoryControls();
+  }
+  function scheduleSave() { recordHistory(); state.dirty = true; updateStatus(); if (saveTimer) clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 400); notifyDashboard(); }
   function serializeSheets() {
     return state.sheets.map((s) => ({ id: s.id, name: s.name, cells: s.cells, headers: s.headers, rowHeaders: s.rowHeaders, rows: s.rows, cols: s.cols }));
   }
@@ -1207,13 +1256,15 @@
       tabsEl = document.createElement("div"); tabsEl.className = "sheet-tabs";
       wrap.appendChild(tabsEl);
     } else { tabsEl = wrap && wrap.querySelector(".sheet-tabs"); }
-    buildTable(); renderValues(); renderTabs(); updateStatus();
+    buildTable(); renderValues(); renderTabs(); recordHistory(); updateStatus();
     updateSheetBalanceCards();
     wireFormulaBar();
     window.addEventListener("online", updateStatus); window.addEventListener("offline", updateStatus);
     document.addEventListener("keydown", (e) => {
       if (document.body.getAttribute("data-page") !== "sheet") return;
       if (e.ctrlKey || e.metaKey) {
+        if ((e.key === "z" || e.key === "Z") && !state.editing && !(e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName))) { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
+        if ((e.key === "y" || e.key === "Y") && !state.editing && !(e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName))) { e.preventDefault(); redo(); return; }
         if (e.key === "c" || e.key === "C") { e.preventDefault(); if (navigator.clipboard) navigator.clipboard.writeText(copySelection()); }
         else if (e.key === "v" || e.key === "V") { e.preventDefault(); if (navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then(paste).catch(() => {}); }
         return;
@@ -1225,6 +1276,8 @@
     bind("btnSheetImport", () => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".xlsx,.xls,.xlsm,.csv"; inp.addEventListener("change", () => { const f = inp.files[0]; if (!f) return; importXlsx(f); }); inp.click(); });
     bind("btnSheetClear", async () => { if (await confirmDialog("Vider la feuille active ?")) { const sheet = activeSheet(); sheet.cells = {}; sheet.rowHeaders = []; sheet.rows = DEFAULT_ROWS; enforceMonthHeaders(sheet); buildTable(); renderValues(); scheduleSave(); } });
     bind("btnSheetCalc", openCalculator);
+    bind("btnSheetUndo", undo);
+    bind("btnSheetRedo", redo);
     bind("sheetBackBtn", () => { const b = document.getElementById("backDashboardButton"); if (b) b.click(); });
     container.addEventListener("paste", (e) => { if (state.editing) return; const text = (e.clipboardData || window.clipboardData).getData("text"); if (text) { e.preventDefault(); paste(text); } });
     container.addEventListener("copy", (e) => { if (state.editing) return; e.clipboardData.setData("text/plain", copySelection()); e.preventDefault(); });
@@ -1394,3 +1447,4 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
+
