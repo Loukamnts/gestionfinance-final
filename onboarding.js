@@ -412,6 +412,11 @@
     if (wizardData.importedFile && typeof window.FinanceSheet !== "undefined" && window.FinanceSheet.saveNow) {
       try { window.FinanceSheet.saveNow(); } catch (e) {}
     }
+    // Les comptes et le solde saisis à l'étape « Situation financière »
+    // deviennent des lignes du vrai tableur, y compris après un import.
+    if (typeof window.FinanceSheet !== "undefined" && typeof window.FinanceSheet.applySetupProfile === "function") {
+      try { window.FinanceSheet.applySetupProfile(wizardData); } catch (e) { console.warn("Impossible d’ajouter le profil au tableur", e); }
+    }
     // Retour à la page d'accueil
     if (typeof window.setPage === "function") window.setPage("dashboard");
     // Les cartes du tableau de bord lisent le profil qui vient d'être enregistré.
@@ -1047,3 +1052,4 @@
     init();
   }
 })();
+
