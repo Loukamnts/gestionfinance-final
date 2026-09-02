@@ -13,13 +13,13 @@ Le projet est nettement plus sûr après les corrections, mais il n'est pas poss
 - La clé Supabase publishable est centralisée dans `supabase_config.json`; aucune clé de service ne doit se trouver dans le navigateur.
 - La suppression de compte passe par une Edge Function qui vérifie le JWT, au lieu d'annoncer une suppression qu'un navigateur ne peut pas effectuer correctement.
 - Le schéma Supabase contient désormais la table de synchronisation `finance_snapshots` et des règles RLS dédiées.
-- Les droits d'ami sont contrôlés au niveau de la base. Seul le destinataire peut accepter une demande ; un ami ne lit un tableur partagé que si `can_view_sheet` est activé.
+- Les droits d'ami sont contrôlés au niveau de la base. Seul le destinataire peut accepter une demande ; un ami ne lit qu'une copie filtrée par les mois et les lignes autorisés.
 - Le mot de passe demandé dans l'interface est passé à 8 caractères minimum.
 - Vercel applique des en-têtes CSP, anti-iframe, anti-MIME sniffing, permissions restreintes et referrer policy.
 
 ## À vérifier dans Supabase avant publication
 
-1. Exécuter `supabase_schema.sql` sans modifier les règles RLS.
+1. Exécuter `supabase_schema.sql`, puis `supabase_granular_friend_sharing.sql`, sans modifier les règles RLS.
 2. Confirmer que RLS est activé sur toutes les tables listées dans le script.
 3. Ne jamais utiliser `service_role` dans `supabase_config.json`, Vercel, GitHub ou le navigateur.
 4. Déployer `supabase/functions/delete-account/index.ts` et définir `ALLOWED_ORIGIN` avec le domaine de production exact.
@@ -31,6 +31,7 @@ Le projet est nettement plus sûr après les corrections, mais il n'est pas poss
 - **XSS :** le projet reste un grand fichier HTML avec des scripts intégrés. La CSP limite les sources externes, mais contient `unsafe-inline` pour que les scripts existants puissent fonctionner. Une amélioration majeure serait de séparer les scripts dans des fichiers externes, supprimer les gestionnaires `onclick` HTML, puis retirer `unsafe-inline`.
 - **CDN :** Chart.js, SheetJS et Supabase sont chargés depuis CDN. Pour un projet sensible, verrouiller les versions, ajouter des attributs SRI lorsque possible, ou héberger des copies contrôlées.
 - **Authentification :** dans Supabase, active la confirmation e-mail, configure le minimum de mot de passe à 8 ou 12 caractères, les limites de débit et CAPTCHA si le site devient public.
-- **Partage :** teste les quatre cas : pas ami, ami sans droit, ami avec droit tableur, ami après retrait du droit. Les permissions « dashboard » et « catégories » servent à l'interface ; l'accès au snapshot complet est volontairement conditionné au droit « tableur ».
+- **Partage :** teste les quatre cas : pas ami, ami sans droit, ami avec un seul mois/une seule ligne, ami après retrait du droit. Le snapshot complet du propriétaire reste privé ; le compte invité lit seulement une copie filtrée, distincte de la synchronisation personnelle.
 - **Données locales :** les données restent aussi dans `localStorage`. Elles ne sont pas chiffrées au repos par l'application : ne partage pas un navigateur ou un profil Windows contenant des données financières.
 - **Compte supprimé :** vérifie toujours ce parcours avec un compte de test. La suppression d'un utilisateur Supabase cascade vers ses données selon le schéma SQL.
+
