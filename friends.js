@@ -1,474 +1,123 @@
-/* ═══════════════════════════════════════════════════════════════
-   friends.js — Système d'amis avec Supabase (invitation par e-mail)
-   - Invitation par e-mail au lieu de code ami
-   - Demande/acceptation d'amis
-   - Permissions par ami (dashboard, tableur, catégories)
-   - Visualisation du tableur des amis selon leurs autorisations
-   ═══════════════════════════════════════════════════════════════ */
+/* Partage entre amis : sélection stricte mois × lignes, consultation seule. */
 (function () {
   "use strict";
 
-  function getSupabase(){ try{ return window.__account && window.__account.client ? window.__account.client : null; }catch(e){ return null; } }
-  function getUser(){ try{ return window.__account && window.__account.user ? window.__account.user : null; }catch(e){ return null; } }
+  var MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+  var friendsList = [], pendingRequests = [], sentRequests = [];
 
-  var friendsList = [];
-  var pendingRequests = [];
-  var sentRequests = [];
-
-  // === Récupérer l'e-mail de l'utilisateur connecté ===
-  async function getMyEmail(){
-    var user = getUser();
-    if(!user) return null;
-    return user.email || null;
-  }
-
-  // === Récupérer la liste d'amis ===
-  async function loadFriends(){
-    var sb = getSupabase(); var user = getUser();
-    if(!sb || !user) return { friends: [], pending: [], sent: [] };
-    try{
-      // Lecture via RPC : elle ne renvoie que les relations de l'utilisateur
-      // connecté et reste fiable même avec des RLS strictes.
-      var res = await sb.rpc("get_my_friendships");
-      if(res.error || !res.data) return { friends: [], pending: [], sent: [] };
-
-      var friends = [];
-      var pending = [];
-      var sent = [];
-
-      for(var i = 0; i < res.data.length; i++){
-        var f = res.data[i];
-        var otherId = f.owner_id === user.id ? f.friend_id : f.owner_id;
-        var isRequester = f.owner_id === user.id;
-
-        var friendObj = {
-          friendshipId: f.friendship_id,
-          friendId: otherId,
-          displayName: f.other_display_name || (f.other_email ? f.other_email.split("@")[0] : "Ami"),
-          email: f.other_email || "",
-          status: f.status,
-          isRequester: isRequester
-        };
-
-        if(f.status === "accepted"){
-          // Chaque personne est propriétaire de ses propres données, peu importe
-          // qui a envoyé l'invitation. Les deux amis peuvent donc partager dans
-          // les deux sens avec leurs réglages respectifs.
-          var ownPermRes = await sb.from("share_permissions")
-            .select("can_view_dashboard,can_view_sheet,can_view_categories")
-            .eq("owner_id", user.id)
-            .eq("friend_id", otherId)
-            .is("year", null).is("month", null).is("row_key", null)
-            .maybeSingle();
-          var receivedPermRes = await sb.from("share_permissions")
-            .select("can_view_dashboard,can_view_sheet,can_view_categories")
-            .eq("owner_id", otherId)
-            .eq("friend_id", user.id)
-            .is("year", null).is("month", null).is("row_key", null)
-            .maybeSingle();
-          friendObj.permissions = (ownPermRes.data && !ownPermRes.error) ? ownPermRes.data : { can_view_dashboard: false, can_view_sheet: false, can_view_categories: false };
-          friendObj.receivedPermissions = (receivedPermRes.data && !receivedPermRes.error) ? receivedPermRes.data : { can_view_dashboard: false, can_view_sheet: false, can_view_categories: false };
-          friends.push(friendObj);
-        } else if(f.status === "pending"){
-          if(isRequester) sent.push(friendObj);
-          else pending.push(friendObj);
-        }
-      }
-
-      friendsList = friends;
-      pendingRequests = pending;
-      sentRequests = sent;
-      return { friends: friends, pending: pending, sent: sent };
-    }catch(e){
-      console.warn("loadFriends error:", e);
-      return { friends: [], pending: [], sent: [] };
-    }
-  }
-
-  // === Envoyer une invitation par e-mail ===
-  function translateFriendRequestError(error){
-    var message = String((error && error.message) || error || "").toLowerCase();
+  function getSupabase(){ try { return window.__account && window.__account.client || null; } catch(e) { return null; } }
+  function getUser(){ try { return window.__account && window.__account.user || null; } catch(e) { return null; } }
+  function el(tag, className, text){ var node=document.createElement(tag); if(className) node.className=className; if(text!==undefined) node.textContent=text; return node; }
+  function permissionDefaults(){ return {can_view_dashboard:false,can_view_sheet:false,can_view_categories:false}; }
+  function money(value){ return Number(value||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"}); }
+  function normalized(value){ return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase(); }
+  function currentSnapshot(){ try { return window.FinanceSheet && window.FinanceSheet.getSnapshot ? window.FinanceSheet.getSnapshot() : null; } catch(e) { return null; } }
+  function sheetYear(sheet){ var match=String(sheet&&sheet.name||"").match(/(19\d{2}|20\d{2}|21\d{2})/); return match ? Number(match[1]) : 0; }
+  function sheetId(sheet,index){ return String(sheet&&sheet.id||("sheet-"+index)); }
+  function rowKey(sheet,sheetIndex,row){ return sheetId(sheet,sheetIndex)+":"+row; }
+  function header(sheet,column){ return String(sheet&&sheet.headers&&sheet.headers[column]||MONTHS[column]||column+1); }
+  function rowName(sheet,row){ var label=String(sheet&&sheet.rowHeaders&&sheet.rowHeaders[row]||"").trim(); return "Ligne "+(row+1)+(label?" — "+label:""); }
+  function hasRowData(sheet,row){ if(String(sheet.rowHeaders&&sheet.rowHeaders[row]||"").trim()) return true; return Object.keys(sheet.cells||{}).some(function(key){ return key.indexOf(row+",")===0; }); }
+  function usefulRows(sheet){ var rows=[], count=Math.max(Number(sheet&&sheet.rows||0),(sheet&&sheet.rowHeaders&&sheet.rowHeaders.length)||0); for(var row=0;row<count;row++) if(hasRowData(sheet,row)) rows.push(row); return rows; }
+  function accessLabel(permissions){ if(permissions.can_view_dashboard&&permissions.can_view_sheet) return "Dashboard et tableur partagés"; if(permissions.can_view_dashboard) return "Dashboard partagé"; if(permissions.can_view_sheet) return "Tableur partagé"; return "Aucun partage actif"; }
+  function errorText(error){
+    var message=String(error&&error.message||error||"").toLowerCase();
     if(/user_not_found/.test(message)) return "Aucun utilisateur trouvé avec cet e-mail";
-    if(/cannot_add_self/.test(message)) return "Tu ne peux pas t'ajouter toi-même";
+    if(/cannot_add_self/.test(message)) return "Tu ne peux pas t’ajouter toi-même";
     if(/request_already_sent/.test(message)) return "Demande déjà envoyée";
-    if(/request_already_received/.test(message)) return "Cette personne t'a déjà envoyé une demande";
-    if(/already_friends/.test(message)) return "Déjà amis";
-    if(/friend_request_blocked/.test(message)) return "Cette demande ne peut pas être envoyée";
-    if(/send_friend_request_by_email/.test(message)) return "Le système d'amis est en cours de mise à jour. Réessaie dans un instant.";
-    return "Impossible d'envoyer la demande d'ami. Réessaie dans un instant.";
+    if(/request_already_received/.test(message)) return "Cette personne t’a déjà envoyé une demande";
+    if(/already_friends/.test(message)) return "Vous êtes déjà amis";
+    if(/finance_shared_(sheet|dashboard)_snapshots|relation .* does not exist/i.test(message)) return "La mise à jour sécurisée du partage n’est pas encore appliquée dans la base.";
+    return "Impossible d’enregistrer cette action. Réessaie dans un instant.";
   }
 
+  async function loadFriends(){
+    var sb=getSupabase(), user=getUser(); if(!sb||!user) return {friends:[],pending:[],sent:[]};
+    try {
+      var response=await sb.rpc("get_my_friendships"); if(response.error||!response.data) return {friends:[],pending:[],sent:[]};
+      var friends=[], pending=[], sent=[];
+      for(var i=0;i<response.data.length;i++){
+        var relation=response.data[i], otherId=relation.owner_id===user.id?relation.friend_id:relation.owner_id;
+        var friend={friendshipId:relation.friendship_id,friendId:otherId,displayName:relation.other_display_name||(relation.other_email?relation.other_email.split("@")[0]:"Ami"),email:relation.other_email||"",isRequester:relation.owner_id===user.id};
+        if(relation.status==="accepted"){
+          var own=await sb.from("share_permissions").select("can_view_dashboard,can_view_sheet,can_view_categories").eq("owner_id",user.id).eq("friend_id",otherId).is("year",null).is("month",null).is("row_key",null).maybeSingle();
+          var received=await sb.from("share_permissions").select("can_view_dashboard,can_view_sheet,can_view_categories").eq("owner_id",otherId).eq("friend_id",user.id).is("year",null).is("month",null).is("row_key",null).maybeSingle();
+          friend.permissions=own.data&&!own.error?own.data:permissionDefaults(); friend.receivedPermissions=received.data&&!received.error?received.data:permissionDefaults(); friends.push(friend);
+        } else if(relation.status==="pending") { if(friend.isRequester) sent.push(friend); else pending.push(friend); }
+      }
+      friendsList=friends; pendingRequests=pending; sentRequests=sent; return {friends:friends,pending:pending,sent:sent};
+    } catch(e) { console.warn("loadFriends",e); return {friends:[],pending:[],sent:[]}; }
+  }
   async function sendFriendRequestByEmail(email){
-    var sb = getSupabase(); var user = getUser();
-    if(!sb || !user) return { error: "Non connecté" };
-    if(!email || email.length < 5 || email.indexOf("@") === -1) return { error: "E-mail invalide" };
-
-    try{
-      // La recherche et l'insertion sont faites par une RPC securisee : les
-      // RLS ne doivent pas exposer les profils de tous les utilisateurs.
-      var res = await sb.rpc("send_friend_request_by_email", { p_email: email.trim().toLowerCase() });
-      if(res.error) return { error: translateFriendRequestError(res.error) };
-      return { success: true };
-    }catch(e){
-      return { error: translateFriendRequestError(e) };
-    }
+    var sb=getSupabase(),user=getUser(); if(!sb||!user) return {error:"Connecte-toi pour envoyer une invitation."}; if(!email||email.length<5||email.indexOf("@")===-1) return {error:"E-mail invalide"};
+    try { var response=await sb.rpc("send_friend_request_by_email",{p_email:email.trim().toLowerCase()}); return response.error?{error:errorText(response.error)}:{success:true}; } catch(e) { return {error:errorText(e)}; }
+  }
+  async function acceptFriend(id){ var sb=getSupabase(),user=getUser(); if(!sb||!user)return{error:"Non connecté"}; try{var response=await sb.rpc("respond_to_friend_request",{p_friendship_id:id,p_accept:true});return response.error?{error:"Impossible d’accepter cette demande."}:{success:true};}catch(e){return{error:errorText(e)};} }
+  async function declineFriend(id){ var sb=getSupabase(),user=getUser(); if(!sb||!user)return{error:"Non connecté"}; try{var response=await sb.rpc("respond_to_friend_request",{p_friendship_id:id,p_accept:false});return response.error?{error:"Impossible de refuser cette demande."}:{success:true};}catch(e){return{error:errorText(e)};} }
+  async function removeFriend(id){
+    var sb=getSupabase(),user=getUser(),relation=friendsList.concat(pendingRequests,sentRequests).find(function(item){return item.friendshipId===id;}); if(!sb||!user)return{error:"Non connecté"};if(!relation)return{error:"Relation introuvable"};
+    try { await sb.from("share_permissions").delete().eq("owner_id",user.id).eq("friend_id",relation.friendId); await sb.from("finance_shared_sheet_snapshots").delete().eq("owner_id",user.id).eq("friend_id",relation.friendId); await sb.from("finance_shared_dashboard_snapshots").delete().eq("owner_id",user.id).eq("friend_id",relation.friendId); var response=await sb.from("friendships").delete().eq("id",id); return response.error?{error:errorText(response.error)}:{success:true}; } catch(e){return{error:errorText(e)};}
   }
 
-  // === Accepter une demande ===
-  async function acceptFriend(friendshipId){
-    var sb = getSupabase(); var user = getUser();
-    if(!sb || !user) return { error: "Non connecté" };
-    try{
-      var res = await sb.rpc("respond_to_friend_request", { p_friendship_id: friendshipId, p_accept: true });
-      if(res.error) return { error: "Impossible d'accepter cette demande. Réessaie dans un instant." };
-      return { success: true };
-    }catch(e){ return { error: e.message }; }
+  async function loadRules(friendId){
+    var sb=getSupabase(),user=getUser();if(!sb||!user)return[];try{var response=await sb.from("share_permissions").select("year,month,row_key,allowed").eq("owner_id",user.id).eq("friend_id",friendId);return response.error?[]:(response.data||[]).filter(function(rule){return rule.year!==null||rule.month!==null||rule.row_key!==null;});}catch(e){return[];}
   }
-
-  // === Refuser une demande ===
-  async function declineFriend(friendshipId){
-    var sb = getSupabase(); var user = getUser();
-    if(!sb || !user) return { error: "Non connecté" };
-    try{
-      var res = await sb.rpc("respond_to_friend_request", { p_friendship_id: friendshipId, p_accept: false });
-      if(res.error) return { error: "Impossible de refuser cette demande. Réessaie dans un instant." };
-      return { success: true };
-    }catch(e){ return { error: e.message }; }
+  function selectionFromRules(snapshot,rules){
+    var selection={}; ((snapshot&&snapshot.sheets)||[]).forEach(function(sheet,index){var id=sheetId(sheet,index),year=sheetYear(sheet);selection[id]={months:new Set(),rows:new Set()};(rules||[]).forEach(function(rule){if(!rule.allowed||Number(rule.year||0)!==year||String(rule.row_key||"").indexOf(id+":")!==0)return;selection[id].months.add(Number(rule.month)-1);var row=Number(String(rule.row_key).slice((id+":").length));if(Number.isInteger(row)&&row>=0)selection[id].rows.add(row);});});return selection;
   }
-
-  // === Supprimer un ami ===
-  async function removeFriend(friendshipId){
-    var sb = getSupabase(); var user = getUser();
-    if(!sb || !user) return { error: "Non connecté" };
-    try{
-      var relation = friendsList.concat(pendingRequests, sentRequests).find(function(item){ return item.friendshipId === friendshipId; });
-      if(!relation) return { error: "Relation introuvable" };
-      var deleteFriendship = await sb.from("friendships").delete().eq("id", friendshipId);
-      if(deleteFriendship.error) return { error: deleteFriendship.error.message };
-      var deletePermissions = await sb.from("share_permissions")
-        .delete()
-        .or("and(owner_id.eq." + user.id + ",friend_id.eq." + relation.friendId + "),and(owner_id.eq." + relation.friendId + ",friend_id.eq." + user.id + ")");
-      if(deletePermissions.error) return { error: deletePermissions.error.message };
-      return { success: true };
-    }catch(e){ return { error: e.message }; }
+  function ruleCount(selection){ return Object.keys(selection||{}).reduce(function(sum,key){return sum+(selection[key].months.size*selection[key].rows.size);},0); }
+  function buildRules(snapshot,selection){
+    var rules=[];((snapshot&&snapshot.sheets)||[]).forEach(function(sheet,sheetIndex){var selected=selection[sheetId(sheet,sheetIndex)];if(!selected||!selected.months.size||!selected.rows.size)return;selected.rows.forEach(function(row){selected.months.forEach(function(column){rules.push({year:sheetYear(sheet),month:column+1,row_key:rowKey(sheet,sheetIndex,row),allowed:true});});});});return rules;
   }
-
-  // === Mettre à jour les permissions ===
-  async function updatePermissions(friendId, permissions){
-    var sb = getSupabase(); var user = getUser();
-    if(!sb || !user) return { error: "Non connecté" };
-    try{
-      var record = {
-        owner_id: user.id,
-        friend_id: friendId,
-        can_view_dashboard: permissions.can_view_dashboard || false,
-        can_view_sheet: permissions.can_view_sheet || false,
-        can_view_categories: permissions.can_view_categories || false,
-        year: null,
-        month: null,
-        row_key: null
-      };
-      var existing = await sb.from("share_permissions")
-        .select("id")
-        .eq("owner_id", user.id).eq("friend_id", friendId)
-        .is("year", null).is("month", null).is("row_key", null)
-        .limit(1)
-        .maybeSingle();
-      if(existing.error) return { error: existing.error.message };
-      var res = existing.data
-        ? await sb.from("share_permissions").update(record).eq("id", existing.data.id)
-        : await sb.from("share_permissions").insert(record);
-      if(res.error) return { error: res.error.message };
-      return { success: true };
-    }catch(e){ return { error: e.message }; }
+  function computed(sheet){try{return window.FinanceSheet&&window.FinanceSheet.recompute?window.FinanceSheet.recompute(sheet.cells||{}):{};}catch(e){return{};}}
+  function safeValue(result){if(!result||result.error||result.value===undefined||result.value===null)return"";var value=result.value;if(typeof value==="number"&&Number.isFinite(value))return value;if(typeof value==="string")return value.slice(0,500);return String(value).slice(0,500);}
+  function buildTablePayload(snapshot,selection){
+    var sheets=[];((snapshot&&snapshot.sheets)||[]).forEach(function(sheet,sheetIndex){var selected=selection[sheetId(sheet,sheetIndex)];if(!selected||!selected.months.size||!selected.rows.size)return;var columns=Array.from(selected.months).sort(function(a,b){return a-b;}),rows=Array.from(selected.rows).sort(function(a,b){return a-b;}),results=computed(sheet),shared={name:String(sheet.name||"Feuille"),headers:columns.map(function(col){return header(sheet,col);}),rowHeaders:rows.map(function(row){return rowName(sheet,row);}),rows:rows.length,cols:columns.length,cells:{}};rows.forEach(function(sourceRow,localRow){columns.forEach(function(sourceCol,localCol){var value=safeValue(results[sourceRow+","+sourceCol]);if(value!=="")shared.cells[localRow+","+localCol]={raw:String(value)};});});sheets.push(shared);});return{v:"shared-sheet-v2",updatedAt:Date.now(),sheets:sheets};
   }
-
-  // === Voir le tableur d'un ami ===
-  async function loadFriendSnapshot(friendId){
-    var sb = getSupabase(); var user = getUser();
-    if(!sb || !user) return { error: "Non connecté" };
-    try{
-      var res = await sb.from("finance_snapshots").select("payload").eq("owner_id", friendId).single();
-      if(res.error || !res.data || !res.data.payload) return { error: "Données non disponibles" };
-      var snap = typeof res.data.payload === "string" ? JSON.parse(res.data.payload) : res.data.payload;
-      return { success: true, snapshot: snap };
-    }catch(e){ return { error: e.message }; }
+  function lineType(label){var text=normalized(label);if(/epargne|livret|pea|placement|investissement/.test(text))return"savings";if(/salaire|revenu|prime|allocation|remuneration|paie|paye/.test(text))return"income";if(/depense|loyer|charge|facture|abonnement|course|frais|impot|taxe|assurance|transport|restaurant|achat|credit/.test(text))return"expense";return"other";}
+  function numberValue(value){var number=typeof value==="number"?value:parseFloat(String(value).replace(",",".").replace(/[^0-9.-]/g,""));return Number.isFinite(number)?number:0;}
+  function buildDashboardPayload(tablePayload){
+    var months=[];(tablePayload.sheets||[]).forEach(function(sheet){for(var col=0;col<Number(sheet.cols||0);col++){var month={label:String(sheet.name||"Feuille")+" — "+String(sheet.headers&&sheet.headers[col]||MONTHS[col]||"Mois"),salary:0,expenses:0,savingsTotal:0,details:[]};for(var row=0;row<Number(sheet.rows||0);row++){var cell=sheet.cells&&sheet.cells[row+","+col];if(!cell)continue;var value=numberValue(cell.raw),label=String(sheet.rowHeaders&&sheet.rowHeaders[row]||("Ligne "+(row+1))),kind=lineType(label);month.details.push({name:label,value:value});if(kind==="income")month.salary+=value;else if(kind==="expense")month.expenses+=Math.abs(value);else if(kind==="savings")month.savingsTotal+=Math.abs(value);}if(month.details.length)months.push(month);}});return{v:"shared-dashboard-v2",updatedAt:Date.now(),months:months};
   }
-  async function loadFriendDashboard(friendId){
-    var sb = getSupabase(); var user = getUser();
-    if(!sb || !user) return { error: "Non connecté" };
-    try{
-      var res = await sb.from("finance_dashboard_snapshots").select("payload").eq("owner_id", friendId).single();
-      if(res.error || !res.data || !res.data.payload) return { error: "Dashboard non disponible" };
-      return { success: true, dashboard: typeof res.data.payload === "string" ? JSON.parse(res.data.payload) : res.data.payload };
-    }catch(e){ return { error: e.message }; }
+  async function deleteShared(table,friendId){var sb=getSupabase(),user=getUser();if(sb&&user)await sb.from(table).delete().eq("owner_id",user.id).eq("friend_id",friendId);}
+  async function publishShared(friendId,permissions,selection,snapshot){
+    var sb=getSupabase(),user=getUser();if(!sb||!user)return{error:"Non connecté"};var tablePayload=buildTablePayload(snapshot,selection),hasData=(tablePayload.sheets||[]).length>0;if(!hasData){await deleteShared("finance_shared_sheet_snapshots",friendId);await deleteShared("finance_shared_dashboard_snapshots",friendId);return{success:true};}
+    if(permissions.can_view_sheet){var table=await sb.from("finance_shared_sheet_snapshots").upsert({owner_id:user.id,friend_id:friendId,payload:tablePayload,updated_at:new Date().toISOString()},{onConflict:"owner_id,friend_id"});if(table.error)return{error:errorText(table.error)};}else await deleteShared("finance_shared_sheet_snapshots",friendId);
+    if(permissions.can_view_dashboard){var dashboard=await sb.from("finance_shared_dashboard_snapshots").upsert({owner_id:user.id,friend_id:friendId,payload:buildDashboardPayload(tablePayload),updated_at:new Date().toISOString()},{onConflict:"owner_id,friend_id"});if(dashboard.error)return{error:errorText(dashboard.error)};}else await deleteShared("finance_shared_dashboard_snapshots",friendId);return{success:true};
   }
-
-  // === Rendu UI ===
-  function escapeHtml(str){
-    if(!str) return "";
-    return String(str).replace(/[&<>"']/g, function(c){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
-    });
+  async function saveGranularShare(friend,permissions,selection){
+    var sb=getSupabase(),user=getUser(),snapshot=currentSnapshot();if(!sb||!user)return{error:"Non connecté"};if(!snapshot||!snapshot.sheets||!snapshot.sheets.length)return{error:"Ajoute d’abord des données à ton tableur."};var rules=buildRules(snapshot,selection),active=permissions.can_view_dashboard||permissions.can_view_sheet;if(active&&!rules.length)return{error:"Sélectionne au moins un mois et une ligne avant d’activer le partage."};
+    try { var cleared=await sb.from("share_permissions").delete().eq("owner_id",user.id).eq("friend_id",friend.friendId);if(cleared.error)return{error:errorText(cleared.error)};var records=[{owner_id:user.id,friend_id:friend.friendId,can_view_dashboard:!!permissions.can_view_dashboard,can_view_sheet:!!permissions.can_view_sheet,can_view_categories:false,year:null,month:null,row_key:null,allowed:false}].concat(rules.map(function(rule){return Object.assign({owner_id:user.id,friend_id:friend.friendId,can_view_dashboard:false,can_view_sheet:false,can_view_categories:false},rule);}));var inserted=await sb.from("share_permissions").insert(records);if(inserted.error)return{error:errorText(inserted.error)};var published=await publishShared(friend.friendId,permissions,selection,snapshot);if(published.error){await sb.from("share_permissions").delete().eq("owner_id",user.id).eq("friend_id",friend.friendId);return published;}return{success:true}; } catch(e){return{error:errorText(e)};}
   }
+  async function refreshMySharedSnapshots(){var snapshot=currentSnapshot(),data=await loadFriends();if(!snapshot)return;for(var i=0;i<data.friends.length;i++){var friend=data.friends[i],rules=await loadRules(friend.friendId),selection=selectionFromRules(snapshot,rules);await publishShared(friend.friendId,friend.permissions||permissionDefaults(),selection,snapshot);}}
 
-  async function renderFriends(container){
-    if(!container) return;
-    var sb = getSupabase(); var user = getUser();
-    if(!sb || !user){
-      container.innerHTML = '<div class="friends-locked">Connecte-toi pour utiliser le système d\'amis.</div>';
-      return;
-    }
-
-    var data = await loadFriends();
-    var myEmail = await getMyEmail();
-
-    var html = '';
-
-    // Mon e-mail (pour partager)
-    if(myEmail){
-      html += '<div class="friends-code-box">';
-      html += '<div class="friends-code-label">Ton e-mail</div>';
-      html += '<div class="friends-code-value">' + escapeHtml(myEmail) + '</div>';
-      html += '<button class="friends-copy-btn" onclick="window.FriendsSystem.copyCode(\'' + escapeHtml(myEmail) + '\')">Copier</button>';
-      html += '</div>';
-    }
-
-    // Inviter par e-mail
-    html += '<div class="friends-add-box">';
-    html += '<input type="email" id="friendCodeInput" placeholder="E-mail de la personne" />';
-    html += '<button class="friends-add-btn" onclick="window.FriendsSystem.addFriend()">Inviter</button>';
-    html += '</div>';
-
-    // Demandes reçues
-    if(data.pending.length > 0){
-      html += '<div class="friends-section-title">Demandes reçues</div>';
-      for(var i = 0; i < data.pending.length; i++){
-        var p = data.pending[i];
-        html += '<div class="friends-request-item">';
-        html += '<div class="friends-avatar">' + escapeHtml(p.displayName.charAt(0).toUpperCase()) + '</div>';
-        html += '<div class="friends-name">' + escapeHtml(p.displayName) + '</div>';
-        html += '<button class="friends-accept-btn" onclick="window.FriendsSystem.accept(\'' + p.friendshipId + '\')">Accepter</button>';
-        html += '<button class="friends-reject-btn" onclick="window.FriendsSystem.decline(\'' + p.friendshipId + '\')">Refuser</button>';
-        html += '</div>';
-      }
-    }
-
-    // Demandes envoyées
-    if(data.sent.length > 0){
-      html += '<div class="friends-section-title">Invitations envoyées</div>';
-      for(var k = 0; k < data.sent.length; k++){
-        var s = data.sent[k];
-        html += '<div class="friends-request-item">';
-        html += '<div class="friends-avatar">' + escapeHtml(s.displayName.charAt(0).toUpperCase()) + '</div>';
-        html += '<div class="friends-name">' + escapeHtml(s.displayName) + '</div>';
-        html += '<span class="friends-pending-badge">En attente</span>';
-        html += '</div>';
-      }
-    }
-
-    // Mes amis
-    if(data.friends.length > 0){
-      html += '<div class="friends-section-title">Mes amis</div>';
-      for(var j = 0; j < data.friends.length; j++){
-        var f = data.friends[j];
-        html += '<div class="friends-list-item">';
-        html += '<div class="friends-avatar">' + escapeHtml(f.displayName.charAt(0).toUpperCase()) + '</div>';
-        html += '<div class="friends-name">' + escapeHtml(f.displayName) + '</div>';
-        html += '<div class="friends-perms">';
-
-        // Les autorisations sont toujours celles de mes propres données.
-        html += '<label class="friends-perm-toggle"><input type="checkbox" ' + (f.permissions.can_view_sheet ? "checked" : "") + ' onchange="window.FriendsSystem.togglePerm(\'' + f.friendId + '\',\'can_view_sheet\',this.checked)" /> Mon tableur</label>';
-        html += '<label class="friends-perm-toggle"><input type="checkbox" ' + (f.permissions.can_view_dashboard ? "checked" : "") + ' onchange="window.FriendsSystem.togglePerm(\'' + f.friendId + '\',\'can_view_dashboard\',this.checked)" /> Mon dashboard</label>';
-        html += '<label class="friends-perm-toggle"><input type="checkbox" ' + (f.permissions.can_view_categories ? "checked" : "") + ' onchange="window.FriendsSystem.togglePerm(\'' + f.friendId + '\',\'can_view_categories\',this.checked)" /> Mes catégories</label>';
-
-        html += '</div>';
-        html += '<button class="friends-reject-btn" onclick="window.FriendsSystem.remove(\'' + f.friendshipId + '\')">Supprimer</button>';
-        html += '</div>';
-      }
-    } else if(data.pending.length === 0 && data.sent.length === 0){
-      html += '<div class="friends-empty">Tu n\'as pas encore d\'amis. Invite un proche par e-mail pour commencer.</div>';
-    }
-
-    container.innerHTML = html;
+  async function loadFriendSnapshot(friendId){var sb=getSupabase(),user=getUser();if(!sb||!user)return{error:"Non connecté"};try{var response=await sb.from("finance_shared_sheet_snapshots").select("payload").eq("owner_id",friendId).eq("friend_id",user.id).maybeSingle();if(response.error||!response.data||!response.data.payload)return{error:"Tableur non disponible"};return{success:true,snapshot:typeof response.data.payload==="string"?JSON.parse(response.data.payload):response.data.payload};}catch(e){return{error:errorText(e)};}}
+  async function loadFriendDashboard(friendId){var sb=getSupabase(),user=getUser();if(!sb||!user)return{error:"Non connecté"};try{var response=await sb.from("finance_shared_dashboard_snapshots").select("payload").eq("owner_id",friendId).eq("friend_id",user.id).maybeSingle();if(response.error||!response.data||!response.data.payload)return{error:"Dashboard non disponible"};return{success:true,dashboard:typeof response.data.payload==="string"?JSON.parse(response.data.payload):response.data.payload};}catch(e){return{error:errorText(e)};}}
+  function renderSharedTable(container,snapshot,friend){
+    container.replaceChildren();container.hidden=false;container.append(el("h3","","Tableur partagé — "+friend.displayName),el("p","","Consultation seule : seules les lignes et les mois autorisés sont affichés."),action("Revenir à mon tableur",function(){if(window.setPage)window.setPage("sheet");}));var sheets=snapshot&&snapshot.sheets||[];if(!sheets.length){container.append(el("div","sharing-empty","Aucune donnée de tableur n’est disponible."));return;}sheets.forEach(function(sheet){var heading=el("h4","shared-sheet-title",sheet.name),wrap=el("div","shared-table-wrap"),table=el("table","shared-table"),thead=document.createElement("thead"),tr=document.createElement("tr");tr.append(el("th","","Ligne"));for(var col=0;col<Number(sheet.cols||0);col++)tr.append(el("th","",sheet.headers&&sheet.headers[col]||MONTHS[col]));thead.append(tr);table.append(thead);var body=document.createElement("tbody");for(var row=0;row<Number(sheet.rows||0);row++){var line=document.createElement("tr");line.append(el("th","",sheet.rowHeaders&&sheet.rowHeaders[row]||("Ligne "+(row+1))));for(var c=0;c<Number(sheet.cols||0);c++){var cell=sheet.cells&&sheet.cells[row+","+c];line.append(el("td","",cell&&cell.raw!==undefined?String(cell.raw):"—"));}body.append(line);}table.append(body);wrap.append(table);container.append(heading,wrap);});
   }
+  function renderSharedDashboard(container,dashboard,friend){
+    container.replaceChildren();container.hidden=false;container.append(el("h3","","Dashboard partagé — "+friend.displayName),el("p","","Synthèse calculée uniquement à partir des lignes et mois autorisés."));var months=dashboard&&dashboard.months||[];if(!months.length){container.append(el("div","sharing-empty","Aucune donnée de dashboard n’est disponible."));return;}var income=months.reduce(function(sum,item){return sum+Number(item.salary||0);},0),expenses=months.reduce(function(sum,item){return sum+Math.abs(Number(item.expenses||0));},0),savings=months.reduce(function(sum,item){return sum+Math.abs(Number(item.savingsTotal||0));},0),grid=el("div","chart-detail-grid");[["Mois analysés",String(months.length)],["Revenus",money(income)],["Dépenses",money(expenses)],["Épargne",money(savings)]].forEach(function(metric){var card=el("div"),label=el("span","",metric[0]),value=el("strong","",metric[1]);card.append(label,value);grid.append(card);});container.append(grid);var list=el("div","shared-month-list");months.forEach(function(month){var row=el("div","shared-month-row"),title=el("strong","",month.label),total=el("span","",money(Number(month.salary||0)-Math.abs(Number(month.expenses||0))));row.append(title,total);list.append(row);});container.append(list);
+  }
+  async function viewShared(friend,mode){var target=document.getElementById("sharedView");if(!target)return;target.hidden=false;target.replaceChildren(el("p","","Chargement du contenu partagé…"));var result=mode==="dashboard"?await loadFriendDashboard(friend.friendId):await loadFriendSnapshot(friend.friendId);if(result.error){target.replaceChildren(el("p","","Le contenu n’est pas disponible : "+result.error));return;}if(mode==="dashboard")renderSharedDashboard(target,result.dashboard,friend);else renderSharedTable(target,result.snapshot,friend);target.scrollIntoView({behavior:"smooth",block:"start"});}
 
-  function el(tag, className, text){
-    var node = document.createElement(tag);
-    if(className) node.className = className;
-    if(text !== undefined) node.textContent = text;
-    return node;
-  }
-  function permissionToggle(friend, label, key, onChanged){
-    var labelEl = el("label", "sharing-permission");
-    var input = document.createElement("input"); input.type = "checkbox"; input.checked = !!friend.permissions[key];
-    input.addEventListener("change", async function(){
-      var next = Object.assign({}, friend.permissions, {}); next[key] = input.checked;
-      input.disabled = true;
-      var res = await updatePermissions(friend.friendId, next);
-      input.disabled = false;
-      if(res.error){ input.checked = !input.checked; alert("Impossible d’enregistrer l’autorisation. Réessaie dans un instant."); return; }
-      friend.permissions = next;
-      if(onChanged) onChanged();
-    });
-    labelEl.append(input, document.createTextNode(label));
-    return labelEl;
-  }
-  function friendlyValue(raw){
-    var value = String(raw == null ? "" : raw).trim();
-    if(value.charAt(0) === "=") return "Formule";
-    return value || "—";
-  }
-  function snapshotSheet(snapshot){
-    return snapshot && snapshot.sheets && snapshot.sheets.length ? snapshot.sheets[0] : null;
-  }
-  function renderSharedTable(container, snapshot, friend){
-    var sheet = snapshotSheet(snapshot);
-    container.replaceChildren();
-    if(!sheet){ container.hidden = false; container.append(el("p", "", "Aucune donnée de tableur n’est disponible pour le moment.")); return; }
-    container.hidden = false;
-    container.append(el("h3", "", "Tableur partagé — " + friend.displayName));
-    container.append(el("p", "", "Consultation seule : tes propres données ne sont jamais modifiées."));
-    var wrap = el("div", "shared-table-wrap"), table = el("table", "shared-table"), head = document.createElement("thead"), row = document.createElement("tr");
-    row.append(el("th", "", "Ligne"));
-    var cols = Math.min(Number(sheet.cols) || 0, 10);
-    for(var c = 0; c < cols; c++) row.append(el("th", "", (sheet.headers && sheet.headers[c]) || String.fromCharCode(65 + c)));
-    head.append(row); table.append(head);
-    var body = document.createElement("tbody"), rows = Math.min(Number(sheet.rows) || 0, 18);
-    for(var r = 0; r < rows; r++){
-      var tr = document.createElement("tr"); tr.append(el("th", "", (sheet.rowHeaders && sheet.rowHeaders[r]) || String(r + 1)));
-      for(var c2 = 0; c2 < cols; c2++){
-        var cell = sheet.cells && sheet.cells[r + "," + c2]; tr.append(el("td", "", friendlyValue(cell && cell.raw)));
-      }
-      body.append(tr);
-    }
-    table.append(body); wrap.append(table); container.append(wrap);
-  }
-  function renderSharedDashboard(container, dashboard, friend){
-    container.replaceChildren(); container.hidden = false;
-    container.append(el("h3", "", "Dashboard partagé — " + friend.displayName));
-    container.append(el("p", "", "Aperçu en lecture seule : aucun contenu de cellule ou formule n’est transmis."));
-    var months = (dashboard && dashboard.months) || [];
-    if(!months.length){ container.append(el("div", "sharing-empty", "Aucune donnée de dashboard n’est disponible pour le moment.")); return; }
-    var totalSalary = months.reduce(function(sum, month){ return sum + Number(month.salary || 0); }, 0);
-    var totalSavings = months.reduce(function(sum, month){ return sum + Number(month.savingsTotal || 0); }, 0);
-    var totalExpenses = months.reduce(function(sum, month){ return sum + Math.abs(Number(month.expenses || 0)); }, 0);
-    var latest = months[months.length - 1] || {};
-    var grid = el("div", "chart-detail-grid");
-    [["Mois analysés", String(months.length)], ["Revenus", totalSalary.toLocaleString("fr-FR", {style:"currency",currency:"EUR"})], ["Dépenses", totalExpenses.toLocaleString("fr-FR", {style:"currency",currency:"EUR"})], ["Épargne", totalSavings.toLocaleString("fr-FR", {style:"currency",currency:"EUR"})]].forEach(function(item){ var card=el("div"), label=el("span", "", item[0]), value=el("strong", "", item[1]); card.append(label,value); grid.append(card); });
-    container.append(grid);
-    var note = el("p", "", "Dernier mois : " + (latest.label || "—") + "."); note.style.marginTop = "14px"; container.append(note);
-  }
-  async function viewShared(friend, mode){
-    var target = document.getElementById("sharedView");
-    if(!target) return;
-    target.hidden = false; target.replaceChildren(el("p", "", "Chargement du contenu partagé…"));
-    var result = mode === "dashboard" ? await loadFriendDashboard(friend.friendId) : await loadFriendSnapshot(friend.friendId);
-    if(result.error){ target.replaceChildren(el("p", "", "Le contenu n’est pas disponible : " + result.error)); return; }
-    if(mode === "dashboard") renderSharedDashboard(target, result.dashboard, friend);
-    else renderSharedTable(target, result.snapshot, friend);
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  function action(label,handler,className){var button=el("button","sharing-action"+(className?" "+className:""),label);button.type="button";button.addEventListener("click",handler);return button;}
+  function switcher(label,checked,onChange){var wrap=el("label","sharing-feature-toggle"),input=document.createElement("input");input.type="checkbox";input.checked=!!checked;input.addEventListener("change",function(){onChange(input.checked);});wrap.append(input,document.createTextNode(label));return wrap;}
+  async function renderSharingAccess(friendId){
+    var target=document.getElementById("sharingAccessContainer");if(!target)return;target.replaceChildren(el("div","sharing-empty","Chargement de la configuration…"));var data=await loadFriends(),friend=data.friends.find(function(item){return item.friendId===friendId;}),snapshot=currentSnapshot();if(!friend){target.replaceChildren(el("div","sharing-empty","Cet ami n’est plus disponible."));return;}if(!snapshot||!snapshot.sheets||!snapshot.sheets.length){target.replaceChildren(el("div","sharing-empty","Ajoute des données au tableur avant de définir un partage."));return;}
+    var selection=selectionFromRules(snapshot,await loadRules(friend.friendId)),permissions=Object.assign(permissionDefaults(),friend.permissions||{}),root=el("section","sharing-access-card"),intro=el("div","sharing-access-intro");intro.append(el("span","eyebrow","Lecture seule"),el("h3","","Accès de "+friend.displayName),el("p","","Le Dashboard et le Tableur montreront uniquement l’intersection des mois et lignes cochés. Sans sélection, rien n’est partagé."));root.append(intro);
+    var features=el("div","sharing-feature-list");features.append(switcher("Autoriser le tableur filtré",permissions.can_view_sheet,function(value){permissions.can_view_sheet=value;}),switcher("Autoriser le dashboard filtré",permissions.can_view_dashboard,function(value){permissions.can_view_dashboard=value;}));root.append(features,el("p","sharing-security-note","Ton ami peut consulter les données sélectionnées, jamais les modifier."));
+    (snapshot.sheets||[]).forEach(function(sheet,index){var id=sheetId(sheet,index);if(!selection[id])selection[id]={months:new Set(),rows:new Set()};var card=el("section","sharing-selection-sheet"),head=el("div","sharing-selection-head");head.append(el("h4","",String(sheet.name||("Feuille "+(index+1)))),el("span","sharing-selection-count","Choisis les mois et lignes"));card.append(head);var utilities=el("div","sharing-selection-controls"),months=el("div","sharing-month-grid"),rows=el("div","sharing-row-list");utilities.append(action("Tous les mois",function(){for(var m=0;m<Math.min(12,Number(sheet.cols||12));m++)selection[id].months.add(m);months.querySelectorAll("input").forEach(function(input){input.checked=true;});}),action("Tout décocher",function(){selection[id].months.clear();selection[id].rows.clear();months.querySelectorAll("input").forEach(function(input){input.checked=false;});rows.querySelectorAll("input").forEach(function(input){input.checked=false;});}));card.append(utilities,el("p","sharing-selection-label","Mois autorisés"));for(var month=0;month<Math.min(12,Number(sheet.cols||12));month++){(function(column){var label=el("label","sharing-month-choice"),input=document.createElement("input");input.type="checkbox";input.checked=selection[id].months.has(column);input.addEventListener("change",function(){if(input.checked)selection[id].months.add(column);else selection[id].months.delete(column);});label.append(input,document.createTextNode(header(sheet,column)));months.append(label);})(month);}card.append(months,el("p","sharing-selection-label","Lignes autorisées"));var available=usefulRows(sheet);if(!available.length)rows.append(el("div","sharing-empty","Aucune ligne renseignée."));available.forEach(function(row){var label=el("label","sharing-row-choice"),input=document.createElement("input");input.type="checkbox";input.checked=selection[id].rows.has(row);input.addEventListener("change",function(){if(input.checked)selection[id].rows.add(row);else selection[id].rows.delete(row);});label.append(input,document.createTextNode(rowName(sheet,row)));rows.append(label);});card.append(rows);root.append(card);});
+    var footer=el("div","sharing-editor-footer"),summary=el("p","sharing-editor-summary",""),save=action("Enregistrer l’accès",async function(){save.disabled=true;summary.textContent="Enregistrement sécurisé…";var result=await saveGranularShare(friend,permissions,selection);if(result.error){summary.textContent=result.error;save.disabled=false;return;}summary.textContent="Accès enregistré. Ton ami verra uniquement cette sélection.";setTimeout(function(){if(window.setPage)window.setPage("sharing");},550);},"button-primary");summary.textContent=ruleCount(selection)?ruleCount(selection)+" cellule"+(ruleCount(selection)>1?"s":"")+" sélectionnée"+(ruleCount(selection)>1?"s":"")+".":"Aucune donnée sélectionnée.";footer.append(summary,save);root.append(footer);target.replaceChildren(root);
   }
   async function renderSharing(container){
-    if(!container) return;
-    var user = getUser();
-    if(!user){ container.replaceChildren(el("div", "sharing-empty", "Connecte-toi pour gérer les partages.")); return; }
-    container.replaceChildren(el("div", "sharing-empty", "Chargement des partages…"));
-    var data = await loadFriends();
-    var layout = el("div", "sharing-layout");
-    var invite = el("section", "sharing-card"); invite.append(el("h3", "", "Inviter un proche"), el("p", "", "Une invitation est envoyée par e-mail. Chaque personne garde le contrôle de ses données."));
-    var email = document.createElement("input"); email.type = "email"; email.placeholder = "nom@exemple.com"; email.autocomplete = "email";
-    var inviteButton = el("button", "sharing-action", "Envoyer l’invitation"); inviteButton.type = "button";
-    inviteButton.addEventListener("click", async function(){ var result = await sendFriendRequestByEmail(email.value.trim()); if(result.error){ alert(result.error); return; } email.value=""; renderSharing(container); });
-    var inputRow = el("div", "sharing-email"); inputRow.append(email, inviteButton); invite.append(inputRow); layout.append(invite);
-    var received = el("section", "sharing-card"); received.append(el("h3", "", "Demandes reçues"), el("p", "", "Accepte une demande avant de définir les accès."));
-    if(!data.pending.length) received.append(el("div", "sharing-empty", "Aucune demande en attente."));
-    data.pending.forEach(function(request){ var item=el("div", "sharing-person"), info=el("div"); info.append(el("h4", "", request.displayName),el("p", "", request.email)); var actions=el("div", "sharing-actions"), accept=el("button", "sharing-action", "Accepter"), decline=el("button", "sharing-action", "Refuser"); accept.type=decline.type="button"; accept.addEventListener("click",async function(){ var result=await acceptFriend(request.friendshipId); if(result.error){alert(result.error);return;} renderSharing(container); tryRenderFriends(); }); decline.addEventListener("click",async function(){ var result=await declineFriend(request.friendshipId); if(result.error){alert(result.error);return;} renderSharing(container); tryRenderFriends(); }); actions.append(accept,decline); item.append(info,actions); received.append(item); }); layout.append(received);
-    var manage = el("section", "sharing-card wide"); manage.append(el("h3", "", "Ce que tu partages"), el("p", "", "Active uniquement les accès que tu souhaites donner. Les autorisations sont séparées dans chaque sens."));
-    if(!data.friends.length) manage.append(el("div", "sharing-empty", "Ajoute un ami pour définir des autorisations."));
-    data.friends.forEach(function(friend){ var item=el("div", "sharing-person"), info=el("div"); info.append(el("h4", "", friend.displayName),el("p", "", friend.email || "Ami")); var perms=el("div", "sharing-permissions"); perms.append(permissionToggle(friend,"Dashboard","can_view_dashboard"),permissionToggle(friend,"Tableur","can_view_sheet"),permissionToggle(friend,"Catégories","can_view_categories")); item.append(info,perms); manage.append(item); }); layout.append(manage);
-    var access = el("section", "sharing-card wide"); access.append(el("h3", "", "Partagé avec moi"), el("p", "", "Ouvre le dashboard ou le tableur d’un ami sans mélanger ses données aux tiennes."));
-    var hasAccess = false;
-    data.friends.forEach(function(friend){ var perms=friend.receivedPermissions || {}; if(!perms.can_view_dashboard && !perms.can_view_sheet) return; hasAccess=true; var item=el("div", "sharing-person"),info=el("div"); info.append(el("h4", "", friend.displayName),el("p", "", "Accès accordés par cet ami")); var actions=el("div", "sharing-actions"); if(perms.can_view_dashboard){var dashboard=el("button", "sharing-action", "Voir son dashboard"); dashboard.type="button"; dashboard.addEventListener("click",function(){viewShared(friend,"dashboard");}); actions.append(dashboard);} if(perms.can_view_sheet){var sheet=el("button", "sharing-action", "Voir son tableur"); sheet.type="button"; sheet.addEventListener("click",function(){viewShared(friend,"sheet");}); actions.append(sheet);} item.append(info,actions); access.append(item); });
-    if(!hasAccess) access.append(el("div", "sharing-empty", "Aucun contenu partagé avec toi pour le moment.")); layout.append(access);
-    container.replaceChildren(layout);
+    if(!container)return;var user=getUser();if(!user){container.replaceChildren(el("div","sharing-empty","Connecte-toi pour gérer les partages."));return;}container.replaceChildren(el("div","sharing-empty","Chargement des partages…"));var data=await loadFriends(),layout=el("div","sharing-layout");
+    var invite=el("section","sharing-card");invite.append(el("h3","","Inviter un proche"),el("p","","Une invitation est envoyée par e-mail. Chaque personne garde le contrôle de ses données."));var email=document.createElement("input");email.type="email";email.placeholder="nom@exemple.com";email.autocomplete="email";var send=action("Envoyer l’invitation",async function(){var result=await sendFriendRequestByEmail(email.value.trim());if(result.error){alert(result.error);return;}email.value="";renderSharing(container);});var inputRow=el("div","sharing-email");inputRow.append(email,send);invite.append(inputRow);layout.append(invite);
+    var requests=el("section","sharing-card");requests.append(el("h3","","Demandes reçues"),el("p","","Accepte une demande avant de donner ou recevoir un accès."));if(!data.pending.length)requests.append(el("div","sharing-empty","Aucune demande en attente."));data.pending.forEach(function(request){var item=el("div","sharing-person"),info=el("div"),actions=el("div","sharing-actions");info.append(el("h4","",request.displayName),el("p","",request.email));actions.append(action("Accepter",async function(){var result=await acceptFriend(request.friendshipId);if(result.error){alert(result.error);return;}renderSharing(container);}),action("Refuser",async function(){var result=await declineFriend(request.friendshipId);if(result.error){alert(result.error);return;}renderSharing(container);}));item.append(info,actions);requests.append(item);});layout.append(requests);
+    var manage=el("section","sharing-card wide");manage.append(el("h3","","Ce que tu partages"),el("p","","Chaque accès est en lecture seule. Tu choisis exactement les mois et les lignes visibles, et peux retirer l’accès à tout moment."));if(!data.friends.length)manage.append(el("div","sharing-empty","Ajoute un ami pour définir un accès."));data.friends.forEach(function(friend){var item=el("div","sharing-person"),info=el("div"),actions=el("div","sharing-actions");info.append(el("h4","",friend.displayName),el("p","",accessLabel(friend.permissions)));actions.append(action("Configurer l’accès",function(){if(window.setPage)window.setPage("sharingAccess");setTimeout(function(){renderSharingAccess(friend.friendId);},0);}),action("Retirer l’ami",async function(){if(!window.confirm("Retirer "+friend.displayName+" de tes amis ?"))return;var result=await removeFriend(friend.friendshipId);if(result.error){alert(result.error);return;}renderSharing(container);},"sharing-action-danger"));item.append(info,actions);manage.append(item);});layout.append(manage);
+    var received=el("section","sharing-card wide");received.append(el("h3","","Partagé avec moi"),el("p","","Consulte uniquement les tableaux et dashboards que tes amis t’ont explicitement autorisés à voir."));var hasAccess=false;data.friends.forEach(function(friend){var permissions=friend.receivedPermissions||permissionDefaults();if(!permissions.can_view_dashboard&&!permissions.can_view_sheet)return;hasAccess=true;var item=el("div","sharing-person"),info=el("div"),actions=el("div","sharing-actions");info.append(el("h4","",friend.displayName),el("p","",accessLabel(permissions)));if(permissions.can_view_dashboard)actions.append(action("Voir son dashboard",function(){viewShared(friend,"dashboard");}));if(permissions.can_view_sheet)actions.append(action("Voir son tableur",function(){viewShared(friend,"sheet");}));item.append(info,actions);received.append(item);});if(!hasAccess)received.append(el("div","sharing-empty","Aucun contenu partagé avec toi pour le moment."));layout.append(received);container.replaceChildren(layout);
   }
 
-  // === API publique ===
-  window.FriendsSystem = {
-    loadFriends: loadFriends,
-    renderFriends: renderFriends,
-    renderSharing: renderSharing,
-    sendFriendRequest: sendFriendRequestByEmail,
-    acceptFriend: acceptFriend,
-    declineFriend: declineFriend,
-    removeFriend: removeFriend,
-    updatePermissions: updatePermissions,
-    loadFriendSnapshot: loadFriendSnapshot,
-    getMyEmail: getMyEmail,
-    copyCode: function(code){
-      try{ navigator.clipboard.writeText(code); }catch(e){}
-    },
-    addFriend: async function(){
-      var input = document.getElementById("friendCodeInput");
-      if(!input) return;
-      var email = input.value.trim();
-      if(!email || email.length < 5 || email.indexOf("@") === -1){ alert("E-mail invalide"); return; }
-      var res = await sendFriendRequestByEmail(email);
-      if(res.error){ alert(res.error); }
-      else {
-        alert("Invitation envoyée !");
-        var container = document.getElementById("friendsContainer");
-        if(container) renderFriends(container);
-        var sharing = document.getElementById("sharingContainer");
-        if(sharing) renderSharing(sharing);
-      }
-    },
-    accept: async function(friendshipId){
-      var res = await acceptFriend(friendshipId);
-      if(res.error) alert(res.error);
-      else { var container = document.getElementById("friendsContainer"); if(container) renderFriends(container); var sharing = document.getElementById("sharingContainer"); if(sharing) renderSharing(sharing); }
-    },
-    decline: async function(friendshipId){
-      var res = await declineFriend(friendshipId);
-      if(res.error) alert(res.error);
-      else { var container = document.getElementById("friendsContainer"); if(container) renderFriends(container); var sharing = document.getElementById("sharingContainer"); if(sharing) renderSharing(sharing); }
-    },
-    remove: async function(friendshipId){
-      var res = await removeFriend(friendshipId);
-      if(res.error) alert(res.error);
-      else { var container = document.getElementById("friendsContainer"); if(container) renderFriends(container); var sharing = document.getElementById("sharingContainer"); if(sharing) renderSharing(sharing); }
-    },
-    togglePerm: async function(friendId, perm, value){
-      var data = await loadFriends();
-      var friend = data.friends.find(function(f){ return f.friendId === friendId; });
-      if(!friend) return;
-      var perms = friend.permissions || {};
-      perms[perm] = value;
-      await updatePermissions(friendId, perms);
-    }
-  };
-
-  // Re-render quand l'utilisateur se connecte (via événement authStateChanged)
-  function tryRenderFriends(){
-    var container = document.getElementById("friendsContainer");
-    if(container && getUser()){
-      renderFriends(container);
-    } else if(container && !getUser()){
-      container.innerHTML = '<div class="friends-locked">Connecte-toi pour utiliser le système d\'amis.</div>';
-    }
-  }
-  window.addEventListener("authStateChanged", tryRenderFriends);
-  // Au chargement, vérifie périodiquement pendant 30s
-  var checkInterval = setInterval(function(){
-    var container = document.getElementById("friendsContainer");
-    if(container && getUser()){
-      clearInterval(checkInterval);
-      renderFriends(container);
-    }
-  }, 1000);
-  setTimeout(function(){ clearInterval(checkInterval); }, 30000);
-  // Re-render aussi quand on arrive sur la page settings
-  var settingsBtn = document.getElementById("settingsButton");
-  if(settingsBtn){ settingsBtn.addEventListener("click", function(){ setTimeout(tryRenderFriends, 200); }); }
+  window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendFriendRequestByEmail,acceptFriend:acceptFriend,declineFriend:declineFriend,removeFriend:removeFriend,loadFriendSnapshot:loadFriendSnapshot,refreshMySharedSnapshots:refreshMySharedSnapshots};
 })();
+
