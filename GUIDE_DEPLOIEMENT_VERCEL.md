@@ -27,12 +27,14 @@ Conserve ton projet Supabase actuel ou crée-en un nouveau.
 
 1. Dans **SQL Editor**, exécute entièrement `supabase_schema.sql`.
    - Si le projet avait déjà été configuré et que l'inscription affiche `Database error saving new user`, exécute une fois `supabase_fix_new_users.sql`. Ce correctif répare le déclencheur de création de profil sans supprimer de comptes ni de données.
-2. Dans **Authentication → Providers**, active Email. Garde la confirmation d'e-mail activée en production.
-3. Dans **Authentication → URL Configuration** :
+2. Exécute ensuite `supabase_granular_friend_sharing.sql`.
+   - Ce script remplace les anciens partages larges par le partage précis par mois et ligne. Par sécurité, les anciens droits de partage sont désactivés : chaque personne devra sélectionner à nouveau ce qu'elle souhaite partager.
+3. Dans **Authentication → Providers**, active Email. Garde la confirmation d'e-mail activée en production.
+4. Dans **Authentication → URL Configuration** :
    - `Site URL` : `https://ton-domaine.fr` ou l'URL Vercel de production ;
    - `Redirect URLs` : ajoute l'URL de production suivie de `/**` ;
    - pour tester les aperçus Vercel, ajoute `https://*-ton-compte.vercel.app/**`.
-4. Dans `supabase_config.json`, renseigne l'URL de ton projet et sa **publishable/anon key**, accessibles dans **Settings → API**. Ne mets jamais de clé secrète ici.
+5. Dans `supabase_config.json`, renseigne l'URL de ton projet et sa **publishable/anon key**, accessibles dans **Settings → API**. Ne mets jamais de clé secrète ici.
 
 ### Fonction de suppression de compte
 
@@ -74,7 +76,8 @@ Teste dans cet ordre :
 5. création de compte, confirmation par e-mail, connexion et déconnexion ;
 6. synchronisation sur un second navigateur ;
 7. suppression avec un compte de test seulement ;
-8. le partage entre amis, avec les trois permissions activées puis désactivées.
+8. le partage entre amis : aucun accès par défaut, puis sélectionne quelques mois et lignes avec un compte de test ;
+9. connecte le compte ami et vérifie qu’il ne voit que cette sélection, puis retire l’accès.
 
 ## Dépannage Vercel
 
@@ -104,3 +107,4 @@ Teste dans cet ordre :
 Les corrections réduisent les risques importants, mais aucun site ne peut être déclaré « parfaitement sécurisé ». Garde Supabase, ses règles RLS et les bibliothèques CDN à jour. Les données locales et la session sont stockées dans le navigateur : un appareil compromis, une extension malveillante ou une faille XSS reste un risque. Pour un produit public, ajoute ensuite la limitation de débit et CAPTCHA côté Supabase Auth, une politique de mot de passe renforcée dans Supabase, ainsi que la surveillance des logs et alertes.
 
 Références officielles : [configurer un build statique Vercel](https://vercel.com/docs/builds/configure-a-build), [déploiements Git Vercel](https://vercel.com/docs/git/vercel-for-github), [URLs de redirection Supabase](https://supabase.com/docs/guides/auth/redirect-urls), [secrets des Edge Functions](https://supabase.com/docs/guides/functions/secrets).
+
