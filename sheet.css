@@ -424,6 +424,38 @@ body[data-theme="brutal"] .account-user-avatar,
 body[data-theme="brutal"] .account-btn-danger { border-radius: 0 !important; }
 @media (max-width: 720px) { body { padding-bottom: 66px; } }
 
+/* Les intitulés restent lisibles : la largeur suit le plus long intitulé,
+   puis le texte revient naturellement à la ligne au lieu de passer sous le crayon. */
+.sheet-table .corner-head,
+.sheet-table .row-head {
+  min-width: var(--sheet-row-header-width, 210px);
+  width: var(--sheet-row-header-width, 210px);
+  height: auto;
+  min-height: 40px;
+}
+.sheet-table .row-head { vertical-align: middle; }
+.sheet-table .row-head .rh-label {
+  width: calc(100% - 78px);
+  max-width: none;
+  min-height: 28px;
+  padding: 7px 34px 7px 0;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.32;
+}
+.sheet-table .row-head .rh-edit-btn { right: 8px; top: 50%; }
+@media (max-width: 720px) {
+  .sheet-table .corner-head,
+  .sheet-table .row-head {
+    min-width: min(var(--sheet-row-header-width, 188px), 70vw);
+    width: min(var(--sheet-row-header-width, 188px), 70vw);
+  }
+  .sheet-table .row-head .rh-label { width: calc(100% - 68px); padding-right: 30px; }
+}
+
 /* === Sync status badge === */
 .sync-badge {
   display: inline-flex; align-items: center; gap: 6px;
