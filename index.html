@@ -11,7 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   <script src="store-shim.js"></script>
-  <link rel="stylesheet" href="sheet.css?v=20260902-1" />
+  <link rel="stylesheet" href="sheet.css?v=20260902-2" />
   <link rel="stylesheet" href="onboarding.css?v=20260901-9" />
   <style>
     /* Anti-zoom mobile : empêche le zoom automatique sur les inputs */
@@ -1532,6 +1532,88 @@
     .sheet-status-tooltip { left: 0; transform: translateX(0) translateY(4px); min-width: min(220px, calc(100vw - 44px)); }
     .sheet-status-info:hover .sheet-status-tooltip { transform: translateX(0) translateY(0); }
   }
+  /* Barre d'accueil : une vraie toolbar compacte, calée à droite sur PC. */
+  #dashboardPage .dashboard-control-row {
+    width: fit-content;
+    max-width: 100%;
+    min-height: 0;
+    margin-left: auto;
+    padding: 6px 8px 6px 12px;
+    gap: 8px;
+    border-radius: calc(var(--radius) - 2px);
+  }
+  #dashboardPage .dashboard-toolbar-status {
+    min-height: 38px;
+    padding: 0 12px 0 0;
+    border-right: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  #dashboardPage .dashboard-controls { gap: 6px; }
+  #dashboardPage .dashboard-controls label { min-width: 90px; }
+  #dashboardPage .dashboard-controls label:nth-child(2) { min-width: 118px; }
+  #dashboardPage .dashboard-controls label:nth-child(3) { min-width: 132px; }
+  #dashboardPage .dashboard-controls label > span { padding-left: 2px; font-size: .64rem; letter-spacing: .04em; text-transform: uppercase; }
+  #dashboardPage .dashboard-controls .custom-select-trigger { min-height: 36px; border-radius: calc(var(--control-radius) - 3px); }
+  #dashboardPage .dashboard-controls .sync-sheet-btn { min-width: 38px; padding: 8px 10px; border-radius: calc(var(--control-radius) - 3px); }
+
+  /* Partage : des sections calmes, lisibles et sans reconstruction au clic. */
+  #sharingPage .content, #sharingAccessPage .content { max-width: 1120px; margin: 0 auto; }
+  .sharing-layout { align-items: start; gap: 14px; }
+  .sharing-card { display: grid; gap: 12px; padding: 20px; border-color: color-mix(in srgb, var(--line-strong), transparent 18%); box-shadow: none; }
+  .sharing-card:hover { border-color: color-mix(in srgb, var(--accent), var(--line-strong) 64%); }
+  .sharing-overview { grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 22px; background: linear-gradient(120deg, color-mix(in srgb, var(--accent), transparent 91%), var(--panel-bg)); }
+  .sharing-overview-copy { display: grid; gap: 5px; }
+  .sharing-overview-copy h3 { margin: 0; font-size: 1.18rem; }
+  .sharing-overview-copy p { margin: 0; max-width: 630px; color: var(--muted); font-size: .86rem; line-height: 1.5; }
+  .sharing-stats { display: grid; grid-template-columns: repeat(3, minmax(76px,1fr)); gap: 7px; }
+  .sharing-stat { display: grid; gap: 2px; padding: 10px; border: 1px solid var(--line); border-radius: calc(var(--radius) - 5px); background: var(--input-bg); text-align: center; }
+  .sharing-stat strong { color: var(--text); font: 850 1.05rem var(--font-heading); }
+  .sharing-stat span { color: var(--muted); font-size: .68rem; font-weight: 750; }
+  .sharing-invite, .sharing-requests { min-height: 178px; }
+  .sharing-email input { min-height: 40px; }
+  .sharing-email .sharing-action { min-width: 92px; }
+  .sharing-person { padding: 13px 0; gap: 16px; }
+  .sharing-person-copy { min-width: 0; }
+  .sharing-person h4 { font-size: .92rem; }
+  .sharing-person p { line-height: 1.4; }
+  .sharing-actions { gap: 8px; }
+  .sharing-action { min-height: 34px; padding: 7px 10px; border-radius: calc(var(--control-radius) - 3px); transition: color .15s ease, border-color .15s ease, background .15s ease, transform .15s ease; }
+  .sharing-action:hover { transform: translateY(-1px); }
+  .sharing-feedback-slot:empty { display: none; }
+  .sharing-feedback { margin: 0; padding: 9px 10px; border: 1px solid var(--line-strong); border-radius: calc(var(--radius) - 6px); background: var(--input-bg); color: var(--muted); font-size: .78rem; line-height: 1.4; }
+  .sharing-feedback.is-error { color: var(--red); border-color: color-mix(in srgb, var(--red), transparent 58%); background: color-mix(in srgb, var(--red), transparent 92%); }
+  .sharing-feedback.is-success { color: var(--green); border-color: color-mix(in srgb, var(--green), transparent 58%); background: color-mix(in srgb, var(--green), transparent 92%); }
+  .sharing-sent-note { margin: 0; color: var(--muted); font-size: .76rem; line-height: 1.4; }
+  .sharing-access-card { max-width: 980px; margin: 0 auto; padding: 22px; box-shadow: none; }
+  .sharing-feature-list { padding: 10px; border: 1px solid var(--line); border-radius: calc(var(--radius) - 5px); background: var(--input-bg); }
+  .sharing-feature-toggle { flex: 1 1 220px; justify-content: flex-start; min-height: 42px; background: var(--panel-bg); }
+  .sharing-selection-sheet { gap: 12px; padding: 16px; border-radius: calc(var(--radius) - 5px); }
+  .sharing-selection-controls .sharing-action { min-height: 31px; font-size: .72rem; }
+  .sharing-month-choice, .sharing-row-choice { min-height: 38px; padding: 8px 9px; border-radius: calc(var(--radius) - 7px); background: var(--panel-bg); }
+  .sharing-month-choice:has(input:checked), .sharing-row-choice:has(input:checked) { border-color: color-mix(in srgb, var(--accent), var(--line) 48%); background: var(--button-active-bg); }
+  .sharing-row-list { max-height: 360px; }
+  .sharing-editor-footer { bottom: 12px; padding: 12px 14px; border-color: color-mix(in srgb, var(--accent), var(--line) 62%); }
+  body[data-theme="brutal"] .sharing-stat, body[data-theme="brutal"] .sharing-feedback, body[data-theme="brutal"] .sharing-feature-list, body[data-theme="brutal"] .sharing-feature-toggle, body[data-theme="brutal"] .sharing-selection-sheet, body[data-theme="brutal"] .sharing-month-choice, body[data-theme="brutal"] .sharing-row-choice { border-radius: 0 !important; }
+  @media (max-width: 820px) {
+    #dashboardPage .dashboard-control-row { width: 100%; margin-left: 0; padding: 10px; gap: 10px; }
+    #dashboardPage .dashboard-toolbar-status { padding: 0; border-right: 0; }
+    .sharing-overview { grid-template-columns: 1fr; }
+    .sharing-stats { max-width: 380px; width: 100%; }
+  }
+  @media (max-width: 560px) {
+    #dashboardPage .dashboard-controls { width: 100%; grid-template-columns: 1fr 1fr; }
+    #dashboardPage .dashboard-controls label { min-width: 0; }
+    #dashboardPage .dashboard-controls label:nth-child(3), #dashboardPage .dashboard-controls .sync-sheet-btn { grid-column: span 2; }
+    #dashboardPage .dashboard-controls .sync-sheet-btn { justify-content: center; }
+    .sharing-card, .sharing-access-card { padding: 15px; }
+    .sharing-stats { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    .sharing-stat { padding: 9px 5px; }
+    .sharing-email { flex-direction: column; }
+    .sharing-email .sharing-action { width: 100%; }
+    .sharing-actions { width: 100%; }
+    .sharing-actions .sharing-action { flex: 1 1 auto; }
+    .sharing-feature-toggle { flex-basis: 100%; }
+  }
   </style>
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard">
@@ -1593,7 +1675,7 @@
     <section class="app-page" id="dashboardPage">
       <section class="content">
         <section class="dashboard-control-row" aria-label="Filtres et statut du tableur">
-          <div class="sheet-status-bar" id="sheetStatusBar">
+          <div class="sheet-status-bar dashboard-toolbar-status" id="sheetStatusBar">
             <span class="sheet-status-dot not-loaded" id="sheetStatusDot"></span>
             <span class="sheet-status-label">Tableur</span>
             <span class="sheet-status-info" aria-describedby="sheetStatusHelp">i
@@ -1674,11 +1756,11 @@
             <span class="lbl">Retour</span>
           </button>
           <button class="button button-ghost icon-btn" id="btnSheetUndo" type="button" title="Annuler la dernière modification (Ctrl/Cmd + Z)" aria-label="Annuler la dernière modification" disabled>
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5m5-5-5 5 5 5" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 7-5 5 5 5" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12h7a7 7 0 0 1 7 7" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/></svg>
             <span class="lbl">Annuler</span>
           </button>
           <button class="button button-ghost icon-btn" id="btnSheetRedo" type="button" title="Rétablir la modification annulée (Ctrl/Cmd + Maj + Z)" aria-label="Rétablir la modification" disabled>
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 7 5 5-5 5" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12h-7a7 7 0 0 0-7 7" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/></svg>
             <span class="lbl">Rétablir</span>
           </button>
           <span class="sheet-title hide-sm">Tableur</span>
@@ -2343,7 +2425,7 @@
     function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
     function updateChartColorTokens(){ const styles=getComputedStyle(document.body); COLORS.salary=readCssVar(styles,"--chart-salary",COLORS.salary); COLORS.expenses=readCssVar(styles,"--chart-expenses",COLORS.expenses); COLORS.savings=readCssVar(styles,"--chart-savings",COLORS.savings); COLORS.grid=readCssVar(styles,"--chart-grid",COLORS.grid); COLORS.tick=readCssVar(styles,"--chart-tick",COLORS.tick); COLORS.text=readCssVar(styles,"--chart-text",COLORS.text); }
     function readCssVar(styles,name,fallback){ return styles.getPropertyValue(name).trim()||fallback; }
-    function setPage(page){ const previous=state.page; state.page=(page==="settings"||page==="sheet"||page==="sharing"||page==="sharingAccess"||page==="updates")?page:"dashboard"; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing"; if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess"; if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); } if(state.page==="updates") renderUpdatesPage(); }
+    function setPage(page){ const previous=state.page; const next=(page==="settings"||page==="sheet"||page==="sharing"||page==="sharingAccess"||page==="updates")?page:"dashboard"; if(next===previous) return; state.page=next; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing"; if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess"; if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); } if(state.page==="updates") renderUpdatesPage(); }
     window.setPage = setPage;
     window.setTheme = setTheme;
     window.setMode = setMode;
@@ -2551,8 +2633,9 @@ function resetDataState(){
     function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-09-02-r2";
+    const RELEASE_NOTES_VERSION="2026-09-02-r3";
     const RELEASE_NOTES=[
+      {date:"2 septembre 2026",title:"Partage et tableur plus fluides",text:"La page Partage et amis reste stable pendant la consultation. Le tableur n’ajoute plus de lignes vides et ses intitulés s’adaptent à leur contenu."},
       {date:"2 septembre 2026",title:"Un partage plus précis",text:"Tu peux maintenant choisir les mois et les lignes visibles par chaque ami. Rien n’est partagé sans ton accord."},
       {date:"2 septembre 2026",title:"Accueil plus net",text:"Les filtres restent au-dessus des graphiques et seules les années présentes dans le tableur sont proposées."},
       {date:"1 septembre 2026",title:"Tableur plus lisible",text:"Les colonnes A, B, C… et les numéros de ligne facilitent la lecture des formules."},
@@ -4672,9 +4755,9 @@ function resetDataState(){
     }
     init();
   </script>
-  <script src="sheet.js?v=20260902-1"></script>
-  <script src="onboarding.js?v=20260901-6"></script>
-  <script src="friends.js?v=20260902-1"></script>
+  <script src="sheet.js?v=20260902-2"></script>
+  <script src="onboarding.js?v=20260902-1"></script>
+  <script src="friends.js?v=20260902-2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>(function(){
   /* === Auth email + mot de passe (Supabase) ===
