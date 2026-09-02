@@ -1371,9 +1371,12 @@
   .profile-menu-link { min-height: 38px; padding: 8px 10px; border: 0; border-radius: 9px; background: transparent; color: var(--text); text-align: left; font: 700 .84rem var(--font-body); }
   .profile-menu-link:hover { background: var(--button-active-bg); color: var(--accent); }
   .profile-menu-link-danger { color: var(--red); border-top: 1px solid var(--line); border-radius: 0; }
-  .dashboard-control-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 56px; padding: 8px 10px 8px 14px; border: var(--panel-border); border-radius: var(--radius); background: var(--panel-bg); backdrop-filter: var(--panel-blur); box-shadow: var(--shadow); }
+  #dashboardPage .content { position: relative; overflow: visible; }
+  .dashboard-control-row { position: relative; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 56px; padding: 8px 10px 8px 14px; overflow: visible; border: var(--panel-border); border-radius: var(--radius); background: var(--panel-bg); backdrop-filter: var(--panel-blur); box-shadow: var(--shadow); }
   .dashboard-control-row .sheet-status-bar { margin: 0; flex: 0 0 auto; border: 0; background: transparent; }
-  .dashboard-controls { display: flex; align-items: end; justify-content: flex-end; gap: 8px; min-width: 0; }
+  .dashboard-controls { position: relative; z-index: 1; display: flex; align-items: end; justify-content: flex-end; gap: 8px; min-width: 0; overflow: visible; }
+  .dashboard-controls .custom-select-wrapper.is-open { z-index: 120; }
+  .dashboard-controls .custom-select-options { z-index: 121; }
   .dashboard-controls label { min-width: 94px; }
   .dashboard-controls label:nth-child(2) { min-width: 132px; }
   .dashboard-controls label:nth-child(3) { min-width: 156px; }
@@ -1433,6 +1436,18 @@
   .shared-table th, .shared-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; }
   .shared-table th { background: var(--input-bg); color: var(--muted); font-size: .72rem; }
   .shared-table th:first-child { color: var(--text); }
+  .latest-update-banner { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; margin: 16px 0; padding: 15px 16px; border: var(--panel-border); border-left: 4px solid var(--accent); border-radius: var(--radius); background: var(--panel-bg); box-shadow: var(--shadow); }
+  .latest-update-banner[hidden] { display: none; }
+  .latest-update-banner strong { display: block; margin-top: 2px; color: var(--text); font: 850 1rem var(--font-heading); }
+  .latest-update-banner p { margin: 5px 0 0; color: var(--muted); font-size: .83rem; line-height: 1.45; }
+  .latest-update-kicker { color: var(--accent); font-size: .7rem; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
+  .latest-update-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+  .latest-update-dismiss { width: 34px; min-height: 34px; padding: 0; border: 1px solid var(--line-strong); border-radius: var(--control-radius); background: transparent; color: var(--text); font: 800 1.1rem var(--font-body); }
+  .updates-list { display: grid; gap: 12px; }
+  .update-entry { padding: 16px; border: var(--panel-border); border-radius: var(--radius); background: var(--panel-bg); box-shadow: var(--shadow); }
+  .update-entry time { display: block; margin-bottom: 5px; color: var(--accent); font-size: .73rem; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+  .update-entry h3 { margin: 0; color: var(--text); font: 850 1rem var(--font-heading); }
+  .update-entry p { margin: 6px 0 0; color: var(--muted); font-size: .84rem; line-height: 1.5; }
   body[data-theme="brutal"] .sharing-card, body[data-theme="brutal"] .sharing-email input, body[data-theme="brutal"] .sharing-permission, body[data-theme="brutal"] .sharing-action, body[data-theme="brutal"] .sharing-empty, body[data-theme="brutal"] .shared-table-wrap { border-radius: 0; }
   body[data-theme="glass"] .custom-select-trigger { border-radius: 14px; background: color-mix(in srgb, var(--panel-solid), transparent 13%); border-color: color-mix(in srgb, var(--line-strong), transparent 18%); box-shadow: 0 8px 22px rgba(5, 12, 31, .16); }
   body[data-theme="glass"] .custom-select-options { top: calc(100% + 8px); padding: 6px; border-radius: 16px; background: color-mix(in srgb, var(--panel-solid), transparent 5%); border-color: color-mix(in srgb, var(--line-strong), transparent 8%); backdrop-filter: blur(24px) saturate(145%); box-shadow: 0 18px 44px rgba(5, 12, 31, .28); }
@@ -1453,9 +1468,14 @@
     .chart-detail-modal { align-items: end; padding: 10px; }
     .chart-detail-card { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
     .chart-detail-grid { grid-template-columns: 1fr; }
+    .latest-update-banner { grid-template-columns: 1fr; padding: 14px; }
+    .latest-update-actions { justify-content: flex-start; }
   }
   @media (max-width: 720px) {
-    .app-header { padding-bottom: 14px; }
+    .app { padding-bottom: calc(94px + env(safe-area-inset-bottom, 0px)); }
+    .app-header { align-items: center; padding-bottom: 14px; }
+    .app-header .brand { min-width: 0; flex: 1 1 auto; }
+    .app-header .top-actions { flex: 0 0 auto; margin-left: auto; }
     .desktop-nav, .profile-trigger-label { display: none; }
     .topbar { flex-direction: row; }
     .brand .eyebrow, .brand .subtitle { display: none; }
@@ -1472,6 +1492,7 @@
     .sharing-card.wide { grid-column: auto; }
     .sharing-person { grid-template-columns: 1fr; }
     .sharing-actions { justify-content: flex-start; }
+    #sharingPage .content { padding-bottom: 20px; }
     .sheet-status-tooltip { left: 0; transform: translateX(0) translateY(4px); min-width: min(220px, calc(100vw - 44px)); }
     .sheet-status-info:hover .sheet-status-tooltip { transform: translateX(0) translateY(0); }
   }
@@ -1524,7 +1545,7 @@
           <div class="profile-popover" id="profilePopover" hidden>
             <div class="profile-popover-account"><span class="profile-popover-kicker">Compte</span><strong id="profileEmail">Non connecté</strong></div>
             <div class="status-pill" id="connectionStatus"><span class="status-dot"></span><span id="connectionText">Non connecté</span></div>
-            <button class="profile-menu-link" id="profileSharingButton" type="button">Partages</button>
+            <button class="profile-menu-link" id="profileSharingButton" type="button">Partage et amis</button>
             <button class="profile-menu-link" id="profileUpdatesButton" type="button">Nouveautés</button>
             <button class="profile-menu-link" id="profileSettingsButton" type="button">Paramètres</button>
             <button class="profile-menu-link profile-menu-link-danger" id="accountLogoutBtn" type="button" hidden>Se déconnecter</button>
@@ -1552,6 +1573,10 @@
             <label><span>Vue</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Camembert</option><option value="grouped">Comparatif — tous les mois</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label>
             <button type="button" id="syncSheetButton" class="sync-sheet-btn" title="Recharger les données du tableur dans le tableau de bord" aria-label="Recharger les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Recharger</span></button>
           </div>
+        </section>
+        <section class="latest-update-banner" id="latestUpdateBanner" hidden aria-live="polite">
+          <div><span class="latest-update-kicker">Nouvelle mise à jour</span><strong id="latestUpdateTitle"></strong><p id="latestUpdateText"></p></div>
+          <div class="latest-update-actions"><button class="button button-ghost" id="latestUpdateAllButton" type="button">Voir les nouveautés</button><button class="latest-update-dismiss" id="latestUpdateDismissButton" type="button" aria-label="Fermer cette information">×</button></div>
         </section>
         <section class="metrics" aria-label="Résumé">
           <article class="metric-card"><span class="metric-label">Salaire moyen</span><strong class="metric-value" id="avgSalary">-</strong><span class="metric-note" id="avgSalaryNote">Tous les mois</span></article>
@@ -1588,9 +1613,15 @@
     </section>
     <section class="app-page" id="sharingPage" hidden>
       <section class="content">
-        <section class="settings-header"><div><span class="eyebrow">Collaboration</span><h2>Partages</h2><p>Gère tes accès et consulte les contenus reçus sans mélanger les données.</p></div><button class="button button-ghost" type="button" data-page="dashboard">Retour à mon espace</button></section>
+        <section class="settings-header"><div><span class="eyebrow">Collaboration</span><h2>Partage et amis</h2><p>Gère tes invitations, tes accès et les contenus reçus sans mélanger les données.</p></div><button class="button button-ghost" type="button" data-page="dashboard">Retour à mon espace</button></section>
         <div id="sharingContainer"></div>
         <section class="panel shared-view" id="sharedView" hidden aria-live="polite"></section>
+      </section>
+    </section>
+    <section class="app-page" id="updatesPage" hidden>
+      <section class="content">
+        <section class="settings-header"><div><span class="eyebrow">Gestion Finance</span><h2>Nouveautés</h2><p>Retrouve les améliorations du service, classées de la plus récente à la plus ancienne.</p></div><button class="button button-ghost" type="button" data-page="dashboard">Retour à mon espace</button></section>
+        <div class="updates-list" id="updatesPageList"></div>
       </section>
     </section>
     <section class="sheet-page app-page" id="sheetPage" hidden>
@@ -1705,10 +1736,6 @@
           <p class="account-status" id="accountStatus">Non configuré</p>
         </div>
       </section>
-                <section class="settings-section panel" id="friendsSection">
-          <div class="settings-section-head"><div><h3>Amis</h3><p>Invite tes proches par e-mail pour partager des infos financières.</p></div></div>
-          <div id="friendsContainer"></div>
-        </section>
         <!-- Section Apparence (thème plus petit) -->
         <section class="settings-section panel"><div class="settings-section-head"><div><h3>Apparence</h3><p>Thème visuel et mode clair/sombre.</p></div></div>
           <div class="theme-grid" role="list">
@@ -1798,9 +1825,6 @@
   </main>
   <div class="chart-detail-modal" id="chartDetailModal" hidden role="dialog" aria-modal="true" aria-labelledby="chartDetailTitle">
     <section class="chart-detail-card"><div class="chart-detail-head"><div><h2 id="chartDetailTitle">Détail du mois</h2><p id="chartDetailSubtitle"></p></div><button class="chart-detail-close" id="chartDetailClose" type="button" aria-label="Fermer">×</button></div><div class="chart-detail-grid" id="chartDetailGrid"></div></section>
-  </div>
-  <div class="chart-detail-modal" id="updatesModal" hidden role="dialog" aria-modal="true" aria-labelledby="updatesTitle">
-    <section class="chart-detail-card"><div class="chart-detail-head"><div><h2 id="updatesTitle">Nouveautés</h2><p>Les dernières évolutions de Gestion Finance.</p></div><button class="chart-detail-close" id="updatesClose" type="button" aria-label="Fermer">×</button></div><div class="detail-list" id="updatesList"></div></section>
   </div>
 
   <!-- Barre de navigation inférieure (style app mobile : Accueil / Tableur / Paramètres) -->
@@ -1916,7 +1940,7 @@
 
     const elements = {
       dashboardPage: document.getElementById("dashboardPage"),
-      settingsPage: document.getElementById("settingsPage"), sharingPage: document.getElementById("sharingPage"), sheetPage: document.getElementById("sheetPage"), settingsButton: document.getElementById("settingsButton"), sheetButton: document.getElementById("sheetButton"), homeButton: document.getElementById("homeButton"),
+      settingsPage: document.getElementById("settingsPage"), sharingPage: document.getElementById("sharingPage"), updatesPage: document.getElementById("updatesPage"), sheetPage: document.getElementById("sheetPage"), settingsButton: document.getElementById("settingsButton"), sheetButton: document.getElementById("sheetButton"), homeButton: document.getElementById("homeButton"),
       backDashboardButton: document.getElementById("backDashboardButton"), themeButtons: document.querySelectorAll("[data-theme-option]"),
       modeToggle: document.getElementById("modeToggle"), loader: document.getElementById("loader"),
       messageBox: document.getElementById("messageBox"), messageText: document.getElementById("messageText"),
@@ -2123,7 +2147,7 @@
     }
     function getAvailableYears(){
       var years = Array.from(new Set((state.months||[]).map(getMonthYear).filter(Boolean)));
-      // Toujours fusionner avec les années des onglets du tableur
+      // Ajouter uniquement les années réellement présentes dans les onglets du tableur.
       if(typeof window.FinanceSheet !== "undefined" && window.FinanceSheet){
         try{
           var snap = window.FinanceSheet.getSnapshot ? window.FinanceSheet.getSnapshot() : null;
@@ -2135,18 +2159,6 @@
             });
           }
         }catch(e){}
-        // Le filtre reste utilisable même si une année vient juste d'être créée
-        // ou ne contient encore qu'un seul mois.
-        var currentYear = new Date().getFullYear();
-        for(var offset = -4; offset <= 4; offset++){
-          var selectableYear = String(currentYear + offset);
-          if(years.indexOf(selectableYear) === -1) years.push(selectableYear);
-        }
-      }
-      // Fallback ultime : années par défaut (année précédente + année courante)
-      if(!years.length){
-        var cy = new Date().getFullYear();
-        years = [String(cy - 1), String(cy)];
       }
       return Array.from(new Set(years)).sort(sortYearValues);
     }
@@ -2277,7 +2289,7 @@
     function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
     function updateChartColorTokens(){ const styles=getComputedStyle(document.body); COLORS.salary=readCssVar(styles,"--chart-salary",COLORS.salary); COLORS.expenses=readCssVar(styles,"--chart-expenses",COLORS.expenses); COLORS.savings=readCssVar(styles,"--chart-savings",COLORS.savings); COLORS.grid=readCssVar(styles,"--chart-grid",COLORS.grid); COLORS.tick=readCssVar(styles,"--chart-tick",COLORS.tick); COLORS.text=readCssVar(styles,"--chart-text",COLORS.text); }
     function readCssVar(styles,name,fallback){ return styles.getPropertyValue(name).trim()||fallback; }
-    function setPage(page){ const previous=state.page; state.page=(page==="settings"||page==="sheet"||page==="sharing")?page:"dashboard"; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); } }
+    function setPage(page){ const previous=state.page; state.page=(page==="settings"||page==="sheet"||page==="sharing"||page==="updates")?page:"dashboard"; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing"; if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); } if(state.page==="updates") renderUpdatesPage(); }
     window.setPage = setPage;
     window.setTheme = setTheme;
     window.setMode = setMode;
@@ -2485,16 +2497,17 @@ function resetDataState(){
     function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-09-01";
+    const RELEASE_NOTES_VERSION="2026-09-02";
     const RELEASE_NOTES=[
+      {date:"2 septembre 2026",title:"Accueil et nouveautés simplifiés",text:"Les filtres de l’accueil passent désormais au-dessus des graphiques, les années affichées viennent uniquement du tableur et la dernière mise à jour est signalée sans fenêtre bloquante."},
       {date:"1 septembre 2026",title:"Partages clarifiés",text:"Une page Partages rassemble les invitations, les autorisations et l’accès aux contenus reçus."},
       {date:"1 septembre 2026",title:"Tableur plus lisible",text:"Les colonnes A, B, C… et les numéros de ligne rendent les formules plus faciles à suivre."},
       {date:"1 septembre 2026",title:"Graphiques détaillés",text:"Un clic sur un mois ouvre maintenant son détail financier."},
       {date:"1 septembre 2026",title:"Synchronisation renforcée",text:"Un compte déjà configuré récupère ses données cloud avant tout affichage du tutoriel."}
     ];
-    function openUpdates(){ const modal=document.getElementById("updatesModal"),list=document.getElementById("updatesList"); if(!modal||!list) return; list.replaceChildren(...RELEASE_NOTES.map(note=>{ const row=document.createElement("div"),strong=document.createElement("strong"),desc=document.createElement("p"); row.className="detail-row"; strong.textContent=`${note.date} — ${note.title}`; desc.textContent=note.text; desc.style.margin="4px 0 0"; desc.style.color="var(--muted)"; desc.style.fontSize=".8rem"; row.append(strong,desc); return row; })); modal.hidden=false; try{safeStore.setItem("personalFinanceDashboard.lastSeenRelease",RELEASE_NOTES_VERSION);}catch(e){} }
-    function closeUpdates(){ const modal=document.getElementById("updatesModal"); if(modal) modal.hidden=true; }
-    function offerNewUpdates(){ try{ if(!safeStore.getItem("personalFinanceDashboard.onboardingCompleted")||safeStore.getItem("personalFinanceDashboard.lastSeenRelease")===RELEASE_NOTES_VERSION) return; openUpdates(); }catch(e){} }
+    function renderUpdatesPage(){ const list=document.getElementById("updatesPageList"); if(!list) return; list.replaceChildren(...RELEASE_NOTES.map(function(note){ const entry=document.createElement("article"),date=document.createElement("time"),title=document.createElement("h3"),description=document.createElement("p"); entry.className="update-entry"; date.textContent=note.date; title.textContent=note.title; description.textContent=note.text; entry.append(date,title,description); return entry; })); }
+    function dismissLatestUpdate(){ const banner=document.getElementById("latestUpdateBanner"); if(banner) banner.hidden=true; try{safeStore.setItem("personalFinanceDashboard.lastSeenRelease",RELEASE_NOTES_VERSION);}catch(e){} }
+    function showLatestUpdate(){ try{ if(!safeStore.getItem("personalFinanceDashboard.onboardingCompleted")||safeStore.getItem("personalFinanceDashboard.lastSeenRelease")===RELEASE_NOTES_VERSION) return; const latest=RELEASE_NOTES[0],banner=document.getElementById("latestUpdateBanner"),title=document.getElementById("latestUpdateTitle"),text=document.getElementById("latestUpdateText"); if(!latest||!banner||!title||!text) return; title.textContent=latest.title; text.textContent=latest.text; banner.hidden=false; }catch(e){} }
 
     // ═══════════════════════════════════════════════════════════════════════
     // ÉVÉNEMENTS & INIT
@@ -2545,12 +2558,12 @@ function resetDataState(){
       if(profileButton && profilePopover){ profileButton.addEventListener("click",function(){ var open=profilePopover.hidden; profilePopover.hidden=!open; profileButton.setAttribute("aria-expanded",String(open)); }); document.addEventListener("click",function(event){ if(profileMenu && !profileMenu.contains(event.target)){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); document.addEventListener("keydown",function(event){ if(event.key==="Escape"){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); }
       if(profileSettings){ profileSettings.addEventListener("click",function(){ setPage("settings"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
       if(profileSharing){ profileSharing.addEventListener("click",function(){ setPage("sharing"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
-      if(profileUpdates){ profileUpdates.addEventListener("click",function(){ openUpdates(); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
+      if(profileUpdates){ profileUpdates.addEventListener("click",function(){ setPage("updates"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
       document.getElementById("chartDetailClose")?.addEventListener("click",closeChartMonthDetail);
       document.getElementById("chartDetailModal")?.addEventListener("click",function(event){ if(event.target===this) closeChartMonthDetail(); });
-      document.getElementById("updatesClose")?.addEventListener("click",closeUpdates);
-      document.getElementById("updatesModal")?.addEventListener("click",function(event){ if(event.target===this) closeUpdates(); });
-      document.addEventListener("keydown",function(event){ if(event.key!=="Escape") return; closeChartMonthDetail(); closeUpdates(); });
+      document.getElementById("latestUpdateDismissButton")?.addEventListener("click",dismissLatestUpdate);
+      document.getElementById("latestUpdateAllButton")?.addEventListener("click",function(){ dismissLatestUpdate(); setPage("updates"); });
+      document.addEventListener("keydown",function(event){ if(event.key!=="Escape") return; closeChartMonthDetail(); });
       elements.backDashboardButton.addEventListener("click",()=>setPage("dashboard"));
       elements.themeButtons.forEach(btn=>btn.addEventListener("click",()=>setTheme(btn.dataset.themeOption)));
       Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.addEventListener("click",()=>setMode(btn.dataset.modeOption)));
@@ -4596,7 +4609,7 @@ function resetDataState(){
 
     function init(){ restoreAppearance(); restoreConfiguration(); setActiveSource("tableur"); renderImportBadge(null); createCustomDropdown(elements.yearSelect); createCustomDropdown(elements.viewSelect); createCustomDropdown(elements.monthSelect); wireEvents(); renderCustomRulesList(); updateInterface(); // Re-populate yearSelect après que FinanceSheet soit initialisé
       setTimeout(function(){ try{ populateYearSelect(); }catch(e){} }, 600);
-      setTimeout(offerNewUpdates,1800);
+      setTimeout(showLatestUpdate,1800);
     }
     init();
   </script>
