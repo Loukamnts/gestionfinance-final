@@ -261,6 +261,20 @@
   let rowHeadEls = [];
   let colHeadEls = [];
 
+  // Le numéro de ligne est une référence visuelle, jamais le titre éditable.
+  // Construire les trois éléments ensemble évite que l'alignement change après
+  // un renommage et garde le crayon hors du texte long.
+  function buildRowHeaderContents(th, r) {
+    th.replaceChildren();
+    const content = document.createElement("div"); content.className = "row-head-content";
+    const number = document.createElement("span"); number.className = "rh-number"; number.textContent = String(r + 1); number.title = "Ligne " + (r + 1);
+    const label = document.createElement("span"); label.className = "rh-label"; label.textContent = state.rowHeaders[r] || ""; label.title = state.rowHeaders[r] || "Intitulé de la ligne";
+    label.addEventListener("dblclick", function(e) { e.stopPropagation(); editRowHeader(r); });
+    const edit = document.createElement("button"); edit.className = "rh-edit-btn"; edit.type = "button"; edit.textContent = "✎"; edit.title = "Renommer l’intitulé"; edit.setAttribute("aria-label", "Renommer l’intitulé de la ligne " + (r + 1));
+    edit.addEventListener("click", function(e) { e.stopPropagation(); editRowHeader(r); });
+    content.append(number, label, edit); th.appendChild(content);
+  }
+
   function buildTable() {
     container.innerHTML = "";
     cellMap.clear(); rowHeadEls = []; colHeadEls = [];
@@ -288,14 +302,8 @@
     for (let r = 0; r < state.rows; r++) {
       const tr = document.createElement("tr");
       const rh = document.createElement("th"); rh.className = "row-head"; rh.dataset.r = r;
-      const rhNumber = document.createElement("span"); rhNumber.className = "rh-number"; rhNumber.textContent = String(r + 1); rhNumber.title = "Ligne " + (r + 1);
-      const rhLabel = document.createElement("span"); rhLabel.className = "rh-label"; rhLabel.textContent = state.rowHeaders[r] || ""; rhLabel.title = state.rowHeaders[r] || "";
-      rh.append(rhNumber, rhLabel);
-      const rhEdit = document.createElement("button"); rhEdit.className = "rh-edit-btn"; rhEdit.type = "button"; rhEdit.textContent = "✎"; rhEdit.title = "Renommer la ligne"; rhEdit.setAttribute("aria-label", "Renommer la ligne " + (r + 1));
-      rhEdit.addEventListener("click", function(e) { e.stopPropagation(); editRowHeader(r); });
-      rh.appendChild(rhEdit);
+      buildRowHeaderContents(rh, r);
       rh.addEventListener("click", () => selectRow(r));
-      rh.addEventListener("dblclick", () => editRowHeader(r));
       tr.appendChild(rh); rowHeadEls.push(rh);
       for (let c = 0; c < state.cols; c++) {
         const td = document.createElement("td"); td.className = "cell"; td.dataset.r = r; td.dataset.c = c;
@@ -581,23 +589,19 @@
     input.addEventListener("blur", finish);
   }
   function rebuildRowHeader(th, r) {
-    th.innerHTML = "";
-    const lbl = document.createElement("span"); lbl.className = "rh-label"; lbl.textContent = rowLabel(r);
-    th.appendChild(lbl);
-    const btn = document.createElement("button"); btn.className = "rh-edit-btn"; btn.type = "button"; btn.textContent = "✎"; btn.title = "Renommer la ligne";
-    btn.setAttribute("aria-label", "Renommer la ligne " + (r + 1));
-    btn.addEventListener("click", function(e) { e.stopPropagation(); editRowHeader(r); });
-    th.appendChild(btn);
+    buildRowHeaderContents(th, r);
   }
   function editRowHeader(r) {
     const th = rowHeadEls[r]; if (!th) return;
-    const input = document.createElement("input"); input.className = "h-edit"; input.value = rowLabel(r);
-    th.innerHTML = ""; th.appendChild(input); input.focus(); input.select();
+    const input = document.createElement("input"); input.className = "h-edit"; input.value = String(state.rowHeaders[r] || ""); input.placeholder = "Intitulé de la ligne"; input.setAttribute("aria-label", "Intitulé de la ligne " + (r + 1));
+    th.replaceChildren(input); input.focus(); input.select();
     let done = false;
     const finish = () => {
       if (done) return; done = true;
-      const v = input.value.trim(); state.rowHeaders[r] = v || String(r + 1);
+      const v = input.value.trim(); state.rowHeaders[r] = v;
       rebuildRowHeader(th, r);
+      const table = th.closest(".sheet-table");
+      if (table) table.style.setProperty("--sheet-row-header-width", Math.round(rowHeaderWidth(activeSheet())) + "px");
       scheduleSave();
     };
     input.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); finish(); } else if (e.key === "Escape") { e.preventDefault(); done = true; rebuildRowHeader(th, r); } });
