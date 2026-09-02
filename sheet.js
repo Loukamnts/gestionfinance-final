@@ -9,7 +9,9 @@
 (function () {
   "use strict";
 
-  const DEFAULT_ROWS = 40;
+  // Le tableur démarre sans lignes vides : les lignes importées ou ajoutées
+  // par l'utilisateur déterminent la hauteur réelle de chaque feuille.
+  const DEFAULT_ROWS = 0;
   const DEFAULT_COLS = 12; // A..L
   const MONTH_HEADERS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 
@@ -91,6 +93,21 @@
   }
   function headerLabel(c) { return state.headers[c] || colToLetter(c); }
   function rowLabel(r) { return state.rowHeaders[r] || String(r + 1); }
+  function contentRowCount(sheet) {
+    let last = -1;
+    (sheet.rowHeaders || []).forEach((label, index) => { if (String(label || "").trim()) last = Math.max(last, index); });
+    Object.keys(sheet.cells || {}).forEach((key) => {
+      const row = Number(key.split(",")[0]);
+      const cell = sheet.cells[key];
+      if (Number.isInteger(row) && cell && String(cell.raw || "").trim() !== "") last = Math.max(last, row);
+    });
+    return last + 1;
+  }
+  function compactRows(sheet) { if (sheet) sheet.rows = contentRowCount(sheet); }
+  function rowHeaderWidth(sheet) {
+    const longest = Math.max(0, ...(sheet.rowHeaders || []).map((label) => String(label || "").trim().length));
+    return Math.max(188, Math.min(348, 86 + longest * 8.1));
+  }
 
   // ═══════════════════════ Moteur de formules ═════════════════════
   function tokenize(formula) {
@@ -249,6 +266,7 @@
     cellMap.clear(); rowHeadEls = []; colHeadEls = [];
     const scroll = document.createElement("div"); scroll.className = "sheet-scroll"; sheetScroll = scroll;
     const table = document.createElement("table"); table.className = "sheet-table";
+    table.style.setProperty("--sheet-row-header-width", Math.round(rowHeaderWidth(activeSheet())) + "px");
     const lettersRow = document.createElement("tr");
     const hRow = document.createElement("tr");
     const corner = document.createElement("th"); corner.className = "corner-head"; corner.rowSpan = 2; corner.title = "Intitulés des lignes"; lettersRow.appendChild(corner);
@@ -271,7 +289,7 @@
       const tr = document.createElement("tr");
       const rh = document.createElement("th"); rh.className = "row-head"; rh.dataset.r = r;
       const rhNumber = document.createElement("span"); rhNumber.className = "rh-number"; rhNumber.textContent = String(r + 1); rhNumber.title = "Ligne " + (r + 1);
-      const rhLabel = document.createElement("span"); rhLabel.className = "rh-label"; rhLabel.textContent = state.rowHeaders[r] || "";
+      const rhLabel = document.createElement("span"); rhLabel.className = "rh-label"; rhLabel.textContent = state.rowHeaders[r] || ""; rhLabel.title = state.rowHeaders[r] || "";
       rh.append(rhNumber, rhLabel);
       const rhEdit = document.createElement("button"); rhEdit.className = "rh-edit-btn"; rhEdit.type = "button"; rhEdit.textContent = "✎"; rhEdit.title = "Renommer la ligne"; rhEdit.setAttribute("aria-label", "Renommer la ligne " + (r + 1));
       rhEdit.addEventListener("click", function(e) { e.stopPropagation(); editRowHeader(r); });
@@ -771,7 +789,7 @@
 
   function fillSheetFromAoa(sheet, aoa, ws) {
     sheet.cells = {}; sheet.headers = []; sheet.rowHeaders = [];
-    let maxR = 0, maxC = 0;
+    let maxR = -1, maxC = 0;
 
     var hasRowTitles = hasRowTitleColumn(aoa);
     var dataStartCol = hasRowTitles ? 1 : 0;
@@ -814,6 +832,9 @@
       const row = aoa[ri];
       if (!row) continue;
       if (ri === monthHeaderRowIndex || isMonthHeaderRow(row)) continue;
+      // Une ligne entièrement vide dans Excel ne doit pas créer un trou dans
+      // le tableur importé ni gonfler artificiellement son nombre de lignes.
+      if (!row.some(function(value) { return value != null && String(value).trim() !== ""; })) continue;
       if (hasRowTitles) {
         var label = row[0];
         if (label != null && String(label).trim() !== "") {
@@ -842,9 +863,9 @@
       dataRowIndex++;
     }
     sheet.cols = Math.max(DEFAULT_COLS, maxC + 1);
-    // Un import ne doit pas créer quarante lignes vides : on garde seulement
-    // une petite marge de saisie après la dernière ligne importée.
-    sheet.rows = Math.max(8, maxR + 3);
+    // L'import restitue exactement ses lignes utiles, sans marge vide.
+    // Le bouton « + 1 ligne » reste disponible lorsque l'utilisateur en veut une.
+    sheet.rows = Math.max(0, maxR + 1);
     for (let c = 0; c < sheet.cols; c++) if (!sheet.headers[c]) sheet.headers[c] = colToLetter(c);
     enforceMonthHeaders(sheet);
   }
@@ -920,7 +941,7 @@
             targetSheet.cells[targetKey2] = { raw: importedCells[importKey2].raw };
           }
         }
-        targetSheet.rows = Math.max(targetSheet.rows || 0, newRowIdx + 3);
+        targetSheet.rows = Math.max(targetSheet.rows || 0, newRowIdx + 1);
       }
     }
   }
@@ -1157,7 +1178,7 @@
         id: s.id || sheetId(), name: s.name || "Feuille", cells: s.cells || {}, headers: s.headers || [],
         rowHeaders: s.rowHeaders || [], rows: s.rows || DEFAULT_ROWS, cols: s.cols || DEFAULT_COLS,
       }));
-      for (const sheet of state.sheets) enforceMonthHeaders(sheet);
+      for (const sheet of state.sheets) { enforceMonthHeaders(sheet); compactRows(sheet); }
       state.activeSheetId = data.activeSheetId || state.sheets[0].id;
       state.active = { r: 0, c: 0 }; state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
       buildTable(); renderValues(); renderTabs();
@@ -1200,7 +1221,7 @@
             cells: s.cells || {}, headers: s.headers || [], rowHeaders: s.rowHeaders || [],
             rows: s.rows || DEFAULT_ROWS, cols: s.cols || DEFAULT_COLS,
           }));
-          for (const s of state.sheets) enforceMonthHeaders(s);
+          for (const s of state.sheets) { enforceMonthHeaders(s); compactRows(s); }
           state.activeSheetId = data.activeSheetId || state.sheets[0].id;
           return true;
         }
@@ -1237,7 +1258,7 @@
       cells: s.cells || {}, headers: s.headers || [], rowHeaders: s.rowHeaders || [],
       rows: s.rows || DEFAULT_ROWS, cols: s.cols || DEFAULT_COLS,
     }));
-    for (const s of state.sheets) enforceMonthHeaders(s);
+    for (const s of state.sheets) { enforceMonthHeaders(s); compactRows(s); }
     state.activeSheetId = data.activeSheetId || state.sheets[0].id;
     state.active = { r: 0, c: 0 }; state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
     buildTable(); renderValues(); renderTabs(); scheduleSave();
@@ -1291,7 +1312,7 @@
     sheet.cells = {};
     sheet.headers = demoData.headers.slice();
     sheet.rowHeaders = demoData.rowHeaders.slice();
-    sheet.rows = Math.max(sheet.rows || 30, demoData.rowHeaders.length + 2);
+    sheet.rows = demoData.rowHeaders.length;
     sheet.cols = Math.max(sheet.cols || 8, demoData.headers.length + 1);
     for (var r = 0; r < demoData.values.length; r++) {
       for (var c = 0; c < demoData.values[r].length; c++) {
@@ -1336,6 +1357,50 @@
     renderValues();
     renderTabs();
     if (opts.notify !== false) notifyDashboard();
+  }
+
+  // Les choix faits pendant la configuration deviennent des lignes concrètes
+  // du tableur, afin que « Comptes utilisés » et le montant de départ ne se
+  // perdent pas après la fin du tutoriel.
+  function applySetupProfile(profile) {
+    profile = profile || {};
+    var startMonth = String(profile.startingMonth || "");
+    var yearMatch = startMonth.match(/^(19\d{2}|20\d{2}|21\d{2})-(\d{2})$/);
+    var target = yearMatch && state.sheets.find(function(sheet) { return String(sheet.name || "") === yearMatch[1]; });
+    target = target || activeSheet();
+    if (!target) return false;
+
+    function sameLabel(a, b) { return String(a || "").trim().toLocaleLowerCase("fr") === String(b || "").trim().toLocaleLowerCase("fr"); }
+    function ensureRow(label) {
+      var found = (target.rowHeaders || []).findIndex(function(value) { return sameLabel(value, label); });
+      if (found >= 0) return found;
+      var row = contentRowCount(target);
+      target.rowHeaders[row] = label;
+      target.rows = row + 1;
+      return row;
+    }
+
+    var changed = false;
+    var amount = profile.currentAmount;
+    if (amount === "" || amount === undefined || amount === null) amount = profile.startingCash;
+    if (amount !== "" && amount !== undefined && amount !== null && Number.isFinite(Number(String(amount).replace(",", ".")))) {
+      var initialRow = ensureRow("Solde initial");
+      var monthIndex = yearMatch ? Math.max(0, Math.min(11, Number(yearMatch[2]) - 1)) : 0;
+      target.cells[cellKey(initialRow, monthIndex)] = { raw: String(amount) };
+      changed = true;
+    }
+
+    String(profile.accounts || "").split(/[;,\n]+/).map(function(value) { return value.trim(); }).filter(Boolean).forEach(function(account) {
+      var label = "Compte — " + account;
+      var exists = (target.rowHeaders || []).some(function(value) { return sameLabel(value, label); });
+      if (!exists) { ensureRow(label); changed = true; }
+    });
+
+    if (!changed) return false;
+    state.activeSheetId = target.id;
+    compactRows(target);
+    buildTable(); renderValues(); renderTabs(); scheduleSave();
+    return true;
   }
 
   // === Met à jour les cartes de solde au-dessus du tableur ===
@@ -1438,7 +1503,7 @@
     }
   }
 
-  window.FinanceSheet = { init, recompute, saveNow, openCalculator, getSnapshot, loadSnapshot, buildWorkbook, importXlsx, exportXlsx, loadDemoData, clearDemoDataFS, updateSheetBalanceCards, migrateOldTemplate, resetToDefaultSheets, VERSION };
+  window.FinanceSheet = { init, recompute, saveNow, openCalculator, getSnapshot, loadSnapshot, buildWorkbook, importXlsx, exportXlsx, loadDemoData, clearDemoDataFS, updateSheetBalanceCards, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
   // Hook appelé après import / édition / création de feuille pour rafraîchir le dashboard.
   let dashTimer = null;
   function notifyDashboard() {
