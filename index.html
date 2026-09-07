@@ -1757,6 +1757,8 @@
   .account-code-step { position: relative; overflow: hidden; padding: 20px; border: 1px solid color-mix(in srgb, var(--accent), var(--line) 62%); border-radius: calc(var(--radius) - 3px); background: linear-gradient(125deg, color-mix(in srgb, var(--accent), transparent 93%), var(--panel-bg)); }
   .account-code-step h3 { margin: 3px 0 4px; color: var(--text); font: 850 1.1rem var(--font-heading); }
   .account-code-step p { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.45; }
+  .account-confirm-guidance { display: grid; gap: 4px; padding: 11px 12px; border: 1px solid color-mix(in srgb, var(--accent), var(--line) 68%); border-radius: calc(var(--control-radius) - 4px); background: color-mix(in srgb, var(--accent), transparent 93%); color: var(--text); font-size: .8rem; line-height: 1.55; }
+  .account-confirm-guidance strong { color: var(--accent); }
   .account-code-orbit { position: absolute; right: -34px; top: -38px; width: 118px; height: 118px; border: 1px solid color-mix(in srgb, var(--accent), transparent 58%); border-radius: 50%; animation: accountOrbit 5s linear infinite; pointer-events: none; }
   .account-code-orbit::before, .account-code-orbit::after, .account-code-orbit span { content: ""; position: absolute; border-radius: 50%; background: var(--accent); box-shadow: 0 0 18px var(--accent); }
   .account-code-orbit::before { width: 7px; height: 7px; top: 12px; left: 26px; }.account-code-orbit::after { width: 4px; height: 4px; right: 17px; bottom: 29px; }.account-code-orbit span { width: 5px; height: 5px; bottom: 13px; left: 21px; }
@@ -2004,17 +2006,15 @@
             <section class="account-auth-pane" id="accountRegisterPane" role="tabpanel" aria-labelledby="accountRegisterTab" hidden>
               <div class="settings-field"><label for="accountRegisterEmail">Email</label><input id="accountRegisterEmail" type="email" autocomplete="email" placeholder="toi@exemple.com" /></div>
               <div class="settings-field"><label for="accountRegisterPw">Choisir un mot de passe</label><input id="accountRegisterPw" type="password" autocomplete="new-password" minlength="8" placeholder="Au moins 8 caractères" /></div>
-              <button type="button" class="account-btn-primary" id="accountRegisterBtn">Recevoir mon code</button>
-              <p class="account-form-note">Un code à six chiffres est envoyé à cette adresse pour confirmer la création du compte.</p>
+              <button type="button" class="account-btn-primary" id="accountRegisterBtn">Recevoir le lien de confirmation</button>
+              <p class="account-form-note">Un lien sécurisé sera envoyé à cette adresse pour confirmer la création du compte.</p>
             </section>
-            <section class="account-code-step" id="accountCodeStep" hidden aria-live="polite">
+            <section class="account-code-step account-email-confirm-step" id="accountEmailConfirmStep" hidden aria-live="polite">
               <div class="account-code-orbit" aria-hidden="true"><span></span></div>
-              <div><span class="eyebrow">Vérification</span><h3>Entre ton code</h3><p id="accountCodeDescription">Nous avons envoyé un code à six chiffres.</p></div>
-              <div class="account-code-inputs" id="accountCodeInputs" aria-label="Code de vérification à six chiffres">
-                <input inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Chiffre 1"><input inputmode="numeric" maxlength="1" aria-label="Chiffre 2"><input inputmode="numeric" maxlength="1" aria-label="Chiffre 3"><input inputmode="numeric" maxlength="1" aria-label="Chiffre 4"><input inputmode="numeric" maxlength="1" aria-label="Chiffre 5"><input inputmode="numeric" maxlength="1" aria-label="Chiffre 6">
-              </div>
-              <button type="button" class="account-btn-primary" id="accountVerifyCodeBtn">Confirmer le code</button>
-              <div class="account-links-row"><button type="button" class="account-link-btn" id="accountResendBtn">Renvoyer un code</button><button type="button" class="account-link-btn" id="accountChangeEmailBtn">Changer d’adresse</button></div>
+              <div><span class="eyebrow">Confirmation requise</span><h3>Confirme ton adresse</h3><p id="accountConfirmDescription">Nous avons envoyé un lien sécurisé à ton adresse.</p></div>
+              <div class="account-confirm-guidance"><strong>1.</strong> Ouvre l’e-mail reçu. <strong>2.</strong> Clique sur « Confirmer ». <strong>3.</strong> Tu reviendras connecté dans Gestion Finance.</div>
+              <button type="button" class="account-btn-primary" id="accountConfirmCheckBtn">J’ai cliqué sur le lien</button>
+              <div class="account-links-row"><button type="button" class="account-link-btn" id="accountResendBtn">Renvoyer le lien</button><button type="button" class="account-link-btn" id="accountChangeEmailBtn">Changer d’adresse</button></div>
             </section>
             <p class="account-msg" id="accountMsg" role="status" aria-live="polite"></p>
           </form>
@@ -2795,9 +2795,10 @@ function resetDataState(){
     function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-09-07-r5";
+    const RELEASE_NOTES_VERSION="2026-09-07-r6";
     const RELEASE_NOTES=[
-      {date:"7 septembre 2026",title:"Accès et partage repensés",text:"La barre d’accueil est mieux structurée, les partages s’ouvrent dans une vraie vue de consultation et la création de compte utilise un code de confirmation."},
+      {date:"7 septembre 2026",title:"Confirmation de compte simplifiée",text:"La création de compte envoie désormais un lien sécurisé à ouvrir, sans code à recopier. La confirmation d’e-mail reste active."},
+      {date:"7 septembre 2026",title:"Accès et partage repensés",text:"La barre d’accueil est mieux structurée et les partages s’ouvrent dans une vraie vue de consultation."},
       {date:"2 septembre 2026",title:"Accès amis simplifié",text:"Le partage se configure maintenant en deux étapes : les écrans à ouvrir, puis les mois et lignes visibles. Les réglages sont enregistrés de façon sécurisée."},
       {date:"2 septembre 2026",title:"Tableur plus stable",text:"Les intitulés de lignes se renomment sans modifier leur numéro et restent correctement alignés, même lorsqu’ils sont longs."},
       {date:"2 septembre 2026",title:"Partage et tableur plus fluides",text:"La page Partage et amis reste stable pendant la consultation. Le tableur n’ajoute plus de lignes vides et ses intitulés s’adaptent à leur contenu."},
@@ -5070,11 +5071,10 @@ function resetDataState(){
 
   function msg(t, kind){ var m = el("accountMsg"); if(m){ m.textContent = t; m.className = "account-msg " + (kind||""); } }
   function clearMsg(){ msg(""); }
-  function setLoading(v){ ["accountLoginBtn","accountRegisterBtn","accountResendBtn","accountVerifyCodeBtn","accountChangeEmailBtn"].forEach(function(id){var button=el(id);if(button)button.disabled=v;}); }
-  function accountPane(name){var loginPane=el("accountLoginPane"),registerPane=el("accountRegisterPane"),codePane=el("accountCodeStep"),loginTab=el("accountLoginTab"),registerTab=el("accountRegisterTab");if(loginPane)loginPane.hidden=name!=="login";if(registerPane)registerPane.hidden=name!=="register";if(codePane)codePane.hidden=name!=="code";if(loginTab){loginTab.classList.toggle("is-active",name==="login");loginTab.setAttribute("aria-selected",String(name==="login"));}if(registerTab){registerTab.classList.toggle("is-active",name==="register"||name==="code");registerTab.setAttribute("aria-selected",String(name==="register"||name==="code"));}}
+  function setLoading(v){ ["accountLoginBtn","accountRegisterBtn","accountResendBtn","accountConfirmCheckBtn","accountChangeEmailBtn"].forEach(function(id){var button=el(id);if(button)button.disabled=v;}); }
+  function accountPane(name){var loginPane=el("accountLoginPane"),registerPane=el("accountRegisterPane"),confirmPane=el("accountEmailConfirmStep"),loginTab=el("accountLoginTab"),registerTab=el("accountRegisterTab");if(loginPane)loginPane.hidden=name!=="login";if(registerPane)registerPane.hidden=name!=="register";if(confirmPane)confirmPane.hidden=name!=="confirm";if(loginTab){loginTab.classList.toggle("is-active",name==="login");loginTab.setAttribute("aria-selected",String(name==="login"));}if(registerTab){registerTab.classList.toggle("is-active",name==="register"||name==="confirm");registerTab.setAttribute("aria-selected",String(name==="register"||name==="confirm"));}}
   function accountEmail(kind){var id=kind==="register"?"accountRegisterEmail":"accountLoginEmail";return String(el(id)&&el(id).value||"").trim();}
-  function showCodeStep(email){sb.pendingSignupEmail=email;accountPane("code");var description=el("accountCodeDescription");if(description)description.textContent="Nous avons envoyé un code à six chiffres à "+email+".";var inputs=Array.from(document.querySelectorAll("#accountCodeInputs input"));inputs.forEach(function(input){input.value="";input.classList.remove("is-filled");});if(inputs[0])inputs[0].focus();}
-  function codeValue(){return Array.from(document.querySelectorAll("#accountCodeInputs input")).map(function(input){return input.value;}).join("");}
+  function showEmailConfirmation(email){sb.pendingSignupEmail=email;accountPane("confirm");var description=el("accountConfirmDescription");if(description)description.textContent="Nous avons envoyé un lien sécurisé à "+email+".";}
 
   async function register(){
     var email = accountEmail("register");
@@ -5092,8 +5092,8 @@ function resetDataState(){
       sb.lastWasSignup = true;
       if(res.data.session){ msg("Compte créé — vous êtes connecté.", "ok"); }
       else {
-        showCodeStep(email);
-        msg("Code envoyé. Vérifie ta boîte de réception.", "ok");
+        showEmailConfirmation(email);
+        msg("Lien de confirmation envoyé. Vérifie ta boîte de réception.", "ok");
       }
     }catch(e){
       console.error("Register error:", e);
@@ -5109,7 +5109,7 @@ function resetDataState(){
     try{
       var res = await sb.client.auth.resend({ email: email, type: "signup" });
       if(res.error){ msg(translateAuthError(res.error)); return; }
-      msg("Nouveau code envoyé. Vérifie aussi tes spams.", "ok");
+      msg("Nouveau lien envoyé. Vérifie aussi tes spams.", "ok");
     }catch(e){ msg(e.message||"Erreur lors du renvoi."); }
     finally{ setLoading(false); }
   }
@@ -5124,19 +5124,16 @@ function resetDataState(){
       if(res.error){
         var unconfirmed = /not confirmed|non confirm/i.test(res.error.message || "");
         msg(translateAuthError(res.error));
-        if(unconfirmed){ sb.pendingSignupEmail=email; accountPane("code"); }
+        if(unconfirmed){ showEmailConfirmation(email); msg("Ton adresse n’est pas encore confirmée. Ouvre le lien reçu par e-mail."); }
         return;
       }
     }catch(e){ msg(translateAuthError(e)); }
     finally{ setLoading(false); }
   }
 
-  async function verifyCode(){
-    var email=sb.pendingSignupEmail||accountEmail("register"),token=codeValue();
-    if(!email){msg("Renseigne d’abord ton adresse email.");accountPane("register");return;}
-    if(!/^\d{6}$/.test(token)){msg("Entre les six chiffres du code reçu.");return;}
-    setLoading(true);clearMsg();
-    try{var res=await sb.client.auth.verifyOtp({email:email,token:token,type:"signup"});if(res.error){msg("Code incorrect ou expiré. Demande-en un nouveau.");return;}sb.pendingSignupEmail="";msg("Compte confirmé — bienvenue !","ok");}
+  async function checkEmailConfirmation(){
+    setLoading(true); clearMsg();
+    try{var res=await sb.client.auth.getSession();if(res&&res.data&&res.data.session){sb.pendingSignupEmail="";msg("Adresse confirmée — vous êtes connecté.","ok");}else{msg("Le lien n’a pas encore été validé. Ouvre l’e-mail reçu puis clique sur le lien de confirmation.");}}
     catch(e){msg(translateAuthError(e));}
     finally{setLoading(false);}
   }
@@ -5148,9 +5145,8 @@ function resetDataState(){
     var b = el("accountRegisterBtn"); if(b) b.addEventListener("click", function(e){ e.preventDefault(); register(); });
     var rd = el("accountResendBtn"); if(rd) rd.addEventListener("click", function(e){ e.preventDefault(); resend(); });
     var loginTab=el("accountLoginTab"),registerTab=el("accountRegisterTab");if(loginTab)loginTab.addEventListener("click",function(){clearMsg();accountPane("login");});if(registerTab)registerTab.addEventListener("click",function(){clearMsg();accountPane("register");});
-    var verify=el("accountVerifyCodeBtn");if(verify)verify.addEventListener("click",function(e){e.preventDefault();verifyCode();});
+    var confirmCheck=el("accountConfirmCheckBtn");if(confirmCheck)confirmCheck.addEventListener("click",function(e){e.preventDefault();checkEmailConfirmation();});
     var changeEmail=el("accountChangeEmailBtn");if(changeEmail)changeEmail.addEventListener("click",function(){clearMsg();accountPane("register");});
-    Array.from(document.querySelectorAll("#accountCodeInputs input")).forEach(function(input,index,inputs){input.addEventListener("input",function(){input.value=input.value.replace(/\D/g,"").slice(0,1);input.classList.toggle("is-filled",!!input.value);if(input.value&&inputs[index+1])inputs[index+1].focus();if(codeValue().length===6)verifyCode();});input.addEventListener("keydown",function(event){if(event.key==="Backspace"&&!input.value&&inputs[index-1])inputs[index-1].focus();});input.addEventListener("paste",function(event){var digits=(event.clipboardData||window.clipboardData).getData("text").replace(/\D/g,"").slice(0,6);if(!digits)return;event.preventDefault();digits.split("").forEach(function(digit,i){if(inputs[i]){inputs[i].value=digit;inputs[i].classList.add("is-filled");}});if(digits.length===6)verifyCode();else if(inputs[digits.length])inputs[digits.length].focus();});});
     document.querySelectorAll("[data-account-logout]").forEach(function(button){ button.addEventListener("click", function(e){ e.preventDefault(); logout(); }); });
     var f = el("accountForm"); if(f) f.addEventListener("submit", function(e){ e.preventDefault(); if(!el("accountLoginPane").hidden)login(); });
     var fp = el("accountForgotBtn"); if(fp) fp.addEventListener("click", function(e){ e.preventDefault(); resetPassword(); });
