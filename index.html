@@ -1700,6 +1700,76 @@
     .sheet-status-tooltip { position: fixed; left: 14px; right: 14px; bottom: 16px; width: auto; min-width: 0; max-width: none; transform: translateY(4px); }
     .sheet-status-info:hover .sheet-status-tooltip { transform: translateY(0); }
   }
+  /* Barre d'accueil : une seule ligne lisible sur ordinateur, hiérarchie stable. */
+  #dashboardPage .dashboard-control-row { grid-template-columns: minmax(145px, 1fr) auto minmax(145px, 1fr); align-items: end; gap: 18px; padding: 11px 14px; }
+  #dashboardPage .dashboard-toolbar-status { justify-self: start; align-self: center; min-height: 38px; padding: 0; border: 0; }
+  #dashboardPage .dashboard-controls { justify-self: center; display: flex; align-items: end; justify-content: center; gap: 10px; }
+  #dashboardPage .dashboard-sync-button { justify-self: end; align-self: end; min-height: 40px; padding: 9px 13px; border-radius: calc(var(--control-radius) - 3px); white-space: nowrap; }
+  #dashboardPage .dashboard-control-group { padding-left: 0; }
+  @media (max-width: 820px) {
+    #dashboardPage .dashboard-control-row { grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
+    #dashboardPage .dashboard-controls { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; justify-content: flex-start; }
+    #dashboardPage .dashboard-sync-button { align-self: center; }
+  }
+  @media (max-width: 560px) {
+    #dashboardPage .dashboard-controls { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); width: 100%; }
+    #dashboardPage .dashboard-period-group { grid-column: 1 / -1; }
+    #dashboardPage .dashboard-sync-button { min-height: 36px; padding: 8px 10px; }
+  }
+  /* Partage : des personnes, actions et vues consultées immédiatement identifiables. */
+  .sharing-person { grid-template-columns: minmax(0,1fr) auto; align-items: center; padding: 14px; border: 1px solid color-mix(in srgb, var(--line-strong), transparent 18%); border-radius: calc(var(--radius) - 5px); background: color-mix(in srgb, var(--input-bg), transparent 15%); }
+  .sharing-person + .sharing-person { margin-top: 8px; }
+  .sharing-person-identity { display: flex; align-items: center; min-width: 0; gap: 10px; }
+  .sharing-person-avatar { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; background: var(--button-active-bg); color: var(--accent); font: 850 .82rem var(--font-heading); }
+  .sharing-actions { justify-content: flex-end; }
+  .sharing-action { min-height: 36px; padding: 8px 12px; border-radius: calc(var(--control-radius) - 4px); background: var(--panel-bg); font-size: .78rem; }
+  .sharing-action.button-primary { border-color: var(--button-primary-bg); background: var(--button-primary-bg); color: var(--button-primary-text); }
+  .sharing-action.button-primary:hover { color: var(--button-primary-text); filter: brightness(1.05); }
+  .sharing-action-danger { color: var(--red); border-color: color-mix(in srgb, var(--red), var(--line) 70%); }
+  .shared-view { max-width: 980px; margin: 0 auto; padding: 22px; border-color: color-mix(in srgb, var(--accent), var(--line) 72%); }
+  .shared-view > .eyebrow { display: block; margin-top: 16px; }
+  .shared-view h3 { margin: 4px 0 6px; color: var(--text); font: 850 1.25rem var(--font-heading); }
+  .shared-view > p { margin: 0 0 16px; color: var(--muted); line-height: 1.5; }
+  .sharing-view-back { color: var(--muted); padding: 6px 0; border: 0; background: transparent; }
+  .sharing-view-back:hover { color: var(--accent); background: transparent; }
+  .sharing-view-loading { margin: 0; color: var(--muted); }
+  @media (max-width: 720px) { .sharing-person { grid-template-columns: 1fr; gap: 12px; } .sharing-actions { justify-content: flex-start; width: 100%; } .sharing-actions .sharing-action { flex: 1 1 auto; } .shared-view { padding: 16px; } }
+  /* Compte : connexion et inscription distinctes, puis vérification par code. */
+  .account-panel { display: grid; gap: 14px; max-width: 560px; }
+  .account-form { display: grid; gap: 14px; }
+  .account-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: calc(var(--radius) - 4px); background: var(--input-bg); }
+  .account-tab { min-height: 38px; border: 0; border-radius: calc(var(--control-radius) - 5px); background: transparent; color: var(--muted); font: 800 .82rem var(--font-body); cursor: pointer; }
+  .account-tab.is-active { background: var(--panel-bg); color: var(--text); box-shadow: 0 3px 10px color-mix(in srgb, var(--body-bg), transparent 68%); }
+  .account-auth-pane, .account-code-step { display: grid; gap: 12px; }
+  .account-auth-pane[hidden], .account-code-step[hidden] { display: none; }
+  .account-auth-pane .settings-field { display: grid; gap: 6px; margin: 0; }
+  .account-auth-pane .settings-field label { color: var(--text); font-size: .8rem; font-weight: 750; }
+  .account-auth-pane input { min-height: 43px; padding: 9px 11px; border: 1px solid var(--line-strong); border-radius: calc(var(--control-radius) - 3px); background: var(--input-bg); color: var(--text); font: 500 .92rem var(--font-body); }
+  .account-auth-pane input:focus { outline: 2px solid color-mix(in srgb, var(--accent), transparent 45%); outline-offset: 2px; }
+  .account-btn-primary, .account-btn-secondary { min-height: 42px; padding: 9px 13px; border-radius: calc(var(--control-radius) - 3px); font: 800 .83rem var(--font-body); cursor: pointer; }
+  .account-btn-primary { border: 1px solid var(--button-primary-bg); background: var(--button-primary-bg); color: var(--button-primary-text); }
+  .account-btn-secondary { border: 1px solid var(--line-strong); background: var(--panel-bg); color: var(--text); }
+  .account-btn-primary:disabled, .account-btn-secondary:disabled { cursor: wait; opacity: .62; }
+  .account-links-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .account-link-btn { padding: 3px 0; border: 0; background: transparent; color: var(--accent); font: 750 .78rem var(--font-body); cursor: pointer; }
+  .account-form-note, .account-msg, .account-status, .account-hint { margin: 0; color: var(--muted); font-size: .78rem; line-height: 1.45; }
+  .account-msg.ok { color: var(--green); }
+  .account-code-step { position: relative; overflow: hidden; padding: 20px; border: 1px solid color-mix(in srgb, var(--accent), var(--line) 62%); border-radius: calc(var(--radius) - 3px); background: linear-gradient(125deg, color-mix(in srgb, var(--accent), transparent 93%), var(--panel-bg)); }
+  .account-code-step h3 { margin: 3px 0 4px; color: var(--text); font: 850 1.1rem var(--font-heading); }
+  .account-code-step p { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.45; }
+  .account-code-orbit { position: absolute; right: -34px; top: -38px; width: 118px; height: 118px; border: 1px solid color-mix(in srgb, var(--accent), transparent 58%); border-radius: 50%; animation: accountOrbit 5s linear infinite; pointer-events: none; }
+  .account-code-orbit::before, .account-code-orbit::after, .account-code-orbit span { content: ""; position: absolute; border-radius: 50%; background: var(--accent); box-shadow: 0 0 18px var(--accent); }
+  .account-code-orbit::before { width: 7px; height: 7px; top: 12px; left: 26px; }.account-code-orbit::after { width: 4px; height: 4px; right: 17px; bottom: 29px; }.account-code-orbit span { width: 5px; height: 5px; bottom: 13px; left: 21px; }
+  @keyframes accountOrbit { to { transform: rotate(360deg); } }
+  .account-code-inputs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; max-width: 390px; }
+  .account-code-inputs input { width: 100%; aspect-ratio: 1 / 1.08; min-height: 46px; padding: 0; border: 1px solid var(--line-strong); border-radius: calc(var(--control-radius) - 4px); background: var(--panel-bg); color: var(--text); text-align: center; font: 850 1.2rem var(--font-heading); caret-color: var(--accent); transition: transform .16s ease, border-color .16s ease, background .16s ease; }
+  .account-code-inputs input:focus { outline: 0; border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 18px color-mix(in srgb, var(--accent), transparent 76%); }
+  .account-code-inputs input.is-filled { border-color: var(--accent); background: var(--button-active-bg); animation: accountDigitIn .23s ease both; }
+  @keyframes accountDigitIn { 50% { transform: scale(1.08); } }
+  .account-user { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: calc(var(--radius) - 4px); background: var(--input-bg); }
+  .account-user-info { display: flex; align-items: center; gap: 10px; }.account-user-info p { margin: 0 0 2px; color: var(--muted); font-size: .74rem; }.account-user-info strong { color: var(--text); overflow-wrap: anywhere; }.account-user-avatar { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--button-primary-bg); color: var(--button-primary-text); font-weight: 850; }
+  body[data-theme="brutal"] .account-tabs, body[data-theme="brutal"] .account-tab, body[data-theme="brutal"] .account-auth-pane input, body[data-theme="brutal"] .account-code-step, body[data-theme="brutal"] .account-code-inputs input, body[data-theme="brutal"] .account-btn-primary, body[data-theme="brutal"] .account-btn-secondary { border-radius: 0 !important; }
+  @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard">
@@ -1775,8 +1845,8 @@
           <div class="dashboard-controls" aria-label="Filtres du tableau de bord">
             <div class="dashboard-control-group dashboard-period-group"><span class="dashboard-group-label">Période</span><div class="dashboard-period-fields"><label><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label><label><span>Mois</span><select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label></div></div>
             <div class="dashboard-control-group"><span class="dashboard-group-label">Graphique</span><label><span class="sr-only">Type de graphique</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Répartition</option><option value="grouped">Comparatif annuel</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label></div>
-            <button type="button" id="syncSheetButton" class="sync-sheet-btn" title="Mettre à jour le tableau de bord depuis le tableur" aria-label="Synchroniser les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Synchroniser</span></button>
           </div>
+          <button type="button" id="syncSheetButton" class="sync-sheet-btn dashboard-sync-button" title="Mettre à jour le tableau de bord depuis le tableur" aria-label="Synchroniser les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Synchroniser</span></button>
         </section>
         <section class="latest-update-banner" id="latestUpdateBanner" hidden aria-live="polite">
           <div><span class="latest-update-kicker">Nouvelle mise à jour</span><strong id="latestUpdateTitle"></strong><p id="latestUpdateText"></p></div>
@@ -1916,31 +1986,37 @@
         <div class="panel-title"><h2>Compte</h2></div>
         <div class="account-panel">
           <div class="settings-intro" id="accountIntro">
-            <strong>Connexion par email</strong>
-            <p>Crée un compte pour protéger ton accès et synchroniser tes données entre appareils.</p>
+            <strong>Ton espace synchronisé</strong>
+            <p>Crée un compte ou connecte-toi pour retrouver ton tableur sur tes appareils.</p>
           </div>
           <p class="account-hint" id="accountHint" style="display:none"></p>
           <form id="accountForm" class="account-form" autocomplete="on">
-            <div class="settings-field">
-              <label for="accountEmailInput">Email</label>
-              <input id="accountEmailInput" type="email" autocomplete="email" placeholder="toi@exemple.com" />
+            <div class="account-tabs" role="tablist" aria-label="Accès au compte">
+              <button class="account-tab is-active" id="accountLoginTab" type="button" role="tab" aria-selected="true" aria-controls="accountLoginPane">Se connecter</button>
+              <button class="account-tab" id="accountRegisterTab" type="button" role="tab" aria-selected="false" aria-controls="accountRegisterPane">Créer un compte</button>
             </div>
-            <div class="settings-field">
-              <label for="accountPwInput">Mot de passe</label>
-              <div class="input-wrapper">
-                <input id="accountPwInput" type="password" autocomplete="current-password" minlength="8" placeholder="Au moins 8 caractères" />
-                <button type="button" class="eye-button" id="accountEyeButton" aria-label="Afficher/masquer le mot de passe"><svg id="accountEyeShow" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg><svg id="accountEyeHide" viewBox="0 0 24 24" fill="none" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-              </div>
-            </div>
-            <div class="account-actions-row">
+            <section class="account-auth-pane" id="accountLoginPane" role="tabpanel" aria-labelledby="accountLoginTab">
+              <div class="settings-field"><label for="accountLoginEmail">Email</label><input id="accountLoginEmail" type="email" autocomplete="email" placeholder="toi@exemple.com" /></div>
+              <div class="settings-field"><label for="accountLoginPw">Mot de passe</label><div class="input-wrapper"><input id="accountLoginPw" type="password" autocomplete="current-password" minlength="8" placeholder="Ton mot de passe" /><button type="button" class="eye-button" id="accountEyeButton" aria-label="Afficher ou masquer le mot de passe"><svg id="accountEyeShow" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg><svg id="accountEyeHide" viewBox="0 0 24 24" fill="none" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>
               <button type="submit" class="account-btn-primary" id="accountLoginBtn">Se connecter</button>
-              <button type="button" class="account-btn-secondary" id="accountRegisterBtn">Créer un compte</button>
-            </div>
-            <div class="account-links-row">
-              <button type="button" class="account-link-btn" id="accountForgotBtn">Mot de passe oublié ?</button>
-            </div>
+              <div class="account-links-row"><button type="button" class="account-link-btn" id="accountForgotBtn">Mot de passe oublié ?</button></div>
+            </section>
+            <section class="account-auth-pane" id="accountRegisterPane" role="tabpanel" aria-labelledby="accountRegisterTab" hidden>
+              <div class="settings-field"><label for="accountRegisterEmail">Email</label><input id="accountRegisterEmail" type="email" autocomplete="email" placeholder="toi@exemple.com" /></div>
+              <div class="settings-field"><label for="accountRegisterPw">Choisir un mot de passe</label><input id="accountRegisterPw" type="password" autocomplete="new-password" minlength="8" placeholder="Au moins 8 caractères" /></div>
+              <button type="button" class="account-btn-primary" id="accountRegisterBtn">Recevoir mon code</button>
+              <p class="account-form-note">Un code à six chiffres est envoyé à cette adresse pour confirmer la création du compte.</p>
+            </section>
+            <section class="account-code-step" id="accountCodeStep" hidden aria-live="polite">
+              <div class="account-code-orbit" aria-hidden="true"><span></span></div>
+              <div><span class="eyebrow">Vérification</span><h3>Entre ton code</h3><p id="accountCodeDescription">Nous avons envoyé un code à six chiffres.</p></div>
+              <div class="account-code-inputs" id="accountCodeInputs" aria-label="Code de vérification à six chiffres">
+                <input inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Chiffre 1"><input inputmode="numeric" maxlength="1" aria-label="Chiffre 2"><input inputmode="numeric" maxlength="1" aria-label="Chiffre 3"><input inputmode="numeric" maxlength="1" aria-label="Chiffre 4"><input inputmode="numeric" maxlength="1" aria-label="Chiffre 5"><input inputmode="numeric" maxlength="1" aria-label="Chiffre 6">
+              </div>
+              <button type="button" class="account-btn-primary" id="accountVerifyCodeBtn">Confirmer le code</button>
+              <div class="account-links-row"><button type="button" class="account-link-btn" id="accountResendBtn">Renvoyer un code</button><button type="button" class="account-link-btn" id="accountChangeEmailBtn">Changer d’adresse</button></div>
+            </section>
             <p class="account-msg" id="accountMsg" role="status" aria-live="polite"></p>
-            <button type="button" class="account-btn-secondary" id="accountResendBtn" style="display:none">Renvoyer l'email de confirmation</button>
           </form>
           <div class="account-user" id="accountUserInfo" style="display:none">
             <div class="account-user-info">
@@ -2719,8 +2795,9 @@ function resetDataState(){
     function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-09-02-r4";
+    const RELEASE_NOTES_VERSION="2026-09-07-r5";
     const RELEASE_NOTES=[
+      {date:"7 septembre 2026",title:"Accès et partage repensés",text:"La barre d’accueil est mieux structurée, les partages s’ouvrent dans une vraie vue de consultation et la création de compte utilise un code de confirmation."},
       {date:"2 septembre 2026",title:"Accès amis simplifié",text:"Le partage se configure maintenant en deux étapes : les écrans à ouvrir, puis les mois et lignes visibles. Les réglages sont enregistrés de façon sécurisée."},
       {date:"2 septembre 2026",title:"Tableur plus stable",text:"Les intitulés de lignes se renomment sans modifier leur numéro et restent correctement alignés, même lorsqu’ils sont longs."},
       {date:"2 septembre 2026",title:"Partage et tableur plus fluides",text:"La page Partage et amis reste stable pendant la consultation. Le tableur n’ajoute plus de lignes vides et ses intitulés s’adaptent à leur contenu."},
@@ -2798,7 +2875,7 @@ function resetDataState(){
       elements.themeButtons.forEach(btn=>btn.addEventListener("click",()=>setTheme(btn.dataset.themeOption)));
       Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.addEventListener("click",()=>setMode(btn.dataset.modeOption)));
       var accEyeBtn = document.getElementById("accountEyeButton");
-      if(accEyeBtn){ accEyeBtn.addEventListener("click", function(){ var inp=document.getElementById("accountPwInput"); var show=document.getElementById("accountEyeShow"); var hide=document.getElementById("accountEyeHide"); if(!inp) return; var isPass=inp.type==="password"; inp.type=isPass?"text":"password"; if(show) show.style.display=isPass?"none":""; if(hide) hide.style.display=isPass?"":"none"; }); }
+      if(accEyeBtn){ accEyeBtn.addEventListener("click", function(){ var inp=document.getElementById("accountLoginPw"); var show=document.getElementById("accountEyeShow"); var hide=document.getElementById("accountEyeHide"); if(!inp) return; var isPass=inp.type==="password"; inp.type=isPass?"text":"password"; if(show) show.style.display=isPass?"none":""; if(hide) hide.style.display=isPass?"":"none"; }); }
       if(elements.messagePauseButton) elements.messagePauseButton.addEventListener("click",()=>{ if(!elements.messageBox?.classList.contains("is-visible")) return; if(messagePaused) resumeMessageTimer(); else pauseMessageTimer(); }); if(elements.messageCloseButton) elements.messageCloseButton.addEventListener("click", hideMessage);
       elements.viewSelect.addEventListener("change",()=>setView(elements.viewSelect.value));
       if(elements.yearSelect) elements.yearSelect.addEventListener("change",()=>{ state.selectedYear=String(elements.yearSelect.value||""); state.selectedMonthId=""; state.isGlobal=false; updateInterface(); }); elements.monthSelect.addEventListener("change",()=>{ state.selectedMonthId=elements.monthSelect.value; state.isGlobal=false; updateInterface(); });
@@ -4993,15 +5070,18 @@ function resetDataState(){
 
   function msg(t, kind){ var m = el("accountMsg"); if(m){ m.textContent = t; m.className = "account-msg " + (kind||""); } }
   function clearMsg(){ msg(""); }
-  function setLoading(v){ var a = el("accountLoginBtn"), b = el("accountRegisterBtn"), c = el("accountResendBtn"); if(a) a.disabled = v; if(b) b.disabled = v; if(c) c.disabled = v; }
-  function showResend(v){ var b = el("accountResendBtn"); if(b) b.style.display = v ? "" : "none"; }
+  function setLoading(v){ ["accountLoginBtn","accountRegisterBtn","accountResendBtn","accountVerifyCodeBtn","accountChangeEmailBtn"].forEach(function(id){var button=el(id);if(button)button.disabled=v;}); }
+  function accountPane(name){var loginPane=el("accountLoginPane"),registerPane=el("accountRegisterPane"),codePane=el("accountCodeStep"),loginTab=el("accountLoginTab"),registerTab=el("accountRegisterTab");if(loginPane)loginPane.hidden=name!=="login";if(registerPane)registerPane.hidden=name!=="register";if(codePane)codePane.hidden=name!=="code";if(loginTab){loginTab.classList.toggle("is-active",name==="login");loginTab.setAttribute("aria-selected",String(name==="login"));}if(registerTab){registerTab.classList.toggle("is-active",name==="register"||name==="code");registerTab.setAttribute("aria-selected",String(name==="register"||name==="code"));}}
+  function accountEmail(kind){var id=kind==="register"?"accountRegisterEmail":"accountLoginEmail";return String(el(id)&&el(id).value||"").trim();}
+  function showCodeStep(email){sb.pendingSignupEmail=email;accountPane("code");var description=el("accountCodeDescription");if(description)description.textContent="Nous avons envoyé un code à six chiffres à "+email+".";var inputs=Array.from(document.querySelectorAll("#accountCodeInputs input"));inputs.forEach(function(input){input.value="";input.classList.remove("is-filled");});if(inputs[0])inputs[0].focus();}
+  function codeValue(){return Array.from(document.querySelectorAll("#accountCodeInputs input")).map(function(input){return input.value;}).join("");}
 
   async function register(){
-    var email = (el("accountEmailInput").value||"").trim();
-    var pw = el("accountPwInput").value||"";
+    var email = accountEmail("register");
+    var pw = el("accountRegisterPw").value||"";
     if(!email || !pw){ msg("Renseigne un email et un mot de passe."); return; }
     if(pw.length < 8){ msg("Le mot de passe doit faire au moins 8 caractères."); return; }
-    setLoading(true); clearMsg(); showResend(false);
+    setLoading(true); clearMsg();
     try{
       var res = await sb.client.auth.signUp({
         email: email,
@@ -5012,8 +5092,8 @@ function resetDataState(){
       sb.lastWasSignup = true;
       if(res.data.session){ msg("Compte créé — vous êtes connecté.", "ok"); }
       else {
-        msg("Compte créé. Un email de confirmation vous a été envoyé — cliquez sur le lien qu'il contient pour activer votre compte.", "ok");
-        showResend(true);
+        showCodeStep(email);
+        msg("Code envoyé. Vérifie ta boîte de réception.", "ok");
       }
     }catch(e){
       console.error("Register error:", e);
@@ -5023,47 +5103,61 @@ function resetDataState(){
   }
 
   async function resend(){
-    var email = (el("accountEmailInput").value||"").trim();
-    if(!email){ msg("Renseigne d'abord votre email."); return; }
+    var email = sb.pendingSignupEmail || accountEmail("register");
+    if(!email){ msg("Renseigne d’abord ton adresse email."); return; }
     setLoading(true); clearMsg();
     try{
       var res = await sb.client.auth.resend({ email: email, type: "signup" });
       if(res.error){ msg(translateAuthError(res.error)); return; }
-      msg("Email de confirmation renvoyé. Vérifiez votre boîte de réception (et les spams).", "ok");
+      msg("Nouveau code envoyé. Vérifie aussi tes spams.", "ok");
     }catch(e){ msg(e.message||"Erreur lors du renvoi."); }
     finally{ setLoading(false); }
   }
 
   async function login(){
-    var email = (el("accountEmailInput").value||"").trim();
-    var pw = el("accountPwInput").value||"";
+    var email = accountEmail("login");
+    var pw = el("accountLoginPw").value||"";
     if(!email || !pw){ msg("Renseigne un email et un mot de passe."); return; }
-    setLoading(true); clearMsg(); showResend(false);
+    setLoading(true); clearMsg();
     try{
       var res = await sb.client.auth.signInWithPassword({ email: email, password: pw });
       if(res.error){
         var unconfirmed = /not confirmed|non confirm/i.test(res.error.message || "");
         msg(translateAuthError(res.error));
-        if(unconfirmed) showResend(true);
+        if(unconfirmed){ sb.pendingSignupEmail=email; accountPane("code"); }
         return;
       }
     }catch(e){ msg(translateAuthError(e)); }
     finally{ setLoading(false); }
   }
 
-  async function logout(){ try{ await sb.client.auth.signOut(); sb.lastWasSignup = false; }catch(e){} }
+  async function verifyCode(){
+    var email=sb.pendingSignupEmail||accountEmail("register"),token=codeValue();
+    if(!email){msg("Renseigne d’abord ton adresse email.");accountPane("register");return;}
+    if(!/^\d{6}$/.test(token)){msg("Entre les six chiffres du code reçu.");return;}
+    setLoading(true);clearMsg();
+    try{var res=await sb.client.auth.verifyOtp({email:email,token:token,type:"signup"});if(res.error){msg("Code incorrect ou expiré. Demande-en un nouveau.");return;}sb.pendingSignupEmail="";msg("Compte confirmé — bienvenue !","ok");}
+    catch(e){msg(translateAuthError(e));}
+    finally{setLoading(false);}
+  }
+
+  async function logout(){ try{ await sb.client.auth.signOut(); sb.lastWasSignup = false; sb.pendingSignupEmail=""; }catch(e){} }
 
   function wire(){
     var a = el("accountLoginBtn"); if(a) a.addEventListener("click", function(e){ e.preventDefault(); login(); });
     var b = el("accountRegisterBtn"); if(b) b.addEventListener("click", function(e){ e.preventDefault(); register(); });
     var rd = el("accountResendBtn"); if(rd) rd.addEventListener("click", function(e){ e.preventDefault(); resend(); });
+    var loginTab=el("accountLoginTab"),registerTab=el("accountRegisterTab");if(loginTab)loginTab.addEventListener("click",function(){clearMsg();accountPane("login");});if(registerTab)registerTab.addEventListener("click",function(){clearMsg();accountPane("register");});
+    var verify=el("accountVerifyCodeBtn");if(verify)verify.addEventListener("click",function(e){e.preventDefault();verifyCode();});
+    var changeEmail=el("accountChangeEmailBtn");if(changeEmail)changeEmail.addEventListener("click",function(){clearMsg();accountPane("register");});
+    Array.from(document.querySelectorAll("#accountCodeInputs input")).forEach(function(input,index,inputs){input.addEventListener("input",function(){input.value=input.value.replace(/\D/g,"").slice(0,1);input.classList.toggle("is-filled",!!input.value);if(input.value&&inputs[index+1])inputs[index+1].focus();if(codeValue().length===6)verifyCode();});input.addEventListener("keydown",function(event){if(event.key==="Backspace"&&!input.value&&inputs[index-1])inputs[index-1].focus();});input.addEventListener("paste",function(event){var digits=(event.clipboardData||window.clipboardData).getData("text").replace(/\D/g,"").slice(0,6);if(!digits)return;event.preventDefault();digits.split("").forEach(function(digit,i){if(inputs[i]){inputs[i].value=digit;inputs[i].classList.add("is-filled");}});if(digits.length===6)verifyCode();else if(inputs[digits.length])inputs[digits.length].focus();});});
     document.querySelectorAll("[data-account-logout]").forEach(function(button){ button.addEventListener("click", function(e){ e.preventDefault(); logout(); }); });
-    var f = el("accountForm"); if(f) f.addEventListener("submit", function(e){ e.preventDefault(); login(); });
+    var f = el("accountForm"); if(f) f.addEventListener("submit", function(e){ e.preventDefault(); if(!el("accountLoginPane").hidden)login(); });
     var fp = el("accountForgotBtn"); if(fp) fp.addEventListener("click", function(e){ e.preventDefault(); resetPassword(); });
   }
 
   async function resetPassword(){
-    var email = (el("accountEmailInput").value||"").trim();
+    var email = accountEmail("login") || accountEmail("register");
     if(!email){ msg("Renseigne d'abord ton email."); return; }
     setLoading(true); clearMsg();
     try{
