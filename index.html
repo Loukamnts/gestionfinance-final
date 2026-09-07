@@ -1648,6 +1648,10 @@
   .sharing-scope-card > input:checked + .sharing-scope-copy .sharing-scope-switch::after { transform: translateX(14px); background: var(--button-primary-text); }
   .sharing-access-redesign .sharing-security-note { padding: 10px 12px; border-left: 3px solid var(--accent); background: color-mix(in srgb, var(--accent), transparent 93%); color: var(--muted); font-size: .78rem; }
   .sharing-dataset-list { display: grid; gap: 12px; }
+  .sharing-year-picker { display: grid; gap: 6px; max-width: 440px; }
+  .sharing-year-picker label { display: grid; gap: 6px; color: var(--muted); font-size: .76rem; font-weight: 800; }
+  .sharing-year-select { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid var(--line-strong); border-radius: calc(var(--control-radius) - 3px); background: var(--input-bg); color: var(--text); font: 750 .88rem var(--font-body); }
+  .sharing-year-select:focus { outline: 2px solid color-mix(in srgb, var(--accent), transparent 45%); outline-offset: 2px; }
   .sharing-dataset-card { display: grid; gap: 12px; padding: 15px; border: 1px solid var(--line); border-radius: calc(var(--radius) - 6px); background: var(--input-bg); }
   .sharing-dataset-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .sharing-dataset-head h5 { margin: 0; color: var(--text); font: 850 .92rem var(--font-heading); }
@@ -1669,6 +1673,32 @@
     .sharing-dataset-status { white-space: normal; }
     .sharing-save-bar { align-items: stretch; flex-direction: column; padding: 13px 15px calc(13px + env(safe-area-inset-bottom, 0px)); }
     .sharing-save-bar .sharing-action { width: 100%; }
+  }
+  /* Accueil et partage : contrôles regroupés, sans défilement horizontal. */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  #dashboardPage .dashboard-control-row { grid-template-columns: minmax(145px, .8fr) minmax(0, 1.4fr); padding: 9px 12px; gap: 14px; }
+  #dashboardPage .dashboard-toolbar-status { border-right: 1px solid var(--line); padding-right: 14px; }
+  #dashboardPage .dashboard-controls { display: flex; align-items: flex-end; justify-content: flex-end; gap: 10px; margin: 0; }
+  #dashboardPage .dashboard-control-group { display: grid; gap: 4px; min-width: 132px; }
+  #dashboardPage .dashboard-period-group { min-width: 230px; }
+  #dashboardPage .dashboard-group-label { color: var(--muted); font: 800 .64rem var(--font-body); letter-spacing: .06em; text-transform: uppercase; }
+  #dashboardPage .dashboard-period-fields { display: grid; grid-template-columns: 1fr 1.12fr; gap: 6px; }
+  #dashboardPage .dashboard-controls label, #dashboardPage .dashboard-controls label:nth-child(2), #dashboardPage .dashboard-controls label:nth-child(3) { min-width: 0; }
+  #dashboardPage .dashboard-controls label > span:not(.sr-only) { display: none; }
+  #dashboardPage .dashboard-controls .sync-sheet-btn { min-width: auto; min-height: 36px; padding: 8px 11px; white-space: nowrap; }
+  @media (max-width: 920px) {
+    #dashboardPage .dashboard-control-row { grid-template-columns: 1fr; }
+    #dashboardPage .dashboard-toolbar-status { border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 8px; }
+    #dashboardPage .dashboard-controls { justify-content: flex-start; }
+  }
+  @media (max-width: 560px) {
+    #dashboardPage .dashboard-control-row { padding: 10px; gap: 9px; }
+    #dashboardPage .dashboard-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); width: 100%; gap: 8px; }
+    #dashboardPage .dashboard-control-group, #dashboardPage .dashboard-period-group { min-width: 0; }
+    #dashboardPage .dashboard-period-group { grid-column: 1 / -1; }
+    #dashboardPage .dashboard-controls .sync-sheet-btn { grid-column: span 2; justify-content: center; }
+    .sheet-status-tooltip { position: fixed; left: 14px; right: 14px; bottom: 16px; width: auto; min-width: 0; max-width: none; transform: translateY(4px); }
+    .sheet-status-info:hover .sheet-status-tooltip { transform: translateY(0); }
   }
   </style>
 </head>
@@ -1742,10 +1772,10 @@
               </span>
             </span>
           </div>
-          <div class="dashboard-controls">
-            <label><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label><label><span>Mois</span><select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
-            <label><span>Vue</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Camembert</option><option value="grouped">Comparatif — tous les mois</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label>
-            <button type="button" id="syncSheetButton" class="sync-sheet-btn" title="Recharger les données du tableur dans le tableau de bord" aria-label="Recharger les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Recharger</span></button>
+          <div class="dashboard-controls" aria-label="Filtres du tableau de bord">
+            <div class="dashboard-control-group dashboard-period-group"><span class="dashboard-group-label">Période</span><div class="dashboard-period-fields"><label><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label><label><span>Mois</span><select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label></div></div>
+            <div class="dashboard-control-group"><span class="dashboard-group-label">Graphique</span><label><span class="sr-only">Type de graphique</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Répartition</option><option value="grouped">Comparatif annuel</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label></div>
+            <button type="button" id="syncSheetButton" class="sync-sheet-btn" title="Mettre à jour le tableau de bord depuis le tableur" aria-label="Synchroniser les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Synchroniser</span></button>
           </div>
         </section>
         <section class="latest-update-banner" id="latestUpdateBanner" hidden aria-live="polite">
