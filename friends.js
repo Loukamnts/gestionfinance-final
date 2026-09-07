@@ -113,7 +113,7 @@
     var hero=el("header","sharing-access-hero");
     var avatar=el("span","sharing-access-avatar",String(friend.displayName||"A").trim().slice(0,1).toLocaleUpperCase("fr"));
     var heroCopy=el("div","sharing-access-hero-copy");
-    heroCopy.append(el("span","eyebrow","Partage en lecture seule"),el("h3","","Accès de "+friend.displayName),el("p","","Tu restes propriétaire de tes données. Rien n’est visible tant que tu n’as pas enregistré une sélection."));
+    heroCopy.append(el("span","eyebrow","Partage en lecture seule"),el("h3","","Accès de "+friend.displayName),el("p","","Tu choisis précisément ce qui est visible. Ton ami ne pourra jamais modifier ton tableur."));
     hero.append(avatar,heroCopy);root.append(hero);
 
     var scopes=el("section","sharing-step sharing-scope-step");
@@ -138,38 +138,43 @@
     var dataStep=el("section","sharing-step sharing-data-step");
     var dataHeading=el("div","sharing-step-heading");
     dataHeading.append(el("span","sharing-step-number","2"));
-    var dataHeadingCopy=el("div");dataHeadingCopy.append(el("h4","","Choisir les données visibles"),el("p","","La sélection se fait feuille par feuille : mois × lignes."));dataHeading.append(dataHeadingCopy);dataStep.append(dataHeading);
-    var sheetList=el("div","sharing-dataset-list");
+    var dataHeadingCopy=el("div");dataHeadingCopy.append(el("h4","","Choisir les données visibles"),el("p","","Sélectionne une année, puis les colonnes (mois) et les lignes autorisées."));dataHeading.append(dataHeadingCopy);dataStep.append(dataHeading);
+    var picker=el("div","sharing-year-picker"),pickerLabel=el("label","","Année ou tableur à configurer"),sheetPicker=document.createElement("select"),sheetHost=el("div","sharing-dataset-list");
+    sheetPicker.className="sharing-year-select";sheetPicker.setAttribute("aria-label","Année ou tableur à configurer");
+    table.sheets.forEach(function(sheet,index){var option=document.createElement("option"),year=yearOf(sheet);option.value=String(index);option.textContent=(year?"Année "+year+" — ":"")+String(sheet.name||("Tableur "+(index+1)));sheetPicker.append(option);});
+    pickerLabel.append(sheetPicker);picker.append(pickerLabel);dataStep.append(picker,sheetHost);
     var save;
     var summary=el("p","sharing-editor-summary","");
-    var sheetStatus={};
     function updateSummary(){
-      var cells=ruleCount(selection),active=permissions.can_view_sheet||permissions.can_view_dashboard;
-      Object.keys(sheetStatus).forEach(function(id){var state=selection[id],status=sheetStatus[id];if(!state||!status)return;status.textContent=state.months.size+" mois · "+state.rows.size+" ligne"+(state.rows.size>1?"s":"");});
+      var cells=ruleCount(selection),active=permissions.can_view_sheet||permissions.can_view_dashboard,configured=[];
+      table.sheets.forEach(function(sheet,index){var state=selection[idOf(sheet,index)];if(state&&state.months.size&&state.rows.size)configured.push({sheet:sheet,index:index,state:state});});
       if(!active)summary.textContent="Aucun écran activé : aucune donnée ne sera partagée.";
-      else if(!cells)summary.textContent="Choisis au moins un mois et une ligne avant d’enregistrer.";
-      else summary.textContent=cells+" cellule"+(cells>1?"s":"")+" seront visibles par "+friend.displayName+" en lecture seule.";
-      if(save){save.disabled=active&&!cells;save.textContent=active?"Enregistrer l’accès":"Désactiver tout partage";save.title=save.disabled?"Sélectionne au moins un mois et une ligne":"";}
+      else if(!cells)summary.textContent="Choisis au moins une colonne (mois) et une ligne avant d’enregistrer.";
+      else if(configured.length===1){var item=configured[0],cols=Array.from(item.state.months).sort(function(a,b){return a-b;}).map(function(column){return headerOf(item.sheet,column);}),monthLabel=cols.length===1?cols[0]:cols[0]+" à "+cols[cols.length-1],year=yearOf(item.sheet)||String(item.sheet.name||"");summary.textContent=friend.displayName+" verra "+item.state.rows.size+" ligne"+(item.state.rows.size>1?"s":"")+", de "+monthLabel+" "+year+", en lecture seule.";}
+      else summary.textContent=friend.displayName+" verra des données sélectionnées sur "+configured.length+" années/tableurs, en lecture seule.";
+      if(save){save.disabled=active&&!cells;save.textContent=active?"Enregistrer l’accès":"Désactiver tout partage";save.title=save.disabled?"Sélectionne au moins une colonne et une ligne":"";}
     }
-    table.sheets.forEach(function(sheet,index){
+    function renderDataset(index){
+      var sheet=table.sheets[index];
       var id=idOf(sheet,index),available=usefulRows(sheet),monthCount=Math.min(12,Number(sheet.cols||12));
       if(!selection[id])selection[id]={months:new Set(),rows:new Set()};
       var card=el("section","sharing-dataset-card"),head=el("div","sharing-dataset-head"),headCopy=el("div"),status=el("span","sharing-dataset-status","");
-      headCopy.append(el("h5","",String(sheet.name||("Feuille "+(index+1)))),el("p","",available.length+" ligne"+(available.length>1?"s":"")+" disponible"+(available.length>1?"s":"")));head.append(headCopy,status);sheetStatus[id]=status;
+      headCopy.append(el("h5","",String(sheet.name||("Feuille "+(index+1)))),el("p","",available.length+" ligne"+(available.length>1?"s":"")+" disponible"+(available.length>1?"s":"")));head.append(headCopy,status);
       var quick=el("div","sharing-quick-actions"),months=el("div","sharing-month-grid"),rows=el("div","sharing-row-list");
-      function syncInputs(){months.querySelectorAll("input").forEach(function(input){input.checked=selection[id].months.has(Number(input.value));});rows.querySelectorAll("input").forEach(function(input){input.checked=selection[id].rows.has(Number(input.value));});updateSummary();}
+      function syncInputs(){months.querySelectorAll("input").forEach(function(input){input.checked=selection[id].months.has(Number(input.value));});rows.querySelectorAll("input").forEach(function(input){input.checked=selection[id].rows.has(Number(input.value));});status.textContent=selection[id].months.size+" colonne"+(selection[id].months.size>1?"s":"")+" · "+selection[id].rows.size+" ligne"+(selection[id].rows.size>1?"s":"");updateSummary();}
       quick.append(
-        button("Tout sélectionner",function(){for(var m=0;m<monthCount;m++)selection[id].months.add(m);available.forEach(function(row){selection[id].rows.add(row);});syncInputs();}),
-        button("Tout effacer",function(){selection[id].months.clear();selection[id].rows.clear();syncInputs();})
+        button("Tout cocher",function(){for(var m=0;m<monthCount;m++)selection[id].months.add(m);available.forEach(function(row){selection[id].rows.add(row);});syncInputs();}),
+        button("Tout décocher",function(){selection[id].months.clear();selection[id].rows.clear();syncInputs();})
       );
-      card.append(head,quick,el("p","sharing-selection-label","Mois autorisés"));
-      for(var month=0;month<monthCount;month++){(function(column){var label=el("label","sharing-month-choice"),input=document.createElement("input");input.type="checkbox";input.value=String(column);input.checked=selection[id].months.has(column);input.addEventListener("change",function(){if(input.checked)selection[id].months.add(column);else selection[id].months.delete(column);updateSummary();});label.append(input,document.createTextNode(headerOf(sheet,column)));months.append(label);})(month);}
+      card.append(head,quick,el("p","sharing-selection-label","Colonnes autorisées (mois)"));
+      for(var month=0;month<monthCount;month++){(function(column){var label=el("label","sharing-month-choice"),input=document.createElement("input");input.type="checkbox";input.value=String(column);input.checked=selection[id].months.has(column);input.addEventListener("change",function(){if(input.checked)selection[id].months.add(column);else selection[id].months.delete(column);syncInputs();});label.append(input,document.createTextNode(headerOf(sheet,column)));months.append(label);})(month);}
       card.append(months,el("p","sharing-selection-label","Lignes autorisées"));
       if(!available.length)rows.append(el("div","sharing-empty","Aucune ligne renseignée dans cette feuille."));
-      available.forEach(function(row){var label=el("label","sharing-row-choice"),input=document.createElement("input");input.type="checkbox";input.value=String(row);input.checked=selection[id].rows.has(row);input.addEventListener("change",function(){if(input.checked)selection[id].rows.add(row);else selection[id].rows.delete(row);updateSummary();});label.append(input,document.createTextNode(labelOf(sheet,row)));rows.append(label);});
-      card.append(rows);sheetList.append(card);
-    });
-    dataStep.append(sheetList);root.append(dataStep);
+      available.forEach(function(row){var label=el("label","sharing-row-choice"),input=document.createElement("input");input.type="checkbox";input.value=String(row);input.checked=selection[id].rows.has(row);input.addEventListener("change",function(){if(input.checked)selection[id].rows.add(row);else selection[id].rows.delete(row);syncInputs();});label.append(input,document.createTextNode(labelOf(sheet,row)));rows.append(label);});
+      card.append(rows);sheetHost.replaceChildren(card);syncInputs();
+    }
+    sheetPicker.addEventListener("change",function(){renderDataset(Number(sheetPicker.value)||0);});
+    root.append(dataStep);
 
     var footer=el("div","sharing-editor-footer sharing-save-bar");
     var feedback=el("div","sharing-feedback-slot");
@@ -180,14 +185,14 @@
       if(window.setPage)window.setPage("sharing");
     },"button-primary");
     var footerCopy=el("div","sharing-save-copy");footerCopy.append(summary,feedback);footer.append(footerCopy,save);root.append(footer);
-    target.replaceChildren(root);updateSummary();
+    target.replaceChildren(root);renderDataset(0);updateSummary();
   }
   async function renderSharing(container,options){
     options=options||{};if(!container)return;var me=user();if(!me){container.replaceChildren(el("div","sharing-empty","Connecte-toi pour gérer les invitations et les accès."));return;}if(!options.force&&container.dataset.sharingReady==="true")return;if(!container.childElementCount)container.replaceChildren(el("div","sharing-empty","Chargement de tes partages…"));
     var data=await loadFriends({force:!!options.force}),layout=el("div","sharing-layout"),overview=el("section","sharing-overview sharing-card wide"),copy=el("div","sharing-overview-copy");copy.append(el("span","eyebrow","Partage et amis"),el("h3","","Garde le contrôle de tes données"),el("p","","Les accès sont privés par défaut. Chaque partage est en lecture seule et peut être retiré à tout moment."));var stats=el("div","sharing-stats"),receivedCount=data.friends.filter(function(friend){var permissions=friend.receivedPermissions||defaults();return permissions.can_view_dashboard||permissions.can_view_sheet;}).length;[["Amis",data.friends.length],["Demandes",data.pending.length],["Accès reçus",receivedCount]].forEach(function(item){var stat=el("div","sharing-stat");stat.append(el("strong","",String(item[1])),el("span","",item[0]));stats.append(stat);});overview.append(copy,stats);layout.append(overview);if(data.error)layout.append(el("div","sharing-empty",data.error));
     var invite=el("section","sharing-card sharing-invite");invite.append(el("h3","","Inviter un proche"),el("p","","Entre son adresse e-mail. Il devra accepter avant que l’un de vous puisse partager quoi que ce soit."));var email=document.createElement("input");email.type="email";email.placeholder="nom@exemple.com";email.autocomplete="email";var inviteFeedback=el("div","sharing-feedback-slot"),send=button("Envoyer",async function(){inviteFeedback.replaceChildren();send.disabled=true;var result=await sendRequest(email.value.trim());if(result.error){inviteFeedback.append(notice(result.error,"error"));send.disabled=false;return;}email.value="";await renderSharing(container,{force:true});});var inputRow=el("div","sharing-email");inputRow.append(email,send);invite.append(inputRow,inviteFeedback);layout.append(invite);
     var requests=el("section","sharing-card sharing-requests");requests.append(el("h3","","Demandes reçues"),el("p","","Accepte uniquement les personnes que tu connais."));if(!data.pending.length)requests.append(el("div","sharing-empty","Aucune demande en attente."));data.pending.forEach(function(friend){requests.append(person(friend,friend.email,[button("Accepter",async function(){var result=await respond(friend.friendshipId,true);if(result.error){requests.append(notice(result.error,"error"));return;}renderSharing(container,{force:true});},"button-primary"),button("Refuser",async function(){var result=await respond(friend.friendshipId,false);if(result.error){requests.append(notice(result.error,"error"));return;}renderSharing(container,{force:true});})]));});if(data.sent.length)requests.append(el("p","sharing-sent-note","En attente : "+data.sent.map(function(friend){return friend.displayName;}).join(", ")+"."));layout.append(requests);
-    var manage=el("section","sharing-card wide sharing-manage");manage.append(el("h3","","Ce que tu partages"),el("p","","Choisis un ami, puis les mois et les lignes visibles. Sans sélection, aucun contenu n’est partagé."));if(!data.friends.length)manage.append(el("div","sharing-empty","Ajoute un ami pour ouvrir les réglages de partage."));data.friends.forEach(function(friend){manage.append(person(friend,accessLabel(friend.permissions||defaults()),[button("Gérer l’accès",function(){if(window.setPage)window.setPage("sharingAccess");setTimeout(function(){renderSharingAccess(friend.friendId);},0);},"button-primary"),button("Retirer",async function(){if(!window.confirm("Retirer "+friend.displayName+" de tes amis ?"))return;var result=await removeFriend(friend.friendshipId);if(result.error){manage.append(notice(result.error,"error"));return;}renderSharing(container,{force:true});},"sharing-action-danger")]));});layout.append(manage);
+    var manage=el("section","sharing-card wide sharing-manage");manage.append(el("h3","","Mes accès accordés"),el("p","","Pour chaque ami, sélectionne les années, les colonnes et les lignes visibles. Sans sélection, rien n’est partagé."));if(!data.friends.length)manage.append(el("div","sharing-empty","Ajoute un ami pour ouvrir les réglages de partage."));data.friends.forEach(function(friend){manage.append(person(friend,accessLabel(friend.permissions||defaults()),[button("Configurer l’accès",function(){if(window.setPage)window.setPage("sharingAccess");setTimeout(function(){renderSharingAccess(friend.friendId);},0);},"button-primary"),button("Retirer",async function(){if(!window.confirm("Retirer "+friend.displayName+" de tes amis ?"))return;var result=await removeFriend(friend.friendshipId);if(result.error){manage.append(notice(result.error,"error"));return;}renderSharing(container,{force:true});},"sharing-action-danger")]));});layout.append(manage);
     var received=el("section","sharing-card wide sharing-received");received.append(el("h3","","Partagé avec moi"),el("p","","Tu peux seulement consulter ce que tes amis t’ont explicitement autorisé."));var hasAccess=false;data.friends.forEach(function(friend){var permissions=friend.receivedPermissions||defaults();if(!permissions.can_view_dashboard&&!permissions.can_view_sheet)return;hasAccess=true;var actions=[];if(permissions.can_view_dashboard)actions.push(button("Voir son dashboard",function(){viewShared(friend,"dashboard");}));if(permissions.can_view_sheet)actions.push(button("Voir son tableur",function(){viewShared(friend,"sheet");},"button-primary"));received.append(person(friend,accessLabel(permissions),actions));});if(!hasAccess)received.append(el("div","sharing-empty","Aucun ami ne partage encore de contenu avec toi."));layout.append(received);container.replaceChildren(layout);container.dataset.sharingReady="true";
   }
   window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots};
