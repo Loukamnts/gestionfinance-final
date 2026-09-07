@@ -65,6 +65,7 @@
               var overlay = $("onboardingOverlay"), blocker = $("wizardBlocker");
               if (overlay) overlay.classList.add("hidden");
               if (blocker) blocker.classList.add("hidden");
+              document.body.classList.remove("onboarding-active");
               if (typeof window.setPage === "function") window.setPage("dashboard");
               return true;
             }
@@ -72,7 +73,9 @@
           await wait(550);
         }
       }
-      startWizard(true);
+      // Ne jamais effacer un tableur local simplement parce qu'un appareil
+      // n'a pas encore de marqueur de tutoriel.
+      startWizard(false);
       return false;
     } finally {
       onboardingStartupInFlight = false;
@@ -81,7 +84,7 @@
 
   function startWizard(clearData) {
     currentStep = 0;
-    wizardData = { startingCash: "", accounts: "", incomeAmount: "", incomeFreq: "mensuel", expenses: "", savingsGoal: "", theme: "glass", mode: "dark", startingMonth: "", currentAmount: "" };
+    wizardData = { startingCash: "", accounts: "", incomeAmount: "", incomeFreq: "mensuel", expenses: "", savingsGoal: "", theme: "glass", mode: "dark", startingMonth: "", currentAmount: "", clearOnFinish: !!clearData };
 
     // Vider le tableur si demandé (bouton admin ou premier lancement)
     if (clearData) {
@@ -90,6 +93,7 @@
 
     const overlay = $("onboardingOverlay");
     if (!overlay) return;
+    document.body.classList.add("onboarding-active");
     overlay.classList.remove("hidden");
     // Active le calque bloquant pendant le wizard
     const blocker = $("wizardBlocker");
@@ -169,6 +173,7 @@
     // Désactive le calque bloquant
     const blocker = $("wizardBlocker");
     if (blocker) blocker.classList.add("hidden");
+    document.body.classList.remove("onboarding-active");
   }
 
   function renderWizardStep() {
@@ -305,25 +310,25 @@
     var currentMonth = d.startingMonth || new Date().toISOString().slice(0,7);
     return `
       <div class="wizard-step active">
-        <h3>Situation financière</h3>
-        <p class="step-desc">Quelques informations pour personnaliser ton tableau de bord.</p>
+        <h3>Ton espace, à ton rythme</h3>
+        <p class="step-desc">Ajoute un solde de départ maintenant, ou commence avec un tableur vide.</p>
         <div class="wizard-field">
-          <label>Argent actuel (€)</label>
-          <input type="number" id="wbCurrentAmount" min="0" step="0.01" placeholder="Ex : 1000" value="${d.currentAmount || ''}" oninput="wizardData.currentAmount=this.value">
-          <p class="field-hint">Ce montant sera utilisé comme solde de départ dans le tableur.</p>
+          <label>Solde de départ (€) <span class="optional-mark">facultatif</span></label>
+          <input type="number" id="wbCurrentAmount" min="0" step="0.01" inputmode="decimal" placeholder="Ex. 1 000" value="${d.currentAmount || ''}" oninput="wizardData.currentAmount=this.value">
+          <p class="field-hint">Le montant disponible au début du mois choisi. Il sera ajouté à ton tableur sans modifier les autres données.</p>
         </div>
         <div class="wizard-field">
-          <label>Mois de départ <span class="required-mark">*</span></label>
-          <input type="month" id="wbStartingMonth" required value="${currentMonth}" oninput="wizardData.startingMonth=this.value" class="wizard-month-input">
-          <p class="field-hint">Le solde ne sera calculé qu'à partir de ce mois. Les données antérieures seront ignorées.</p>
+          <label>Mois du solde de départ</label>
+          <input type="month" id="wbStartingMonth" value="${currentMonth}" oninput="wizardData.startingMonth=this.value" class="wizard-month-input">
         </div>
-        <div class="wizard-field">
-          <label>Comptes utilisés <span class="required-mark">*</span></label>
-          <input type="text" id="wbAccounts" required placeholder="Ex : Revolut, BoursoBank, Livret A" value="${d.accounts}" oninput="wizardData.accounts=this.value">
+        <div class="wizard-info-box wizard-start-info">
+          <strong>Tout le reste se règle dans le tableur.</strong><br>
+          Comptes, lignes, catégories et objectifs d’épargne restent modifiables quand tu le souhaites.
         </div>
-        <div class="wizard-field">
-          <label>Objectif d'épargne (€) <span class="required-mark">*</span></label>
-          <input type="number" id="wbSavings" required min="0" step="0.01" placeholder="Ex : 500" value="${d.savingsGoal}" oninput="wizardData.savingsGoal=this.value">
+        <div class="wizard-mini-list" aria-label="Ce qui est possible">
+          <span>✓ Aucun compte imposé</span>
+          <span>✓ Aucun objectif obligatoire</span>
+          <span>✓ Solde modifiable plus tard</span>
         </div>
       </div>
     `;
@@ -405,7 +410,7 @@
     }
     closeWizard();
     // Nettoie le tableur seulement si aucun fichier n'a été importé
-    if (!wizardData.importedFile) {
+    if (wizardData.clearOnFinish && !wizardData.importedFile) {
       clearSpreadsheetData();
     }
     // Si un fichier a été importé, s'assurer qu'il est sauvegardé
@@ -490,6 +495,7 @@
           var overlay = $("onboardingOverlay"), blocker = $("wizardBlocker");
           if (overlay) overlay.classList.add("hidden");
           if (blocker) blocker.classList.add("hidden");
+          document.body.classList.remove("onboarding-active");
           if (typeof window.setPage === "function") window.setPage("dashboard");
           return;
         }
@@ -593,8 +599,8 @@
       action: "Suivant",
     },
     {
-      title: "Bouton Recharger",
-      text: "Clique ici pour recharger les données du tableur vers le tableau de bord.",
+      title: "Synchroniser le tableau de bord",
+      text: "Ce bouton met à jour les graphiques à partir de ton tableur, seulement lorsque tu le demandes.",
       target: "#syncSheetButton",
       action: "Suivant",
     },
@@ -619,9 +625,9 @@
       ensureVisible: true,
     },
     {
-      title: "Bouton Paramètres",
-      text: "Clique ici pour accéder aux paramètres, changer de thème et gérer tes amis.",
-      target: "[data-page='settings'], #settingsButton, .nav-item:nth-child(3)",
+      title: "Profil et réglages",
+      text: "Retrouve ici le thème, ton compte, l’aide et les réglages de l’application.",
+      target: ".profile-trigger, [data-page='settings'], #settingsButton, .nav-item:nth-child(3)",
       action: "Terminer",
       isLast: true,
     },
@@ -633,6 +639,7 @@
     tutorialIndex = 0;
     const overlay = $("tutorialOverlay");
     if (!overlay) return;
+    document.body.classList.add("tutorial-active");
     overlay.classList.remove("hidden");
     // Active le calque bloquant
     const blocker = $("tutorialBlocker");
@@ -655,6 +662,7 @@
     // Désactive le calque bloquant — le site redevient cliquable
     const blocker = $("tutorialBlocker");
     if (blocker) blocker.classList.add("hidden");
+    document.body.classList.remove("tutorial-active");
     store(STORAGE.tutorial, true);
     // Nettoie les références pour arrêter le repositionnement au scroll
     currentTutorialTarget = null;
