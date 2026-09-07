@@ -532,7 +532,7 @@
           if (submitBtn) submitBtn.disabled = false;
           continueAfterSuccessfulAuth(statusEl);
         } else {
-          if (statusEl) statusEl.textContent = "Compte créé ! Vérifie ton email pour confirmer.";
+          if (statusEl) statusEl.textContent = "Un lien sécurisé vient d’être envoyé. Ouvre-le pour confirmer ton adresse ; tu reviendras ensuite connecté.";
           if (submitBtn) submitBtn.disabled = false;
         }
       }).catch(function(e) {
