@@ -12,7 +12,7 @@
   function button(text,handler,cls){var node=el("button","sharing-action"+(cls?" "+cls:""),text);node.type="button";node.addEventListener("click",handler);return node;}
   function notice(text,kind){var node=el("p","sf-notice"+(kind?" is-"+kind:""),text);node.setAttribute("role","status");return node;}
   function defaults(){return{can_view_dashboard:false,can_view_sheet:false,can_view_categories:false};}
-  function money(value){return Number(value||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});}
+  function money(value){if(window.GFI18n)return window.GFI18n.money(value);return Number(value||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});}
   function normal(value){return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();}
   function snapshot(){try{return window.FinanceSheet&&window.FinanceSheet.getSnapshot?window.FinanceSheet.getSnapshot():null;}catch(e){return null;}}
   function yearOf(sheet){var match=String(sheet&&sheet.name||"").match(/(19\d{2}|20\d{2}|21\d{2})/);return match?Number(match[1]):0;}
@@ -106,7 +106,8 @@
   }
   async function loadShared(friendId,kind){var client=sb(),me=user();if(!client||!me)return{error:"Non connecté"};var table=kind==="dashboard"?"finance_shared_dashboard_snapshots":"finance_shared_sheet_snapshots";try{var result=await client.from(table).select("payload").eq("owner_id",friendId).eq("friend_id",me.id).maybeSingle();if(result.error)return{error:"Le chargement a échoué. Vérifie ta connexion puis réessaie."};if(!result.data||!result.data.payload)return{error:"Cet accès a peut-être été retiré, ou ton ami doit enregistrer à nouveau son partage."};return{payload:typeof result.data.payload==="string"?JSON.parse(result.data.payload):result.data.payload};}catch(e){return{error:errorText(e)};}}
   // Interface de partage : aucune écriture tant que l'accès n'est pas enregistré.
-  var renderVersion=0,viewVersion=0,selectedTab="friends",nextMessage="";
+  var renderVersion=0,viewVersion=0,selectedTab="friends",nextMessage="",sharedDashboardDispose=null;
+  function disposeSharedDashboard(){if(sharedDashboardDispose){sharedDashboardDispose();sharedDashboardDispose=null;}}
   function icon(name){
     var paths={
       people:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -129,7 +130,7 @@
   function tag(text,graphic,active){var node=el("span","sf-tag"+(active?" is-active":""),text);if(graphic)node.prepend(icon(graphic));return node;}
   function identity(friend,level){
     var root=el("div","sf-identity"),avatar=el("span","sf-avatar",String(friend.displayName||"A").trim().slice(0,2).toLocaleUpperCase("fr")),copy=el("div","sf-identity-copy");
-    avatar.setAttribute("aria-hidden","true");copy.append(el(level||"h3","",friend.displayName),el("p","",friend.email));root.append(avatar,copy);return root;
+    avatar.setAttribute("aria-hidden","true");copy.setAttribute("translate","no");copy.append(el(level||"h3","",friend.displayName),el("p","",friend.email));root.append(avatar,copy);return root;
   }
   function emptyState(title,description,graphic,cta){
     var root=el("div","sf-empty");root.append(icon(graphic||"people"),el("h3","",title),el("p","",description));if(cta)root.append(cta);return root;
@@ -175,7 +176,7 @@
     card.append(head,mine,received);return card;
   }
   function closeSharedView(){
-    viewVersion++;var target=document.getElementById("sharedView"),home=document.getElementById("sharingContainer");
+    disposeSharedDashboard();viewVersion++;var target=document.getElementById("sharedView"),home=document.getElementById("sharingContainer");
     if(target){target.hidden=true;target.replaceChildren();}if(home)home.hidden=false;
   }
   function viewHeader(container,friend,title){
@@ -195,14 +196,12 @@
     });
   }
   function renderSharedDashboard(container,data,friend){
-    viewHeader(container,friend,"Tableau de bord partagé");container.append(el("p","sf-muted","Les montants ci-dessous portent uniquement sur les données partagées."));
-    var months=data&&data.months||[];if(!months.length){container.append(emptyState("Rien à afficher","Ton ami peut mettre à jour son partage depuis son espace.","chart"));return;}
-    var income=months.reduce(function(s,m){return s+Number(m.salary||0);},0),expenses=months.reduce(function(s,m){return s+Math.abs(Number(m.expenses||0));},0),savings=months.reduce(function(s,m){return s+Math.abs(Number(m.savingsTotal||0));},0),grid=el("div","sf-metrics");
-    [["Revenus",money(income)],["Dépenses",money(expenses)],["Épargne",money(savings)]].forEach(function(metric){var card=el("div","sf-metric");card.append(el("span","sf-muted",metric[0]),el("strong","",metric[1]));grid.append(card);});container.append(grid,el("h3","sf-sheet-heading","Mois partagés"));
-    var list=el("div","sf-months");months.forEach(function(month){var line=el("div","sf-month");line.append(el("strong","",month.label),el("span","sf-muted","Revenus − dépenses"),el("strong","",money(Number(month.salary||0)-Math.abs(Number(month.expenses||0)))));list.append(line);});container.append(list);
+    viewHeader(container,friend,"Tableau de bord partagé");
+    container.append(el("p","sf-muted","Les graphiques et les montants portent uniquement sur les données autorisées."));
+    if(window.SharedDashboard)sharedDashboardDispose=window.SharedDashboard.render(container,data);
   }
   async function viewShared(friend,kind){
-    var version=++viewVersion,target=document.getElementById("sharedView"),home=document.getElementById("sharingContainer");if(!target)return;
+    disposeSharedDashboard();var version=++viewVersion,target=document.getElementById("sharedView"),home=document.getElementById("sharingContainer");if(!target)return;
     if(home)home.hidden=true;target.className="sf-shared";target.hidden=false;target.replaceChildren(action("Mes amis",closeSharedView,"back","back"),notice("Ouverture du partage…"));
     var result=await loadShared(friend.friendId,kind);if(version!==viewVersion)return;
     if(result.error){target.replaceChildren(action("Mes amis",closeSharedView,"back","back"),emptyState("Ce partage n’est pas disponible",result.error,"lock",action("Réessayer",function(){viewShared(friend,kind);},"secondary","refresh")));return;}
@@ -236,7 +235,7 @@
     var dataset=el("section","sf-section sf-dataset");dataset.append(step(2,"Les données visibles","Coche les mois en haut et les lignes à gauche. Les cellules colorées seront partagées."));
     var tools=el("div","sf-table-tools"),pickerLabel=el("label","sf-field","Année / feuille"),picker=document.createElement("select"),host=el("div","sf-dataset-host");picker.setAttribute("aria-label","Année ou feuille à partager");
     sheets.forEach(function(sheet,i){var option=el("option","",sheet.name||("Feuille "+(i+1)));option.value=String(i);picker.append(option);});pickerLabel.append(picker);
-    var clear=action("Effacer la sélection",function(){var state=selection[idOf(sheets[Number(picker.value)],Number(picker.value))];state.rows.clear();state.months.clear();syncDataset();},"text");
+    var clear=action("Effacer la sélection",function(){var state=selection[idOf(sheets[Number(picker.value)],Number(picker.value))];state.rows.clear();state.months.clear();syncDataset();},"clear","close");
     tools.append(pickerLabel,clear);dataset.append(tools,host);main.append(dataset);
     var summaryTitle=el("h3","","Résumé de l’accès"),summaryText=el("p","sf-summary-text"),summaryItems=el("div","sf-summary-items"),summaryStatus=tag("Aucun partage","lock"),countText=el("p","sf-summary-count"),save=action("Enregistrer l’accès",async function(){
       if(saving)return;saving=true;feedback.replaceChildren();updateSummary();root.querySelectorAll("input,select").forEach(function(n){n.disabled=true;});
@@ -282,7 +281,7 @@
         label.append(input,el("span","",headerOf(sheet,c)));th.append(label);input.addEventListener("change",function(){if(input.checked)state.months.add(c);else state.months.delete(c);syncDataset();});colInputs.push({input:input,label:th,value:c});tr.append(th);})(column);}
       head.append(tr);grid.append(head);var body=el("tbody");
       available.forEach(function(r){var line=el("tr"),th=el("th"),label=el("label","sf-row-check"),input=document.createElement("input");th.scope="row";input.type="checkbox";input.setAttribute("aria-label","Partager "+labelOf(sheet,r));input.addEventListener("change",function(){if(input.checked)state.rows.add(r);else state.rows.delete(r);syncDataset();});
-        label.append(input,el("span","sf-row-number",String(r+1)),el("span","",String(sheet.rowHeaders&&sheet.rowHeaders[r]||("Ligne "+(r+1)))));th.append(label);line.append(th);rowInputs.push({input:input,label:th,value:r});
+        label.append(input,el("span","sf-row-number",String(r+1)),el("span","sf-user-label",String(sheet.rowHeaders&&sheet.rowHeaders[r]||("Ligne "+(r+1)))));th.append(label);line.append(th);rowInputs.push({input:input,label:th,value:r});
         for(var c=0;c<cols;c++){var value=cellValue(values[r+","+c]),td=el("td","",value===""?"—":formatValue(value));cellEntries.push({node:td,row:r,col:c,state:state});line.append(td);}body.append(line);
       });
       grid.append(body);scroll.append(grid);scroll.tabIndex=0;scroll.setAttribute("aria-label","Aperçu du tableur, défilement horizontal et vertical");
@@ -295,9 +294,11 @@
     options=options||{};if(!container)return;container.hidden=false;closeSharedView();var me=user();
     if(!me){container.dataset.sharingReady="";container.replaceChildren(emptyState("Tes finances, à partager avec tes proches","Connecte-toi pour inviter un ami et choisir ce qu’il peut consulter.","people",action("Se connecter",function(){if(window.setPage)window.setPage("settings");},"primary")));return;}
     if(!options.force&&container.dataset.sharingReady===me.id&&container._sharingData===cache.data&&cache.data&&Date.now()-cache.loadedAt<30000)return;
-    var version=++renderVersion;if(!container.childElementCount)container.replaceChildren(notice("Chargement de tes amis…"));
-    var data=await loadFriends({force:!!options.force});if(version!==renderVersion||!user()||user().id!==me.id)return;
-    var shell=el("div","sf-shell"),toolbar=el("div","sf-toolbar"),tabs=el("div","sf-tabs"),content=el("div","sf-tab-content"),refresh=action("Actualiser",function(){renderSharing(container,{force:true});},"icon-button","refresh");tabs.setAttribute("role","tablist");tabs.setAttribute("aria-label","Amis et invitations");
+    var version=++renderVersion,started=Date.now();if(!container.childElementCount)container.replaceChildren(notice("Chargement de tes amis…"));
+    var data=await loadFriends({force:!!options.force});
+    if(options.animated&&Date.now()-started<450)await new Promise(function(resolve){setTimeout(resolve,450-(Date.now()-started));});
+    if(version!==renderVersion||!user()||user().id!==me.id)return;
+    var shell=el("div","sf-shell"),toolbar=el("div","sf-toolbar"),tabs=el("div","sf-tabs"),content=el("div","sf-tab-content"),refresh=action("Actualiser",function(){window.GFUI.withBusy(refresh,function(){return renderSharing(container,{force:true,animated:true});});},"icon-button","refresh");tabs.setAttribute("role","tablist");tabs.setAttribute("aria-label","Amis et invitations");
     var friendsTab=action("Mes amis",function(){chooseTab("friends");}),invitesTab=action("Invitations",function(){chooseTab("invitations");});
     [[friendsTab,"friends",data.friends.length],[invitesTab,"invitations",data.pending.length+data.sent.length]].forEach(function(item){item[0].className="sf-tab";item[0].id="sf-tab-"+item[1];item[0].setAttribute("role","tab");item[0].setAttribute("aria-controls","sf-panel-"+item[1]);item[0].append(el("span","sf-tab-count",String(item[2])));tabs.append(item[0]);});
     tabs.addEventListener("keydown",function(event){if(["ArrowLeft","ArrowRight","Home","End"].includes(event.key)){event.preventDefault();var next=event.key==="Home"?"friends":event.key==="End"?"invitations":selectedTab==="friends"?"invitations":"friends";chooseTab(next);(next==="friends"?friendsTab:invitesTab).focus();}});

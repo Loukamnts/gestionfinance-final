@@ -1774,6 +1774,9 @@
   @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260908-1">
+  <link rel="stylesheet" href="ui-polish.css?v=20260908-r8">
+  <script src="i18n.js?v=20260908-r8"></script>
+  <script src="ui-controls.js?v=20260908-r8" defer></script>
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard">
   <div class="loader" id="loader" aria-live="polite" aria-label="Chargement"><div class="spinner"></div></div>
@@ -1809,7 +1812,7 @@
     <header class="topbar app-header">
       <div class="brand" aria-label="Gestion Finance">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><path d="M12 49h40" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><path d="M18 43V34M31 43V26M44 43V17" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><path d="M16 27 29 14l8 8 13-14" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 8h8v8" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <div class="brand-copy"><span class="eyebrow">Pilotage financier</span><h1>Gestion Finance</h1><p class="subtitle">Tableau de bord · Tableur multi-feuilles · Sync cloud</p></div>
+        <div class="brand-copy"><h1>Gestion Finance</h1></div>
       </div>
       <nav class="desktop-nav" aria-label="Navigation principale">
         <button class="desktop-nav-link" id="desktopHomeButton" type="button" data-page="dashboard">Accueil</button>
@@ -1833,8 +1836,8 @@
     </header>
     <section class="app-page" id="dashboardPage">
       <section class="content">
-        <section class="dashboard-control-row" aria-label="Filtres et statut du tableur">
-          <div class="sheet-status-bar dashboard-toolbar-status" id="sheetStatusBar">
+        <section class="home-toolbar" aria-label="Filtres du tableau de bord">
+          <div class="home-toolbar-top"><h2>Tableau de bord</h2><div class="home-toolbar-actions"><div class="sheet-status-bar dashboard-toolbar-status" id="sheetStatusBar">
             <span class="sheet-status-dot not-loaded" id="sheetStatusDot"></span>
             <span class="sheet-status-label">Tableur</span>
             <span class="sheet-status-info" aria-describedby="sheetStatusHelp">i
@@ -1844,12 +1847,12 @@
                 <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--green,#2ed47a)"></span> Connecté en ligne</span>
               </span>
             </span>
+          </div><button type="button" id="syncSheetButton" class="gf-button gf-refresh" title="Mettre à jour le tableau de bord depuis le tableur" aria-label="Synchroniser les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Actualiser</span></button></div></div>
+          <div class="home-filter-grid">
+            <label class="home-filter"><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
+            <label class="home-filter"><span>Mois</span><select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
+            <label class="home-filter"><span>Vue du graphique</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Répartition</option><option value="grouped">Comparatif annuel</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label>
           </div>
-          <div class="dashboard-controls" aria-label="Filtres du tableau de bord">
-            <div class="dashboard-control-group dashboard-period-group"><span class="dashboard-group-label">Période</span><div class="dashboard-period-fields"><label><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label><label><span>Mois</span><select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label></div></div>
-            <div class="dashboard-control-group"><span class="dashboard-group-label">Graphique</span><label><span class="sr-only">Type de graphique</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Répartition</option><option value="grouped">Comparatif annuel</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label></div>
-          </div>
-          <button type="button" id="syncSheetButton" class="sync-sheet-btn dashboard-sync-button" title="Mettre à jour le tableau de bord depuis le tableur" aria-label="Synchroniser les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Synchroniser</span></button>
         </section>
         <section class="latest-update-banner" id="latestUpdateBanner" hidden aria-live="polite">
           <div><span class="latest-update-kicker">Nouvelle mise à jour</span><strong id="latestUpdateTitle"></strong><p id="latestUpdateText"></p></div>
@@ -2021,17 +2024,20 @@
           </form>
           <div class="account-user" id="accountUserInfo" style="display:none">
             <div class="account-user-info">
-              <div class="account-user-avatar" id="accountUserAvatar"></div>
+              <div class="account-user-avatar" id="accountUserAvatar" translate="no"></div>
               <div>
-                <p>Connecté en tant que</p>
-                <strong id="accountEmailDisplay"></strong>
+                <p class="account-connected-label">Compte connecté</p>
+                <strong id="accountEmailDisplay" translate="no"></strong>
+                <p class="account-connected-note">Ton espace personnel, sur tous tes appareils.</p>
               </div>
             </div>
             <div class="account-user-actions"><button class="account-btn-secondary" id="accountSettingsLogoutBtn" data-account-logout type="button" hidden>Se déconnecter</button></div>
           </div>
+          <div class="account-sync-detail" id="accountSyncDetail" hidden><span>Synchronisation</span><strong id="syncStatusText" role="status">Prêt à synchroniser</strong><p>Les accès de tes amis restent limités à tes choix de partage.</p></div>
           <p class="account-status" id="accountStatus">Non configuré</p>
         </div>
       </section>
+        <section class="settings-section panel language-section"><div><h3>Langue</h3><p>Choisis la langue de l’interface. Tes données ne sont pas traduites.</p></div><div class="language-options" role="group" aria-label="Langue de l’interface"><button type="button" data-language="fr" lang="fr" translate="no" aria-pressed="true">Français</button><button type="button" data-language="en" lang="en" translate="no" aria-pressed="false">English</button></div></section>
         <!-- Section Apparence (thème plus petit) -->
         <section class="settings-section panel"><div class="settings-section-head"><div><h3>Apparence</h3><p>Thème visuel et mode clair/sombre.</p></div></div>
           <div class="theme-grid" role="list">
@@ -2274,7 +2280,7 @@
     function sum(vals){ return vals.reduce((t,v)=>t+(Number(v)||0),0); }
     function maxBy(items,fn){ return items.reduce((best,item)=>!best||fn(item)>fn(best)?item:best,null); }
     function minBy(items,fn){ return items.reduce((best,item)=>!best||fn(item)<fn(best)?item:best,null); }
-    function formatEuro(v){ return euroFormatter.format(Number(v)||0); }
+    function formatEuro(v){ return window.GFI18n?window.GFI18n.money(v):euroFormatter.format(Number(v)||0); }
     function formatPercent(v,total){ return total?`${Math.round((v/total)*100)} %`:"0 %"; }
     function deepMerge(t,s){ const o={...t}; Object.entries(s||{}).forEach(([k,v])=>o[k]=(isPlainObj(v)&&isPlainObj(o[k]))?deepMerge(o[k],v):v); return o; }
     function isPlainObj(v){ return v&&typeof v==="object"&&!Array.isArray(v); }
@@ -2545,6 +2551,7 @@
       const visibleMonths=getVisibleMonths(); if(!visibleMonths.length){ elements.chartTitle.textContent="Répartition du mois"; elements.chartSubtitle.textContent="Importe une source financière pour afficher les graphiques."; elements.emptyState.classList.add("is-visible"); return; }
       if(typeof Chart!=="function"){ elements.chartTitle.textContent="Chart.js indisponible"; elements.chartSubtitle.textContent="Le fichier Chart.js n'a pas pu être chargé depuis le CDN."; elements.emptyState.classList.add("is-visible"); showMessage("Chart.js n'a pas pu être chargé. Vérifie ta connexion internet."); return; }
       const config=getChartConfig(); elements.chartTitle.textContent=config.title; elements.chartSubtitle.textContent=config.subtitle; elements.emptyState.classList.remove("is-visible");
+      if(window.GFI18n){ const tr=window.GFI18n.t; config.chart.data.labels=(config.chart.data.labels||[]).map(label=>tr(label)); config.chart.data.datasets.forEach(ds=>{ if(["Salaire","Dépense","Dépenses","Épargne"].includes(ds.label))ds.label=tr(ds.label); }); }
       state.chart=new Chart(elements.chartCanvas,config.chart); generateCustomLegend(state.chart);
     }
     function generateCustomLegend(chart){
@@ -2583,6 +2590,7 @@
     // THÈMES & APPARENCE (avec persistance de la vue)
     // ═══════════════════════════════════════════════════════════════════════
     function restoreAppearance(){ const savedTheme=safeStore.getItem(STORAGE_KEYS.theme); const savedMode=safeStore.getItem(STORAGE_KEYS.mode); state.appearance.theme=["glass","editorial","brutal"].includes(savedTheme)?savedTheme:"glass"; state.appearance.mode=["dark","light"].includes(savedMode)?savedMode:"dark"; const savedView=safeStore.getItem(STORAGE_KEYS.view); if(["pie","grouped","stacked","line"].includes(savedView)) state.currentView=savedView; applyAppearance({persist:false,refreshChart:false}); if(elements.viewSelect){ elements.viewSelect.value=state.currentView; syncCustomDropdown(elements.viewSelect); } }
+    window.addEventListener("gf:languagechange",function(){ updateInterface(); });
     function setTheme(theme){ if(!["glass","editorial","brutal"].includes(theme)) return; state.appearance.theme=theme; applyAppearance({persist:true,refreshChart:true}); }
     function setMode(mode){ if(!["dark","light"].includes(mode)) return; state.appearance.mode=mode; applyAppearance({persist:true,refreshChart:true}); }
     function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
@@ -2796,8 +2804,9 @@ function resetDataState(){
     function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-09-08-r7";
+    const RELEASE_NOTES_VERSION="2026-09-08-r8";
     const RELEASE_NOTES=[
+      {date:"8 septembre 2026",title:"Un accueil plus léger",text:"L’en-tête prend moins de place, les filtres sont alignés et les actualisations sont animées. Les tableaux de bord partagés ont leurs graphiques. Français ou anglais : à toi de choisir dans les paramètres."},
       {date:"8 septembre 2026",title:"Le partage, plus clair",text:"Une fiche par ami, les mois et lignes à cocher dans le tableur, et un résumé avant d’enregistrer. Les partages reçus s’ouvrent depuis la même fiche."},
       {date:"7 septembre 2026",title:"Confirmation de compte simplifiée",text:"La création de compte envoie désormais un lien sécurisé à ouvrir, sans code à recopier. La confirmation d’e-mail reste active."},
       {date:"7 septembre 2026",title:"Accès et partage repensés",text:"La barre d’accueil est mieux structurée et les partages s’ouvrent dans une vraie vue de consultation."},
@@ -4565,7 +4574,6 @@ function resetDataState(){
       opts = opts || {};
       var silent = opts.silent === true;
       var btn = document.getElementById("syncSheetButton");
-      var btnOrig = btn ? btn.innerHTML : "";
       try{
         if(typeof window.FinanceSheet === "undefined" || typeof window.FinanceSheet.buildWorkbook !== "function"){
           if(!silent) showMessage("Le tableur n'est pas encore chargé. Ouvre l'onglet Tableur d'abord.");
@@ -4576,17 +4584,16 @@ function resetDataState(){
         var hasData = snap && snap.sheets && snap.sheets.some(function(sh){ return sh.cells && Object.keys(sh.cells).length > 0; });
         if(!hasData){
           resetDataState(); updateInterface();
-          if(btn) btn.disabled = false;
-          if(btn) btn.innerHTML = btnOrig;
+          
+          
           return false;
         }
         if(typeof window.XLSX === "undefined" || !window.XLSX?.utils?.sheet_to_json){
           if(!silent) showMessage("La bibliothèque Excel n'est pas chargée. Vérifie ta connexion internet.");
           return false;
         }
-        if(btn && !silent){ btn.disabled = true; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span class="sync-spinner"></span>'; }
         const wb = window.FinanceSheet.buildWorkbook();
-        if(!wb || !wb.SheetNames || !wb.SheetNames.length){ applyFinancePagesToState([], { source: "tableur", reset: true }); populateMonthSelect(); updateInterface(); if(btn) btn.disabled = false; if(btn) btn.innerHTML = btnOrig; if(!silent) showMessage("Le tableur est vide. Saisis des données dans l'onglet Tableur puis clique sur Recharger."); return false; }
+        if(!wb || !wb.SheetNames || !wb.SheetNames.length){ applyFinancePagesToState([], { source: "tableur", reset: true }); populateMonthSelect(); updateInterface(); if(!silent) showMessage("Le tableur est vide. Saisis des données dans l'onglet Tableur puis clique sur Recharger."); return false; }
         const pages = [];
         wb.SheetNames.forEach((sheetName) => {
           const ws = wb.Sheets[sheetName];
@@ -4763,7 +4770,7 @@ function resetDataState(){
         populateMonthSelect();
         updateInterface();
         if(pages.length) setConnection(true, "Tableur");
-        if(btn) btn.disabled = false; if(btn) btn.innerHTML = btnOrig;
+        
         if(!silent){
           var catCount = (state.detectedProperties||[]).length;
           var monthCount = (state.months||[]).length;
@@ -4774,7 +4781,7 @@ function resetDataState(){
           }
         }
         return true;
-      }catch(err){ console.error("syncDashboardFromFinanceSheet:", err); if(btn) btn.disabled = false; if(btn) btn.innerHTML = btnOrig; if(!silent) showMessage("Erreur lors du rechargement : " + (err.message||err), 10000); return false; } finally { try{ if(typeof window.updateSheetStatus === "function") window.updateSheetStatus(); }catch(e){} }
+      }catch(err){ console.error("syncDashboardFromFinanceSheet:", err); if(!silent) showMessage("Erreur lors du rechargement : " + (err.message||err), 10000); return false; } finally { try{ if(typeof window.updateSheetStatus === "function") window.updateSheetStatus(); }catch(e){} }
     }
     window.syncDashboardFromFinanceSheet = syncDashboardFromFinanceSheet;
     window.populateYearSelect = populateYearSelect;
@@ -4805,7 +4812,7 @@ function resetDataState(){
     window.addEventListener("offline", updateSheetStatus);
     document.addEventListener("DOMContentLoaded", updateSheetStatus);
     setInterval(updateSheetStatus, 5000);
-    document.addEventListener("DOMContentLoaded", ()=>{ const b=document.getElementById("syncSheetButton"); if(b) b.addEventListener("click", ()=>{ try{ if(typeof window.syncDashboardFromFinanceSheet==="function") window.syncDashboardFromFinanceSheet(); }catch(e){} }); });
+    document.addEventListener("DOMContentLoaded", ()=>{ const b=document.getElementById("syncSheetButton"); if(b) b.addEventListener("click", ()=>window.GFUI.withBusy(b,()=>window.syncDashboardFromFinanceSheet())); });
     async function importFinanceFile(file){
       if(!file) return;
       const extension = (file.name.split(".").pop() || "").toLowerCase();
@@ -4925,7 +4932,8 @@ function resetDataState(){
   </script>
   <script src="sheet.js?v=20260902-3"></script>
   <script src="onboarding.js?v=20260902-1"></script>
-  <script src="friends.js?v=20260908-1"></script>
+  <script src="shared-dashboard.js?v=20260908-r8"></script>
+  <script src="friends.js?v=20260908-r8"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>(function(){
   /* === Auth email + mot de passe (Supabase) ===
@@ -5032,6 +5040,9 @@ function resetDataState(){
 
   function renderAuth(){
     var form = el("accountForm"); var userInfo = el("accountUserInfo");
+    var section=document.querySelector(".account-section"),syncDetail=el("accountSyncDetail");
+    if(section)section.classList.toggle("is-connected",!!sb.user);
+    if(syncDetail)syncDetail.hidden=!sb.user;
     var hint = el("accountHint"); var status = el("accountStatus"); var logoutButtons = Array.from(document.querySelectorAll("[data-account-logout]")); var intro = el("accountIntro");
     var profileAvatar = el("profileAvatar"); var profileLabel = el("profileLabel"); var profileEmail = el("profileEmail");
     if(!sb.client){
@@ -5195,6 +5206,7 @@ function resetDataState(){
     if(!sb || !user || !fs){ return false; }
     if(syncState.pushing || syncState.suppressPush) return false;
     syncState.pushing = true;
+    updateSyncStatus();
     try{
       var snap = fs.getSnapshot ? fs.getSnapshot() : null;
       if(!snap || !snap.sheets || !snap.sheets.length){ syncState.pushing = false; return false; }
@@ -5230,6 +5242,7 @@ function resetDataState(){
       return false;
     }finally{
       syncState.pushing = false;
+      updateSyncStatus();
     }
   }
 
@@ -5285,12 +5298,13 @@ function resetDataState(){
   function updateSyncStatus(){
     var el = document.getElementById("syncStatusText");
     if(!el) return;
+    el.dataset.syncState=syncState.pushing?"syncing":syncState.dirty?"pending":"ready";
     if(!getUser()){ el.textContent = ""; return; }
     if(!navigator.onLine){ el.textContent = "Hors ligne — sync en attente"; return; }
     if(syncState.pushing){ el.textContent = "Synchronisation..."; return; }
     if(syncState.dirty){ el.textContent = "En attente de sync..."; return; }
-    if(syncState.lastSync){ var ago = Math.round((Date.now() - syncState.lastSync) / 1000); el.textContent = ago < 60 ? "Synchronise il y a " + ago + "s" : "Synchronise"; return; }
-    el.textContent = "Pret a synchroniser";
+    if(syncState.lastSync){ var ago = Math.round((Date.now() - syncState.lastSync) / 1000); el.textContent = ago < 60 ? "Synchronisé il y a " + ago + " s" : "Synchronisé"; return; }
+    el.textContent = "Prêt à synchroniser";
   }
 
   // === Sync automatique au retour en ligne ===
