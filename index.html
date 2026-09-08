@@ -1773,6 +1773,7 @@
   body[data-theme="brutal"] .account-tabs, body[data-theme="brutal"] .account-tab, body[data-theme="brutal"] .account-auth-pane input, body[data-theme="brutal"] .account-code-step, body[data-theme="brutal"] .account-code-inputs input, body[data-theme="brutal"] .account-btn-primary, body[data-theme="brutal"] .account-btn-secondary { border-radius: 0 !important; }
   @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
+  <link rel="stylesheet" href="sharing.css?v=20260908-1">
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard">
   <div class="loader" id="loader" aria-live="polite" aria-label="Chargement"><div class="spinner"></div></div>
@@ -1889,14 +1890,14 @@
     </section>
     <section class="app-page" id="sharingPage" hidden>
       <section class="content">
-        <section class="settings-header"><div><span class="eyebrow">Collaboration</span><h2>Partage et amis</h2><p>Gère tes invitations, tes accès et les contenus reçus sans mélanger les données.</p></div><button class="button button-ghost" type="button" data-page="dashboard">Retour à mon espace</button></section>
+        <header class="sf-page-head"><div><h2>Partage et amis</h2><p>Choisis ce que tes proches peuvent consulter.</p></div><button class="sf-button sf-back" type="button" data-page="dashboard">Retour à mon espace</button></header>
         <div id="sharingContainer"></div>
-        <section class="panel shared-view" id="sharedView" hidden aria-live="polite"></section>
+        <section class="sf-shared" id="sharedView" hidden aria-live="polite"></section>
       </section>
     </section>
     <section class="app-page" id="sharingAccessPage" hidden>
       <section class="content">
-        <section class="settings-header"><div><span class="eyebrow">Partage et amis</span><h2>Configurer l’accès</h2><p>Choisis les lignes et les mois qu’un ami peut consulter.</p></div><div class="sharing-actions"><button class="button button-ghost" type="button" data-page="sheet">Ouvrir le tableur</button><button class="button button-ghost" type="button" data-page="sharing">Retour</button></div></section>
+        <header class="sf-page-head"><div><h2>Mon partage</h2><p>Un accès personnel, que tu peux modifier à tout moment.</p></div><button class="sf-button sf-back" type="button" data-page="sharing">Retour aux amis</button></header>
         <div id="sharingAccessContainer"></div>
       </section>
     </section>
@@ -2795,8 +2796,9 @@ function resetDataState(){
     function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-09-07-r6";
+    const RELEASE_NOTES_VERSION="2026-09-08-r7";
     const RELEASE_NOTES=[
+      {date:"8 septembre 2026",title:"Le partage, plus clair",text:"Une fiche par ami, les mois et lignes à cocher dans le tableur, et un résumé avant d’enregistrer. Les partages reçus s’ouvrent depuis la même fiche."},
       {date:"7 septembre 2026",title:"Confirmation de compte simplifiée",text:"La création de compte envoie désormais un lien sécurisé à ouvrir, sans code à recopier. La confirmation d’e-mail reste active."},
       {date:"7 septembre 2026",title:"Accès et partage repensés",text:"La barre d’accueil est mieux structurée et les partages s’ouvrent dans une vraie vue de consultation."},
       {date:"2 septembre 2026",title:"Accès amis simplifié",text:"Le partage se configure maintenant en deux étapes : les écrans à ouvrir, puis les mois et lignes visibles. Les réglages sont enregistrés de façon sécurisée."},
@@ -4923,7 +4925,7 @@ function resetDataState(){
   </script>
   <script src="sheet.js?v=20260902-3"></script>
   <script src="onboarding.js?v=20260902-1"></script>
-  <script src="friends.js?v=20260902-3"></script>
+  <script src="friends.js?v=20260908-1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>(function(){
   /* === Auth email + mot de passe (Supabase) ===
@@ -5339,4 +5341,3 @@ function resetDataState(){
 </script>
 </body>
 </html>
-
