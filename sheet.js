@@ -336,7 +336,7 @@
       const td = entry.td, cv = entry.cv;
       td.classList.remove("num", "error");
       if (!res) { cv.textContent = ""; return; }
-      if (res.error) { cv.textContent = res.error; td.classList.add("error"); return; }
+      if (res.error) { cv.textContent = window.GFI18n?window.GFI18n.t(res.error):res.error; td.classList.add("error"); return; }
       const v = res.value;
       if (typeof v === "number" && Number.isFinite(v)) { cv.textContent = formatNumber(v); td.classList.add("num"); }
       else if (typeof v === "number") { cv.textContent = "#ERR!"; td.classList.add("error"); }
@@ -361,7 +361,7 @@
     const cell = getCell(r, c);
     if (document.activeElement !== fxInput) fxInput.value = cell.raw;
     const res = lastComputed[cellKey(r, c)];
-    if (res && res.error) fxPreview.textContent = res.error;
+    if (res && res.error) fxPreview.textContent = window.GFI18n?window.GFI18n.t(res.error):res.error;
     else if (res && typeof res.value === "number" && Number.isFinite(res.value) && cell.raw && cell.raw[0] === "=") fxPreview.textContent = "= " + formatNumber(res.value);
     else if (res && typeof res.value === "number" && Number.isFinite(res.value)) fxPreview.textContent = formatNumber(res.value);
     else fxPreview.textContent = "";
@@ -1516,4 +1516,3 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
-

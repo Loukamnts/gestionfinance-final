@@ -1017,14 +1017,14 @@
             // la fonction Edge vérifie le JWT puis supprime auth.users côté serveur.
             var result = await sb.functions.invoke("delete-account");
             if (result.error) {
-              alert("La suppression du compte a échoué. Vérifie que la fonction Supabase « delete-account » est déployée.");
+              alert(window.GFI18n?window.GFI18n.t("La suppression du compte a échoué. Vérifie que la fonction Supabase « delete-account » est déployée."):"La suppression du compte a échoué. Vérifie que la fonction Supabase « delete-account » est déployée.");
               return;
             }
             window.__account.user = null;
             window.dispatchEvent(new CustomEvent("authStateChanged", { detail: { user: null, event: "SIGNED_OUT" } }));
           }
         } catch(e) {
-          alert("La suppression du compte a échoué. Réessaie plus tard.");
+          alert(window.GFI18n?window.GFI18n.t("La suppression du compte a échoué. Réessaie plus tard."):"La suppression du compte a échoué. Réessaie plus tard.");
           return;
         }
         // Nettoie tout en local
@@ -1060,4 +1060,3 @@
     init();
   }
 })();
-

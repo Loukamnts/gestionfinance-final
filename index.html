@@ -1774,9 +1774,9 @@
   @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260908-1">
-  <link rel="stylesheet" href="ui-polish.css?v=20260908-r8">
-  <script src="i18n.js?v=20260908-r8"></script>
-  <script src="ui-controls.js?v=20260908-r8" defer></script>
+  <link rel="stylesheet" href="ui-polish.css?v=20260908-r9">
+  <script src="i18n.js?v=20260908-r9"></script>
+  <script src="ui-controls.js?v=20260908-r9" defer></script>
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard">
   <div class="loader" id="loader" aria-live="polite" aria-label="Chargement"><div class="spinner"></div></div>
@@ -2538,8 +2538,8 @@
       const allRules=visibleMonths.length?formatRuleLines(visibleMonths.flatMap(m=>m.ruleBreakdown||[])):"-";
       elements.bigExpenses.textContent=selected&&selected.bigExpenses!=="-"?`${selected.bigExpenses}`:allRules;
     }
-    function formatRuleLines(items){ const m=new Map(); items.forEach(i=>{ if(i&&i.name) m.set(i.name,(m.get(i.name)||0)+Number(i.value||0)); }); return Array.from(m.entries()).filter(([,v])=>v!==0).map(([name,val])=>`${name}: ${formatEuro(val)}`).join("\n")||"-"; }
-    function createDetailRow(lbl,val,col){ const row=document.createElement("div"); row.className="detail-row"; const name=document.createElement("span"); name.textContent=lbl; name.style.color=col; const amount=document.createElement("strong"); amount.textContent=val; row.append(name,amount); return row; }
+    function formatRuleLines(items){ const m=new Map(); items.forEach(i=>{ if(i&&i.name) m.set(i.name,(m.get(i.name)||0)+Number(i.value||0)); }); return Array.from(m.entries()).filter(([,v])=>v!==0).map(([name,val])=>`${window.GFI18n?window.GFI18n.t(name):name}: ${formatEuro(val)}`).join("\n")||"-"; }
+    function createDetailRow(lbl,val,col){ const row=document.createElement("div"); row.className="detail-row"; const name=document.createElement("span"); name.textContent=["Salaire","Dépense","Épargne"].includes(lbl)&&window.GFI18n?window.GFI18n.t(lbl):lbl; name.style.color=col; const amount=document.createElement("strong"); amount.textContent=val; row.append(name,amount); return row; }
     function getSelectedMonth(){ const visible=getVisibleMonths(); return visible.find(m=>m.id===state.selectedMonthId)||visible[visible.length-1]||state.months.find(m=>m.id===state.selectedMonthId); }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -2554,36 +2554,64 @@
       if(window.GFI18n){ const tr=window.GFI18n.t; config.chart.data.labels=(config.chart.data.labels||[]).map(label=>tr(label)); config.chart.data.datasets.forEach(ds=>{ if(["Salaire","Dépense","Dépenses","Épargne"].includes(ds.label))ds.label=tr(ds.label); }); }
       state.chart=new Chart(elements.chartCanvas,config.chart); generateCustomLegend(state.chart);
     }
-    function generateCustomLegend(chart){
-      elements.customLegend.innerHTML="";
+    function generateCustomLegend(chart,target=elements.customLegend){
+      target.innerHTML="";
       const isPie=chart.config.type==="pie"||chart.config.type==="doughnut";
       const items=isPie?chart.data.labels.map((lbl,i)=>({text:lbl,color:chart.data.datasets[0].backgroundColor[i],index:i,hidden:!chart.getDataVisibility(i)})):chart.data.datasets.map((ds,i)=>({text:ds.label,color:ds.backgroundColor,index:i,hidden:!chart.isDatasetVisible(i)}));
       items.forEach(item=>{
         const btn=document.createElement("div"); btn.className=`legend-item${item.hidden?" is-hidden":""}`; const swatch=document.createElement("span"); swatch.className="legend-color"; swatch.style.background=item.color; const label=document.createElement("span"); label.textContent=item.text; btn.append(swatch,label);
-        btn.addEventListener("click",()=>{ if(isPie) chart.toggleDataVisibility(item.index); else chart.setDatasetVisibility(item.index,!chart.isDatasetVisible(item.index)); chart.update({duration:1000,easing:"easeOutQuart"}); btn.classList.toggle("is-hidden",isPie?!chart.getDataVisibility(item.index):!chart.isDatasetVisible(item.index)); clearTimeout(chart.__legendRefreshTimer); chart.__legendRefreshTimer=setTimeout(()=>generateCustomLegend(chart),600); });
-        elements.customLegend.appendChild(btn);
+        btn.addEventListener("click",()=>{ if(isPie) chart.toggleDataVisibility(item.index); else chart.setDatasetVisibility(item.index,!chart.isDatasetVisible(item.index)); chart.update({duration:1000,easing:"easeOutQuart"}); btn.classList.toggle("is-hidden",isPie?!chart.getDataVisibility(item.index):!chart.isDatasetVisible(item.index)); clearTimeout(chart.__legendRefreshTimer); chart.__legendRefreshTimer=setTimeout(()=>generateCustomLegend(chart,target),600); });
+        target.appendChild(btn);
       });
     }
-    function getChartConfig(){ switch(state.currentView){ case"grouped":return getGroupedBarConfig(); case"stacked":return getStackedRulesConfig(); case"line":return getLineConfig(); default:return getPieConfig(); } }
+    function getChartConfig(context){ switch(context?.view||state.currentView){ case"grouped":return getGroupedBarConfig(context); case"stacked":return getStackedRulesConfig(context); case"line":return getLineConfig(context); default:return getPieConfig(context); } }
     function getActiveRules(){ return (state.availableRules?.length?state.availableRules:getAvailableRules()).filter(r=>r!=="Ignorer"&&r!=="Salaire"); }
     function getMonthRuleValue(month,rule){ return Math.abs(month?.ruleBreakdown?.find(i=>i.name===rule)?.value||0); }
-    function getPieConfig(){
-      const visibleMonths=getVisibleMonths(); const month=getSelectedMonth()||visibleMonths[visibleMonths.length-1]||state.months[state.months.length-1];
+    function getPieConfig(context){
+      const visibleMonths=context?context.months:getVisibleMonths(); const month=context?(context.selected||visibleMonths[visibleMonths.length-1]):getSelectedMonth()||visibleMonths[visibleMonths.length-1]||state.months[state.months.length-1];
       const items=(month?.ruleBreakdown||[]).filter(i=>i.value!==0);
       return{
         title:`Répartition - ${month?.label||""}`, subtitle:"Salaire et règles appliquées au mois sélectionné.",
         chart:{ type:"doughnut", data:{ labels:["Salaire",...items.map(i=>i.name)], datasets:[{ data:[Math.abs(month?.salary||0),...items.map(i=>Math.abs(i.value))], backgroundColor:[COLORS.salary,...items.map(i=>i.color||getRuleColor(i.name))], borderColor: "#000000", borderWidth: 2, hoverOffset:12 }] }, options:baseChartOptions({ cutout:"60%", layout:{padding:{top:10,bottom:10}}, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, animation:{animateRotate:true,animateScale:true,duration:1000,easing:"easeOutQuart"} }) }
       };
     }
-    function getGroupedBarConfig(){ const months=getVisibleMonths(); const rules=getActiveRules(); return{ title:"Comparatif mois par mois", subtitle:"Salaire et règles appliquées sur l’année sélectionnée.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:[createBarDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createBarDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false}) } }; }
-    function getStackedRulesConfig(){ const months=getVisibleMonths(); const rules=getActiveRules(); return{ title:"Répartition par règles", subtitle:"Vue empilée de l’année sélectionnée.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:rules.map(rule=>({ label:rule, data:months.map(m=>getMonthRuleValue(m,rule)), backgroundColor:getRuleColor(rule), borderColor:getRuleColor(rule), borderWidth:1, borderRadius:6, maxBarThickness:44 })) }, options:axisChartOptions({stacked:true}) } }; }
-    function getLineConfig(){ const months=getVisibleMonths(); const rules=getActiveRules(); return{ title:"Évolution annuelle", subtitle:"Salaire et règles appliquées sur l’année sélectionnée.", chart:{ type:"line", data:{ labels:months.map(m=>m.label), datasets:[createLineDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createLineDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false}) } }; }
+    function getGroupedBarConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Comparatif mois par mois", subtitle:"Salaire et règles appliquées sur l’année sélectionnée.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:[createBarDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createBarDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
+    function getStackedRulesConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Répartition par règles", subtitle:"Vue empilée de l’année sélectionnée.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:rules.map(rule=>({ label:rule, data:months.map(m=>getMonthRuleValue(m,rule)), backgroundColor:getRuleColor(rule), borderColor:getRuleColor(rule), borderWidth:1, borderRadius:6, maxBarThickness:44 })) }, options:axisChartOptions({stacked:true,onMonthClick:context?.onMonthClick}) } }; }
+    function getLineConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Évolution annuelle", subtitle:"Salaire et règles appliquées sur l’année sélectionnée.", chart:{ type:"line", data:{ labels:months.map(m=>m.label), datasets:[createLineDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createLineDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
     function createBarDataset(l,c,d){ return{label:l,data:d,backgroundColor:c,borderColor:c,borderWidth:1,borderRadius:6,maxBarThickness:36}; }
     function createLineDataset(l,c,d){ return{label:l,data:d,borderColor:c,backgroundColor:c,pointBackgroundColor:c,pointBorderColor:"#0d1422",pointBorderWidth:2,pointRadius:4,pointHoverRadius:6,borderWidth:3,tension:0.35}; }
-    function axisChartOptions({stacked}){ return baseChartOptions({ maintainAspectRatio:false, interaction:{mode:"index",intersect:false}, onClick:function(event,active,chart){ const point=(active&&active[0])||chart.getElementsAtEventForMode(event,"nearest",{intersect:true},true)[0]; const month=getVisibleMonths()[point?.index]; if(month) openChartMonthDetail(month); }, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, scales:{ x:{ stacked, grid:{color:"rgba(255,255,255,0.04)"}, ticks:{color:COLORS.tick,maxRotation:0,autoSkip:true} }, y:{ stacked, beginAtZero:true, grid:{color:COLORS.grid}, ticks:{color:COLORS.tick,callback:v=>compactEuroFormatter.format(v)} } }, animation:{duration:1000,easing:"easeOutQuart"} }); }
+    function axisChartOptions({stacked,onMonthClick}){ return baseChartOptions({ maintainAspectRatio:false, interaction:{mode:"index",intersect:false}, onClick:function(event,active,chart){ const point=(active&&active[0])||chart.getElementsAtEventForMode(event,"nearest",{intersect:true},true)[0]; if(onMonthClick){ if(point) onMonthClick(point.index); return; } const month=getVisibleMonths()[point?.index]; if(month) openChartMonthDetail(month); }, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, scales:{ x:{ stacked, grid:{color:"rgba(255,255,255,0.04)"}, ticks:{color:COLORS.tick,maxRotation:0,autoSkip:true} }, y:{ stacked, beginAtZero:true, grid:{color:COLORS.grid}, ticks:{color:COLORS.tick,callback:v=>compactEuroFormatter.format(v)} } }, animation:{duration:1000,easing:"easeOutQuart"} }); }
     function baseChartOptions(extra){ return deepMerge({ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:tooltipOptions()}, transitions:{ active:{animation:{duration:300,easing:"easeOutCubic"}}, show:{animations:{x:{from:0,duration:1000,easing:"easeOutQuart"},y:{from:0,duration:1000,easing:"easeOutQuart"},r:{from:0,duration:1000,easing:"easeOutQuart"},borderWidth:{from:0,duration:500,easing:"linear"}}}, hide:{animations:{x:{to:0,duration:600,easing:"easeInCubic"},y:{to:0,duration:600,easing:"easeInCubic"}}} } },extra); }
     function tooltipOptions(){ const isDark=document.body.dataset.mode==="dark", theme=document.body.dataset.theme; let bg,text,border; if(theme==="glass"){ bg=isDark?"rgba(6,6,26,0.97)":"rgba(255,255,255,0.97)"; border=isDark?"rgba(129,140,248,0.3)":"rgba(99,102,241,0.25)"; text=isDark?"#e2e8ff":"#1e1b4b"; }else if(theme==="editorial"){ bg=isDark?"rgba(26,18,9,0.97)":"rgba(255,255,255,0.98)"; border=isDark?"rgba(196,168,130,0.3)":"rgba(124,29,29,0.25)"; text=isDark?"#f5f0e8":"#1a1209"; }else{ bg=isDark?"rgba(15,15,15,0.97)":"rgba(255,255,255,0.97)"; border=isDark?"#ffffff":"#0f0f0f"; text=isDark?"#f0ede6":"#0f0f0f"; } return{ backgroundColor:bg, borderColor:border, borderWidth:theme==="brutal"?2:1, titleColor:text, bodyColor:text, padding:12, cornerRadius:theme==="brutal"?0:8, callbacks:{ label:ctx=>{ const lbl=ctx.dataset.label||ctx.label||""; return`${lbl}: ${formatEuro(ctx.parsed?.y??ctx.parsed??0)}`; } } }; }
-    function openChartMonthDetail(month){ const modal=document.getElementById("chartDetailModal"), title=document.getElementById("chartDetailTitle"), subtitle=document.getElementById("chartDetailSubtitle"), grid=document.getElementById("chartDetailGrid"); if(!modal||!grid) return; title.textContent=`Détail — ${month.label||"Mois"}`; subtitle.textContent="Clique sur un autre point pour consulter un autre mois."; const lines=[{label:"Salaire",value:month.salary||0},{label:"Dépenses",value:Math.abs(month.expenses||0)},{label:"Épargne",value:month.savingsTotal||0},...(month.ruleBreakdown||[]).filter(item=>item.name!=="Dépense"&&item.name!=="Épargne").map(item=>({label:item.name,value:Math.abs(item.value||0)}))]; grid.replaceChildren(...lines.map(item=>{ const el=document.createElement("div"),label=document.createElement("span"),value=document.createElement("strong"); label.textContent=item.label; value.textContent=formatEuro(item.value); el.append(label,value); return el; })); modal.hidden=false; }
+    function openChartMonthDetail(month,options={}){ const modal=document.getElementById("chartDetailModal"), title=document.getElementById("chartDetailTitle"), subtitle=document.getElementById("chartDetailSubtitle"), grid=document.getElementById("chartDetailGrid"); if(!modal||!grid) return; title.textContent=`Détail — ${month.label||"Mois"}`; subtitle.textContent="Clique sur un autre point pour consulter un autre mois."; const lines=[{label:"Salaire",value:month.salary||0},{label:"Dépenses",value:Math.abs(month.expenses||0)},{label:"Épargne",value:month.savingsTotal||0},...(month.ruleBreakdown||[]).filter(item=>item.name!=="Dépense"&&item.name!=="Épargne").map(item=>({label:item.name,value:Math.abs(item.value||0)}))]; grid.replaceChildren(...lines.filter(item=>!options.shared||(item.label==="Salaire"?month.hasIncome:item.label==="Dépenses"?month.hasExpenses:item.label==="Épargne"?month.hasSavings:true)).map(item=>{ const el=document.createElement("div"),label=document.createElement("span"),value=document.createElement("strong"); label.textContent=item.label; value.textContent=formatEuro(item.value); el.append(label,value); return el; })); modal.hidden=false; }
+
+    // A shared view supplies its own filtered months; never fall back to personal data.
+    window.DashboardPresentation=Object.freeze({
+      ruleForLabel(label){
+        const key=normalizePropertyName(label),saved=migrateRuleValue(getPropertyRules()[key]||"auto");
+        return saved==="auto"?classifyFinancialProperty(label):saved;
+      },
+      metrics:calculateDashboardMetrics,
+      colorForRule:rule=>rule==="Salaire"?COLORS.salary:getRuleColor(rule),
+      dropdown:createCustomDropdown,
+      syncDropdown:syncCustomDropdown,
+      legend:generateCustomLegend,
+      chartConfig(options){
+        const months=Array.isArray(options.months)?options.months:[],selected=options.selected||months[months.length-1];
+        const rules=Array.from(new Set(months.flatMap(month=>(month.ruleBreakdown||[]).map(item=>item.name)))).filter(rule=>rule!=="Salaire"&&rule!=="Ignorer");
+        const result=getChartConfig({view:options.view,months,selected,rules,onMonthClick:options.onMonthClick});
+        if(options.hideSalary){
+          if(result.chart.type==="doughnut"){result.chart.data.labels.shift();for(const dataset of result.chart.data.datasets){dataset.data.shift();dataset.backgroundColor.shift();}}
+          else result.chart.data.datasets=result.chart.data.datasets.filter(dataset=>dataset.label!=="Salaire");
+        }
+        const tr=window.GFI18n?window.GFI18n.t:value=>value;
+        result.chart.data.labels=result.chart.data.labels.map(label=>tr(label));
+        result.chart.data.datasets.forEach(dataset=>{if(["Salaire","Dépense","Épargne"].includes(dataset.label))dataset.label=tr(dataset.label);});
+        return result;
+      },
+      openMonth(month){openChartMonthDetail(month,{shared:true});}
+    });
+
     function closeChartMonthDetail(){ const modal=document.getElementById("chartDetailModal"); if(modal) modal.hidden=true; }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -2804,8 +2832,9 @@ function resetDataState(){
     function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-09-08-r8";
+    const RELEASE_NOTES_VERSION="2026-09-08-r9";
     const RELEASE_NOTES=[
+      {date:"8 septembre 2026",title:"Les mêmes repères dans les partages",text:"Le tableau de bord d’un ami reprend maintenant les cartes et graphiques de l’accueil. Les indications de partage sont plus simples et les traductions anglaises ont été complétées. Sur téléphone, les nouveautés restent dans le bandeau de l’accueil."},
       {date:"8 septembre 2026",title:"Un accueil plus léger",text:"L’en-tête prend moins de place, les filtres sont alignés et les actualisations sont animées. Les tableaux de bord partagés ont leurs graphiques. Français ou anglais : à toi de choisir dans les paramètres."},
       {date:"8 septembre 2026",title:"Le partage, plus clair",text:"Une fiche par ami, les mois et lignes à cocher dans le tableur, et un résumé avant d’enregistrer. Les partages reçus s’ouvrent depuis la même fiche."},
       {date:"7 septembre 2026",title:"Confirmation de compte simplifiée",text:"La création de compte envoie désormais un lien sécurisé à ouvrir, sans code à recopier. La confirmation d’e-mail reste active."},
@@ -2823,7 +2852,7 @@ function resetDataState(){
     function dismissLatestUpdate(){ const banner=document.getElementById("latestUpdateBanner"); if(banner) banner.hidden=true; try{safeStore.setItem("personalFinanceDashboard.lastSeenRelease",RELEASE_NOTES_VERSION);}catch(e){} }
     function closeUpdates(){ const modal=document.getElementById("updatesModal"); if(modal) modal.hidden=true; }
     function openLatestUpdate(){ const latest=RELEASE_NOTES[0],modal=document.getElementById("updatesModal"),list=document.getElementById("updatesModalList"); if(!latest||!modal||!list) return; const note=document.createElement("article"),date=document.createElement("time"),title=document.createElement("h3"),description=document.createElement("p"); note.className="updates-modal-note"; date.textContent=latest.date; title.textContent=latest.title; description.textContent=latest.text; note.append(date,title,description); list.replaceChildren(note); modal.hidden=false; try{safeStore.setItem("personalFinanceDashboard.lastSeenRelease",RELEASE_NOTES_VERSION);}catch(e){} }
-    function showLatestUpdate(){ try{ if(!safeStore.getItem("personalFinanceDashboard.onboardingCompleted")||safeStore.getItem("personalFinanceDashboard.lastSeenRelease")===RELEASE_NOTES_VERSION) return; if(window.matchMedia&&window.matchMedia("(max-width: 720px)").matches){ openLatestUpdate(); return; } const latest=RELEASE_NOTES[0],banner=document.getElementById("latestUpdateBanner"),title=document.getElementById("latestUpdateTitle"),text=document.getElementById("latestUpdateText"); if(!latest||!banner||!title||!text) return; title.textContent=latest.title; text.textContent=latest.text; banner.hidden=false; }catch(e){} }
+    function showLatestUpdate(){ try{ if(!safeStore.getItem("personalFinanceDashboard.onboardingCompleted")||safeStore.getItem("personalFinanceDashboard.lastSeenRelease")===RELEASE_NOTES_VERSION) return; const latest=RELEASE_NOTES[0],banner=document.getElementById("latestUpdateBanner"),title=document.getElementById("latestUpdateTitle"),text=document.getElementById("latestUpdateText"); if(!latest||!banner||!title||!text) return; title.textContent=latest.title; text.textContent=latest.text; banner.hidden=false; }catch(e){} }
 
     // ═══════════════════════════════════════════════════════════════════════
     // ÉVÉNEMENTS & INIT
@@ -4930,10 +4959,10 @@ function resetDataState(){
     }
     init();
   </script>
-  <script src="sheet.js?v=20260902-3"></script>
-  <script src="onboarding.js?v=20260902-1"></script>
-  <script src="shared-dashboard.js?v=20260908-r8"></script>
-  <script src="friends.js?v=20260908-r8"></script>
+  <script src="sheet.js?v=20260908-r9"></script>
+  <script src="onboarding.js?v=20260908-r9"></script>
+  <script src="shared-dashboard.js?v=20260908-r9"></script>
+  <script src="friends.js?v=20260908-r9"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>(function(){
   /* === Auth email + mot de passe (Supabase) ===

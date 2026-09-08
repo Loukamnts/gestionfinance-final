@@ -1,93 +1,111 @@
-/* Read-only dashboard. Its sole input is the recipient's filtered snapshot. */
-(function() {
+/* Read-only adapter: only a recipient's filtered snapshot enters this view. */
+(function(){
 "use strict";
 const FR_MONTHS=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 const t=value=>window.GFI18n?window.GFI18n.t(value):value;
 const cash=value=>window.GFI18n?window.GFI18n.money(value):Number(value||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
 const number=value=>Number.isFinite(Number(value))?Number(value):0;
 const normal=value=>String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
-function kind(label){const name=normal(label);if(/epargne|livret|pea|placement|investissement/.test(name))return"savings";if(/salaire|revenu|prime|allocation|remuneration|paie|paye/.test(name))return"income";if(/depense|loyer|charge|facture|abonnement|course|frais|impot|taxe|assurance|transport|restaurant|achat|credit/.test(name))return"expense";return"other";}
-function normalize(data) {
-  return (Array.isArray(data&&data.months)?data.months:[]).filter(month=>month&&typeof month==="object").map((month,index)=>{
-    const label=String(month.label||""),yearMatches=label.match(/(?:19|20|21)\d{2}/g);
-    const monthPart=label.split(" — ").pop();
+function legacyRule(label){
+  const name=normal(label);
+  if(/epargne|livret|pea|placement|investissement|revolut|bourse/.test(name))return"Épargne";
+  if(/depense|loyer|charge|facture|abonnement|course|frais|impot|taxe|assurance|transport|restaurant|achat|credit|prime video/.test(name))return"Dépense";
+  if(/salaire|revenu|prime|allocation|remuneration|paie|paye/.test(name))return"Salaire";
+  return"Ignorer";
+}
+function normalize(data){
+  const months=(Array.isArray(data&&data.months)?data.months:[]).filter(month=>month&&typeof month==="object").map((month,index)=>{
+    const sourceLabel=String(month.label||""),yearMatches=sourceLabel.match(/(?:19|20|21)\d{2}/g),monthPart=sourceLabel.split(" — ").pop();
     let monthIndex=FR_MONTHS.findIndex(name=>normal(monthPart).includes(normal(name)));
-    const year=Number(month.year)||(yearMatches?Number(yearMatches[yearMatches.length-1]):0);
+    const year=Number(month.year)||(yearMatches?Number(yearMatches.at(-1)):0);
     if(Number.isInteger(month.month)&&month.month>=1&&month.month<=12)monthIndex=month.month-1;
-    return {id:String(index),label,year,monthIndex,details:(Array.isArray(month.details)?month.details:[]).filter(row=>row&&typeof row==="object").map(row=>({name:String(row.name||""),value:number(row.value)})),salary:number(month.salary),expenses:Math.abs(number(month.expenses)),savingsTotal:Math.abs(number(month.savingsTotal))};
+    const details=(Array.isArray(month.details)?month.details:[]).filter(row=>row&&typeof row==="object").map(row=>{
+      const name=String(row.name||"").replace(/^Ligne \d+ — /,"");
+      return {name,value:number(row.value),rule:typeof row.rule==="string"?row.rule:legacyRule(name)};
+    });
+    return {id:String(index),label:monthIndex>=0?FR_MONTHS[monthIndex]+(year?" "+year:""):sourceLabel,year,monthIndex,details};
+  });
+  const grouped=new Map();
+  months.forEach(month=>{
+    const key=month.year&&month.monthIndex>=0?month.year+"-"+month.monthIndex:month.id;
+    if(grouped.has(key))grouped.get(key).details.push(...month.details);else grouped.set(key,month);
+  });
+  return [...grouped.values()].map(month=>{
+    const totals=new Map();month.details.forEach(row=>totals.set(row.rule,(totals.get(row.rule)||0)+row.value));
+    return {...month,salary:totals.get("Salaire")||0,expenses:totals.get("Dépense")||0,savingsTotal:totals.get("Épargne")||0,
+      hasIncome:totals.has("Salaire"),hasExpenses:totals.has("Dépense"),hasSavings:totals.has("Épargne"),
+      ruleBreakdown:[...totals].filter(([name])=>name!=="Salaire"&&name!=="Ignorer").map(([name,value])=>({name,value}))};
   }).sort((a,b)=>a.year-b.year||a.monthIndex-b.monthIndex||a.id.localeCompare(b.id));
 }
-function chartModel(months,selected,view) {
-  const rows=selected?selected.details:[];
-  if(view==="pie")return {type:"doughnut",labels:rows.filter(row=>row.value!==0).map(row=>row.name),datasets:[{label:"Montant",data:rows.filter(row=>row.value!==0).map(row=>Math.abs(row.value))}]};
-  const names=Array.from(new Set(months.flatMap(month=>month.details.map(row=>row.name)))).filter(name=>view!=="stacked"||kind(name)==="savings");
-  return {type:view==="line"?"line":"bar",labels:months.map(month=>month.label),datasets:names.map(name=>({label:name,data:months.map(month=>month.details.filter(row=>row.name===name).reduce((sum,row)=>sum+row.value,0))}))};
-}
-function summary(months) {
-  const sum=key=>months.reduce((n,m)=>n+m[key],0);
-  const expenses=months.filter(m=>m.details.some(row=>kind(row.name)==="expense")||m.expenses!==0);
-  const ordered=expenses.slice().sort((a,b)=>a.expenses-b.expenses);
-  return {income:months.some(m=>m.details.some(row=>kind(row.name)==="income")||m.salary!==0)?sum("salary")/Math.max(1,months.length):null,
-    savings:months.some(m=>m.details.some(row=>kind(row.name)==="savings")||m.savingsTotal!==0)?sum("savingsTotal"):null,
-    max:ordered[ordered.length-1]||null,min:ordered[0]||null};
+function summary(months){
+  const sum=key=>months.reduce((n,m)=>n+m[key],0),expenses=months.filter(month=>month.hasExpenses),ordered=expenses.slice().sort((a,b)=>Math.abs(a.expenses)-Math.abs(b.expenses));
+  return {income:months.some(m=>m.hasIncome)?sum("salary")/Math.max(1,months.length):null,savings:months.some(m=>m.hasSavings)?Math.abs(sum("savingsTotal")):null,max:ordered.at(-1)||null,min:ordered[0]||null};
 }
 function node(tag,cls,text){const item=document.createElement(tag);if(cls)item.className=cls;if(text!==undefined)item.textContent=text;return item;}
-function render(container,data) {
-  const months=normalize(data),root=node("div","sd-dashboard"),filters=node("div","sd-toolbar"),metrics=node("div","sd-metrics"),card=node("section","sd-chart-card"),title=node("h3"),note=node("p"),holder=node("div","sd-canvas"),canvas=node("canvas"),empty=node("p","sd-empty"),details=node("section","sd-detail");
-  root.append(filters,metrics,card,details);container.append(root);
-  let chart=null,disposed=false,year=months.length?String(months[months.length-1].year):"0",monthId="",view="line";
-  const years=Array.from(new Set(months.map(month=>String(month.year))));
-  function field(label){const wrap=node("label","sf-field"),text=node("span","",t(label)),select=node("select");wrap.append(text,select);filters.append(wrap);return {select,text,label};}
-  const yearField=field("Année"),monthField=field("Mois"),viewField=field("Vue du graphique");
-  canvas.setAttribute("role","img");holder.append(canvas);card.append(title,note,holder,empty);
+function render(container,data){
+  const presentation=window.DashboardPresentation,months=normalize(data),root=node("div","shared-dashboard content");
+  if(!presentation){container.append(node("p","sf-notice","Le tableau de bord n’a pas pu être chargé. Recharge la page."));return()=>{};}
+  let chart=null,disposed=false,year=months.length?String(months.at(-1).year):"0",monthId="",view="pie";
+  const toolbar=node("section","home-toolbar"),top=node("div","home-toolbar-top"),heading=node("h2","","Tableau de bord"),readOnly=node("span","sf-tag","Lecture seule"),filters=node("div","home-filter-grid"),metrics=node("section","metrics"),card=node("section","panel chart-panel"),chartHead=node("div","chart-head"),chartText=node("div"),title=node("h2"),subtitle=node("p"),holder=node("div","chart-wrap"),canvas=node("canvas"),empty=node("div","empty-state"),legend=node("div","custom-legend"),details=node("section","month-details");
+  top.append(heading,readOnly);toolbar.append(top,filters);root.append(toolbar,metrics,card,details);container.append(root);
+  chartText.append(title,subtitle);chartHead.append(chartText);holder.append(canvas,empty);card.append(chartHead,holder,legend);canvas.setAttribute("aria-label","Graphique financier");
+  metrics.setAttribute("aria-label","Résumé");details.setAttribute("aria-label","Détail du mois");
+  const years=[...new Set(months.map(month=>String(month.year)))].reverse();
+  function field(label){const wrap=node("label","home-filter"),text=node("span","",label),select=node("select");wrap.append(text,select);filters.append(wrap);return select;}
+  const yearSelect=field("Année"),monthSelect=field("Mois"),viewSelect=field("Vue du graphique");
   function visible(){return months.filter(month=>String(month.year)===year);}
-  function monthLabel(month){if(month.monthIndex>=0){const translated=t(FR_MONTHS[month.monthIndex]);return translated+(month.year?" "+month.year:"");}return month.label||t("Mois");}
-  function options(select,items,value){select.replaceChildren(...items.map(([key,label])=>{const option=node("option","",label);option.value=key;return option;}));select.value=value;}
+  function options(select,items,value){select.replaceChildren(...items.map(([key,label])=>{const option=node("option","",label);option.value=key;return option;}));select.value=value;presentation.dropdown(select);}
   function updateFilters(){
-    [yearField,monthField,viewField].forEach(field=>field.text.textContent=t(field.label));
-    options(yearField.select,years.map(value=>[value,value==="0"?t("Sans année"):value]),year);
-    const allowed=visible();if(!allowed.some(month=>month.id===monthId))monthId=allowed.length?allowed[allowed.length-1].id:"";
-    options(monthField.select,allowed.map(month=>[month.id,monthLabel(month)]),monthId);
-    options(viewField.select,[["pie",t("Répartition")],["grouped",t("Comparatif annuel")],["stacked",t("Épargne")],["line",t("Évolution")]],view);
-    yearField.select.disabled=!years.length;monthField.select.disabled=!allowed.length;
+    const allowed=visible();if(!allowed.some(month=>month.id===monthId))monthId=allowed.length?allowed.at(-1).id:"";
+    yearSelect.disabled=!years.length;monthSelect.disabled=!allowed.length;
+    options(yearSelect,years.length?years.map(value=>[value,value==="0"?"Sans année":value]):[["0","Aucune année disponible"]],year);
+    options(monthSelect,allowed.length?allowed.map(month=>[month.id,month.label]):[["","Aucun mois disponible"]],monthId);
+    options(viewSelect,[["pie","Répartition"],["grouped","Comparatif annuel"],["stacked","Épargne"],["line","Évolution"]],view);
+  }
+  function detailRow(label,value,color,isUserText){
+    const row=node("div","detail-row"),name=node("span","",isUserText?label:t(label));if(isUserText)name.translate=false;if(color)name.style.color=color;
+    row.append(name,node("strong","",cash(value)));return row;
+  }
+  function updateDetails(){
+    const selected=visible().find(month=>month.id===monthId),rules=node("article","detail-panel"),expenses=node("article","detail-panel"),ruleList=node("div","detail-list"),expenseList=node("div","detail-list");
+    rules.append(node("h3","","Détail épargne"),ruleList);expenses.append(node("h3","","Détail dépenses"),expenseList);details.replaceChildren(rules,expenses);
+    const breakdown=selected?(selected.ruleBreakdown||[]).filter(row=>row.value!==0):[];
+    if(!breakdown.length)ruleList.append(node("p","expense-note",selected&&selected.ruleBreakdown.length?"Aucun montant pour ce mois.":"Non partagé"));
+    breakdown.forEach(row=>ruleList.append(detailRow(row.name,row.value,presentation.colorForRule(row.name),!["Dépense","Épargne"].includes(row.name))));
+    const expenseRows=selected?selected.details.filter(row=>row.rule==="Dépense"):[];
+    if(!expenseRows.length)expenseList.append(node("p","expense-note","Non partagé"));
+    expenseRows.forEach(row=>expenseList.append(detailRow(row.name,Math.abs(row.value),null,true)));
   }
   function update(){
     if(disposed)return;updateFilters();
-    const allowed=visible(),selected=allowed.find(month=>month.id===monthId),totals=summary(allowed);
+    const allowed=visible(),selected=allowed.find(month=>month.id===monthId),totals=summary(allowed),sameMetrics=presentation.metrics(allowed),salaryTotal=allowed.reduce((sum,month)=>sum+month.salary,0);
     metrics.replaceChildren();
-    [[t("Revenus moyens"),totals.income===null?t("Non partagé"):cash(totals.income),t("Sur les mois partagés")],
-     [t("Total épargné"),totals.savings===null?t("Non partagé"):cash(totals.savings),t("Données autorisées")],
-     [t("Mois le plus dépensier"),totals.max?monthLabel(totals.max):t("Non partagé"),totals.max?cash(totals.max.expenses):""],
-     [t("Mois le moins dépensier"),totals.min?monthLabel(totals.min):t("Non partagé"),totals.min?cash(totals.min.expenses):""]].forEach(([label,value,sub])=>{const metric=node("article","sd-metric");metric.append(node("span","",label),node("strong","",value),node("small","",sub));metrics.append(metric);});
-    title.textContent=t({pie:"Répartition des lignes sélectionnées",grouped:"Comparatif mois par mois",stacked:"Épargne par mois",line:"Évolution annuelle"}[view]);
-    note.textContent=t(view==="pie"?"Montants absolus du mois sélectionné. Le détail signé figure ci-dessous.":"Clique sur un point ou une barre pour consulter le détail du mois.");
-    const model=chartModel(allowed,selected,view);
-    if(chart){chart.destroy();chart=null;}
-    const hasPoints=model.datasets.some(set=>set.data.some(value=>value!==0));
-    holder.hidden=!hasPoints||typeof window.Chart!=="function";empty.hidden=!holder.hidden;
-    empty.textContent=t(!months.length?"Aucune donnée partagée.":!hasPoints?"Aucun montant à afficher pour cette sélection.":"Le graphique n’a pas pu être chargé. Le détail reste disponible.");
-    if(!holder.hidden) {
-      const style=getComputedStyle(document.body),css=(name,fallback)=>style.getPropertyValue(name).trim()||fallback;
-      const palette=[css("--chart-salary","#818cf8"),css("--chart-expenses","#fb7185"),css("--chart-savings","#34d399"),css("--accent","#a78bfa"),"#38bdf8","#fbbf24","#c084fc"];
-      const config={type:model.type,data:{labels:view==="pie"?model.labels:allowed.map(monthLabel),datasets:model.datasets.map((set,i)=>({...set,label:view==="pie"?t(set.label):set.label,borderColor:palette[i%palette.length],backgroundColor:view==="pie"?model.labels.map((_,i)=>palette[i%palette.length]):palette[i%palette.length],borderWidth:view==="line"?2:0,borderRadius:document.body.dataset.theme==="brutal"?0:5,pointRadius:4,pointHoverRadius:7,pointHitRadius:15,tension:.2,fill:false,maxBarThickness:42}))},options:{responsive:true,maintainAspectRatio:false,animation:window.matchMedia("(prefers-reduced-motion: reduce)").matches?false:{duration:280},locale:window.GFI18n?window.GFI18n.locale():"fr-FR",plugins:{legend:{position:"bottom",labels:{color:css("--text","#fff"),boxWidth:12,padding:18,font:{family:css("--font-body","sans-serif"),size:12}}},tooltip:{backgroundColor:css("--input-focus-bg","#111"),titleColor:css("--text","#fff"),bodyColor:css("--text","#fff"),borderColor:css("--line-strong","#666"),borderWidth:1,callbacks:{label:context=>(context.dataset.label&&view!=="pie"?context.dataset.label:context.label)+": "+cash(view==="pie"?context.parsed:context.parsed.y)}}},onClick:(event,elements)=>{if(view!=="pie"&&elements.length&&allowed[elements[0].index]){monthId=allowed[elements[0].index].id;monthField.select.value=monthId;updateDetails();details.scrollIntoView({block:"nearest",behavior:"auto"});}}}};
-      if(view!=="pie")config.options.scales={x:{stacked:view==="stacked",ticks:{color:css("--muted","#aaa"),maxRotation:35},grid:{display:false}},y:{stacked:view==="stacked",beginAtZero:true,ticks:{color:css("--muted","#aaa")},grid:{color:css("--line","#444")}}};
-      try{chart=new window.Chart(canvas,config);}catch(error){holder.hidden=true;empty.hidden=false;empty.textContent=t("Le graphique n’a pas pu être chargé. Le détail reste disponible.");}
-      canvas.setAttribute("aria-label",title.textContent+" — "+t("Données autorisées"));
+    [["Salaire moyen",totals.income===null?"Non partagé":cash(sameMetrics.avgSalary),allowed.length+" mois analysé"+(allowed.length>1?"s":"")],
+     ["Total épargné",totals.savings===null?"Non partagé":cash(Math.abs(sameMetrics.totalSavings)),totals.savings!==null&&totals.income!==null?(salaryTotal?Math.round(totals.savings/salaryTotal*100):0)+" % du salaire total":"Données autorisées"],
+     ["Mois le plus dépensier",totals.max?totals.max.label:"Non partagé",totals.max?cash(Math.abs(totals.max.expenses)):"Données autorisées"],
+     ["Mois le moins dépensier",totals.min?totals.min.label:"Non partagé",totals.min?cash(Math.abs(totals.min.expenses)):"Données autorisées"]].forEach(([label,value,note])=>{
+      const metric=node("article","metric-card");metric.append(node("span","metric-label",label),node("strong","metric-value",value),node("span","metric-note",note));metrics.append(metric);
+    });
+    if(chart){clearTimeout(chart.__legendRefreshTimer);chart.destroy();chart=null;}legend.replaceChildren();
+    const config=presentation.chartConfig({view,months:allowed,selected,hideSalary:totals.income===null,onMonthClick:index=>{
+      const month=allowed[index];if(!month)return;monthId=month.id;monthSelect.value=monthId;presentation.syncDropdown(monthSelect);updateDetails();presentation.openMonth(month);
+    }});
+    title.textContent=config.title;subtitle.textContent=config.subtitle;
+    const hasData=config.chart.data.datasets.some(dataset=>dataset.data.some(value=>Number(value)!==0));
+    const unavailable=typeof window.Chart!=="function";
+    empty.classList.toggle("is-visible",!hasData||unavailable);canvas.hidden=!hasData||unavailable;
+    empty.textContent=!months.length?"Aucune donnée partagée.":unavailable?"Le graphique n’a pas pu être chargé. Le détail reste disponible.":"Aucun montant à afficher pour cette sélection.";
+    if(hasData&&!unavailable){
+      try{chart=new window.Chart(canvas,config.chart);presentation.legend(chart,legend);}catch(error){canvas.hidden=true;empty.classList.add("is-visible");empty.textContent="Le graphique n’a pas pu être chargé. Le détail reste disponible.";}
     }
-    updateDetails();
+    updateDetails();if(window.GFI18n)window.GFI18n.apply(root);
   }
-  function updateDetails(){
-    const selected=visible().find(month=>month.id===monthId);details.replaceChildren(node("h3","",t("Détail du mois")+(selected?" — "+monthLabel(selected):"")));
-    if(!selected||!selected.details.length){details.append(node("p","sf-muted",t("Aucune donnée partagée.")));return;}
-    selected.details.forEach(row=>{const line=node("div","sd-detail-row"),label=node("span","",row.name);label.translate=false;line.append(label,node("strong","",cash(row.value)));details.append(line);});
-  }
-  yearField.select.addEventListener("change",()=>{year=yearField.select.value;update();});
-  monthField.select.addEventListener("change",()=>{monthId=monthField.select.value;if(view==="pie")update();else updateDetails();});
-  viewField.select.addEventListener("change",()=>{view=viewField.select.value;update();});
+  yearSelect.addEventListener("change",()=>{year=yearSelect.value;update();});
+  monthSelect.addEventListener("change",()=>{monthId=monthSelect.value;update();});
+  viewSelect.addEventListener("change",()=>{view=viewSelect.value;update();});
   const themeObserver=new MutationObserver(update);themeObserver.observe(document.body,{attributes:true,attributeFilter:["data-theme","data-mode"]});
-  window.addEventListener("gf:languagechange",update);
-  update();
-  return ()=>{disposed=true;if(chart)chart.destroy();themeObserver.disconnect();window.removeEventListener("gf:languagechange",update);};
+  window.addEventListener("gf:languagechange",update);update();
+  return()=>{disposed=true;if(chart){clearTimeout(chart.__legendRefreshTimer);chart.destroy();}themeObserver.disconnect();window.removeEventListener("gf:languagechange",update);};
 }
-window.SharedDashboard={render,normalize,chartModel,summary};
+window.SharedDashboard={render,normalize,summary};
 })();
