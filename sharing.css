@@ -201,7 +201,8 @@ body[data-theme="brutal"] :is(#sharingPage,#sharingAccessPage,.sf-dialog) { --sf
   .sf-table-bulk { gap: 12px; }
   .sf-table-count { width: 100%; margin: 0; }
   .sf-table-scroll { max-height: min(460px,65dvh); }
-  .sf-table :is(th,td):first-child { width: 172px; min-width: 172px; max-width: 172px; }
+  .sf-table :is(th,td):first-child { width: clamp(128px,40vw,172px); min-width: clamp(128px,40vw,172px); max-width: clamp(128px,40vw,172px); }
+  .sf-dataset .sf-table-scroll { max-width: calc(100% + 32px); margin-inline: -16px; border-inline: 0; border-radius: 0; }
   .sf-table :is(th,td) { min-width: 108px; }
   .sf-row-check { grid-template-columns: 17px minmax(0,1fr); gap: 10px; }
   .sf-row-number { display: none; }
