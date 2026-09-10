@@ -2832,8 +2832,9 @@ function resetDataState(){
     function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-09-10-finance-metrics";
+    const RELEASE_NOTES_VERSION="2026-09-10-account-actions";
     const RELEASE_NOTES=[
+      {date:"10 septembre 2026",title:"Des actions de compte plus claires",text:"Supprimer mon compte apparaît uniquement lorsque vous êtes connecté. Hors connexion, Réinitialiser reste disponible pour effacer les données locales."},
       {date:"10 septembre 2026",title:"Des moyennes fidèles aux données",text:"Un mois sans salaire ou sans dépense n’est plus pris pour un zéro. Les moyennes et les mois les plus ou moins dépensiers utilisent uniquement les montants réellement renseignés."},
       {date:"10 septembre 2026",title:"Des partages mieux protégés",text:"Retirer un ami ferme désormais les accès dans les deux sens. Si vous vous ajoutez à nouveau, chacun choisit ce qu’il souhaite partager. Le chargement du site et les boutons de configuration ont aussi été renforcés."},
       {date:"8 septembre 2026",title:"Les mêmes repères dans les partages",text:"Le tableau de bord d’un ami reprend maintenant les cartes et graphiques de l’accueil. Les indications de partage sont plus simples et les traductions anglaises ont été complétées. Sur téléphone, les nouveautés restent dans le bandeau de l’accueil."},
@@ -5088,12 +5089,13 @@ function resetDataState(){
     var section=document.querySelector(".account-section"),syncDetail=el("accountSyncDetail");
     if(section)section.classList.toggle("is-connected",!!sb.user);
     if(syncDetail)syncDetail.hidden=!sb.user;
-    var hint = el("accountHint"); var status = el("accountStatus"); var logoutButtons = Array.from(document.querySelectorAll("[data-account-logout]")); var intro = el("accountIntro");
+    var hint = el("accountHint"); var status = el("accountStatus"); var logoutButtons = Array.from(document.querySelectorAll("[data-account-logout]")); var intro = el("accountIntro"); var deleteButton = el("settingsDeleteBtn");
     var profileAvatar = el("profileAvatar"); var profileLabel = el("profileLabel"); var profileEmail = el("profileEmail");
     if(!sb.client){
       if(form) form.style.display = "none";
       if(userInfo) userInfo.style.display = "none";
       logoutButtons.forEach(function(button){ button.hidden = true; button.style.display = "none"; });
+      if(deleteButton){ deleteButton.hidden = true; deleteButton.style.display = "none"; }
       if(intro) intro.style.display = "";
       if(profileAvatar) profileAvatar.textContent = "?";
       if(profileLabel) profileLabel.textContent = "Profil";
@@ -5106,6 +5108,7 @@ function resetDataState(){
       if(form) form.style.display = "none";
       if(userInfo) userInfo.style.display = "";
       logoutButtons.forEach(function(button){ button.hidden = false; button.style.display = "inline-flex"; });
+      if(deleteButton){ deleteButton.hidden = false; deleteButton.style.display = "inline-flex"; }
       if(intro) intro.style.display = "none";
       var d = el("accountEmailDisplay"); if(d) d.textContent = sb.user.email || "";
       var av = el("accountUserAvatar"); if(av) av.textContent = (sb.user.email || "?").charAt(0).toUpperCase();
@@ -5118,6 +5121,7 @@ function resetDataState(){
       if(form) form.style.display = "";
       if(userInfo) userInfo.style.display = "none";
       logoutButtons.forEach(function(button){ button.hidden = true; button.style.display = "none"; });
+      if(deleteButton){ deleteButton.hidden = true; deleteButton.style.display = "none"; }
       if(intro) intro.style.display = "";
       if(profileAvatar) profileAvatar.textContent = "?";
       if(profileLabel) profileLabel.textContent = "Profil";
