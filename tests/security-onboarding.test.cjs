@@ -51,4 +51,3 @@ test('The destructive cloud-account action is shown only to an authenticated use
   assert.match(code,/if\(sb\.user\)[\s\S]*deleteButton\.hidden = false; deleteButton\.style\.display = "inline-flex"/);
   assert.match(code,/\}else\{[\s\S]*deleteButton\.hidden = true; deleteButton\.style\.display = "none"/);
 });
-
