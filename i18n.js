@@ -2,6 +2,8 @@
 (function(){
 "use strict";
 const dictionary=Object.freeze({
+  "Des actions de compte plus claires": "Clearer account actions",
+  "Supprimer mon compte apparaît uniquement lorsque vous êtes connecté. Hors connexion, Réinitialiser reste disponible pour effacer les données locales.": "Delete my account now appears only while you are signed in. When signed out, Reset remains available to clear local data.",
   "Des partages mieux protégés": "Better protected sharing",
   "Des moyennes fidèles aux données": "Averages that reflect your data",
   "Un mois sans salaire ou sans dépense n’est plus pris pour un zéro. Les moyennes et les mois les plus ou moins dépensiers utilisent uniquement les montants réellement renseignés.": "A month with no salary or expense is no longer treated as zero. Averages and highest or lowest spending months now use only amounts that were actually entered.",
@@ -687,3 +689,4 @@ function start(){
 window.GFI18n={t,locale,money,setLanguage,getLanguage:()=>language,apply};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
 })();
+
