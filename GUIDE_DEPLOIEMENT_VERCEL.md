@@ -1,110 +1,95 @@
-# Publier Gestion finance sur Vercel
+# Déployer Gestion Finance sur Vercel
 
-Cette version est un site statique : `index.html`, CSS et JavaScript sont à la racine. Il n'y a aucun dossier `dist`, `build` ou serveur Node à détecter. Le fichier `vercel.json` est déjà présent et applique les en-têtes de sécurité du site.
+Mise à jour du 9 septembre 2026. Le site reste statique et les sources restent à la racine. Un build prépare désormais un dossier public `dist`. Ne publie plus directement la racine : elle contient les migrations SQL et les outils de test.
 
-## 1. Préparer le dépôt GitHub
+## Projet existant
 
-1. Crée un nouveau dépôt GitHub vide, par exemple `gestion-finance`.
-2. Envoie **le contenu du dossier du projet**, pas le dossier parent et pas l'archive ZIP. À la racine du dépôt, tu dois voir au minimum :
+Conserve le dépôt `Loukamnts/gestionfinance-final` et le projet Vercel actuel.
 
-   ```text
-   index.html
-   sheet.js
-   sheet.css
-   onboarding.js
-   onboarding.css
-   friends.js
-   supabase_config.json
-   supabase_schema.sql
-   vercel.json
-   ```
+| Réglage | Valeur |
+| --- | --- |
+| Root Directory | `.` |
+| Framework Preset | Other |
+| Install Command | `npm ci --ignore-scripts --include=dev` |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+| Node.js | 22.x ou 24.x |
 
-3. Ne publie jamais une clé `service_role`, un mot de passe ou un fichier `.env`. La clé `anonKey`/publishable dans `supabase_config.json` est conçue pour être exposée au navigateur ; sa sécurité dépend des règles RLS de Supabase.
+Ces commandes sont définies dans `vercel.json`. Désactive les anciens overrides vides ou pointant sur `.` dans Vercel. Le dépôt contient `package.json`, `package-lock.json`, `scripts`, `tests` et toutes les sources. Ne pousse ni `node_modules` ni `dist` : Vercel les recrée.
 
-## 2. Préparer Supabase
+Le build teste les protections, copie uniquement les fichiers publics, extrait les scripts intégrés et calcule leurs empreintes SRI. Les polices, Chart.js et Supabase sont servis par le site. SheetJS est chargé depuis sa distribution officielle avec version exacte et SRI. Aucun SQL, outil de test ou document interne n'est inclus.
 
-Conserve ton projet Supabase actuel ou crée-en un nouveau.
+## Mise à jour Supabase
 
-1. Dans **SQL Editor**, exécute entièrement `supabase_schema.sql`.
-   - Si le projet avait déjà été configuré et que l'inscription affiche `Database error saving new user`, exécute une fois `supabase_fix_new_users.sql`. Ce correctif répare le déclencheur de création de profil sans supprimer de comptes ni de données.
-2. Exécute ensuite `supabase_granular_friend_sharing.sql`.
-   - Ce script remplace les anciens partages larges par le partage précis par mois et ligne. Par sécurité, les anciens droits de partage sont désactivés : chaque personne devra sélectionner à nouveau ce qu'elle souhaite partager.
-3. Dans **Authentication → Providers**, active Email. Garde la confirmation d'e-mail activée en production.
-4. Dans **Authentication → URL Configuration** :
-   - `Site URL` : `https://ton-domaine.fr` ou l'URL Vercel de production ;
-   - `Redirect URLs` : ajoute l'URL de production suivie de `/**` ;
-   - pour tester les aperçus Vercel, ajoute `https://*-ton-compte.vercel.app/**`.
-5. Dans `supabase_config.json`, renseigne l'URL de ton projet et sa **publishable/anon key**, accessibles dans **Settings → API**. Ne mets jamais de clé secrète ici.
+Pour le projet existant, qui possède déjà le partage granulaire et son correctif de lecture, exécute **uniquement** `supabase_security_hardening.sql` dans SQL Editor. Applique-le avant de publier le nouveau client : Retirer un ami utilise désormais la fonction atomique `remove_friendship`.
 
-### Fonction de suppression de compte
+Le script est transactionnel et réexécutable. Aucun compte ni tableur personnel n'est supprimé. Les droits orphelins, sans amitié acceptée, sont désactivés ; les partages valides sont conservés.
 
-Le navigateur ne peut pas supprimer un utilisateur Supabase directement sans exposer une clé secrète. La fonction Edge incluse réalise cette action côté serveur après vérification de la session.
+Ne rejoue pas le schéma initial ni `supabase_granular_friend_sharing.sql` lors d'une mise à jour : cette ancienne migration réinitialise les permissions.
 
-Avec la CLI Supabase installée et connectée :
+Pour une base entièrement neuve, exécute dans cet ordre :
 
-```bash
+1. `supabase_schema.sql`.
+2. `supabase_granular_friend_sharing.sql`.
+3. `supabase_fix_secure_sharing_access.sql`.
+4. `supabase_fix_shared_snapshot_read.sql`.
+5. `supabase_security_hardening.sql`.
+
+Cet ordre est couvert par les tests PostgreSQL. Ne rejoue pas ensuite les autres réparations historiques : elles peuvent réintroduire d'anciens droits.
+
+## Authentification
+
+Garde Email et **Confirm email** activés. Configure la Site URL exacte dans Authentication → URL Configuration, ainsi que les URLs de confirmation et récupération réellement utilisées. Évite les jokers couvrant des déploiements non fiables.
+
+La configuration publique contient seulement l'URL du projet et une clé publishable ou ancienne clé anon. Le build refuse les clés administrateur reconnues, y compris un JWT de rôle `service_role`. Ne pousse jamais de mot de passe, de clé secrète ou de fichier `.env`.
+
+Un changement de projet Supabase exige aussi de mettre à jour les origines exactes de `connect-src` dans `vercel.json`. Le build vérifie leur cohérence.
+
+Configure côté Supabase les limites de débit et la politique de mots de passe. Un CAPTCHA exige ses propres clés et l'intégration du formulaire : ne l'active pas sans préparer le site, sinon les inscriptions échoueront.
+
+## Suppression de compte
+
+La fonction `supabase/functions/delete-account/index.ts` reste déployée dans Supabase, pas dans Vercel. Elle vérifie la session et ne supprime que son utilisateur.
+
+```sh
 supabase login
 supabase link --project-ref TON_PROJECT_REF
-supabase secrets set ALLOWED_ORIGIN=https://ton-domaine.fr
+supabase secrets set ALLOWED_ORIGIN=https://ton-domaine-de-production
 supabase functions deploy delete-account
 ```
 
-`ALLOWED_ORIGIN` doit correspondre exactement à l'URL de production, sans `/` final. Les secrets `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` sont disponibles dans l'environnement des Edge Functions ; ne les copie jamais dans Vercel ni dans le dépôt.
+L'origine doit correspondre exactement au site, sans slash final. Ne copie jamais la clé de service dans le navigateur. Teste la suppression uniquement avec un compte explicitement jetable.
 
-Si tu changes de domaine plus tard, mets à jour `ALLOWED_ORIGIN`, puis teste la suppression avec un compte de test.
+## Vérifications
 
-## 3. Déployer dans Vercel
+En local, avec Node 22 ou 24 :
 
-1. Ouvre [Vercel](https://vercel.com/new) puis importe le dépôt GitHub.
-2. Dans **Root Directory**, laisse `.`. Si ton dépôt contient ce projet dans un sous-dossier, sélectionne uniquement ce sous-dossier.
-3. Dans **Framework Preset**, choisis **Other**.
-4. Active l'override du **Build Command** et laisse le champ vide : ce site ne nécessite aucune compilation.
-5. Vérifie que **Output Directory** vaut `.` (ou désactive son override). Il ne doit pas viser `dist`, `build` ou un dossier vide.
-6. Clique sur **Deploy**.
-7. Ouvre l'URL de production, puis ajoute-la à la configuration des URLs Supabase ci-dessus.
+```sh
+npm ci --ignore-scripts --include=dev
+npm test
+npm run build
+```
 
-Chaque nouveau push sur la branche de production déclenchera un redéploiement automatique. Les branches et pull requests obtiennent une URL d'aperçu.
+Après le déploiement Vercel marqué Ready :
 
-## 4. Vérification après publication
+- parcours de configuration, connexion, thèmes, langues et modales légales fonctionnels ;
+- graphiques, import et export Excel testés avec un fichier fictif ;
+- aucun partage initial ; destinataire limité aux mois/lignes autorisés ; tiers refusé ;
+- retrait d'ami : accès coupés dans les deux sens ; réinvitation : aucun ancien accès rétabli ;
+- `/supabase_schema.sql`, `/.git/config`, `/.env` et `/package.json` répondent 404 ;
+- aucune erreur CSP/SRI, aucun `unsafe-inline` dans `script-src` ;
+- `/.well-known/security.txt` accessible une fois le contact public choisi.
 
-Teste dans cet ordre :
+## Dépannage et retour arrière
 
-1. le premier parcours : **Argent actuel** apparaît avant l'objectif d'épargne ;
-2. le tableur : l'objectif d'épargne est modifiable dans le tableur ;
-3. les paramètres : catégories, règles et apparence sont visibles ici, pas dans le tableur ni sur l'accueil ;
-4. un changement de thème clair/sombre ;
-5. création de compte, confirmation par e-mail, connexion et déconnexion ;
-6. synchronisation sur un second navigateur ;
-7. suppression avec un compte de test seulement ;
-8. le partage entre amis : aucun accès par défaut, puis sélectionne quelques mois et lignes avec un compte de test ;
-9. connecte le compte ami et vérifie qu’il ne voit que cette sélection, puis retire l’accès.
+En cas de build en erreur, lis les logs et vérifie Node, le lockfile et les sources. Ne retire pas les tests ou en-têtes pour masquer l'échec.
 
-## Dépannage Vercel
+Si SRI bloque SheetJS, vérifie les octets depuis sa distribution officielle avant de changer version et empreinte ; ne supprime pas `integrity`.
 
-**Une page 404 ou une page vide**
+Si Retirer un ami échoue, vérifie la migration de durcissement. Le client ne retombe pas sur une suppression partielle.
 
-- Assure-toi que le dépôt contient `index.html` en minuscules à la racine sélectionnée.
-- Dans Vercel, remets le Framework Preset sur **Other**, le Build Command vide et l'Output Directory sur `.`.
-- Consulte les logs du dernier déploiement après chaque correction.
+Pour revenir à une ancienne version, restaure un commit GitHub/Vercel compatible. Ne rétablis pas les écritures directes Supabase pour faire fonctionner un ancien bouton.
 
-**La confirmation d'e-mail renvoie vers localhost ou une mauvaise URL**
+La session et le tableur restent stockés sur l'appareil. N'utilise pas un profil de navigateur partagé pour des données privées. Ces tests ne constituent pas une garantie d'invulnérabilité.
 
-- Mets à jour `Site URL` et les `Redirect URLs` dans Supabase, puis renvoie l'e-mail de confirmation.
-
-**Le bouton « Supprimer mon compte » échoue**
-
-- Vérifie que la fonction `delete-account` est déployée.
-- Vérifie que le secret `ALLOWED_ORIGIN` correspond exactement à l'URL de production.
-- Teste depuis l'URL de production, pas une URL d'aperçu.
-
-**`Database error saving new user` lors de la création d'un compte**
-
-- Ouvre **Supabase → SQL Editor**, colle le contenu de `supabase_fix_new_users.sql`, puis clique sur **Run**.
-- Le script est réexécutable sans risque : il remet en place le profil automatique et laisse toujours Supabase Auth créer le compte, même si un ancien profil est incomplet.
-
-## Limites de sécurité à connaître
-
-Les corrections réduisent les risques importants, mais aucun site ne peut être déclaré « parfaitement sécurisé ». Garde Supabase, ses règles RLS et les bibliothèques CDN à jour. Les données locales et la session sont stockées dans le navigateur : un appareil compromis, une extension malveillante ou une faille XSS reste un risque. Pour un produit public, ajoute ensuite la limitation de débit et CAPTCHA côté Supabase Auth, une politique de mot de passe renforcée dans Supabase, ainsi que la surveillance des logs et alertes.
-
-Références officielles : [configurer un build statique Vercel](https://vercel.com/docs/builds/configure-a-build), [déploiements Git Vercel](https://vercel.com/docs/git/vercel-for-github), [URLs de redirection Supabase](https://supabase.com/docs/guides/auth/redirect-urls), [secrets des Edge Functions](https://supabase.com/docs/guides/functions/secrets).
-
+Références : [build Vercel](https://vercel.com/docs/builds/configure-a-build), [configuration Vercel](https://vercel.com/docs/project-configuration/vercel-json), [RLS Supabase](https://supabase.com/docs/guides/database/postgres/row-level-security), [URLs de redirection](https://supabase.com/docs/guides/auth/redirect-urls).

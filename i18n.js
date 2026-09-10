@@ -2,6 +2,8 @@
 (function(){
 "use strict";
 const dictionary=Object.freeze({
+  "Des partages mieux protégés": "Better protected sharing",
+  "Retirer un ami ferme désormais les accès dans les deux sens. Si vous vous ajoutez à nouveau, chacun choisit ce qu’il souhaite partager. Le chargement du site et les boutons de configuration ont aussi été renforcés.": "Removing a friend now closes access in both directions. If you add each other again, each person chooses what to share. Site loading and setup controls have also been improved.",
   "Accueil": "Home",
   "Tableur": "Spreadsheet",
   "Paramètres": "Settings",

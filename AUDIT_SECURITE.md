@@ -1,6 +1,16 @@
 # Audit de sécurité — Gestion finance
 
-Date : 1 septembre 2026
+Rapport historique : 1 septembre 2026. Voir ci-dessous le complément du 10 septembre avant d'utiliser les anciennes instructions.
+
+## Complément — correctif du 10 septembre 2026
+
+Le nouveau déploiement sépare les scripts intégrés, refuse les handlers HTML (y compris ceux du tutoriel), vérifie SRI et ne publie que `dist`. Chart.js, Supabase et les polices sont hébergés localement avec versions verrouillées. SheetJS conserve une version officielle exacte et son empreinte SRI. `unsafe-inline` reste limité aux styles pour préserver les thèmes ; il n'est plus autorisé aux scripts.
+
+La migration `supabase_security_hardening.sql` réserve les écritures de partage aux fonctions contrôlées, révoque les accès dans les deux sens et empêche la réactivation par une synchronisation périmée. Elle gère aussi les anciens doublons de relation. Les adresses d'invitation sont vérifiées dans Supabase Auth, pas dans un profil modifiable. Elle ne supprime aucun compte ni tableur personnel.
+
+Avant publication, appliquer cette migration au projet existant. Pour une base neuve, suivre **l'ordre complet du GUIDE_DEPLOIEMENT_VERCEL.md**, qui remplace les instructions historiques ci-dessous. Le dépôt inclut 29 tests de sécurité/build/configuration ; le build les exécute et échoue si une protection régresse. Les vérifications locales ne prouvent pas à elles seules l'état de la base ou du déploiement en ligne.
+
+Le contact public de `security.txt` doit être choisi par le propriétaire. Ne pas inventer une adresse, promettre une certification ni ajouter les anciens en-têtes XSS obsolètes pour améliorer artificiellement un score. L'hébergement Vercel gère le certificat et le domaine `vercel.app` ; les règles DNS d'un domaine appartenant à un tiers ne sont pas modifiables dans ce dépôt.
 
 ## Verdict
 
@@ -34,4 +44,3 @@ Le projet est nettement plus sûr après les corrections, mais il n'est pas poss
 - **Partage :** teste les quatre cas : pas ami, ami sans droit, ami avec un seul mois/une seule ligne, ami après retrait du droit. Le snapshot complet du propriétaire reste privé ; le compte invité lit seulement une copie filtrée, distincte de la synchronisation personnelle.
 - **Données locales :** les données restent aussi dans `localStorage`. Elles ne sont pas chiffrées au repos par l'application : ne partage pas un navigateur ou un profil Windows contenant des données financières.
 - **Compte supprimé :** vérifie toujours ce parcours avec un compte de test. La suppression d'un utilisateur Supabase cascade vers ses données selon le schéma SQL.
-

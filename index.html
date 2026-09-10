@@ -2832,8 +2832,9 @@ function resetDataState(){
     function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-09-08-r9";
+    const RELEASE_NOTES_VERSION="2026-09-10-security";
     const RELEASE_NOTES=[
+      {date:"10 septembre 2026",title:"Des partages mieux protégés",text:"Retirer un ami ferme désormais les accès dans les deux sens. Si vous vous ajoutez à nouveau, chacun choisit ce qu’il souhaite partager. Le chargement du site et les boutons de configuration ont aussi été renforcés."},
       {date:"8 septembre 2026",title:"Les mêmes repères dans les partages",text:"Le tableau de bord d’un ami reprend maintenant les cartes et graphiques de l’accueil. Les indications de partage sont plus simples et les traductions anglaises ont été complétées. Sur téléphone, les nouveautés restent dans le bandeau de l’accueil."},
       {date:"8 septembre 2026",title:"Un accueil plus léger",text:"L’en-tête prend moins de place, les filtres sont alignés et les actualisations sont animées. Les tableaux de bord partagés ont leurs graphiques. Français ou anglais : à toi de choisir dans les paramètres."},
       {date:"8 septembre 2026",title:"Le partage, plus clair",text:"Une fiche par ami, les mois et lignes à cocher dans le tableur, et un résumé avant d’enregistrer. Les partages reçus s’ouvrent depuis la même fiche."},

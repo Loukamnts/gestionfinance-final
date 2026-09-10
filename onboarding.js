@@ -199,6 +199,7 @@
     ];
 
     content.innerHTML = steps[currentStep]();
+    wireWizardControls(content);
 
     // Wire buttons
     const nextBtn = $("wizardNext");
@@ -261,6 +262,28 @@
     }
   }
 
+  // Événements définis dans le script, jamais dans les attributs HTML (CSP stricte).
+  function wireWizardControls(content) {
+    const bind = (selector, event, handler) => content.querySelectorAll(selector).forEach(node => node.addEventListener(event, handler));
+    bind('[data-onb-auth]', 'click', event => window.onbShowAuth(event.currentTarget.dataset.onbAuth));
+    bind('#wbPwToggle', 'click', () => window.onbTogglePw());
+    bind('#wbAuthSubmit', 'click', () => window.onbSubmitAuth());
+    bind('#wbCurrentAmount', 'input', event => { wizardData.currentAmount = event.currentTarget.value; });
+    bind('#wbStartingMonth', 'input', event => { wizardData.startingMonth = event.currentTarget.value; });
+    bind('[data-onb-import]', 'click', event => { if (event.target.id !== 'wbImportFile') $('wbImportFile').click(); });
+    bind('#wbImportFile', 'change', event => window.onbHandleImport(event.currentTarget));
+    bind('[data-onb-empty]', 'click', () => window.onbSkipImport());
+    bind('[data-onb-theme]', 'click', event => window.onbSelectTheme(event.currentTarget.dataset.onbTheme));
+    bind('[data-onb-mode]', 'click', event => window.onbSelectMode(event.currentTarget.dataset.onbMode));
+    bind('[role="button"][tabindex="0"]', 'keydown', event => {
+      if (event.target !== event.currentTarget) return;
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.currentTarget.click(); }
+    });
+    // Valeurs affectées comme propriétés : aucun contenu importé n'est interprété en HTML.
+    if ($('wbCurrentAmount')) $('wbCurrentAmount').value = wizardData.currentAmount || '';
+    if ($('wbStartingMonth')) $('wbStartingMonth').value = wizardData.startingMonth || new Date().toISOString().slice(0,7);
+  }
+
   // === Étape 0 : Connexion (créer un compte ou se connecter) — en première position ===
   function renderStepConnexion() {
     const d = wizardData;
@@ -269,12 +292,12 @@
         <h3>Connexion</h3>
         <p class="step-desc">Crée un compte ou connecte-toi pour synchroniser tes données entre appareils et partager avec tes amis.</p>
         <div class="wizard-auth-choices">
-          <div class="wizard-auth-choice" onclick="window.onbShowAuth('signup')">
+          <div class="wizard-auth-choice" role="button" tabindex="0" data-onb-auth="signup">
             <svg viewBox="0 0 24 24" fill="none" width="24" height="24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.5" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 8v6M23 11h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <h4>Créer un compte</h4>
             <p>Email et mot de passe</p>
           </div>
-          <div class="wizard-auth-choice" onclick="window.onbShowAuth('login')">
+          <div class="wizard-auth-choice" role="button" tabindex="0" data-onb-auth="login">
             <svg viewBox="0 0 24 24" fill="none" width="24" height="24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <h4>Se connecter</h4>
             <p>J'ai déjà un compte</p>
@@ -289,12 +312,12 @@
             <label>Mot de passe</label>
             <div class="wizard-pw-wrapper">
               <input type="password" id="wbAuthPw" placeholder="Au moins 6 caractères">
-              <button type="button" class="wizard-eye-btn" id="wbPwToggle" onclick="window.onbTogglePw()" aria-label="Afficher/masquer le mot de passe">
+              <button type="button" class="wizard-eye-btn" id="wbPwToggle" aria-label="Afficher/masquer le mot de passe">
                 <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
               </button>
             </div>
           </div>
-          <button class="wizard-auth-submit" id="wbAuthSubmit" onclick="window.onbSubmitAuth()">Continuer</button>
+          <button type="button" class="wizard-auth-submit" id="wbAuthSubmit">Continuer</button>
           <p class="wizard-auth-status" id="wbAuthStatus"></p>
         </div>
         <div class="wizard-info-box">
@@ -314,12 +337,12 @@
         <p class="step-desc">Ajoute un solde de départ maintenant, ou commence avec un tableur vide.</p>
         <div class="wizard-field">
           <label>Solde de départ (€) <span class="optional-mark">facultatif</span></label>
-          <input type="number" id="wbCurrentAmount" min="0" step="0.01" inputmode="decimal" placeholder="Ex. 1 000" value="${d.currentAmount || ''}" oninput="wizardData.currentAmount=this.value">
+          <input type="number" id="wbCurrentAmount" min="0" step="0.01" inputmode="decimal" placeholder="Ex. 1 000">
           <p class="field-hint">Le montant disponible au début du mois choisi. Il sera ajouté à ton tableur sans modifier les autres données.</p>
         </div>
         <div class="wizard-field">
           <label>Mois du solde de départ</label>
-          <input type="month" id="wbStartingMonth" value="${currentMonth}" oninput="wizardData.startingMonth=this.value" class="wizard-month-input">
+          <input type="month" id="wbStartingMonth" class="wizard-month-input">
         </div>
         <div class="wizard-info-box wizard-start-info">
           <strong>Tout le reste se règle dans le tableur.</strong><br>
@@ -339,13 +362,13 @@
       <div class="wizard-step active">
         <h3>Import de données</h3>
         <p class="step-desc">Choisis comment démarrer ton tableur.</p>
-        <div class="wizard-choice" onclick="document.getElementById('wbImportFile').click()">
+        <div class="wizard-choice" role="button" tabindex="0" data-onb-import>
           <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 8l-5-5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           <h4>Importer un fichier Excel</h4>
           <p>Charge un fichier .xlsx depuis ton ordinateur</p>
-          <input type="file" id="wbImportFile" accept=".xlsx,.xls" style="display:none" onchange="window.onbHandleImport(this)">
+          <input type="file" id="wbImportFile" accept=".xlsx,.xls" style="display:none">
         </div>
-        <div class="wizard-choice" onclick="window.onbSkipImport()">
+        <div class="wizard-choice" role="button" tabindex="0" data-onb-empty>
           <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M9 3v18" stroke="currentColor" stroke-width="2"/></svg>
           <h4>Commencer avec un tableau vide</h4>
           <p>Crée ton tableur de zéro</p>
@@ -365,7 +388,7 @@
         <p class="step-desc">Choisis le thème et le mode d'affichage.</p>
         <div class="wizard-theme-grid">
           ${THEMES.map(t => `
-            <div class="wizard-theme-card ${d.theme === t.id ? 'selected' : ''}" onclick="window.onbSelectTheme('${t.id}')">
+            <div class="wizard-theme-card ${d.theme === t.id ? 'selected' : ''}" role="button" tabindex="0" data-onb-theme="${t.id}">
               <div class="wizard-theme-preview" style="background: ${t.preview}"></div>
               <span>${t.name}</span>
             </div>
@@ -374,8 +397,8 @@
         <div class="wizard-field" style="margin-top: 20px;">
           <label>Mode d'affichage</label>
           <div class="mode-segment" role="group" aria-label="Mode d'affichage">
-            <button type="button" class="${d.mode === 'light' ? 'is-active' : ''}" onclick="window.onbSelectMode('light')">Clair</button>
-            <button type="button" class="${d.mode === 'dark' ? 'is-active' : ''}" onclick="window.onbSelectMode('dark')">Sombre</button>
+            <button type="button" class="${d.mode === 'light' ? 'is-active' : ''}" data-onb-mode="light">Clair</button>
+            <button type="button" class="${d.mode === 'dark' ? 'is-active' : ''}" data-onb-mode="dark">Sombre</button>
           </div>
         </div>
       </div>
