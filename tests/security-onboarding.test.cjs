@@ -4,6 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const source=fs.readFileSync(path.join(__dirname,'../onboarding.js'),'utf8');
+const appSource=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 test('Every dynamic onboarding step is free of inline handlers and interpolated input values',()=>{
   const code=source.slice(source.indexOf('  function renderStepConnexion()'),source.indexOf('  function finishWizard()'));
   const context={wizardData:{currentAmount:'" onfocus="alert(1)',startingMonth:'"><script>bad</script>',theme:'glass',mode:'light'},
@@ -42,3 +43,12 @@ test('External wizard bindings preserve authentication, inputs, import, theme an
   for(const expected of ['onbShowAuth','onbTogglePw','onbSubmitAuth','onbHandleImport','onbSkipImport','onbSelectTheme','onbSelectMode'])
     assert(calls.some(call=>Array.isArray(call)&&call[0]===expected),expected);
 });
+test('The destructive cloud-account action is shown only to an authenticated user',()=>{
+  const renderAuth=appSource.match(/function renderAuth\(\)\{[\s\S]*?\n  \}\n\n  function msg/);
+  assert(renderAuth,'renderAuth must remain present');
+  const code=renderAuth[0];
+  assert.match(code,/deleteButton\.hidden = true; deleteButton\.style\.display = "none"/);
+  assert.match(code,/if\(sb\.user\)[\s\S]*deleteButton\.hidden = false; deleteButton\.style\.display = "inline-flex"/);
+  assert.match(code,/\}else\{[\s\S]*deleteButton\.hidden = true; deleteButton\.style\.display = "none"/);
+});
+
