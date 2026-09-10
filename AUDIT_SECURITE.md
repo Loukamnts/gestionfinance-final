@@ -39,7 +39,7 @@ La session navigateur est nécessaire à la connexion persistante et à la synch
 
 ## Vérifications réalisées
 
-- 29 tests automatisés de sécurité, base simulée, build et tutoriel : réussis.
+- 30 tests automatisés de sécurité, base simulée, build, tutoriel et visibilité des actions de compte : réussis.
 - 40 contrôles automatisés d'interface, traduction, partage et calcul : réussis.
 - `npm audit`, dépendances de production puis dépôt complet : 0 vulnérabilité signalée.
 - Build public : 13 fichiers applicatifs, 3 scripts extraits, aucun SQL publié.
@@ -60,4 +60,3 @@ Le détail reproductible se trouve dans `work/security-audit-20260909/validation
 ## Contact de sécurité
 
 Aucun contact n'est publié par supposition. L'adresse d'un compte personnel visible dans une console d'administration ne doit pas devenir automatiquement un contact public. Une fois l'adresse dédiée fournie, ajouter `security.txt` avec au minimum `Contact`, `Expires`, `Canonical` et, si disponible, `Preferred-Languages: fr, en`.
-
