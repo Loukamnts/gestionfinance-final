@@ -689,4 +689,3 @@ function start(){
 window.GFI18n={t,locale,money,setLanguage,getLanguage:()=>language,apply};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
 })();
-
