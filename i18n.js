@@ -3,6 +3,8 @@
 "use strict";
 const dictionary=Object.freeze({
   "Des partages mieux protégés": "Better protected sharing",
+  "Des moyennes fidèles aux données": "Averages that reflect your data",
+  "Un mois sans salaire ou sans dépense n’est plus pris pour un zéro. Les moyennes et les mois les plus ou moins dépensiers utilisent uniquement les montants réellement renseignés.": "A month with no salary or expense is no longer treated as zero. Averages and highest or lowest spending months now use only amounts that were actually entered.",
   "Retirer un ami ferme désormais les accès dans les deux sens. Si vous vous ajoutez à nouveau, chacun choisit ce qu’il souhaite partager. Le chargement du site et les boutons de configuration ont aussi été renforcés.": "Removing a friend now closes access in both directions. If you add each other again, each person chooses what to share. Site loading and setup controls have also been improved.",
   "Accueil": "Home",
   "Tableur": "Spreadsheet",
@@ -37,6 +39,7 @@ const dictionary=Object.freeze({
   "Voir les nouveautés": "See what's new",
   "Voir toutes les nouveautés": "All updates",
   "Salaire moyen": "Average salary",
+  "Aucun salaire renseigné": "No salary entered",
   "Revenus moyens": "Average income",
   "Tous les mois": "All months",
   "Total épargné": "Total saved",
@@ -581,6 +584,7 @@ function t(value) {
     [/^(Caractère inattendu|Réf invalide): (.+)$/,(_,type,detail)=>(type==="Réf invalide"?"Invalid reference":"Unexpected character")+": "+detail],
 
     [/^(\d+) mois analysés?$/,(_,n)=>n+" month"+(n==="1"?"":"s")+" analysed"],
+    [/^(\d+) mois avec salaire$/,(_,n)=>n+" month"+(n==="1"?"":"s")+" with salary"],
     [/^(\d+\s?%) du salaire total$/,(_,n)=>n+" of total salary"],
     [/^Catégories détectées \((\d+)\)$/,(_,n)=>"Detected categories ("+n+")"],
     [/^Auto \((.+)\)$/,(_,rule)=>"Auto ("+t(rule)+")"],

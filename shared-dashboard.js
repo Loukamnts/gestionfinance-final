@@ -38,8 +38,8 @@ function normalize(data){
   }).sort((a,b)=>a.year-b.year||a.monthIndex-b.monthIndex||a.id.localeCompare(b.id));
 }
 function summary(months){
-  const sum=key=>months.reduce((n,m)=>n+m[key],0),expenses=months.filter(month=>month.hasExpenses),ordered=expenses.slice().sort((a,b)=>Math.abs(a.expenses)-Math.abs(b.expenses));
-  return {income:months.some(m=>m.hasIncome)?sum("salary")/Math.max(1,months.length):null,savings:months.some(m=>m.hasSavings)?Math.abs(sum("savingsTotal")):null,max:ordered.at(-1)||null,min:ordered[0]||null};
+  const sum=key=>months.reduce((n,m)=>n+m[key],0),income=months.filter(month=>month.hasIncome),expenses=months.filter(month=>month.hasExpenses),ordered=expenses.slice().sort((a,b)=>Math.abs(a.expenses)-Math.abs(b.expenses));
+  return {income:income.length?income.reduce((total,month)=>total+month.salary,0)/income.length:null,savings:months.some(m=>m.hasSavings)?Math.abs(sum("savingsTotal")):null,max:ordered.at(-1)||null,min:ordered[0]||null};
 }
 function node(tag,cls,text){const item=document.createElement(tag);if(cls)item.className=cls;if(text!==undefined)item.textContent=text;return item;}
 function render(container,data){
@@ -80,7 +80,7 @@ function render(container,data){
     if(disposed)return;updateFilters();
     const allowed=visible(),selected=allowed.find(month=>month.id===monthId),totals=summary(allowed),sameMetrics=presentation.metrics(allowed),salaryTotal=allowed.reduce((sum,month)=>sum+month.salary,0);
     metrics.replaceChildren();
-    [["Salaire moyen",totals.income===null?"Non partagé":cash(sameMetrics.avgSalary),allowed.length+" mois analysé"+(allowed.length>1?"s":"")],
+    [["Salaire moyen",totals.income===null?"Non partagé":cash(sameMetrics.avgSalary),totals.income===null?"Données autorisées":sameMetrics.incomeMonthCount+" mois avec salaire"],
      ["Total épargné",totals.savings===null?"Non partagé":cash(Math.abs(sameMetrics.totalSavings)),totals.savings!==null&&totals.income!==null?(salaryTotal?Math.round(totals.savings/salaryTotal*100):0)+" % du salaire total":"Données autorisées"],
      ["Mois le plus dépensier",totals.max?totals.max.label:"Non partagé",totals.max?cash(Math.abs(totals.max.expenses)):"Données autorisées"],
      ["Mois le moins dépensier",totals.min?totals.min.label:"Non partagé",totals.min?cash(Math.abs(totals.min.expenses)):"Données autorisées"]].forEach(([label,value,note])=>{
