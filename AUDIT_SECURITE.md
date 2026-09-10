@@ -1,46 +1,62 @@
-# Audit de sécurité — Gestion finance
+# Audit de sécurité — Gestion Finance
 
-Rapport historique : 1 septembre 2026. Voir ci-dessous le complément du 10 septembre avant d'utiliser les anciennes instructions.
-
-## Complément — correctif du 10 septembre 2026
-
-Le nouveau déploiement sépare les scripts intégrés, refuse les handlers HTML (y compris ceux du tutoriel), vérifie SRI et ne publie que `dist`. Chart.js, Supabase et les polices sont hébergés localement avec versions verrouillées. SheetJS conserve une version officielle exacte et son empreinte SRI. `unsafe-inline` reste limité aux styles pour préserver les thèmes ; il n'est plus autorisé aux scripts.
-
-La migration `supabase_security_hardening.sql` réserve les écritures de partage aux fonctions contrôlées, révoque les accès dans les deux sens et empêche la réactivation par une synchronisation périmée. Elle gère aussi les anciens doublons de relation. Les adresses d'invitation sont vérifiées dans Supabase Auth, pas dans un profil modifiable. Elle ne supprime aucun compte ni tableur personnel.
-
-Avant publication, appliquer cette migration au projet existant. Pour une base neuve, suivre **l'ordre complet du GUIDE_DEPLOIEMENT_VERCEL.md**, qui remplace les instructions historiques ci-dessous. Le dépôt inclut 29 tests de sécurité/build/configuration ; le build les exécute et échoue si une protection régresse. Les vérifications locales ne prouvent pas à elles seules l'état de la base ou du déploiement en ligne.
-
-Le contact public de `security.txt` doit être choisi par le propriétaire. Ne pas inventer une adresse, promettre une certification ni ajouter les anciens en-têtes XSS obsolètes pour améliorer artificiellement un score. L'hébergement Vercel gère le certificat et le domaine `vercel.app` ; les règles DNS d'un domaine appartenant à un tiers ne sont pas modifiables dans ce dépôt.
+Dernière validation : 10 septembre 2026.
 
 ## Verdict
 
-Le projet est nettement plus sûr après les corrections, mais il n'est pas possible de le déclarer parfaitement sécurisé. La sécurité finale dépend aussi de la configuration Supabase, du domaine Vercel, des dépendances CDN et de l'appareil de l'utilisateur.
+La version publiée est nettement durcie et les vulnérabilités techniques identifiées dans le périmètre du dépôt ont été corrigées ou encadrées. Il reste impossible de déclarer un site « parfaitement sécurisé » : la sécurité dépend aussi de Supabase, de Vercel, des comptes utilisateurs, des appareils et des futures modifications.
 
-## Corrigé dans cette version
+## Protections vérifiées
 
-- Les intégrations Google Drive / Google Sheets et le serveur local associé ne sont plus chargés par le site.
-- Les données Notion et ses identifiants ne sont plus chargés par l'interface.
-- La clé Supabase publishable est centralisée dans `supabase_config.json`; aucune clé de service ne doit se trouver dans le navigateur.
-- La suppression de compte passe par une Edge Function qui vérifie le JWT, au lieu d'annoncer une suppression qu'un navigateur ne peut pas effectuer correctement.
-- Le schéma Supabase contient désormais la table de synchronisation `finance_snapshots` et des règles RLS dédiées.
-- Les droits d'ami sont contrôlés au niveau de la base. Seul le destinataire peut accepter une demande ; un ami ne lit qu'une copie filtrée par les mois et les lignes autorisés.
-- Le mot de passe demandé dans l'interface est passé à 8 caractères minimum.
-- Vercel applique des en-têtes CSP, anti-iframe, anti-MIME sniffing, permissions restreintes et referrer policy.
+- Le site public est construit dans `dist` ; migrations SQL, tests, lockfile, fichiers d'environnement et métadonnées Git ne sont pas déployés.
+- Les scripts applicatifs sont externes, sans gestionnaires `onclick` dans le HTML et sans autorisation `unsafe-inline` ou `unsafe-eval` dans `script-src`.
+- Les 14 scripts publics ont une empreinte SHA-384 vérifiée au chargement.
+- Supabase, Chart.js et les polices sont servis localement avec des versions verrouillées. SheetJS conserve une version exacte et une empreinte SRI.
+- Les en-têtes CSP, HSTS, anti-iframe, anti-MIME sniffing, COOP, COEP, CORP, Referrer-Policy et Permissions-Policy sont actifs en production.
+- La configuration publique accepte uniquement l'URL du projet et une clé publishable/anon ; le build refuse les clés `service_role` connues ou encodées.
+- La confirmation d'e-mail Supabase reste activée et l'interface propose connexion/inscription par mot de passe.
+- La suppression de compte passe par une Edge Function qui vérifie la session ; aucune clé administrateur n'est exposée au navigateur.
+- Les données Google Drive, Google Sheets, Notion et leurs anciennes intégrations ne sont plus chargées.
 
-## À vérifier dans Supabase avant publication
+## Partage et amis
 
-1. Exécuter `supabase_schema.sql`, puis `supabase_granular_friend_sharing.sql`, sans modifier les règles RLS.
-2. Confirmer que RLS est activé sur toutes les tables listées dans le script.
-3. Ne jamais utiliser `service_role` dans `supabase_config.json`, Vercel, GitHub ou le navigateur.
-4. Déployer `supabase/functions/delete-account/index.ts` et définir `ALLOWED_ORIGIN` avec le domaine de production exact.
-5. Configurer les URLs de redirection de Supabase avant de tester l'e-mail de confirmation ou la réinitialisation de mot de passe.
+La migration `supabase_security_hardening.sql` a été appliquée au projet de production après confirmation du propriétaire. Elle ne supprime ni compte ni tableur personnel.
 
-## Risques résiduels et améliorations recommandées
+- Seul le destinataire peut accepter une invitation en attente.
+- L'adresse invitée est résolue depuis Supabase Auth et doit être confirmée ; un e-mail de profil modifiable ne suffit pas.
+- Une amitié acceptée n'accorde aucun accès par défaut.
+- Le propriétaire partage une copie filtrée par années, mois et lignes ; son instantané personnel complet reste privé.
+- Les écritures directes dans les relations et autorisations sont refusées au client ; elles passent par des fonctions contrôlées.
+- Une sélection périmée ne peut pas réactiver un accès retiré.
+- Retirer un ami supprime la relation dans les deux sens et révoque les autorisations bilatérales, y compris pour d'anciens doublons inverses.
+- Une nouvelle invitation ne restaure pas d'anciens droits.
 
-- **Session navigateur :** elle est nécessaire à la connexion par e-mail et à la synchronisation. Elle est conservée dans le stockage du navigateur ; la déconnexion la détruit. La supprimer totalement supprimerait aussi la connexion persistante et le partage.
-- **XSS :** le projet reste un grand fichier HTML avec des scripts intégrés. La CSP limite les sources externes, mais contient `unsafe-inline` pour que les scripts existants puissent fonctionner. Une amélioration majeure serait de séparer les scripts dans des fichiers externes, supprimer les gestionnaires `onclick` HTML, puis retirer `unsafe-inline`.
-- **CDN :** Chart.js, SheetJS et Supabase sont chargés depuis CDN. Pour un projet sensible, verrouiller les versions, ajouter des attributs SRI lorsque possible, ou héberger des copies contrôlées.
-- **Authentification :** dans Supabase, active la confirmation e-mail, configure le minimum de mot de passe à 8 ou 12 caractères, les limites de débit et CAPTCHA si le site devient public.
-- **Partage :** teste les quatre cas : pas ami, ami sans droit, ami avec un seul mois/une seule ligne, ami après retrait du droit. Le snapshot complet du propriétaire reste privé ; le compte invité lit seulement une copie filtrée, distincte de la synchronisation personnelle.
-- **Données locales :** les données restent aussi dans `localStorage`. Elles ne sont pas chiffrées au repos par l'application : ne partage pas un navigateur ou un profil Windows contenant des données financières.
-- **Compte supprimé :** vérifie toujours ce parcours avec un compte de test. La suppression d'un utilisateur Supabase cascade vers ses données selon le schéma SQL.
+## Données locales
+
+Le tableur est aussi conservé dans le stockage du navigateur afin de fonctionner localement et hors connexion. Ce stockage n'est pas chiffré par l'application. Il faut donc utiliser un profil navigateur et un appareil protégés, surtout pour des données financières.
+
+La session navigateur est nécessaire à la connexion persistante et à la synchronisation. La déconnexion détruit la session côté client. Supprimer totalement cette session empêcherait la reconnexion transparente et le partage.
+
+## Vérifications réalisées
+
+- 29 tests automatisés de sécurité, base simulée, build et tutoriel : réussis.
+- 40 contrôles automatisés d'interface, traduction, partage et calcul : réussis.
+- Build public : 13 fichiers applicatifs, 3 scripts extraits, aucun SQL publié.
+- Production : CSP, marqueur de version et intégrité des 14 scripts conformes.
+- Les chemins sensibles contrôlés (`.env`, `.git/config`, SQL, tests et lockfile) répondent 404.
+- La migration Supabase est installée ; les compteurs de comptes et instantanés sont restés identiques avant/après.
+
+Le détail reproductible se trouve dans `work/security-audit-20260909/validation-correctifs.md` dans l'espace de validation local. Ce rapport ne contient aucune donnée financière d'utilisateur.
+
+## Vérifications opérationnelles encore nécessaires
+
+- Rejouer périodiquement le parcours avec deux comptes de test réels : invitation, acceptation, aucun droit par défaut, partage d'une ligne et d'un mois, consultation, révocation, puis réinvitation.
+- Tester la suppression uniquement avec un compte jetable. Cette action supprime réellement le compte Supabase et ses données liées.
+- Activer des limites de débit adaptées et un CAPTCHA seulement après avoir intégré son jeton au formulaire ; l'activer côté Supabase seul bloquerait les inscriptions.
+- Mettre à jour régulièrement les dépendances, puis reconstruire et repasser tous les tests avant publication.
+- Publier `/.well-known/security.txt` lorsque le propriétaire aura choisi une adresse de contact destinée à être publique.
+
+## Contact de sécurité
+
+Aucun contact n'est publié par supposition. L'adresse d'un compte personnel visible dans une console d'administration ne doit pas devenir automatiquement un contact public. Une fois l'adresse dédiée fournie, ajouter `security.txt` avec au minimum `Contact`, `Expires`, `Canonical` et, si disponible, `Preferred-Languages: fr, en`.
+
