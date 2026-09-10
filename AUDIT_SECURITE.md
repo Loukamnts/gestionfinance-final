@@ -41,6 +41,7 @@ La session navigateur est nécessaire à la connexion persistante et à la synch
 
 - 29 tests automatisés de sécurité, base simulée, build et tutoriel : réussis.
 - 40 contrôles automatisés d'interface, traduction, partage et calcul : réussis.
+- `npm audit`, dépendances de production puis dépôt complet : 0 vulnérabilité signalée.
 - Build public : 13 fichiers applicatifs, 3 scripts extraits, aucun SQL publié.
 - Production : CSP, marqueur de version et intégrité des 14 scripts conformes.
 - Les chemins sensibles contrôlés (`.env`, `.git/config`, SQL, tests et lockfile) répondent 404.
