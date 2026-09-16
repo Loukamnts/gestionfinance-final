@@ -154,7 +154,7 @@
       const fields = document.getElementById("objectivePlanFields"); if (!fields) return;
       fields.hidden = !fields.hidden; this.setAttribute("aria-expanded", String(!fields.hidden));
     });
-    document.getElementById("personalNotesButton")?.addEventListener("click", function () { setNotesOpen(true); });
+    document.querySelectorAll("[data-open-notes]").forEach(function (button) { button.addEventListener("click", function () { setNotesOpen(true); }); });
     document.getElementById("personalNotesClose")?.addEventListener("click", function () { setNotesOpen(false); });
     document.getElementById("personalNotesDrawer")?.addEventListener("click", function (event) { if (event.target === this) setNotesOpen(false); });
     document.addEventListener("keydown", function (event) { if (event.key === "Escape") setNotesOpen(false); });
