@@ -73,7 +73,7 @@ html = html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi,(tag,attrs,code)=>
   put(file,code);
   return `<script src="${file}"></script>`;
 });
-// Remplace les quatre anciens gestionnaires HTML sans autoriser unsafe-inline.
+// Remplace les gestionnaires des fenêtres légales restantes sans autoriser unsafe-inline.
 html = html.replace(/onclick="document\.getElementById\('(legalModal|privacyModal)'\)\.(showModal|close)\(\)"/g,
   (_,id,method)=>`data-dialog-target="${id}" data-dialog-action="${method}"`);
 put('app/dialog-actions.js',`document.addEventListener('click',function(event){
