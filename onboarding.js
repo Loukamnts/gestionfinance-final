@@ -83,22 +83,18 @@
   }
 
   function startWizard(clearData) {
-    currentStep = 0;
-    wizardData = { startingCash: "", accounts: "", incomeAmount: "", incomeFreq: "mensuel", expenses: "", savingsGoal: "", theme: "glass", mode: "dark", startingMonth: "", currentAmount: "", clearOnFinish: !!clearData };
-
-    // Vider le tableur si demandé (bouton admin ou premier lancement)
-    if (clearData) {
-      clearSpreadsheetData();
-    }
-
-    const overlay = $("onboardingOverlay");
-    if (!overlay) return;
-    document.body.classList.add("onboarding-active");
-    overlay.classList.remove("hidden");
-    // Active le calque bloquant pendant le wizard
-    const blocker = $("wizardBlocker");
-    if (blocker) blocker.classList.remove("hidden");
-    renderWizardStep();
+    // Le questionnaire de configuration a été retiré : il imposait des choix
+    // financiers avant même que l'utilisateur puisse explorer l'application.
+    // Le tutoriel reste disponible et le solde de départ se règle dans le
+    // tableur, quand la personne le souhaite.
+    if (clearData) clearSpreadsheetData();
+    store(STORAGE.onboarding, true);
+    const overlay = $("onboardingOverlay"), blocker = $("wizardBlocker");
+    if (overlay) overlay.classList.add("hidden");
+    if (blocker) blocker.classList.add("hidden");
+    document.body.classList.remove("onboarding-active");
+    if (typeof window.setPage === "function") window.setPage("dashboard");
+    setTimeout(function () { startTutorial(); }, 300);
   }
 
   // Vide toutes les données du tableur pour que le tutoriel soit visible
@@ -526,7 +522,7 @@
       await wait(500);
     }
     if (statusEl) statusEl.textContent = "Connecté ! Passage à la configuration…";
-    setTimeout(function() { currentStep = 1; renderWizardStep(); }, 250);
+    setTimeout(function() { startWizard(false); }, 250);
   }
 
   window.onbSubmitAuth = function() {
@@ -579,8 +575,7 @@
 
   window.onbSkipAuth = function() {
     wizardData.authConnected = false;
-    if (currentStep < 3) { currentStep++; renderWizardStep(); }
-    else finishWizard();
+    startWizard(false);
   };
 
   // === Eye toggle for password ===
@@ -699,6 +694,7 @@
     if (wizardData.importedFile && typeof window.syncDashboardFromFinanceSheet === "function") {
       try { window.syncDashboardFromFinanceSheet({ silent: true }); } catch (e) {}
     }
+    setTimeout(function(){ if (typeof window.showLatestUpdate === "function") window.showLatestUpdate(); }, 250);
   }
 
   // Liste des éléments qu'on a rendus visibles pendant le tutoriel
