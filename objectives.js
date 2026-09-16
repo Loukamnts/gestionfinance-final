@@ -156,7 +156,8 @@
     });
     document.querySelectorAll("[data-open-notes]").forEach(function (button) { button.addEventListener("click", function () { setNotesOpen(true); }); });
     document.getElementById("personalNotesClose")?.addEventListener("click", function () { setNotesOpen(false); });
-    document.getElementById("personalNotesDrawer")?.addEventListener("click", function (event) { if (event.target === this) setNotesOpen(false); });
+    // Le voile ne ferme pas la note : cela évite une fermeture accidentelle
+    // pendant l'écriture. La croix et la touche Échap restent disponibles.
     document.addEventListener("keydown", function (event) { if (event.key === "Escape") setNotesOpen(false); });
     form.addEventListener("submit", function (event) {
       event.preventDefault();
