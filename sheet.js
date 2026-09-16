@@ -277,7 +277,10 @@
 
   function buildTable() {
     container.innerHTML = "";
+    // Les éléments DOM viennent d'être recréés : l'état de peinture précédent
+    // ne doit jamais empêcher la sélection de se redessiner sur la nouvelle grille.
     cellMap.clear(); rowHeadEls = []; colHeadEls = [];
+    prevInRange = new Set(); prevActiveKey = null;
     const scroll = document.createElement("div"); scroll.className = "sheet-scroll"; sheetScroll = scroll;
     const table = document.createElement("table"); table.className = "sheet-table";
     table.style.setProperty("--sheet-row-header-width", Math.round(rowHeaderWidth(activeSheet())) + "px");
@@ -309,9 +312,6 @@
         const td = document.createElement("td"); td.className = "cell"; td.dataset.r = r; td.dataset.c = c;
         const cv = document.createElement("span"); cv.className = "cv"; td.appendChild(cv);
         td.addEventListener("pointerdown", onCellPointerDown);
-        td.addEventListener("pointermove", onCellPointerMove);
-        td.addEventListener("pointerup", onCellPointerUp);
-        td.addEventListener("pointercancel", onCellPointerUp);
         tr.appendChild(td);
         cellMap.set(cellKey(r, c), { td, cv });
       }
@@ -396,7 +396,7 @@
   }
 
   // ═════════ Sélection & édition (pointer events, diff + rAF) ═════
-  const ptr = { active: false, startX: 0, startY: 0, moved: false, r0: 0, c0: 0, startCell: { r: 0, c: 0 } };
+  const ptr = { active: false, pointerId: null, startX: 0, startY: 0, moved: false, r0: 0, c0: 0, startCell: { r: 0, c: 0 } };
   let lastTapKey = null;
   let rafSelection = null; let pendingRange = null;
   let prevInRange = new Set(); let prevActiveKey = null;
@@ -407,26 +407,38 @@
     if (state.editing && (state.active.r !== r || state.active.c !== c)) { commitActiveEdit(); }
     if (e.shiftKey) { setRange(state.range.r0, state.range.c0, r, c); syncFormulaBar(); return; }
     ptr.active = true; ptr.moved = false;
+    ptr.pointerId = e.pointerId;
     ptr.startX = e.clientX; ptr.startY = e.clientY;
     ptr.r0 = r; ptr.c0 = c; ptr.startCell = { r, c };
     ptr.willEdit = !state.editing && (lastTapKey === cellKey(r, c));
-    try { td.setPointerCapture(e.pointerId); } catch (_) {}
+    // Les écouteurs documentaires conservent le glissé même quand le pointeur
+    // passe rapidement d'une cellule à l'autre ou sort brièvement du tableau.
+    document.addEventListener("pointermove", onCellPointerMove, true);
+    document.addEventListener("pointerup", onCellPointerUp, true);
+    document.addEventListener("pointercancel", onCellPointerUp, true);
     setActive(r, c);
   }
   function onCellPointerMove(e) {
-    if (!ptr.active) return;
+    if (!ptr.active || e.pointerId !== ptr.pointerId) return;
     if (!ptr.moved) {
       const dx = e.clientX - ptr.startX, dy = e.clientY - ptr.startY;
       if (dx * dx + dy * dy < 36) return;
       ptr.moved = true;
     }
+    // Sur ordinateur, le geste sert exclusivement à sélectionner. Sur tactile,
+    // on laisse le défilement horizontal naturel du tableur rester disponible.
+    if (e.pointerType === "mouse") e.preventDefault();
     const el = document.elementFromPoint(e.clientX, e.clientY);
     const td2 = el && el.closest ? el.closest("td.cell") : null;
     if (td2) { const rr = +td2.dataset.r, cc = +td2.dataset.c; scheduleRange(ptr.r0, ptr.c0, rr, cc); }
   }
   function onCellPointerUp(e) {
-    if (!ptr.active) return;
+    if (!ptr.active || e.pointerId !== ptr.pointerId) return;
+    document.removeEventListener("pointermove", onCellPointerMove, true);
+    document.removeEventListener("pointerup", onCellPointerUp, true);
+    document.removeEventListener("pointercancel", onCellPointerUp, true);
     ptr.active = false;
+    ptr.pointerId = null;
     const sc = ptr.startCell;
     if (!ptr.moved && !state.editing) {
       if (ptr.willEdit) { lastTapKey = null; startEdit(sc.r, sc.c); }
@@ -1154,6 +1166,77 @@
     });
   }
 
+  // ═════════════════════ Montant de départ ══════════════════════
+  // Réglage volontairement situé dans le tableur : il peut être corrigé à tout
+  // moment sans repasser par un questionnaire ni effacer le reste des données.
+  function openStartingBalance() {
+    if (document.querySelector(".sheet-modal-overlay")) return;
+    let profile = {};
+    try { profile = JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile") || "{}") || {}; } catch (_) { profile = {}; }
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentAmount = profile.startingCash !== undefined && profile.startingCash !== "" ? profile.startingCash : (profile.currentAmount || "");
+
+    const overlay = document.createElement("div"); overlay.className = "sheet-modal-overlay";
+    const modal = document.createElement("div"); modal.className = "sheet-modal sheet-starting-balance-modal";
+    const title = document.createElement("h3"); title.textContent = "Argent de départ";
+    const intro = document.createElement("p"); intro.className = "sheet-modal-intro";
+    intro.textContent = "Le montant disponible au début du mois choisi. Il sert de base au solde restant, sans compter comme un revenu.";
+
+    const amountLabel = document.createElement("label"); amountLabel.className = "sheet-field";
+    amountLabel.append("Montant disponible (€)");
+    const amount = document.createElement("input"); amount.type = "text"; amount.inputMode = "decimal"; amount.placeholder = "Ex. 1 250"; amount.value = String(currentAmount);
+    amountLabel.appendChild(amount);
+
+    const monthLabel = document.createElement("label"); monthLabel.className = "sheet-field";
+    monthLabel.append("Mois de départ");
+    const month = document.createElement("input"); month.type = "month"; month.value = /^\d{4}-\d{2}$/.test(String(profile.startingMonth || "")) ? profile.startingMonth : currentMonth;
+    monthLabel.appendChild(month);
+
+    const helper = document.createElement("p"); helper.className = "sheet-modal-helper";
+    helper.textContent = "Laissez le montant vide puis enregistrez pour retirer ce réglage.";
+    const actions = document.createElement("div"); actions.className = "sheet-modal-actions sheet-modal-actions-row";
+    const cancel = document.createElement("button"); cancel.type = "button"; cancel.className = "button button-ghost"; cancel.textContent = "Annuler";
+    const save = document.createElement("button"); save.type = "button"; save.className = "button button-primary"; save.textContent = "Enregistrer";
+    const close = () => overlay.remove();
+
+    cancel.addEventListener("click", close);
+    save.addEventListener("click", () => {
+      const rawAmount = amount.value.trim();
+      const normalizedAmount = rawAmount.replace(/\s/g, "").replace(",", ".");
+      const rawMonth = month.value;
+      if (rawAmount && !Number.isFinite(Number(normalizedAmount))) { amount.focus(); return; }
+      if (rawAmount && !/^\d{4}-\d{2}$/.test(rawMonth)) { month.focus(); return; }
+      profile.startingCash = normalizedAmount;
+      profile.currentAmount = normalizedAmount;
+      profile.startingMonth = rawAmount ? rawMonth : "";
+      profile.currentCashDate = rawAmount ? rawMonth + "-01" : "";
+      try { safeStore.setItem("personalFinanceDashboard.setupProfile", JSON.stringify(profile)); } catch (_) {}
+      clearInitialBalanceCells();
+      if (rawAmount) applySetupProfile(profile);
+      else { buildTable(); renderValues(); renderTabs(); scheduleSave(); }
+      try { window.dispatchEvent(new Event("gfprofilechange")); } catch (_) {}
+      try { if (window.__gfSync) window.__gfSync.markDirty(); } catch (_) {}
+      notifyDashboard();
+      close();
+      toast(rawAmount ? "Argent de départ enregistré" : "Argent de départ retiré");
+    });
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+    actions.append(cancel, save);
+    modal.append(title, intro, amountLabel, monthLabel, helper, actions);
+    overlay.appendChild(modal); document.body.appendChild(overlay); amount.focus();
+  }
+
+  function clearInitialBalanceCells() {
+    const isInitialBalance = (value) => String(value || "").trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() === "solde initial";
+    (state.sheets || []).forEach((sheet) => {
+      if (!sheet || !sheet.cells) return;
+      (sheet.rowHeaders || []).forEach((label, row) => {
+        if (!isInitialBalance(label)) return;
+        Object.keys(sheet.cells).forEach((key) => { if (+key.split(",")[0] === row) delete sheet.cells[key]; });
+      });
+    });
+  }
+
   // ═════════════════════════ Sauvegarde ═══════════════════════════
   let saveTimer = null;
   let undoHistory = [], redoHistory = [], restoringHistory = false;
@@ -1507,7 +1590,7 @@
     }
   }
 
-  window.FinanceSheet = { init, recompute, saveNow, openCalculator, getSnapshot, loadSnapshot, buildWorkbook, importXlsx, exportXlsx, loadDemoData, clearDemoDataFS, updateSheetBalanceCards, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
+  window.FinanceSheet = { init, recompute, saveNow, openCalculator, openStartingBalance, getSnapshot, loadSnapshot, buildWorkbook, importXlsx, exportXlsx, loadDemoData, clearDemoDataFS, updateSheetBalanceCards, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
   // Hook appelé après import / édition / création de feuille pour rafraîchir le dashboard.
   let dashTimer = null;
   function notifyDashboard() {

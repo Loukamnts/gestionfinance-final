@@ -518,3 +518,69 @@ body[data-theme="brutal"] .account-btn-danger { border-radius: 0 !important; }
   .sheet-table .row-head .rh-number { margin-left: 5px; margin-right: 3px; }
 }
 
+/* Finition responsive : les outils restent accessibles sans agrandir la page,
+   les intitulés restent compacts et les mois se parcourent comme dans un tableur. */
+.sheet-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent, #818cf8) var(--input-bg, rgba(0,0,0,.08));
+  overscroll-behavior: contain;
+}
+.sheet-scroll::-webkit-scrollbar { height: 10px; width: 10px; }
+.sheet-scroll::-webkit-scrollbar-track { background: var(--input-bg, rgba(0,0,0,.08)); }
+.sheet-scroll::-webkit-scrollbar-thumb { background: var(--accent, #818cf8); border: 2px solid var(--input-bg, transparent); border-radius: 99px; }
+.sheet-fill-handle { z-index: 12; }
+.sheet-starting-balance-modal { max-width: 410px; }
+.sheet-modal-intro { margin: 0 0 16px; color: var(--muted); line-height: 1.5; font-size: .9rem; }
+.sheet-field { display: grid; gap: 7px; margin: 12px 0; color: var(--text); font-weight: 750; font-size: .85rem; }
+.sheet-field input { width: 100%; min-height: 42px; box-sizing: border-box; padding: 9px 11px; border: 1px solid var(--line-strong, var(--line)); border-radius: var(--control-radius, 10px); color: var(--text); background: var(--input-bg, transparent); font: inherit; }
+.sheet-modal-helper { margin: 12px 0 0; color: var(--muted); font-size: .78rem; line-height: 1.4; }
+.sheet-modal-actions-row { flex-direction: row; justify-content: flex-end; margin-top: 18px; }
+.sheet-modal-actions-row .button { width: auto; min-width: 112px; }
+
+@media (max-width: 720px) {
+  .sheet-page { min-width: 0; }
+  .sheet-bar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+    padding: 7px;
+    overflow: hidden;
+  }
+  .sheet-bar-left { gap: 4px; min-width: 0; }
+  .sheet-bar .sheet-title { display: none; }
+  .sheet-bar-right {
+    min-width: 0; margin-left: 0; gap: 4px;
+    overflow-x: auto; overscroll-behavior-x: contain; padding-bottom: 2px;
+    scrollbar-width: thin;
+  }
+  .sheet-bar .button { min-height: 36px; padding: 7px 8px; font-size: .76rem; white-space: nowrap; }
+  .sheet-bar .icon-btn { width: 38px; min-width: 38px; min-height: 36px; justify-content: center; padding: 7px; }
+  .sheet-bar .icon-btn .lbl, .sheet-bar .sheet-divider, .sheet-bar .sheet-spacer { display: none; }
+  .sheet-bar .icon-btn svg { width: 17px; height: 17px; }
+  .sheet-table thead th, .sheet-table td.cell { min-width: 116px; }
+  .sheet-table .corner-head,
+  .sheet-table .row-head {
+    min-width: min(var(--sheet-row-header-width, 132px), 38vw);
+    width: min(var(--sheet-row-header-width, 132px), 38vw);
+    min-height: 38px;
+  }
+  .sheet-table .row-head .row-head-content { grid-template-columns: 24px minmax(0, 1fr) 24px; min-height: 38px; }
+  .sheet-table .row-head .rh-number { display: none; }
+  .sheet-table .row-head .rh-label {
+    grid-column: 1 / 3;
+    max-height: 38px;
+    padding: 4px 3px 4px 7px;
+    font-size: .72rem;
+    line-height: 1.2;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .sheet-table .row-head .rh-edit-btn { grid-column: 3; font-size: .78rem; min-width: 24px; min-height: 24px; padding: 3px; }
+  .sheet-modal-overlay { align-items: center; padding: 14px; }
+  .sheet-modal { max-height: min(82dvh, 620px); overflow: auto; }
+  .sheet-modal-actions-row { flex-direction: column-reverse; }
+  .sheet-modal-actions-row .button { width: 100%; }
+}
