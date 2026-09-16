@@ -292,13 +292,13 @@ body[data-theme="brutal"] :is(.objective-form,.objective-card,.objectives-empty,
 .personal-destination-arrow { color:var(--muted); font:700 1.25rem/1 var(--font-body); }
 .personal-notes-overlay { position:fixed; inset:0; z-index:500; display:flex; justify-content:flex-end; background:color-mix(in srgb,var(--text),transparent 65%); padding:16px; overscroll-behavior:contain; }
 .personal-notes-overlay[hidden] { display:none; }
-.personal-notes-panel { width:min(510px,100%); min-height:100%; display:grid; grid-template-rows:auto auto minmax(0,1fr) auto; gap:14px; padding:24px; border:var(--panel-border); border-radius:var(--radius); background:var(--panel-solid); color:var(--text); box-shadow:var(--shadow); overflow:auto; }
+.personal-notes-panel { width:min(510px,100%); min-height:100%; display:flex; flex-direction:column; gap:14px; padding:24px; border:var(--panel-border); border-radius:var(--radius); background:var(--panel-solid); color:var(--text); box-shadow:var(--shadow); overflow:auto; }
 .personal-notes-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
 .personal-notes-head h2 { margin:3px 0 6px; font:800 1.45rem/1.2 var(--font-heading); }
 .personal-notes-head p { margin:0; color:var(--muted); font:.84rem/1.45 var(--font-body); }
 .personal-notes-close { width:36px; height:36px; flex:0 0 36px; display:grid; place-items:center; border:1px solid var(--line-strong); border-radius:var(--control-radius); background:var(--input-bg); color:var(--text); font:500 1.5rem/1 var(--font-body); cursor:pointer; }
-.personal-notes-panel textarea { width:100%; min-height:280px; resize:vertical; box-sizing:border-box; border:1px solid var(--line-strong); border-radius:min(10px,var(--control-radius)); background:var(--input-bg); color:var(--text); padding:12px; font:500 .94rem/1.55 var(--font-body); }
-.personal-notes-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.personal-notes-panel textarea { width:100%; min-height:280px; flex:0 0 auto; resize:vertical; box-sizing:border-box; border:1px solid var(--line-strong); border-radius:min(10px,var(--control-radius)); background:var(--input-bg); color:var(--text); padding:12px; font:500 .94rem/1.55 var(--font-body); }
+.personal-notes-foot { flex:0 0 auto; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start; gap:12px; }
 .personal-notes-foot .notebook-help { margin:0; }
 body.personal-notes-open { overflow:hidden !important; overscroll-behavior:none; }
 
@@ -368,7 +368,7 @@ body[data-theme="brutal"] .personal-destination,body[data-theme="brutal"] .setti
   .personal-notes-overlay { padding:0; align-items:flex-end; }
   .personal-notes-panel { width:100%; min-height:min(78dvh,680px); max-height:92dvh; padding:18px; border-radius:var(--radius) var(--radius) 0 0; }
   .personal-notes-panel textarea { min-height:240px; }
-  .personal-notes-foot { align-items:flex-start; flex-direction:column; }
+  .personal-notes-foot { grid-template-columns:1fr; align-items:flex-start; }
   .settings-hub { grid-template-columns:1fr; gap:10px; }
   .settings-hub-item { min-height:82px; padding:14px; grid-template-columns:34px minmax(0,1fr) auto; gap:11px; }
   .settings-hub-icon { width:33px; height:33px; }
@@ -430,8 +430,8 @@ body[data-theme="brutal"] .app-header .brand-copy h1 { font-size:clamp(1.08rem,3
   .settings-hub { display:flex; gap:8px; width:calc(100% + 2px); margin:0 -1px; padding:0 1px 2px; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; -ms-overflow-style:none; }
   .settings-hub::-webkit-scrollbar { display:none; height:0; }
   .settings-hub-label { display:none; }
-  .settings-hub-item { flex:0 0 auto; width:auto; min-height:42px; padding:10px 15px; border:1px solid var(--line); border-radius:99px; background:var(--input-bg); color:var(--muted); white-space:nowrap; }
-  .settings-hub-item:hover,.settings-hub-item[aria-current="true"] { border-color:var(--accent); background:var(--button-active-bg); color:var(--accent); }
+  .settings-hub-item { flex:0 0 auto; width:auto; min-height:42px; padding:10px 15px; border:0; border-radius:99px; background:var(--input-bg); color:var(--muted); box-shadow:none; white-space:nowrap; }
+  .settings-hub-item:hover,.settings-hub-item[aria-current="true"] { border:0; background:var(--button-active-bg); color:var(--accent); }
   .settings-hub-item strong { font-size:.82rem; }
   .settings-shell > [data-settings-panel] { width:100%; box-sizing:border-box; }
   .personal-shell { display:flex; flex-direction:column; gap:16px; }
@@ -477,13 +477,17 @@ body[data-theme="brutal"] :is(.settings-hub-item,.personal-destination) { border
 
 @media (max-width:720px) {
   .personal-workspace-layout { display:flex; flex-direction:column; gap:16px; }
-  .personal-workspace-nav { display:flex; gap:8px; order:0; width:calc(100% + 2px); margin:0 -1px; padding:0 1px 2px; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; -ms-overflow-style:none; }
+  .personal-workspace-nav { display:flex; gap:8px; order:-1; width:calc(100% + 2px); margin:0 -1px; padding:0 1px 2px; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; -ms-overflow-style:none; }
   .personal-workspace-nav::-webkit-scrollbar,.settings-hub::-webkit-scrollbar { display:none; height:0; }
   .personal-workspace-label { display:none; }
   .personal-workspace-link,.personal-workspace-notes { flex:0 0 auto; width:auto; min-height:42px; padding:10px 15px; border:1px solid var(--line); border-radius:var(--control-radius); background:var(--input-bg); white-space:nowrap; }
   .personal-workspace-link.is-active { border-color:var(--accent); }
   .personal-workspace-notes { margin-top:0; color:var(--accent); }
   .personal-workspace-content { width:100%; }
+}
+
+@media (max-width:720px) {
+  body[data-theme="brutal"] .settings-hub-item { border:0 !important; box-shadow:none !important; }
 }
 
 /* Glassmorphism : les notes et les objectifs restent des panneaux nets,
