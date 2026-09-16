@@ -297,7 +297,7 @@ body[data-theme="brutal"] :is(.objective-form,.objective-card,.objectives-empty,
 .personal-notes-head h2 { margin:3px 0 6px; font:800 1.45rem/1.2 var(--font-heading); }
 .personal-notes-head p { margin:0; color:var(--muted); font:.84rem/1.45 var(--font-body); }
 .personal-notes-close { width:36px; height:36px; flex:0 0 36px; display:grid; place-items:center; border:1px solid var(--line-strong); border-radius:var(--control-radius); background:var(--input-bg); color:var(--text); font:500 1.5rem/1 var(--font-body); cursor:pointer; }
-.personal-notes-panel textarea { width:100%; min-height:280px; resize:vertical; box-sizing:border-box; border:1px solid var(--line-strong); border-radius:var(--control-radius); background:var(--input-bg); color:var(--text); padding:12px; font:500 .94rem/1.55 var(--font-body); }
+.personal-notes-panel textarea { width:100%; min-height:280px; resize:vertical; box-sizing:border-box; border:1px solid var(--line-strong); border-radius:min(10px,var(--control-radius)); background:var(--input-bg); color:var(--text); padding:12px; font:500 .94rem/1.55 var(--font-body); }
 .personal-notes-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .personal-notes-foot .notebook-help { margin:0; }
 body.personal-notes-open { overflow:hidden !important; overscroll-behavior:none; }
@@ -490,6 +490,7 @@ body[data-theme="brutal"] :is(.settings-hub-item,.personal-destination) { border
    jamais des bulles transparentes. */
 body[data-theme="glass"] :is(.personal-notes-panel,.objectives-panel,.objective-form,.objective-card) { backdrop-filter:none; -webkit-backdrop-filter:none; border-radius:10px; }
 body[data-theme="glass"] :is(.personal-notes-panel,.personal-notes-close,.notebook-status,.objective-kind,.objective-progress,.objective-plan-toggle,.objective-plan-fields,.personal-workspace-link,.personal-workspace-notes) { border-radius:10px !important; }
+body[data-theme="glass"] .personal-notes-panel textarea { border-radius:10px; }
 body[data-theme="glass"] .personal-workspace-link,.personal-workspace-notes { background:transparent; }
 body[data-theme="glass"] .personal-workspace-link.is-active,body[data-theme="glass"] .personal-workspace-link:hover,body[data-theme="glass"] .personal-workspace-notes:hover { background:var(--button-active-bg); }
 body[data-theme="glass"][data-mode="dark"] :is(.personal-notes-panel,.objectives-panel,.objective-form,.objective-card) { background:rgba(17,20,44,.96); }
