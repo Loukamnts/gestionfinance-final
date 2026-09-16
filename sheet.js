@@ -396,7 +396,7 @@
   }
 
   // ═════════ Sélection & édition (pointer events, diff + rAF) ═════
-  const ptr = { active: false, pointerId: null, startX: 0, startY: 0, moved: false, r0: 0, c0: 0, startCell: { r: 0, c: 0 } };
+  const ptr = { active: false, pointerId: null, startX: 0, startY: 0, moved: false, touchSelecting: false, r0: 0, c0: 0, startCell: { r: 0, c: 0 } };
   let lastTapKey = null;
   let rafSelection = null; let pendingRange = null;
   let prevInRange = new Set(); let prevActiveKey = null;
@@ -407,6 +407,7 @@
     if (state.editing && (state.active.r !== r || state.active.c !== c)) { commitActiveEdit(); }
     if (e.shiftKey) { setRange(state.range.r0, state.range.c0, r, c); syncFormulaBar(); return; }
     ptr.active = true; ptr.moved = false;
+    ptr.touchSelecting = e.pointerType !== "touch" || td.classList.contains("selected");
     ptr.pointerId = e.pointerId;
     ptr.startX = e.clientX; ptr.startY = e.clientY;
     ptr.r0 = r; ptr.c0 = c; ptr.startCell = { r, c };
@@ -425,9 +426,15 @@
       if (dx * dx + dy * dy < 36) return;
       ptr.moved = true;
     }
-    // Sur ordinateur, le geste sert exclusivement à sélectionner. Sur tactile,
-    // on laisse le défilement horizontal naturel du tableur rester disponible.
-    if (e.pointerType === "mouse") e.preventDefault();
+    if (e.pointerType === "touch" && !ptr.touchSelecting) return;
+    e.preventDefault();
+    if (e.pointerType === "touch" && sheetScroll) {
+      const rect = sheetScroll.getBoundingClientRect(), edge = 36, step = 14;
+      if (e.clientX > rect.right - edge) sheetScroll.scrollLeft += step;
+      else if (e.clientX < rect.left + edge) sheetScroll.scrollLeft -= step;
+      if (e.clientY > rect.bottom - edge) sheetScroll.scrollTop += step;
+      else if (e.clientY < rect.top + edge) sheetScroll.scrollTop -= step;
+    }
     const el = document.elementFromPoint(e.clientX, e.clientY);
     const td2 = el && el.closest ? el.closest("td.cell") : null;
     if (td2) { const rr = +td2.dataset.r, cc = +td2.dataset.c; scheduleRange(ptr.r0, ptr.c0, rr, cc); }
@@ -455,12 +462,14 @@
     setRange(r, c, r, c);
     syncFormulaBar();
   }
-  function setRange(r0, c0, r1, c1) {
+  let selectionKind = "cell";
+  function setRange(r0, c0, r1, c1, kind = "cell") {
+    selectionKind = kind;
     state.range = { r0: Math.min(r0, r1), c0: Math.min(c0, c1), r1: Math.max(r0, r1), c1: Math.max(c0, c1) };
     applySelectionStyle();
   }
-  function selectRow(r) { setRange(r, 0, r, state.cols - 1); state.active = { r, c: state.range.c0 }; syncFormulaBar(); }
-  function selectCol(c) { setRange(0, c, state.rows - 1, c); state.active = { r: state.range.r0, c }; syncFormulaBar(); }
+  function selectRow(r) { setRange(r, 0, r, state.cols - 1, "row"); state.active = { r, c: state.range.c0 }; syncFormulaBar(); }
+  function selectCol(c) { setRange(0, c, state.rows - 1, c, "col"); state.active = { r: state.range.r0, c }; syncFormulaBar(); }
 
   function applySelectionStyle() {
     const r0 = state.range.r0, c0 = state.range.c0, r1 = state.range.r1, c1 = state.range.c1;
@@ -482,8 +491,8 @@
       const oldEntry = cellMap.get(prevActiveKey); if (oldEntry) oldEntry.td.classList.remove("selected");
       const newEntry = cellMap.get(activeKey); if (newEntry) newEntry.td.classList.add("selected");
     }
-    rowHeadEls.forEach((th) => { const r = +th.dataset.r; th.classList.toggle("row-sel", r >= r0 && r <= r1); });
-    if (colHeadEls.length) colHeadEls.forEach((th) => { const c = +th.dataset.c; th.classList.toggle("col-sel", c >= c0 && c <= c1); });
+    rowHeadEls.forEach((th) => { const r = +th.dataset.r; th.classList.toggle("row-sel", selectionKind === "row" && r >= r0 && r <= r1); });
+    if (colHeadEls.length) colHeadEls.forEach((th) => { const c = +th.dataset.c; th.classList.toggle("col-sel", selectionKind === "col" && c >= c0 && c <= c1); });
 
     prevInRange = nextInRange;
     prevActiveKey = activeKey;
@@ -1178,7 +1187,7 @@
 
     const overlay = document.createElement("div"); overlay.className = "sheet-modal-overlay";
     const modal = document.createElement("div"); modal.className = "sheet-modal sheet-starting-balance-modal";
-    const title = document.createElement("h3"); title.textContent = "Argent de départ";
+    const title = document.createElement("h3"); title.textContent = "Configurer le solde de départ";
     const intro = document.createElement("p"); intro.className = "sheet-modal-intro";
     intro.textContent = "Le montant disponible au début du mois choisi. Il sert de base au solde restant, sans compter comme un revenu.";
 
@@ -1517,9 +1526,9 @@
 
     function rowKind(label) {
       var key = String(label || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-      if (/solde|depart|restant|reste|disponible|compte|livret|epargne|pea|bourse|placement|wallet|revolut|boursobank|bourso|banque/.test(key)) return "ignore";
+      if (/solde|depart|restant|reste|disponible|compte|livret|pea|bourse|placement|wallet|revolut|boursobank|bourso|banque/.test(key)) return "ignore";
       if (/salaire|revenu|prime|allocation|apl|caf|rsa|remuneration|paie|paye|indemnite|remboursement/.test(key)) return "income";
-      if (/depense|loyer|charge|carte|facture|abonnement|frais|impot|taxe|assurance|transport|course|restaurant|achat|credit/.test(key)) return "expense";
+      if (/depense|epargne|economie|loyer|charge|carte|facture|abonnement|frais|impot|taxe|assurance|transport|course|restaurant|achat|credit/.test(key)) return "expense";
       return "ignore";
     }
 

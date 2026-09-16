@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>Gestion finance</title>
   <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="app-icon-180.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#11142c" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,900;1,400;1,900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
@@ -36,8 +39,8 @@
       --font-body: "Space Grotesk", sans-serif;
       --bg: #06061a;
       --body-bg: radial-gradient(circle at 12% -8%, rgba(99,102,241,0.25), transparent 34%), radial-gradient(circle at 100% 8%, rgba(139,92,246,0.2), transparent 32%), #06061a;
-      --panel-bg: rgba(255,255,255,0.04);
-      --panel-solid: rgba(255,255,255,0.06);
+      --panel-bg: #11142c;
+      --panel-solid: #11142c;
       --panel-border: 1px solid rgba(255,255,255,0.08);
       --panel-top-border: 1px solid rgba(255,255,255,0.08);
       --panel-blur: blur(20px);
@@ -46,14 +49,14 @@
       --text: #e2e8ff;
       --muted: #a7b0d6;
       --muted-2: #7982a8;
-      --input-bg: rgba(6,6,26,0.72);
-      --input-focus-bg: rgba(12,12,36,0.95);
+      --input-bg: #0b0d24;
+      --input-focus-bg: #151936;
       --button-primary-bg: linear-gradient(135deg,#818cf8,#e879f9);
       --button-primary-text: #090a1f;
       --button-active-bg: rgba(129,140,248,0.16);
       --button-active-text: #e2e8ff;
-      --metric-bg: rgba(255,255,255,0.04);
-      --detail-bg: rgba(255,255,255,0.04);
+      --metric-bg: #11142c;
+      --detail-bg: #11142c;
       --message-bg: rgba(251,113,133,0.1);
       --message-border: rgba(251,113,133,0.28);
       --message-text: #ffd9df;
@@ -87,8 +90,8 @@
       --font-body: "Space Grotesk", sans-serif;
       --bg: #f0f2ff;
       --body-bg: radial-gradient(circle at 12% -8%, rgba(99,102,241,0.08), transparent 34%), radial-gradient(circle at 100% 8%, rgba(139,92,246,0.08), transparent 32%), #f0f2ff;
-      --panel-bg: rgba(255,255,255,0.8);
-      --panel-solid: rgba(255,255,255,0.82);
+      --panel-bg: #ffffff;
+      --panel-solid: #ffffff;
       --panel-border: 1px solid rgba(99,102,241,0.15);
       --panel-top-border: 1px solid rgba(99,102,241,0.15);
       --panel-blur: blur(20px);
@@ -97,14 +100,14 @@
       --text: #1e1b4b;
       --muted: #5c6293;
       --muted-2: #747aa8;
-      --input-bg: rgba(255,255,255,0.72);
-      --input-focus-bg: rgba(255,255,255,0.96);
+      --input-bg: #f7f8ff;
+      --input-focus-bg: #ffffff;
       --button-primary-bg: linear-gradient(135deg,#818cf8,#e879f9);
       --button-primary-text: #ffffff;
       --button-active-bg: rgba(129,140,248,0.14);
       --button-active-text: #3730a3;
-      --metric-bg: rgba(255,255,255,0.76);
-      --detail-bg: rgba(255,255,255,0.72);
+      --metric-bg: #ffffff;
+      --detail-bg: #ffffff;
       --message-bg: rgba(99,102,241,0.08);
       --message-border: rgba(99,102,241,0.3);
       --message-text: #3730a3;
@@ -1826,6 +1829,7 @@
             <div class="profile-popover-account"><span class="profile-popover-kicker">Compte</span><strong id="profileEmail">Non connecté</strong></div>
             <div class="status-pill" id="connectionStatus"><span class="status-dot"></span><span id="connectionText">Non connecté</span></div>
             <button class="profile-menu-link profile-menu-link-primary" id="profilePersonalButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 14.5c1.1-1.35 2.45-2.02 4-2.02s2.9.67 4 2.02M12 10a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Mon espace</span><small>Objectifs, amis, nouveautés</small></button>
+            <button class="profile-menu-link" id="profileNotesButton" type="button" data-open-notes><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Notes</span></button>
             <button class="profile-menu-link" id="profileSettingsButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6l-.04.08a2 2 0 0 1-3.92 0L10 20a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1l-.08-.04a2 2 0 0 1 0-3.92L4 10a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6l.04-.08a2 2 0 0 1 3.92 0L14 4a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.36.7.6 1l.08.04a2 2 0 0 1 0 3.92L20 14c-.24.3-.46.64-.6 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>Paramètres</span></button>
             <button class="profile-menu-link profile-menu-link-danger" id="accountLogoutBtn" data-account-logout type="button" hidden><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5M14 16l4-4-4-4M18 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Se déconnecter</span></button>
           </div>
@@ -1864,7 +1868,7 @@
           <article class="metric-card"><span class="metric-label">Mois le moins dépensier</span><strong class="metric-value" id="minExpenseMonth">-</strong><span class="metric-note" id="minExpenseValue">-</span></article>
         </section>
         <section class="mobile-finance-summary panel" aria-label="Résumé financier compact">
-          <div class="mobile-finance-summary-head"><div><span class="eyebrow">Résumé financier</span><h2 id="mobileSummaryLabel">Salaire moyen</h2></div><span class="mobile-summary-count">4 indicateurs</span></div>
+          <div class="mobile-finance-summary-head"><div><span class="eyebrow">Résumé financier</span><h2 id="mobileSummaryLabel">Salaire moyen</h2></div></div>
           <strong class="mobile-finance-summary-value" id="mobileSummaryValue">-</strong>
           <p class="mobile-finance-summary-note" id="mobileSummaryNote">Tous les mois</p>
           <div class="mobile-finance-summary-tabs" role="tablist" aria-label="Choisir un indicateur financier">
@@ -1895,14 +1899,14 @@
           <div class="chart-scroll" id="chartScroll" aria-label="Graphique annuel défilable horizontalement"><div class="chart-wrap" id="chartWrap"><canvas id="financeChart" aria-label="Graphique financier"></canvas><div class="empty-state is-visible" id="emptyState">Aucune donnée à afficher pour le moment.</div></div></div>
           <div id="customLegend" class="custom-legend"></div>
         </section>
-        <section class="month-details" aria-label="Détail du mois">
-          <article class="detail-panel"><h3>Détail épargne</h3><div class="detail-list" id="savingsBreakdown"><div class="detail-row"><span>-</span><strong>-</strong></div></div></article>
-          <article class="detail-panel"><h3>Détail dépenses</h3><p class="expense-note" id="bigExpenses">-</p></article>
+        <section class="month-details month-summary" aria-label="Résumé global">
+          <article class="detail-panel detail-panel-global"><h3>Résumé global</h3><div class="global-summary-grid"><section><h4>Épargne</h4><div class="detail-list" id="savingsBreakdown"><div class="detail-row"><span>-</span><strong>-</strong></div></div></section><section><h4>Dépenses importantes</h4><p class="expense-note" id="bigExpenses">-</p></section></div></article>
         </section>
       </section>
     </section>
     <section class="app-page" id="sharingPage" hidden>
       <section class="content personal-workspace-layout">
+        <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
           <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
@@ -1911,7 +1915,6 @@
           <button class="personal-workspace-notes" type="button" data-open-notes>Notes</button>
         </nav>
         <div class="personal-workspace-content">
-          <header class="sf-page-head"><div><h2>Partage et amis</h2><p>Choisis ce que tes proches peuvent consulter.</p></div></header>
           <div id="sharingContainer"></div>
           <section class="sf-shared" id="sharedView" hidden aria-live="polite"></section>
         </div>
@@ -1919,6 +1922,7 @@
     </section>
     <section class="app-page" id="sharingAccessPage" hidden>
       <section class="content personal-workspace-layout">
+        <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
           <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
@@ -1927,13 +1931,13 @@
           <button class="personal-workspace-notes" type="button" data-open-notes>Notes</button>
         </nav>
         <div class="personal-workspace-content">
-          <header class="sf-page-head"><div><h2>Mon partage</h2><p>Un accès personnel, que tu peux modifier à tout moment.</p></div></header>
           <div id="sharingAccessContainer"></div>
         </div>
       </section>
     </section>
     <section class="app-page" id="updatesPage" hidden>
       <section class="content personal-workspace-layout">
+        <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
           <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
@@ -1942,7 +1946,6 @@
           <button class="personal-workspace-notes" type="button" data-open-notes>Notes</button>
         </nav>
         <div class="personal-workspace-content">
-          <section class="settings-header"><div><span class="eyebrow">Gestion Finance</span><h2>Nouveautés</h2><p>Retrouve les améliorations du service, classées de la plus récente à la plus ancienne.</p></div></section>
           <div class="updates-list" id="updatesPageList"></div>
           <nav class="updates-pagination" id="updatesPagination" aria-label="Pages des nouveautés"></nav>
         </div>
@@ -1965,6 +1968,7 @@
     </section>
     <section class="app-page" id="objectivesPage" hidden>
       <section class="content personal-workspace-layout">
+        <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
           <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
@@ -1973,7 +1977,6 @@
           <button class="personal-workspace-notes" type="button" data-open-notes>Notes</button>
         </nav>
         <div class="personal-workspace-content objectives-shell">
-          <section class="settings-header"><div><span class="eyebrow">Mon espace</span><h2>Objectifs</h2><p>Crée tes projets à ton rythme. Chaque objectif est privé par défaut et synchronisé avec ton compte.</p></div></section>
           <div class="objectives-grid">
           <section class="panel objectives-panel"><div class="objectives-panel-head"><div><h3>Mes objectifs</h3><p>Épargne, investissement, dépense prévue ou projet personnel.</p></div><button class="button button-primary" id="objectiveAddButton" type="button">Ajouter un objectif</button></div><form class="objective-form" id="objectiveForm" hidden>
             <label><span>Nom de l'objectif</span><input id="objectiveTitle" maxlength="80" placeholder="Ex. Apport immobilier" required /></label>
@@ -1989,7 +1992,7 @@
       </section>
     </section>
     <div class="personal-notes-overlay" id="personalNotesDrawer" hidden role="dialog" aria-modal="true" aria-labelledby="personalNotesTitle">
-      <section class="personal-notes-panel"><div class="personal-notes-head"><div><span class="eyebrow">Mon espace</span><h2 id="personalNotesTitle">Notes</h2><p>Idées et rappels privés, enregistrés automatiquement.</p></div><button class="personal-notes-close" id="personalNotesClose" type="button" aria-label="Fermer les notes">×</button></div><label class="notebook-label" for="notebookInput">Tes notes</label><textarea id="notebookInput" maxlength="20000" placeholder="Ex. Comparer les offres d'épargne, préparer le budget vacances…"></textarea><div class="personal-notes-foot"><p class="notebook-help">Enregistrement automatique sur cet appareil, puis dans ton compte lorsque tu es connecté.</p><span class="notebook-status" id="notebookStatus" aria-live="polite">Enregistré</span></div></section>
+      <section class="personal-notes-panel"><div class="personal-notes-head"><div><span class="eyebrow">Mon espace</span><h2 id="personalNotesTitle">Notes</h2><p>Idées et rappels privés, enregistrés automatiquement.</p></div><div class="personal-notes-head-actions"><span class="notebook-status" id="notebookStatus" aria-live="polite">Enregistré</span><button class="personal-notes-close" id="personalNotesClose" type="button" aria-label="Fermer les notes">×</button></div></div><label class="notebook-label" for="notebookInput">Tes notes</label><textarea id="notebookInput" maxlength="20000" placeholder="Ex. Comparer les offres d'épargne, préparer le budget vacances…"></textarea><div class="personal-notes-foot"><p class="notebook-help">Enregistrement automatique sur cet appareil, puis dans ton compte lorsque tu es connecté.</p></div></section>
     </div>
     <section class="sheet-page app-page" id="sheetPage" hidden>
       <div class="sheet-bar">
@@ -2011,11 +2014,11 @@
           </button>
           <span class="sheet-divider"></span>
           <button class="button button-ghost icon-btn" id="btnSheetImport" type="button" title="Importer un fichier Excel">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 8l-5-5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             <span class="lbl">Importer</span>
           </button>
           <button class="button button-ghost icon-btn" id="btnSheetExport" type="button" title="Exporter en .xlsx">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 8l-5-5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             <span class="lbl">Exporter</span>
           </button>
           <span class="sheet-spacer"></span>
@@ -2034,13 +2037,15 @@
       </div>
       <div class="sheet-balance-cards" id="sheetBalanceCards">
         <div class="balance-card" id="balCardStart">
-          <span class="balance-label">Argent de départ <span class="balance-info-wrap"><button class="balance-info" id="startingBalanceInfo" type="button" aria-label="En savoir plus sur l'argent de départ" aria-describedby="startingBalanceHelp">i</button><span class="balance-help" id="startingBalanceHelp" role="tooltip">Le montant disponible avant les revenus et dépenses du mois choisi. Tu peux le modifier à tout moment.</span></span></span>
+          <span class="balance-label">Solde de départ <span class="balance-info-wrap"><button class="balance-info" id="startingBalanceInfo" type="button" aria-label="En savoir plus sur le solde de départ" aria-describedby="startingBalanceHelp">i</button><span class="balance-help" id="startingBalanceHelp" role="tooltip">Le montant déjà disponible avant les opérations du mois choisi. Ce n’est pas un revenu.</span></span></span>
           <span class="balance-value" id="balStart">—</span>
+          <span class="balance-note">Avant revenus, dépenses et épargne</span>
           <button class="balance-edit" id="startingBalanceEdit" type="button">Configurer</button>
         </div>
         <div class="balance-card balance-card-accent" id="balCardRemaining">
-          <span class="balance-label">Solde restant</span>
+          <span class="balance-label">Solde calculé</span>
           <span class="balance-value" id="balRemaining">—</span>
+          <span class="balance-note">Départ + revenus − dépenses − épargne</span>
         </div>
       </div>
       <div class="sheet-wrap"><div id="sheetApp"></div></div>
@@ -2109,9 +2114,9 @@
                 <p class="account-connected-note">Ton espace personnel, sur tous tes appareils.</p>
               </div>
             </div>
-            <div class="account-user-actions"><button class="account-btn-secondary" id="accountSettingsLogoutBtn" data-account-logout type="button" hidden>Se déconnecter</button></div>
+            <div class="account-user-actions"><button class="account-btn-secondary account-logout-button" id="accountSettingsLogoutBtn" data-account-logout type="button" hidden><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5M14 16l4-4-4-4M18 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Se déconnecter</span></button></div>
           </div>
-          <div class="account-sync-detail" id="accountSyncDetail" hidden><span>Synchronisation automatique</span><strong id="syncStatusText" role="status">Prêt à synchroniser</strong><p>Chaque modification du tableur, de tes objectifs ou de tes notes est sauvegardée dans ton compte dès que tu es connecté. Le bouton « Actualiser » de l’accueil recalcule seulement les graphiques. Tes amis ne voient que les données que tu autorises explicitement.</p></div>
+          <div class="account-sync-detail" id="accountSyncDetail" hidden><div class="account-sync-head"><div><span>Sauvegarde du compte</span><p>Les modifications sont enregistrées automatiquement lorsque tu es connecté.</p></div><strong id="syncStatusText" role="status">Prêt à synchroniser</strong></div><ul class="account-sync-list"><li><b>Tableur, objectifs et notes</b> : sauvegardés dans ton compte.</li><li><b>Actualiser sur l’accueil</b> : recalcule uniquement les graphiques.</li><li><b>Partage</b> : rien n’est visible par défaut ; tu autorises chaque accès.</li></ul></div>
           <p class="account-status" id="accountStatus">Non configuré</p>
         </div>
       </section>
@@ -2714,7 +2719,7 @@
     function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
     function updateChartColorTokens(){ const styles=getComputedStyle(document.body); COLORS.salary=readCssVar(styles,"--chart-salary",COLORS.salary); COLORS.expenses=readCssVar(styles,"--chart-expenses",COLORS.expenses); COLORS.savings=readCssVar(styles,"--chart-savings",COLORS.savings); COLORS.grid=readCssVar(styles,"--chart-grid",COLORS.grid); COLORS.tick=readCssVar(styles,"--chart-tick",COLORS.tick); COLORS.text=readCssVar(styles,"--chart-text",COLORS.text); }
     function readCssVar(styles,name,fallback){ return styles.getPropertyValue(name).trim()||fallback; }
-    function setPage(page){ const requested=page==="personal"?"sharing":page; const previous=state.page; const next=(requested==="settings"||requested==="sheet"||requested==="sharing"||requested==="sharingAccess"||requested==="updates"||requested==="objectives")?requested:"dashboard"; if(next===previous){ if(next==="settings") showSettingsView("account"); return; } state.page=next; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing"; if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess"; if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates"; if(elements.personalPage) elements.personalPage.hidden=true; if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="settings") showSettingsView("account"); if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); } if(state.page==="updates") renderUpdatesPage(); if(state.page==="objectives"&&window.GFObjectives) window.GFObjectives.render(); }
+    function setPage(page){ const requested=page==="personal"?"sharing":page; const previous=state.page; const next=(requested==="settings"||requested==="sheet"||requested==="sharing"||requested==="sharingAccess"||requested==="updates"||requested==="objectives")?requested:"dashboard"; if(next===previous) return; state.page=next; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing"; if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess"; if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates"; if(elements.personalPage) elements.personalPage.hidden=true; if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="settings"&&previous!=="settings") showSettingsView("account"); if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); } if(state.page==="updates") renderUpdatesPage(); if(state.page==="objectives"&&window.GFObjectives) window.GFObjectives.render(); }
     const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],account:["Paramètres","Compte","Connexion, protection de l'accès et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."]};
     function showSettingsView(view){ const next=view!=="home"&&Object.prototype.hasOwnProperty.call(SETTINGS_VIEW_COPY,view)?view:"account",copy=SETTINGS_VIEW_COPY[next]; document.querySelectorAll("[data-settings-panel]").forEach(function(panel){ panel.hidden=panel.dataset.settingsPanel!==next; }); const kicker=document.getElementById("settingsKicker"),title=document.getElementById("settingsTitle"),subtitle=document.getElementById("settingsSubtitle"); if(kicker) kicker.textContent=copy[0]; if(title) title.textContent=copy[1]; if(subtitle) subtitle.textContent=copy[2]; document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.setAttribute("aria-current",String(button.dataset.settingsView===next)); }); }
     function renderPersonalSpace(){ const profileEmail=document.getElementById("profileEmail"),profileAvatar=document.getElementById("profileAvatar"),email=document.getElementById("personalEmail"),avatar=document.getElementById("personalAvatar"),meta=document.getElementById("personalObjectivesMeta"); if(email){ const value=String(profileEmail?.textContent||"").trim(); email.textContent=value&&value!=="Non connecté"?value:"Un espace privé pour organiser tes projets et tes accès."; } if(avatar) avatar.textContent=String(profileAvatar?.textContent||"?").trim().slice(0,2)||"?"; if(meta){ let goals=[]; try{ const profile=JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile")||"{}"); goals=Array.isArray(profile?.objectives)?profile.objectives.filter(Boolean):[]; }catch(e){} meta.textContent=goals.length?goals.length+" objectif"+(goals.length>1?"s":"")+" en cours.":"Crée et suis tes projets financiers."; } }
@@ -2946,7 +2951,7 @@ function resetDataState(){
       {date:"1 septembre 2026",title:"Synchronisation",text:"Un compte déjà configuré récupère ses données avant d’afficher le tutoriel."}
     ];
     let updatesPageNumber=1;
-    function renderUpdatesPage(page){ const list=document.getElementById("updatesPageList"),pagination=document.getElementById("updatesPagination"); if(!list) return; const perPage=10,totalPages=Math.max(1,Math.ceil(RELEASE_NOTES.length/perPage)); updatesPageNumber=Math.min(totalPages,Math.max(1,Number(page)||updatesPageNumber)); const start=(updatesPageNumber-1)*perPage,notes=RELEASE_NOTES.slice(start,start+perPage); list.replaceChildren(...notes.map(function(note){ const entry=document.createElement("article"),date=document.createElement("time"),title=document.createElement("h3"),description=document.createElement("p"); entry.className="update-entry"; date.textContent=note.date; title.textContent=note.title; description.textContent=note.text; entry.append(date,title,description); return entry; })); if(!pagination) return; pagination.replaceChildren(); if(totalPages<2) { pagination.hidden=true; return; } pagination.hidden=false; for(let number=1;number<=totalPages;number++){ const button=document.createElement("button"); button.type="button"; button.className="updates-page-button"+(number===updatesPageNumber?" is-active":""); button.textContent=String(number); button.setAttribute("aria-label","Page "+number+" des nouveautés"); button.setAttribute("aria-current",number===updatesPageNumber?"page":"false"); button.addEventListener("click",function(){ renderUpdatesPage(number); document.getElementById("updatesPageList")?.scrollIntoView({block:"start",behavior:"smooth"}); }); pagination.append(button); } }
+    function renderUpdatesPage(page){ const list=document.getElementById("updatesPageList"),pagination=document.getElementById("updatesPagination"); if(!list) return; const perPage=6,totalPages=Math.max(1,Math.ceil(RELEASE_NOTES.length/perPage)); updatesPageNumber=Math.min(totalPages,Math.max(1,Number(page)||updatesPageNumber)); const start=(updatesPageNumber-1)*perPage,notes=RELEASE_NOTES.slice(start,start+perPage); list.replaceChildren(...notes.map(function(note){ const entry=document.createElement("article"),date=document.createElement("time"),title=document.createElement("h3"),description=document.createElement("p"); entry.className="update-entry"; date.textContent=note.date; title.textContent=note.title; description.textContent=note.text; entry.append(date,title,description); return entry; })); if(!pagination) return; pagination.replaceChildren(); if(totalPages<2) { pagination.hidden=true; return; } pagination.hidden=false; for(let number=1;number<=totalPages;number++){ const button=document.createElement("button"); button.type="button"; button.className="updates-page-button"+(number===updatesPageNumber?" is-active":""); button.textContent=String(number); button.setAttribute("aria-label","Page "+number+" des nouveautés"); button.setAttribute("aria-current",number===updatesPageNumber?"page":"false"); button.addEventListener("click",function(){ renderUpdatesPage(number); document.getElementById("updatesPageList")?.scrollIntoView({block:"start",behavior:"smooth"}); }); pagination.append(button); } }
     function dismissLatestUpdate(){ const banner=document.getElementById("latestUpdateBanner"); if(banner) banner.hidden=true; try{safeStore.setItem("personalFinanceDashboard.lastSeenRelease",RELEASE_NOTES_VERSION);}catch(e){} }
     function showLatestUpdate(){ try{ if(document.body.classList.contains("tutorial-active")||!safeStore.getItem("personalFinanceDashboard.onboardingCompleted")||safeStore.getItem("personalFinanceDashboard.lastSeenRelease")===RELEASE_NOTES_VERSION) return; const latest=RELEASE_NOTES[0],banner=document.getElementById("latestUpdateBanner"),title=document.getElementById("latestUpdateTitle"),text=document.getElementById("latestUpdateText"); if(!latest||!banner||!title||!text) return; title.textContent=latest.title; text.textContent=latest.text; banner.hidden=false; }catch(e){} }
     window.showLatestUpdate=showLatestUpdate;
@@ -2963,10 +2968,11 @@ function resetDataState(){
       // Événement pour vider l'état du dashboard (appelé par le bouton admin)
       window.addEventListener("financeClearData", () => { resetDataState(); updateInterface(); });
       document.querySelectorAll("[data-page]").forEach(function(button){ button.addEventListener("click",function(){ setPage(button.dataset.page); }); });
-      var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileSettings=document.getElementById("profileSettingsButton"), profilePersonal=document.getElementById("profilePersonalButton");
+      var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileSettings=document.getElementById("profileSettingsButton"), profilePersonal=document.getElementById("profilePersonalButton"), profileNotes=document.getElementById("profileNotesButton");
       if(profileButton && profilePopover){ profileButton.addEventListener("click",function(){ var open=profilePopover.hidden; profilePopover.hidden=!open; profileButton.setAttribute("aria-expanded",String(open)); }); document.addEventListener("click",function(event){ if(profileMenu && !profileMenu.contains(event.target)){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); document.addEventListener("keydown",function(event){ if(event.key==="Escape"){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); }
       if(profileSettings){ profileSettings.addEventListener("click",function(){ setPage("settings"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
       if(profilePersonal){ profilePersonal.addEventListener("click",function(){ setPage("sharing"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
+      if(profileNotes){ profileNotes.addEventListener("click",function(){ if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
       document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView(button.dataset.settingsView); }); });
       document.querySelectorAll("[data-settings-back]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView("account"); }); });
       document.addEventListener("click",function(event){ const viewButton=event.target.closest("[data-settings-view]"); if(viewButton){ showSettingsView(viewButton.dataset.settingsView); return; } const backButton=event.target.closest("[data-settings-back]"); if(backButton) showSettingsView("account"); });
