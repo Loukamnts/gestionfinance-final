@@ -23,7 +23,8 @@
     const current = Math.max(0, Number(goal.current) || 0);
     if (!title || !Number.isFinite(target) || target < 0) return null;
     const dueDate = /^\d{4}-\d{2}-\d{2}$/.test(String(goal.dueDate || "")) ? goal.dueDate : "";
-    return { id: String(goal.id || "").slice(0, 64) || makeId(), title, type, target, current, dueDate };
+    const cadence = ["once", "monthly", "yearly"].includes(goal.cadence) ? goal.cadence : "once";
+    return { id: String(goal.id || "").slice(0, 64) || makeId(), title, type, target, current, dueDate, cadence };
   }
 
   function goalsFrom(profile) {
@@ -59,6 +60,10 @@
   function status(text) {
     const el = document.getElementById("notebookStatus");
     if (el) el.textContent = text;
+  }
+
+  function cadenceName(cadence) {
+    return ({ monthly: "Chaque mois", yearly: "Chaque année" })[cadence] || "Sans récurrence";
   }
 
   function render() {
@@ -99,6 +104,9 @@
       if (goal.dueDate) {
         const due = document.createElement("p"); due.className = "objective-due"; due.textContent = "Échéance : " + new Intl.DateTimeFormat(document.documentElement.lang === "en" ? "en-GB" : "fr-FR", { dateStyle: "long" }).format(new Date(goal.dueDate + "T00:00:00")); card.append(due);
       }
+      if (goal.cadence && goal.cadence !== "once") {
+        const cadence = document.createElement("p"); cadence.className = "objective-cadence"; cadence.textContent = cadenceName(goal.cadence); card.append(cadence);
+      }
       list.append(card);
     });
     if (document.activeElement !== notebook) notebook.value = String(profile.notebook || "").slice(0, MAX_NOTE_LENGTH);
@@ -110,6 +118,9 @@
     if (!form) return;
     form.reset();
     document.getElementById("objectiveCurrent").value = "0";
+    const planFields = document.getElementById("objectivePlanFields"), planToggle = document.getElementById("objectivePlanToggle");
+    if (planFields) planFields.hidden = true;
+    if (planToggle) planToggle.setAttribute("aria-expanded", "false");
     form.hidden = false;
     document.getElementById("objectiveTitle")?.focus();
   }
@@ -117,6 +128,18 @@
   function closeForm() {
     const form = document.getElementById("objectiveForm");
     if (form) form.hidden = true;
+  }
+
+  function setNotesOpen(open) {
+    const drawer = document.getElementById("personalNotesDrawer");
+    if (!drawer) return;
+    drawer.hidden = !open;
+    document.body.classList.toggle("personal-notes-open", open);
+    if (open) {
+      const notebook = document.getElementById("notebookInput");
+      render();
+      requestAnimationFrame(function () { notebook?.focus(); });
+    }
   }
 
   function init() {
@@ -127,6 +150,14 @@
     if (!form || !notebook) return;
     add?.addEventListener("click", openForm);
     cancel?.addEventListener("click", closeForm);
+    document.getElementById("objectivePlanToggle")?.addEventListener("click", function () {
+      const fields = document.getElementById("objectivePlanFields"); if (!fields) return;
+      fields.hidden = !fields.hidden; this.setAttribute("aria-expanded", String(!fields.hidden));
+    });
+    document.getElementById("personalNotesButton")?.addEventListener("click", function () { setNotesOpen(true); });
+    document.getElementById("personalNotesClose")?.addEventListener("click", function () { setNotesOpen(false); });
+    document.getElementById("personalNotesDrawer")?.addEventListener("click", function (event) { if (event.target === this) setNotesOpen(false); });
+    document.addEventListener("keydown", function (event) { if (event.key === "Escape") setNotesOpen(false); });
     form.addEventListener("submit", function (event) {
       event.preventDefault();
       const title = String(document.getElementById("objectiveTitle")?.value || "").trim().slice(0, 80);
@@ -136,7 +167,7 @@
       const profile = readProfile();
       const goals = goalsFrom(profile);
       if (goals.length >= MAX_GOALS) { status("Limite de " + MAX_GOALS + " objectifs atteinte"); return; }
-      goals.unshift({ id: makeId(), title, type: document.getElementById("objectiveType")?.value || "custom", target, current, dueDate: document.getElementById("objectiveDueDate")?.value || "" });
+      goals.unshift({ id: makeId(), title, type: document.getElementById("objectiveType")?.value || "custom", target, current, dueDate: document.getElementById("objectiveDueDate")?.value || "", cadence: document.getElementById("objectiveCadence")?.value || "once" });
       profile.objectives = goals;
       saveProfile(profile); closeForm(); render();
     });
@@ -151,6 +182,6 @@
     render();
   }
 
-  window.GFObjectives = { render, saveProfile };
+  window.GFObjectives = { render, saveProfile, setNotesOpen };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();

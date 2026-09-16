@@ -1774,8 +1774,8 @@
   @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260908-1">
-  <link rel="stylesheet" href="ui-polish.css?v=20260908-r9">
-  <script src="i18n.js?v=20260908-r9"></script>
+  <link rel="stylesheet" href="ui-polish.css?v=20260916-r10">
+  <script src="i18n.js?v=20260916-r10"></script>
   <script src="ui-controls.js?v=20260908-r9" defer></script>
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard">
@@ -1825,9 +1825,7 @@
           <div class="profile-popover" id="profilePopover" hidden>
             <div class="profile-popover-account"><span class="profile-popover-kicker">Compte</span><strong id="profileEmail">Non connecté</strong></div>
             <div class="status-pill" id="connectionStatus"><span class="status-dot"></span><span id="connectionText">Non connecté</span></div>
-            <button class="profile-menu-link" id="profileSharingButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 10.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM17 10a3 3 0 0 1 0-6M21 20v-1.5a4 4 0 0 0-2.5-3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Partage et amis</span></button>
-            <button class="profile-menu-link" id="profileObjectivesButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><path d="m12 12 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Objectifs</span></button>
-            <button class="profile-menu-link" id="profileUpdatesButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 2 1.7 5.3L19 9l-5.3 1.7L12 16l-1.7-5.3L5 9l5.3-1.7L12 2ZM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span>Nouveautés</span></button>
+            <button class="profile-menu-link profile-menu-link-primary" id="profilePersonalButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 14.5c1.1-1.35 2.45-2.02 4-2.02s2.9.67 4 2.02M12 10a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Mon espace</span><small>Objectifs, amis, nouveautés</small></button>
             <button class="profile-menu-link" id="profileSettingsButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6l-.04.08a2 2 0 0 1-3.92 0L10 20a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1l-.08-.04a2 2 0 0 1 0-3.92L4 10a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6l.04-.08a2 2 0 0 1 3.92 0L14 4a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.36.7.6 1l.08.04a2 2 0 0 1 0 3.92L20 14c-.24.3-.46.64-.6 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>Paramètres</span></button>
             <button class="profile-menu-link profile-menu-link-danger" id="accountLogoutBtn" data-account-logout type="button" hidden><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5M14 16l4-4-4-4M18 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Se déconnecter</span></button>
           </div>
@@ -1864,6 +1862,17 @@
           <article class="metric-card"><span class="metric-label">Total épargné</span><strong class="metric-value" id="totalSavings">-</strong><span class="metric-note" id="totalSavingsNote">Comptes cumulés</span></article>
           <article class="metric-card"><span class="metric-label">Mois le plus dépensier</span><strong class="metric-value" id="maxExpenseMonth">-</strong><span class="metric-note" id="maxExpenseValue">-</span></article>
           <article class="metric-card"><span class="metric-label">Mois le moins dépensier</span><strong class="metric-value" id="minExpenseMonth">-</strong><span class="metric-note" id="minExpenseValue">-</span></article>
+        </section>
+        <section class="mobile-finance-summary panel" aria-label="Résumé financier compact">
+          <div class="mobile-finance-summary-head"><div><span class="eyebrow">Résumé financier</span><h2 id="mobileSummaryLabel">Salaire moyen</h2></div><span class="mobile-summary-count">4 indicateurs</span></div>
+          <strong class="mobile-finance-summary-value" id="mobileSummaryValue">-</strong>
+          <p class="mobile-finance-summary-note" id="mobileSummaryNote">Tous les mois</p>
+          <div class="mobile-finance-summary-tabs" role="tablist" aria-label="Choisir un indicateur financier">
+            <button type="button" data-mobile-summary="salary" role="tab" aria-selected="true">Salaire</button>
+            <button type="button" data-mobile-summary="savings" role="tab" aria-selected="false">Épargne</button>
+            <button type="button" data-mobile-summary="highest" role="tab" aria-selected="false">Plus dépensé</button>
+            <button type="button" data-mobile-summary="lowest" role="tab" aria-selected="false">Moins dépensé</button>
+          </div>
         </section>
         <section class="savings-goal-card" id="savingsGoalCard" hidden>
           <div class="savings-goal-header">
@@ -1912,22 +1921,40 @@
         <nav class="updates-pagination" id="updatesPagination" aria-label="Pages des nouveautés"></nav>
       </section>
     </section>
+    <section class="app-page" id="personalPage" hidden>
+      <section class="content personal-shell">
+        <header class="personal-page-title"><span class="eyebrow">Mon espace</span><h2>Mon espace</h2><p>Garde tes projets, tes accès et tes notes au même endroit.</p></header>
+        <section class="panel personal-welcome">
+          <div class="personal-identity"><span class="personal-avatar" id="personalAvatar" aria-hidden="true">?</span><div><span class="eyebrow">Espace personnel</span><h3>Ton espace personnel</h3><p id="personalEmail">Tes objectifs, tes partages et tes notes restent à portée de main.</p></div></div>
+          <button class="personal-notes-button" id="personalNotesButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Notes</span></button>
+        </section>
+        <section class="personal-destinations" aria-label="Mes raccourcis personnels">
+          <span class="personal-sidebar-label">Mon espace</span>
+          <button class="panel personal-destination" type="button" data-page="objectives"><span class="personal-destination-icon personal-destination-icon-goal" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><path d="m12 12 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><strong>Objectifs</strong><small id="personalObjectivesMeta">Crée et suis tes projets financiers.</small></span><span class="personal-destination-arrow" aria-hidden="true">→</span></button>
+          <button class="panel personal-destination" type="button" data-page="sharing"><span class="personal-destination-icon personal-destination-icon-sharing" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 10.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM17 10a3 3 0 0 1 0-6M21 20v-1.5a4 4 0 0 0-2.5-3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Partage et amis</strong><small>Gère tes invitations et les accès que tu accordes.</small></span><span class="personal-destination-arrow" aria-hidden="true">→</span></button>
+          <button class="panel personal-destination" type="button" data-page="updates"><span class="personal-destination-icon personal-destination-icon-updates" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m12 2 1.7 5.3L19 9l-5.3 1.7L12 16l-1.7-5.3L5 9l5.3-1.7L12 2ZM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span><span><strong>Nouveautés</strong><small>Découvre les dernières améliorations de Gestion Finance.</small></span><span class="personal-destination-arrow" aria-hidden="true">→</span></button>
+        </section>
+      </section>
+    </section>
     <section class="app-page" id="objectivesPage" hidden>
       <section class="content objectives-shell">
-        <section class="settings-header"><div><span class="eyebrow">Espace personnel</span><h2>Objectifs</h2><p>Garde tes projets financiers et tes notes au même endroit. Ils restent privés et sont synchronisés avec ton compte.</p></div><button class="button button-ghost" type="button" data-page="dashboard">Retour à mon espace</button></section>
+        <section class="settings-header"><div><span class="eyebrow">Mon espace</span><h2>Objectifs</h2><p>Crée tes projets à ton rythme. Chaque objectif est privé par défaut et synchronisé avec ton compte.</p></div><button class="button button-ghost" type="button" data-page="personal">Retour à Mon espace</button></section>
         <div class="objectives-grid">
-          <section class="panel objectives-panel"><div class="objectives-panel-head"><div><h3>Mes objectifs</h3><p>Épargne, investissement, dépenses ou projet personnel.</p></div><button class="button button-primary" id="objectiveAddButton" type="button">Ajouter un objectif</button></div><form class="objective-form" id="objectiveForm" hidden>
+          <section class="panel objectives-panel"><div class="objectives-panel-head"><div><h3>Mes objectifs</h3><p>Épargne, investissement, dépense prévue ou projet personnel.</p></div><button class="button button-primary" id="objectiveAddButton" type="button">Ajouter un objectif</button></div><form class="objective-form" id="objectiveForm" hidden>
             <label><span>Nom de l'objectif</span><input id="objectiveTitle" maxlength="80" placeholder="Ex. Apport immobilier" required /></label>
             <label><span>Type</span><select id="objectiveType"><option value="savings">Épargne</option><option value="investment">Investissement</option><option value="expense">Dépense prévue</option><option value="custom">Personnalisé</option></select></label>
             <label><span>Montant visé (€)</span><input id="objectiveTarget" type="number" min="0" step="0.01" inputmode="decimal" required /></label>
             <label><span>Déjà atteint (€)</span><input id="objectiveCurrent" type="number" min="0" step="0.01" inputmode="decimal" value="0" /></label>
-            <label><span>Échéance <em>facultative</em></span><input id="objectiveDueDate" type="date" /></label>
+            <button class="objective-plan-toggle" id="objectivePlanToggle" type="button" aria-expanded="false" aria-controls="objectivePlanFields">Planifier cet objectif <span>Facultatif</span></button>
+            <div class="objective-plan-fields" id="objectivePlanFields" hidden><label><span>Rythme</span><select id="objectiveCadence"><option value="once">Sans récurrence</option><option value="monthly">Chaque mois</option><option value="yearly">Chaque année</option></select></label><label><span>Échéance <em>facultative</em></span><input id="objectiveDueDate" type="date" /></label></div>
             <div class="objective-form-actions"><button class="button button-ghost" id="objectiveCancelButton" type="button">Annuler</button><button class="button button-primary" type="submit">Enregistrer l'objectif</button></div>
           </form><div class="objectives-list" id="objectivesList"></div></section>
-          <section class="panel notebook-panel"><div class="objectives-panel-head"><div><h3>Bloc-notes</h3><p>Notes, idées et rappels privés.</p></div><span class="notebook-status" id="notebookStatus" aria-live="polite">Enregistré</span></div><label class="notebook-label" for="notebookInput">Tes notes</label><textarea id="notebookInput" maxlength="20000" placeholder="Ex. Comparer les offres d'épargne, préparer le budget vacances…"></textarea><p class="notebook-help">Enregistrement automatique sur cet appareil, puis dans ton compte lorsque tu es connecté.</p></section>
         </div>
       </section>
     </section>
+    <div class="personal-notes-overlay" id="personalNotesDrawer" hidden role="dialog" aria-modal="true" aria-labelledby="personalNotesTitle">
+      <section class="personal-notes-panel"><div class="personal-notes-head"><div><span class="eyebrow">Mon espace</span><h2 id="personalNotesTitle">Notes</h2><p>Idées et rappels privés, enregistrés automatiquement.</p></div><button class="personal-notes-close" id="personalNotesClose" type="button" aria-label="Fermer les notes">×</button></div><label class="notebook-label" for="notebookInput">Tes notes</label><textarea id="notebookInput" maxlength="20000" placeholder="Ex. Comparer les offres d'épargne, préparer le budget vacances…"></textarea><div class="personal-notes-foot"><p class="notebook-help">Enregistrement automatique sur cet appareil, puis dans ton compte lorsque tu es connecté.</p><span class="notebook-status" id="notebookStatus" aria-live="polite">Enregistré</span></div></section>
+    </div>
     <section class="sheet-page app-page" id="sheetPage" hidden>
       <div class="sheet-bar">
         <div class="sheet-bar-left">
@@ -1991,10 +2018,23 @@
     </section>
     <section class="settings-page app-page" id="settingsPage" hidden>
       <div class="settings-shell">
-        <div class="settings-header panel"><div><span class="eyebrow">Paramètres</span><h2>Personnalisation</h2></div><button class="button button-ghost" id="backDashboardButton" type="button">← Retour</button></div>
+        <div class="settings-header panel"><div><span class="eyebrow" id="settingsKicker">Paramètres</span><h2 id="settingsTitle">Réglages</h2><p id="settingsSubtitle">Choisis ce que tu souhaites régler.</p></div><button class="button button-ghost" id="backDashboardButton" type="button">← Retour</button></div>
+        <nav class="settings-hub" id="settingsHub" aria-label="Rubriques des paramètres">
+          <span class="settings-hub-label">Compte</span>
+          <button class="settings-hub-item" type="button" data-settings-view="account"><span><strong>Profil et connexion</strong><small>Adresse, accès et déconnexion</small></span></button>
+          <span class="settings-hub-label">Préférences</span>
+          <button class="settings-hub-item" type="button" data-settings-view="appearance"><span><strong>Apparence</strong><small>Thème et mode d'affichage</small></span></button>
+          <button class="settings-hub-item" type="button" data-settings-view="language"><span><strong>Langue</strong><small>Français ou English</small></span></button>
+          <span class="settings-hub-label">Données</span>
+          <button class="settings-hub-item" type="button" data-settings-view="data"><span><strong>Données et synchronisation</strong><small>Tableur, sauvegarde et réinitialisation</small></span></button>
+          <span class="settings-hub-label">À propos</span>
+          <button class="settings-hub-item" type="button" data-settings-view="privacy"><span><strong>Confidentialité &amp; sécurité</strong><small>Ce qui protège tes données</small></span></button>
+          <button class="settings-hub-item" type="button" data-settings-view="legal"><span><strong>Mentions légales</strong><small>Informations sur le service</small></span></button>
+        </nav>
 
       <!-- Section Compte : connexion email + mot de passe (Supabase) -->
-      <section class="settings-section panel account-section" aria-label="Compte">
+      <section class="settings-section panel account-section" data-settings-panel="account" aria-label="Compte" hidden>
+        <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
         <div class="panel-title"><h2>Compte</h2></div>
         <div class="account-panel">
           <div class="settings-intro" id="accountIntro">
@@ -2043,9 +2083,9 @@
           <p class="account-status" id="accountStatus">Non configuré</p>
         </div>
       </section>
-        <section class="settings-section panel language-section"><div><h3>Langue</h3><p>Choisis la langue de l’interface. Tes données ne sont pas traduites.</p></div><div class="language-options" role="group" aria-label="Langue de l’interface"><button type="button" data-language="fr" lang="fr" translate="no" aria-pressed="true">Français</button><button type="button" data-language="en" lang="en" translate="no" aria-pressed="false">English</button></div></section>
+        <section class="settings-section panel language-section" data-settings-panel="language" hidden><button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button><div><h3>Langue</h3><p>Choisis la langue de l’interface. Tes données ne sont pas traduites.</p></div><div class="language-options" role="group" aria-label="Langue de l’interface"><button type="button" data-language="fr" lang="fr" translate="no" aria-pressed="true">Français</button><button type="button" data-language="en" lang="en" translate="no" aria-pressed="false">English</button></div></section>
         <!-- Section Apparence (thème plus petit) -->
-        <section class="settings-section panel"><div class="settings-section-head"><div><h3>Apparence</h3><p>Thème visuel et mode clair/sombre.</p></div></div>
+        <section class="settings-section panel" data-settings-panel="appearance" hidden><button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button><div class="settings-section-head"><div><h3>Apparence</h3><p>Thème visuel et mode clair/sombre.</p></div></div>
           <div class="theme-grid" role="list">
             <button class="theme-card" type="button" data-theme-option="glass" aria-label="Glassmorphism"><span class="theme-check" aria-hidden="true">✓</span><span class="theme-preview preview-glass" aria-hidden="true"><span class="preview-title"></span><span class="preview-tabs"><i></i><i></i><i></i></span><span class="preview-cards"><i></i><i></i><i></i></span><span class="preview-chart"><i></i><i></i><i></i></span></span><span class="theme-name">Glassmorphism</span><span class="theme-tone">Premium spatial</span></button>
             <button class="theme-card" type="button" data-theme-option="editorial" aria-label="Editorial Finance"><span class="theme-check" aria-hidden="true">✓</span><span class="theme-preview preview-editorial" aria-hidden="true"><span class="preview-title"></span><span class="preview-tabs"><i></i><i></i><i></i></span><span class="preview-cards"><i></i><i></i><i></i></span><span class="preview-chart"><i></i><i></i><i></i></span></span><span class="theme-name">Editorial Finance</span><span class="theme-tone">Presse économique</span></button>
@@ -2055,7 +2095,8 @@
         </section>
 
         <!-- Actions sensibles : sobres et séparées du pied de page. -->
-        <div class="settings-reset-section">
+        <div class="settings-reset-section" data-settings-panel="data" hidden>
+          <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
           <div class="settings-reset-copy"><h3>Données et compte</h3><p>Réinitialise l’application locale ou supprime définitivement les données synchronisées.</p></div>
           <button type="button" class="settings-reset-btn" id="settingsResetBtn">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" style="flex-shrink:0"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 3v5h5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -2068,11 +2109,21 @@
           </button>
           <p class="settings-reset-hint">Supprime définitivement ton compte et toutes tes données sur le cloud. Cette action est irréversible.</p>
         </div>
-        <!-- Pied de page : mentions + confidentialité -->
-        <div class="settings-footer">
-          <button type="button" class="settings-footer-link" onclick="document.getElementById('legalModal').showModal()">Mentions légales</button>
-          <button type="button" class="settings-footer-link" onclick="document.getElementById('privacyModal').showModal()">Confidentialité &amp; sécurité</button>
-        </div>
+        <section class="settings-section panel settings-reading-page" data-settings-panel="privacy" hidden>
+          <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
+          <div class="settings-section-head"><div><h3>Confidentialité &amp; sécurité</h3><p>Les protections utiles, expliquées simplement.</p></div></div>
+          <div class="legal-section"><strong>Stockage local</strong><p>Tes données restent dans ton navigateur. Elles ne sont synchronisées avec ton compte Supabase que lorsque tu te connectes.</p></div>
+          <div class="legal-section"><strong>Connexion HTTPS</strong><p>Le site est servi via HTTPS pour garantir le chiffrement des données en transit.</p></div>
+          <div class="legal-section"><strong>Synchronisation de compte (optionnelle)</strong><p>Lorsque tu te connectes, ton tableur est synchronisé avec ton compte Supabase via une connexion chiffrée.</p></div>
+          <div class="legal-section"><strong>Pas de tracking publicitaire</strong><p>Ce site ne contient aucun tracker, cookie publicitaire ni script d'analyse tierce. Aucune donnée n'est vendue ou partagée avec des tiers.</p></div>
+        </section>
+        <section class="settings-section panel settings-reading-page" data-settings-panel="legal" hidden>
+          <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
+          <div class="settings-section-head"><div><h3>Mentions légales</h3><p>Les informations importantes sur Gestion Finance.</p></div></div>
+          <div class="legal-section"><strong>Éditeur du site</strong><p>Site « Gestion finance », outil personnel de gestion budgétaire. Les informations saisies relèvent de l'utilisateur et demeurent sous sa responsabilité.</p></div>
+          <div class="legal-section"><strong>Nature du service</strong><p>Application de tableur et de tableau de bord financiers. Aucune donnée bancaire n'est collectée : les saisies sont manuelles et restent locales, avec synchronisation de compte optionnelle.</p></div>
+          <div class="legal-section"><strong>Propriété intellectuelle &amp; responsabilité</strong><p>Les données saisies sont les tiennes. Le site est fourni « en l'état », sans garantie de résultat. Il ne constitue pas un conseil financier, fiscal ou juridique.</p></div>
+        </section>
       </div>
     </section>
 
@@ -2248,7 +2299,7 @@
 
     const elements = {
       dashboardPage: document.getElementById("dashboardPage"),
-      settingsPage: document.getElementById("settingsPage"), sharingPage: document.getElementById("sharingPage"), sharingAccessPage: document.getElementById("sharingAccessPage"), updatesPage: document.getElementById("updatesPage"), objectivesPage: document.getElementById("objectivesPage"), sheetPage: document.getElementById("sheetPage"), settingsButton: document.getElementById("settingsButton"), sheetButton: document.getElementById("sheetButton"), homeButton: document.getElementById("homeButton"),
+      settingsPage: document.getElementById("settingsPage"), sharingPage: document.getElementById("sharingPage"), sharingAccessPage: document.getElementById("sharingAccessPage"), updatesPage: document.getElementById("updatesPage"), personalPage: document.getElementById("personalPage"), objectivesPage: document.getElementById("objectivesPage"), sheetPage: document.getElementById("sheetPage"), settingsButton: document.getElementById("settingsButton"), sheetButton: document.getElementById("sheetButton"), homeButton: document.getElementById("homeButton"),
       backDashboardButton: document.getElementById("backDashboardButton"), themeButtons: document.querySelectorAll("[data-theme-option]"),
       modeToggle: document.getElementById("modeToggle"), loader: document.getElementById("loader"),
       messageBox: document.getElementById("messageBox"), messageText: document.getElementById("messageText"),
@@ -2631,7 +2682,10 @@
     function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
     function updateChartColorTokens(){ const styles=getComputedStyle(document.body); COLORS.salary=readCssVar(styles,"--chart-salary",COLORS.salary); COLORS.expenses=readCssVar(styles,"--chart-expenses",COLORS.expenses); COLORS.savings=readCssVar(styles,"--chart-savings",COLORS.savings); COLORS.grid=readCssVar(styles,"--chart-grid",COLORS.grid); COLORS.tick=readCssVar(styles,"--chart-tick",COLORS.tick); COLORS.text=readCssVar(styles,"--chart-text",COLORS.text); }
     function readCssVar(styles,name,fallback){ return styles.getPropertyValue(name).trim()||fallback; }
-    function setPage(page){ const previous=state.page; const next=(page==="settings"||page==="sheet"||page==="sharing"||page==="sharingAccess"||page==="updates"||page==="objectives")?page:"dashboard"; if(next===previous) return; state.page=next; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing"; if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess"; if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates"; if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); } if(state.page==="updates") renderUpdatesPage(); if(state.page==="objectives"&&window.GFObjectives) window.GFObjectives.render(); }
+    function setPage(page){ const previous=state.page; const next=(page==="settings"||page==="sheet"||page==="sharing"||page==="sharingAccess"||page==="updates"||page==="personal"||page==="objectives")?page:"dashboard"; if(next===previous){ if(next==="settings") showSettingsView("home"); return; } state.page=next; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing"; if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess"; if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates"; if(elements.personalPage) elements.personalPage.hidden=state.page!=="personal"; if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="settings") showSettingsView("home"); if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); } if(state.page==="updates") renderUpdatesPage(); if(state.page==="personal") renderPersonalSpace(); if(state.page==="objectives"&&window.GFObjectives) window.GFObjectives.render(); }
+    const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],account:["Paramètres","Compte","Connexion, protection de l'accès et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."]};
+    function showSettingsView(view){ const next=Object.prototype.hasOwnProperty.call(SETTINGS_VIEW_COPY,view)?view:"home",copy=SETTINGS_VIEW_COPY[next],hub=document.getElementById("settingsHub"); document.querySelectorAll("[data-settings-panel]").forEach(function(panel){ panel.hidden=next==="home"||panel.dataset.settingsPanel!==next; }); if(hub) hub.hidden=next!=="home"; const kicker=document.getElementById("settingsKicker"),title=document.getElementById("settingsTitle"),subtitle=document.getElementById("settingsSubtitle"); if(kicker) kicker.textContent=copy[0]; if(title) title.textContent=copy[1]; if(subtitle) subtitle.textContent=copy[2]; document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.setAttribute("aria-current",String(button.dataset.settingsView===next)); }); }
+    function renderPersonalSpace(){ const profileEmail=document.getElementById("profileEmail"),profileAvatar=document.getElementById("profileAvatar"),email=document.getElementById("personalEmail"),avatar=document.getElementById("personalAvatar"),meta=document.getElementById("personalObjectivesMeta"); if(email){ const value=String(profileEmail?.textContent||"").trim(); email.textContent=value&&value!=="Non connecté"?value:"Un espace privé pour organiser tes projets et tes accès."; } if(avatar) avatar.textContent=String(profileAvatar?.textContent||"?").trim().slice(0,2)||"?"; if(meta){ let goals=[]; try{ const profile=JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile")||"{}"); goals=Array.isArray(profile?.objectives)?profile.objectives.filter(Boolean):[]; }catch(e){} meta.textContent=goals.length?goals.length+" objectif"+(goals.length>1?"s":"")+" en cours.":"Crée et suis tes projets financiers."; } }
     window.setPage = setPage;
     window.setTheme = setTheme;
     window.setMode = setMode;
@@ -2877,12 +2931,13 @@ function resetDataState(){
       // Événement pour vider l'état du dashboard (appelé par le bouton admin)
       window.addEventListener("financeClearData", () => { resetDataState(); updateInterface(); });
       document.querySelectorAll("[data-page]").forEach(function(button){ button.addEventListener("click",function(){ setPage(button.dataset.page); }); });
-      var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileSettings=document.getElementById("profileSettingsButton"), profileSharing=document.getElementById("profileSharingButton"), profileObjectives=document.getElementById("profileObjectivesButton"), profileUpdates=document.getElementById("profileUpdatesButton");
+      var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileSettings=document.getElementById("profileSettingsButton"), profilePersonal=document.getElementById("profilePersonalButton");
       if(profileButton && profilePopover){ profileButton.addEventListener("click",function(){ var open=profilePopover.hidden; profilePopover.hidden=!open; profileButton.setAttribute("aria-expanded",String(open)); }); document.addEventListener("click",function(event){ if(profileMenu && !profileMenu.contains(event.target)){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); document.addEventListener("keydown",function(event){ if(event.key==="Escape"){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); }
       if(profileSettings){ profileSettings.addEventListener("click",function(){ setPage("settings"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
-      if(profileSharing){ profileSharing.addEventListener("click",function(){ setPage("sharing"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
-      if(profileObjectives){ profileObjectives.addEventListener("click",function(){ setPage("objectives"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
-      if(profileUpdates){ profileUpdates.addEventListener("click",function(){ setPage("updates"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
+      if(profilePersonal){ profilePersonal.addEventListener("click",function(){ setPage("personal"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
+      document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView(button.dataset.settingsView); }); });
+      document.querySelectorAll("[data-settings-back]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView("home"); }); });
+      document.addEventListener("click",function(event){ const viewButton=event.target.closest("[data-settings-view]"); if(viewButton){ showSettingsView(viewButton.dataset.settingsView); return; } const backButton=event.target.closest("[data-settings-back]"); if(backButton) showSettingsView("home"); });
       document.getElementById("chartDetailClose")?.addEventListener("click",closeChartMonthDetail);
       document.getElementById("chartDetailModal")?.addEventListener("click",function(event){ if(event.target===this) closeChartMonthDetail(); });
       document.getElementById("latestUpdateDismissButton")?.addEventListener("click",dismissLatestUpdate);
@@ -2896,6 +2951,7 @@ function resetDataState(){
       if(accEyeBtn){ accEyeBtn.addEventListener("click", function(){ var inp=document.getElementById("accountLoginPw"); var show=document.getElementById("accountEyeShow"); var hide=document.getElementById("accountEyeHide"); if(!inp) return; var isPass=inp.type==="password"; inp.type=isPass?"text":"password"; if(show) show.style.display=isPass?"none":""; if(hide) hide.style.display=isPass?"":"none"; }); }
       if(elements.messagePauseButton) elements.messagePauseButton.addEventListener("click",()=>{ if(!elements.messageBox?.classList.contains("is-visible")) return; if(messagePaused) resumeMessageTimer(); else pauseMessageTimer(); }); if(elements.messageCloseButton) elements.messageCloseButton.addEventListener("click", hideMessage);
       elements.viewSelect.addEventListener("change",()=>setView(elements.viewSelect.value));
+      document.querySelectorAll("[data-mobile-summary]").forEach(function(button){ button.addEventListener("click",function(){ setMobileSummary(button.dataset.mobileSummary); }); });
       if(elements.yearSelect) elements.yearSelect.addEventListener("change",()=>{ state.selectedYear=String(elements.yearSelect.value||""); state.selectedMonthId=""; state.isGlobal=false; updateInterface(); }); elements.monthSelect.addEventListener("change",()=>{ state.selectedMonthId=elements.monthSelect.value; state.isGlobal=false; updateInterface(); });
       elements.categorySettingsList.addEventListener("change",e=>{ const sel=e.target.closest("[data-category-rule]"); if(!sel) return; setPropertyRule(sel.dataset.categoryRule,sel.value); rebuildDashboardFromCurrentPages(); });
       if(elements.btnAddCustomRule){ elements.btnAddCustomRule.addEventListener("click",()=>{ const name=(elements.customRuleName?.value||"").trim(); const res=addCustomRule(name); if(!res.ok){ if(res.reason==="empty") showMessage("Renseigne un nom de règle."); else if(res.reason==="system") showMessage("Cette règle existe déjà dans les règles système."); else if(res.reason==="duplicate") showMessage(`La règle “${name}” existe déjà.`); else showMessage("Impossible d'ajouter cette règle."); return; } if(elements.customRuleName) elements.customRuleName.value=""; renderCustomRulesList(); if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else updateInterface(); showMessage(`Règle ajoutée : ${res.name}`,15000); }); }
@@ -4495,6 +4551,7 @@ function resetDataState(){
         elements.avgSalaryNote.textContent = "Tous les mois";
         elements.totalSavingsNote.textContent = "Comptes cumulés";
         var sgc = document.getElementById("savingsGoalCard"); if (sgc) sgc.hidden = true;
+        updateMobileSummary();
         return;
       }
       elements.avgSalary.textContent = metrics.avgSalary === null ? "-" : formatEuro(metrics.avgSalary);
@@ -4509,7 +4566,12 @@ function resetDataState(){
       const selectedMonth = getSelectedMonth();
       const selectedSavings = selectedMonth ? Math.abs(Number(selectedMonth.savingsTotal || 0)) : 0;
       updateSavingsGoalCard(selectedSavings);
+      updateMobileSummary();
     }
+
+    let mobileSummaryView="salary";
+    function setMobileSummary(view){ if(!["salary","savings","highest","lowest"].includes(view)) return; mobileSummaryView=view; updateMobileSummary(); }
+    function updateMobileSummary(){ const label=document.getElementById("mobileSummaryLabel"),value=document.getElementById("mobileSummaryValue"),note=document.getElementById("mobileSummaryNote"),sources={salary:["Salaire moyen",elements.avgSalary,elements.avgSalaryNote],savings:["Total épargné",elements.totalSavings,elements.totalSavingsNote],highest:["Mois le plus dépensier",elements.maxExpenseMonth,elements.maxExpenseValue],lowest:["Mois le moins dépensier",elements.minExpenseMonth,elements.minExpenseValue]},current=sources[mobileSummaryView]||sources.salary; if(label) label.textContent=current[0]; if(value) value.textContent=current[1]?.textContent||"-"; if(note) note.textContent=current[2]?.textContent||"-"; document.querySelectorAll("[data-mobile-summary]").forEach(function(button){ const selected=button.dataset.mobileSummary===mobileSummaryView; button.setAttribute("aria-selected",String(selected)); button.classList.toggle("is-active",selected); }); }
 
     function updateSavingsGoalCard(currentSavings) {
       var card = document.getElementById("savingsGoalCard");
@@ -5383,6 +5445,6 @@ function resetDataState(){
   window.__gfSync = { pushToCloud: pushToCloud, pullFromCloud: pullFromCloud, markDirty: markDirty, updateSyncStatus: updateSyncStatus };
 })();
 </script>
-  <script src="objectives.js?v=20260916-1"></script>
+  <script src="objectives.js?v=20260916-2"></script>
 </body>
 </html>
