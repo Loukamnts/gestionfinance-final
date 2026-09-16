@@ -76,7 +76,7 @@ test('All direct dependency versions are exact and package lock is present',()=>
   assert(fs.existsSync(path.join(root,'package-lock.json')));
 });
 test('Dialog controls use external listeners rather than CSP exemptions',()=>{
-  assert.equal([...html.matchAll(/data-dialog-target=/g)].length,4);
+  assert.equal([...html.matchAll(/data-dialog-target=/g)].length,2);
   const source=fs.readFileSync(path.join(root,'dist/app/dialog-actions.js'),'utf8');
   assert(source.includes('instanceof HTMLDialogElement'));
 });
