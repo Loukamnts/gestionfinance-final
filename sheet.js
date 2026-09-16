@@ -1386,7 +1386,6 @@
     bind("btnSheetCalc", openCalculator);
     bind("btnSheetUndo", undo);
     bind("btnSheetRedo", redo);
-    bind("sheetBackBtn", () => { const b = document.getElementById("backDashboardButton"); if (b) b.click(); });
     container.addEventListener("paste", (e) => { if (state.editing) return; const text = (e.clipboardData || window.clipboardData).getData("text"); if (text) { e.preventDefault(); paste(text); } });
     container.addEventListener("copy", (e) => { if (state.editing) return; e.clipboardData.setData("text/plain", copySelection()); e.preventDefault(); });
     notifyDashboard();
