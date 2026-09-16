@@ -427,9 +427,8 @@ body[data-theme="brutal"] .app-header .brand-copy h1 { font-size:clamp(1.08rem,3
   .settings-shell > .settings-header { padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; align-items:flex-start; }
   .settings-shell > .settings-header h2 { font-size:1.8rem; }
   .settings-shell > .settings-header > .button { min-height:36px; padding:7px 10px; font-size:.78rem; }
-  .settings-hub { display:flex; gap:8px; width:calc(100% + 2px); margin:0 -1px; padding:0 1px 8px; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:thin; }
-  .settings-hub::-webkit-scrollbar { height:5px; }
-  .settings-hub::-webkit-scrollbar-thumb { background:var(--line-strong); border-radius:99px; }
+  .settings-hub { display:flex; gap:8px; width:calc(100% + 2px); margin:0 -1px; padding:0 1px 2px; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; -ms-overflow-style:none; }
+  .settings-hub::-webkit-scrollbar { display:none; height:0; }
   .settings-hub-label { display:none; }
   .settings-hub-item { flex:0 0 auto; width:auto; min-height:42px; padding:10px 15px; border:1px solid var(--line); border-radius:99px; background:var(--input-bg); color:var(--muted); white-space:nowrap; }
   .settings-hub-item:hover,.settings-hub-item[aria-current="true"] { border-color:var(--accent); background:var(--button-active-bg); color:var(--accent); }
@@ -465,7 +464,7 @@ body[data-theme="brutal"] :is(.settings-hub-item,.personal-destination) { border
 .personal-workspace-label { display:block; margin:0 0 8px; color:var(--muted); font:800 .68rem/1.2 var(--font-body); letter-spacing:.13em; text-transform:uppercase; }
 .personal-workspace-link,.personal-workspace-notes { width:100%; min-height:42px; padding:10px 12px; border:0; border-radius:var(--control-radius); background:transparent; color:var(--muted); text-align:left; font:650 .9rem/1.25 var(--font-body); cursor:pointer; }
 .personal-workspace-link:hover,.personal-workspace-link.is-active,.personal-workspace-notes:hover { background:var(--button-active-bg); color:var(--accent); }
-.personal-workspace-notes { margin-top:12px; border-top:1px solid var(--line); border-radius:0; color:var(--accent); }
+.personal-workspace-notes { margin-top:12px; border:1px solid var(--line); border-radius:var(--control-radius); color:var(--accent); }
 .personal-workspace-content { min-width:0; }
 .personal-workspace-content > .settings-header { margin-top:0; }
 .personal-workspace-content .sf-page-head { margin-top:0; }
@@ -490,13 +489,13 @@ body[data-theme="brutal"] :is(.settings-hub-item,.personal-destination) { border
 /* Glassmorphism : les notes et les objectifs restent des panneaux nets,
    jamais des bulles transparentes. */
 body[data-theme="glass"] :is(.personal-notes-panel,.objectives-panel,.objective-form,.objective-card) { backdrop-filter:none; -webkit-backdrop-filter:none; border-radius:10px; }
-body[data-theme="glass"] :is(.personal-notes-close,.notebook-status,.objective-kind,.objective-progress,.objective-plan-toggle,.objective-plan-fields,.personal-workspace-link,.personal-workspace-notes) { border-radius:8px; }
+body[data-theme="glass"] :is(.personal-notes-panel,.personal-notes-close,.notebook-status,.objective-kind,.objective-progress,.objective-plan-toggle,.objective-plan-fields,.personal-workspace-link,.personal-workspace-notes) { border-radius:10px !important; }
 body[data-theme="glass"] .personal-workspace-link,.personal-workspace-notes { background:transparent; }
 body[data-theme="glass"] .personal-workspace-link.is-active,body[data-theme="glass"] .personal-workspace-link:hover,body[data-theme="glass"] .personal-workspace-notes:hover { background:var(--button-active-bg); }
 body[data-theme="glass"][data-mode="dark"] :is(.personal-notes-panel,.objectives-panel,.objective-form,.objective-card) { background:rgba(17,20,44,.96); }
 body[data-theme="glass"][data-mode="light"] :is(.personal-notes-panel,.objectives-panel,.objective-form,.objective-card) { background:rgba(255,255,255,.96); }
-body[data-theme="glass"][data-mode="dark"] .personal-workspace-notes { background:rgba(17,20,44,.84); }
-body[data-theme="glass"][data-mode="light"] .personal-workspace-notes { background:rgba(255,255,255,.92); }
+body[data-theme="glass"][data-mode="dark"] .personal-workspace-notes { background:rgba(17,20,44,.96); }
+body[data-theme="glass"][data-mode="light"] .personal-workspace-notes { background:rgba(255,255,255,.96); }
 @media (max-width:720px) {
   body[data-theme="glass"] :is(.objective-form,.objective-card,.objectives-panel,.personal-notes-panel) { border-radius:8px; }
   body[data-theme="glass"][data-mode="dark"] :is(.objective-form,.objective-card,.objectives-panel,.personal-notes-panel) { background:rgba(17,20,44,.96); }
@@ -504,5 +503,5 @@ body[data-theme="glass"][data-mode="light"] .personal-workspace-notes { backgrou
   body[data-theme="glass"] :is(.objective-kind,.objective-progress,.objective-plan-toggle,.objective-plan-fields) { border-radius:6px; }
 }
 
-body[data-theme="editorial"] :is(.personal-workspace-link,.personal-workspace-notes) { border-radius:3px; }
-body[data-theme="brutal"] :is(.personal-workspace-link,.personal-workspace-notes) { border-radius:0; }
+body[data-theme="editorial"] :is(.personal-workspace-link,.personal-workspace-notes,.personal-notes-panel) { border-radius:3px; }
+body[data-theme="brutal"] :is(.personal-workspace-link,.personal-workspace-notes,.personal-notes-panel) { border-radius:0; }
