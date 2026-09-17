@@ -37,11 +37,22 @@ create table if not exists public.finance_dashboard_snapshots (
 alter table public.finance_dashboard_snapshots enable row level security;
 
 drop policy if exists "snapshots_owner_or_authorized_friend_select" on public.finance_snapshots;
-drop policy if exists "snapshots_select_owner_or_shared" on public.finance_snapshots;
-drop policy if exists "snapshots_owner_select" on public.finance_snapshots;
-drop policy if exists "snapshots_owner_insert" on public.finance_snapshots;
-create policy "snapshots_owner_select" on public.finance_snapshots
-  for select using (auth.uid() = owner_id);
+create policy "snapshots_owner_or_authorized_friend_select" on public.finance_snapshots
+  for select using (
+    auth.uid() = owner_id
+    or exists (
+      select 1
+      from public.friendships f
+      join public.share_permissions p
+        on p.owner_id = finance_snapshots.owner_id
+       and p.friend_id = auth.uid()
+       and p.year is null and p.month is null and p.row_key is null
+       and p.can_view_sheet = true
+      where f.status = 'accepted'
+        and ((f.owner_id = finance_snapshots.owner_id and f.friend_id = auth.uid())
+          or (f.friend_id = finance_snapshots.owner_id and f.owner_id = auth.uid()))
+    )
+  );
 
 drop policy if exists "dashboard_snapshots_owner_all" on public.finance_dashboard_snapshots;
 drop policy if exists "dashboard_snapshots_authorized_friend_select" on public.finance_dashboard_snapshots;

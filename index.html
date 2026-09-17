@@ -1991,34 +1991,36 @@
       <section class="personal-notes-panel"><div class="personal-notes-head"><div><span class="eyebrow">Mon espace</span><h2 id="personalNotesTitle">Notes</h2><p>Idées et rappels privés, enregistrés automatiquement.</p></div><div class="personal-notes-head-actions"><span class="notebook-status" id="notebookStatus" aria-live="polite">Enregistré</span><button class="personal-notes-close" id="personalNotesClose" type="button" aria-label="Fermer les notes">×</button></div></div><label class="notebook-label" for="notebookInput">Tes notes</label><textarea id="notebookInput" maxlength="20000" placeholder="Ex. Comparer les offres d'épargne, préparer le budget vacances…"></textarea><div class="personal-notes-foot"><p class="notebook-help">Enregistrement automatique sur cet appareil, puis dans ton compte lorsque tu es connecté.</p></div></section>
     </div>
     <section class="sheet-page app-page" id="sheetPage" hidden>
-      <div class="sheet-bar">
-        <div class="sheet-bar-left">
-          <button class="button button-ghost icon-btn" id="btnSheetUndo" type="button" title="Annuler la dernière modification (Ctrl/Cmd + Z)" aria-label="Annuler la dernière modification" disabled>
+      <div class="sheet-bar" role="toolbar" aria-label="Outils du tableur">
+        <div class="sheet-bar-left" role="group" aria-label="Historique des modifications">
+          <button class="button button-ghost icon-btn" id="btnSheetUndo" type="button" title="Annuler la dernière modification (Ctrl/Cmd + Z)" data-tooltip="Annuler" aria-label="Annuler la dernière modification" disabled>
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 7-5 5 5 5" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12h7a7 7 0 0 1 7 7" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/></svg>
             <span class="lbl">Annuler</span>
           </button>
-          <button class="button button-ghost icon-btn" id="btnSheetRedo" type="button" title="Rétablir la modification annulée (Ctrl/Cmd + Maj + Z)" aria-label="Rétablir la modification" disabled>
+          <button class="button button-ghost icon-btn" id="btnSheetRedo" type="button" title="Rétablir la modification annulée (Ctrl/Cmd + Maj + Z)" data-tooltip="Rétablir" aria-label="Rétablir la modification" disabled>
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 7 5 5-5 5" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12h-7a7 7 0 0 0-7 7" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/></svg>
             <span class="lbl">Rétablir</span>
           </button>
         </div>
         <div class="sheet-bar-right">
-          <button class="button button-primary icon-btn" id="btnSheetCalc" type="button" title="Ouvrir la calculatrice">
+          <button class="button button-primary icon-btn" id="btnSheetCalc" type="button" title="Ouvrir la calculatrice" data-tooltip="Ouvrir la calculatrice">
             <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 6h8M8 10h0M12 10h0M16 10h0M8 14h0M12 14h0M16 14h0M8 18h0M12 18h0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             <span class="lbl">Calculatrice</span>
           </button>
           <span class="sheet-divider"></span>
-          <button class="button button-ghost icon-btn" id="btnSheetImport" type="button" title="Importer un fichier Excel">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <span class="lbl">Importer</span>
-          </button>
-          <button class="button button-ghost icon-btn" id="btnSheetExport" type="button" title="Exporter en .xlsx">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 8l-5-5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <span class="lbl">Exporter</span>
-          </button>
+          <div class="sheet-bar-file-actions" role="group" aria-label="Importer ou exporter">
+            <button class="button button-ghost icon-btn" id="btnSheetImport" type="button" title="Importer un fichier Excel" data-tooltip="Importer un fichier Excel" aria-label="Importer un fichier Excel">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span class="lbl">Importer</span>
+            </button>
+            <button class="button button-ghost icon-btn" id="btnSheetExport" type="button" title="Exporter en .xlsx" data-tooltip="Exporter en Excel" aria-label="Exporter en Excel">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 8l-5-5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span class="lbl">Exporter</span>
+            </button>
+          </div>
           <span class="sheet-spacer"></span>
           <span class="sheet-divider"></span>
-          <button class="button button-ghost icon-btn" id="btnSheetClear" type="button" title="Vider le tableau">
+          <button class="button button-ghost icon-btn" id="btnSheetClear" type="button" title="Vider le tableau" data-tooltip="Vider la feuille" aria-label="Vider la feuille active">
             <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span class="lbl">Corbeille</span>
           </button>

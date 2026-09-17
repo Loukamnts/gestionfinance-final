@@ -100,42 +100,7 @@
       const amount = document.createElement("span"); amount.textContent = euro(goal.current) + " / " + euro(goal.target);
       const percent = document.createElement("strong"); percent.textContent = progress + " %";
       details.append(amount, percent);
-      const remaining = document.createElement("p"); remaining.className = "objective-remaining";
-      remaining.textContent = goal.target > goal.current ? "Reste " + euro(goal.target - goal.current) : "Objectif atteint";
-
-      // L'objectif reste léger à créer, mais son avancement peut être mis à
-      // jour directement depuis sa carte. Cette modification passe par le
-      // même chemin de sauvegarde et de synchronisation que le reste du profil.
-      const progressEditor = document.createElement("div"); progressEditor.className = "objective-progress-editor";
-      const currentLabel = document.createElement("label"); currentLabel.textContent = "Montant atteint";
-      const currentInput = document.createElement("input");
-      currentInput.type = "number";
-      currentInput.min = "0";
-      currentInput.step = "0.01";
-      currentInput.inputMode = "decimal";
-      currentInput.value = String(goal.current);
-      currentInput.setAttribute("aria-label", "Montant atteint pour " + goal.title);
-      currentLabel.append(currentInput);
-      const update = document.createElement("button");
-      update.type = "button";
-      update.className = "button button-ghost objective-update";
-      update.textContent = "Mettre à jour";
-      function saveProgress() {
-        const value = Number(currentInput.value);
-        if (!Number.isFinite(value) || value < 0) { currentInput.focus(); return; }
-        const current = readProfile();
-        current.objectives = goalsFrom(current).map(function (item) {
-          return item.id === goal.id ? Object.assign({}, item, { current: value }) : item;
-        });
-        saveProfile(current);
-        render();
-      }
-      update.addEventListener("click", saveProgress);
-      currentInput.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") { event.preventDefault(); saveProgress(); }
-      });
-      progressEditor.append(currentLabel, update);
-      card.append(top, line, details, remaining, progressEditor);
+      card.append(top, line, details);
       if (goal.dueDate) {
         const due = document.createElement("p"); due.className = "objective-due"; due.textContent = "Échéance : " + new Intl.DateTimeFormat(document.documentElement.lang === "en" ? "en-GB" : "fr-FR", { dateStyle: "long" }).format(new Date(goal.dueDate + "T00:00:00")); card.append(due);
       }
@@ -221,4 +186,3 @@
   window.GFObjectives = { render, saveProfile, setNotesOpen };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
-
