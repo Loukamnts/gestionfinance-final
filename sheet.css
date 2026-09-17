@@ -949,3 +949,43 @@ body[data-theme="brutal"] .sheet-bar { box-shadow:4px 4px 0 var(--line-strong); 
   .sheet-bar #btnSheetCalc .lbl { display:inline !important; font-size:.75rem; }
 }
 
+/* Barre centrée dans son espace : elle défile avec le tableur au lieu de
+   rester coincée dans la zone supérieure du navigateur. */
+.sheet-bar {
+  position:relative;
+  top:auto;
+  align-self:center;
+  margin-inline:auto;
+  min-height:44px;
+  gap:5px;
+  padding:3px;
+  box-shadow:0 7px 20px color-mix(in srgb,var(--text) 8%,transparent);
+}
+.sheet-bar-left,.sheet-bar-file-actions { padding:1px; }
+.sheet-bar-right { gap:5px; }
+.sheet-bar .button {
+  width:34px;
+  min-width:34px;
+  height:34px;
+  min-height:34px;
+  flex-basis:34px;
+}
+.sheet-bar #btnSheetCalc {
+  height:38px;
+  min-height:38px;
+  padding-inline:12px;
+}
+
+@media (max-width:720px) {
+  .sheet-bar {
+    position:relative;
+    top:auto;
+    align-self:center;
+    margin-inline:auto;
+    min-height:42px;
+    padding:3px;
+  }
+  .sheet-bar .button { width:33px; min-width:33px; height:33px; min-height:33px; flex-basis:33px; }
+  .sheet-bar #btnSheetCalc { height:37px; min-height:37px; padding-inline:9px !important; }
+}
+
