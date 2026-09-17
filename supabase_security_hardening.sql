@@ -138,6 +138,8 @@ where not exists (
 
 -- Réaffirme que les instantanés complets restent exclusivement personnels.
 drop policy if exists snapshots_owner_or_authorized_friend_select on public.finance_snapshots;
+drop policy if exists snapshots_select_owner_or_shared on public.finance_snapshots;
+drop policy if exists snapshots_owner_insert on public.finance_snapshots;
 drop policy if exists dashboard_snapshots_authorized_friend_select on public.finance_dashboard_snapshots;
 drop policy if exists snapshots_owner_select on public.finance_snapshots;
 create policy snapshots_owner_select on public.finance_snapshots
@@ -298,4 +300,3 @@ grant execute on function public.refresh_friend_share_snapshots(uuid,jsonb,jsonb
 
 
 commit;
-

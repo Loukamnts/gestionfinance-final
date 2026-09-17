@@ -52,7 +52,9 @@ create policy "share_perm_friend_global_select" on public.share_permissions
 -- Le snapshot complet reste exclusivement privé. Il ne peut plus être lu
 -- par un ami : seul le snapshot filtré ci-dessus sera accessible.
 drop policy if exists "snapshots_owner_or_authorized_friend_select" on public.finance_snapshots;
+drop policy if exists "snapshots_select_owner_or_shared" on public.finance_snapshots;
 drop policy if exists "snapshots_owner_select" on public.finance_snapshots;
+drop policy if exists "snapshots_owner_insert" on public.finance_snapshots;
 create policy "snapshots_owner_select" on public.finance_snapshots
   for select using (auth.uid() = owner_id);
 
@@ -137,4 +139,3 @@ create policy "shared_dashboard_recipient_select" on public.finance_shared_dashb
   );
 
 commit;
-

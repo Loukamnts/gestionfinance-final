@@ -37,7 +37,9 @@ create table if not exists public.finance_dashboard_snapshots (
 alter table public.finance_dashboard_snapshots enable row level security;
 
 drop policy if exists "snapshots_owner_or_authorized_friend_select" on public.finance_snapshots;
+drop policy if exists "snapshots_select_owner_or_shared" on public.finance_snapshots;
 drop policy if exists "snapshots_owner_select" on public.finance_snapshots;
+drop policy if exists "snapshots_owner_insert" on public.finance_snapshots;
 create policy "snapshots_owner_select" on public.finance_snapshots
   for select using (auth.uid() = owner_id);
 
@@ -63,4 +65,3 @@ create policy "dashboard_snapshots_authorized_friend_select" on public.finance_d
   );
 
 commit;
-
