@@ -1908,7 +1908,6 @@
       <section class="content personal-workspace-layout">
         <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
-          <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
           <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
@@ -1924,7 +1923,6 @@
       <section class="content personal-workspace-layout">
         <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
-          <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
           <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
@@ -1939,7 +1937,6 @@
       <section class="content personal-workspace-layout">
         <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
-          <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
           <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
@@ -1970,7 +1967,6 @@
       <section class="content personal-workspace-layout">
         <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
-          <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
           <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
@@ -1995,35 +1991,36 @@
       <section class="personal-notes-panel"><div class="personal-notes-head"><div><span class="eyebrow">Mon espace</span><h2 id="personalNotesTitle">Notes</h2><p>Idées et rappels privés, enregistrés automatiquement.</p></div><div class="personal-notes-head-actions"><span class="notebook-status" id="notebookStatus" aria-live="polite">Enregistré</span><button class="personal-notes-close" id="personalNotesClose" type="button" aria-label="Fermer les notes">×</button></div></div><label class="notebook-label" for="notebookInput">Tes notes</label><textarea id="notebookInput" maxlength="20000" placeholder="Ex. Comparer les offres d'épargne, préparer le budget vacances…"></textarea><div class="personal-notes-foot"><p class="notebook-help">Enregistrement automatique sur cet appareil, puis dans ton compte lorsque tu es connecté.</p></div></section>
     </div>
     <section class="sheet-page app-page" id="sheetPage" hidden>
-      <div class="sheet-bar">
-        <div class="sheet-bar-left">
-          <button class="button button-ghost icon-btn" id="btnSheetUndo" type="button" title="Annuler la dernière modification (Ctrl/Cmd + Z)" aria-label="Annuler la dernière modification" disabled>
+      <div class="sheet-bar" role="toolbar" aria-label="Outils du tableur">
+        <div class="sheet-bar-left" role="group" aria-label="Historique des modifications">
+          <button class="button button-ghost icon-btn" id="btnSheetUndo" type="button" title="Annuler la dernière modification (Ctrl/Cmd + Z)" data-tooltip="Annuler" aria-label="Annuler la dernière modification" disabled>
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 7-5 5 5 5" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12h7a7 7 0 0 1 7 7" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/></svg>
             <span class="lbl">Annuler</span>
           </button>
-          <button class="button button-ghost icon-btn" id="btnSheetRedo" type="button" title="Rétablir la modification annulée (Ctrl/Cmd + Maj + Z)" aria-label="Rétablir la modification" disabled>
+          <button class="button button-ghost icon-btn" id="btnSheetRedo" type="button" title="Rétablir la modification annulée (Ctrl/Cmd + Maj + Z)" data-tooltip="Rétablir" aria-label="Rétablir la modification" disabled>
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 7 5 5-5 5" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12h-7a7 7 0 0 0-7 7" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/></svg>
             <span class="lbl">Rétablir</span>
           </button>
-          <span class="sheet-title hide-sm">Tableur</span>
         </div>
         <div class="sheet-bar-right">
-          <button class="button button-primary icon-btn" id="btnSheetCalc" type="button" title="Ouvrir la calculatrice">
+          <button class="button button-primary icon-btn" id="btnSheetCalc" type="button" title="Ouvrir la calculatrice" data-tooltip="Ouvrir la calculatrice">
             <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 6h8M8 10h0M12 10h0M16 10h0M8 14h0M12 14h0M16 14h0M8 18h0M12 18h0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             <span class="lbl">Calculatrice</span>
           </button>
           <span class="sheet-divider"></span>
-          <button class="button button-ghost icon-btn" id="btnSheetImport" type="button" title="Importer un fichier Excel">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <span class="lbl">Importer</span>
-          </button>
-          <button class="button button-ghost icon-btn" id="btnSheetExport" type="button" title="Exporter en .xlsx">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 8l-5-5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <span class="lbl">Exporter</span>
-          </button>
+          <div class="sheet-bar-file-actions" role="group" aria-label="Importer ou exporter">
+            <button class="button button-ghost icon-btn" id="btnSheetImport" type="button" title="Importer un fichier Excel" data-tooltip="Importer un fichier Excel" aria-label="Importer un fichier Excel">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span class="lbl">Importer</span>
+            </button>
+            <button class="button button-ghost icon-btn" id="btnSheetExport" type="button" title="Exporter en .xlsx" data-tooltip="Exporter en Excel" aria-label="Exporter en Excel">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 8l-5-5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span class="lbl">Exporter</span>
+            </button>
+          </div>
           <span class="sheet-spacer"></span>
           <span class="sheet-divider"></span>
-          <button class="button button-ghost icon-btn" id="btnSheetClear" type="button" title="Vider le tableau">
+          <button class="button button-ghost icon-btn" id="btnSheetClear" type="button" title="Vider le tableau" data-tooltip="Vider la feuille" aria-label="Vider la feuille active">
             <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span class="lbl">Corbeille</span>
           </button>
@@ -5314,7 +5311,7 @@ function resetDataState(){
      Utilise une table finance_snapshots pour stocker le snapshot complet
      (toutes les feuilles, formules, headers, etc.).
      Hors ligne : sauvegarde locale, sync au retour du reseau. */
-  var syncState = { dirty: false, lastSync: 0, pulling: false, pushing: false, suppressPush: false };
+  var syncState = { dirty: false, lastSync: 0, pulling: false, pushing: false, suppressPush: false, userId: "", remoteUpdatedAt: "", scheduledPull: null };
 
   function getSupabase(){ try{ return window.__account && window.__account.client ? window.__account.client : null; }catch(e){ return null; } }
   function getUser(){ try{ return window.__account && window.__account.user ? window.__account.user : null; }catch(e){ return null; } }
@@ -5338,12 +5335,13 @@ function resetDataState(){
       // des snapshots destinés aux amis.
       var privateProfile = null;
       try { privateProfile = JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile") || "null"); } catch(e) {}
+      var cloudUpdatedAt = new Date().toISOString();
       var payload = JSON.stringify({ v: snap.v || "cloud", sheets: snap.sheets, activeSheetId: snap.activeSheetId, profile: privateProfile && typeof privateProfile === "object" ? privateProfile : null, savedAt: Date.now() });
       
       var res = await sb.from("finance_snapshots").upsert({
         owner_id: user.id,
         payload: payload,
-        updated_at: new Date().toISOString()
+        updated_at: cloudUpdatedAt
       }, { onConflict: "owner_id" });
       
       if(res.error){ console.warn("Sync push error:", res.error.message); syncState.pushing = false; return false; }
@@ -5362,6 +5360,7 @@ function resetDataState(){
       
       syncState.dirty = false;
       syncState.lastSync = Date.now();
+      syncState.remoteUpdatedAt = cloudUpdatedAt;
       updateSyncStatus();
       return true;
     }catch(e){
@@ -5379,12 +5378,21 @@ function resetDataState(){
     var user = getUser();
     var fs = getFinanceSheet();
     if(!sb || !user || !fs){ return false; }
-    if(syncState.pulling) return false;
+    if(syncState.pulling || syncState.pushing || syncState.dirty) return false;
     syncState.pulling = true;
     syncState.suppressPush = true; // Eviter la boucle pull -> save -> push
     try{
-      var res = await sb.from("finance_snapshots").select("payload,updated_at").eq("owner_id", user.id).single();
-      if(res.error || !res.data || !res.data.payload){ syncState.pulling = false; syncState.suppressPush = false; return false; }
+      var res = await sb.from("finance_snapshots").select("payload,updated_at").eq("owner_id", user.id).maybeSingle();
+      if(res.error){ console.warn("Sync pull error:", res.error.message); return false; }
+      // Aucun snapshot : premier appareil de ce compte. Le démarrage pourra
+      // alors envoyer ses données locales au lieu de les considérer perdues.
+      if(!res.data || !res.data.payload) return null;
+      var remoteUpdatedAt = String(res.data.updated_at || "");
+      if(remoteUpdatedAt && remoteUpdatedAt === syncState.remoteUpdatedAt){
+        syncState.lastSync = Date.now();
+        updateSyncStatus();
+        return true;
+      }
       
       var snap = typeof res.data.payload === "string" ? JSON.parse(res.data.payload) : res.data.payload;
       if(!snap || !snap.sheets || !snap.sheets.length){ syncState.pulling = false; syncState.suppressPush = false; return false; }
@@ -5393,13 +5401,20 @@ function resetDataState(){
       }
       
       if(fs.loadSnapshot){
+        // loadSnapshot sauvegarde aussi le cache local après 400 ms. Ce verrou
+        // doit rester actif jusque-là, sinon ce pull déclencherait aussitôt un
+        // push inutile qui pourrait masquer une modification d'un autre appareil.
+        window.__gfSuppressSync = true;
         fs.loadSnapshot({ v: snap.v || "cloud", sheets: snap.sheets, activeSheetId: snap.activeSheetId });
+        setTimeout(function(){ window.__gfSuppressSync = false; }, 800);
         if(typeof window.syncDashboardFromFinanceSheet === "function"){
           try{ window.syncDashboardFromFinanceSheet({ silent: true }); }catch(e){}
         }
       }
       
       syncState.lastSync = Date.now();
+      syncState.remoteUpdatedAt = remoteUpdatedAt;
+      syncState.dirty = false;
       updateSyncStatus();
       return true;
     }catch(e){
@@ -5446,35 +5461,63 @@ function resetDataState(){
   });
   window.addEventListener("offline", function(){ updateSyncStatus(); });
 
-  // === Hook dans onAuthStateChange pour pull au login ===
-  function hookAuth(){
-    var sb = getSupabase();
-    if(!sb || !sb.auth) return;
-    sb.auth.onAuthStateChange(function(evt, session){
-      if(evt === "SIGNED_IN" && session && session.user){
-        setTimeout(function(){
-          pullFromCloud().then(function(pulled){
-            if(!pulled){ updateSyncStatus(); }
-          });
-        }, 800);
-      }
-      if(evt === "SIGNED_OUT"){
-        syncState.dirty = false;
-        syncState.lastSync = 0;
+  // Une seule synchronisation est programmée même si Supabase et le module
+  // Compte annoncent presque simultanément la restauration de la session.
+  function scheduleAccountSync(user, delay){
+    if(!user || !user.id) return;
+    var changedAccount = syncState.userId !== user.id;
+    syncState.userId = user.id;
+    if(changedAccount){ syncState.remoteUpdatedAt = ""; syncState.lastSync = 0; syncState.dirty = false; }
+    if(syncState.scheduledPull) clearTimeout(syncState.scheduledPull);
+    syncState.scheduledPull = setTimeout(async function(){
+      syncState.scheduledPull = null;
+      var current = getUser();
+      if(!current || current.id !== user.id || !navigator.onLine) return;
+      var pulled = await pullFromCloud();
+      if(pulled === null){
+        // Nouveau compte sans snapshot : on conserve et envoie le contenu
+        // présent sur l'appareil (tableur, objectifs et notes).
+        syncState.dirty = true;
         updateSyncStatus();
-      }
-    });
+        await pushToCloud();
+      }else if(pulled === false){ updateSyncStatus(); }
+    }, typeof delay === "number" ? delay : 500);
+  }
+
+  function clearAccountSync(){
+    if(syncState.scheduledPull) clearTimeout(syncState.scheduledPull);
+    syncState.scheduledPull = null;
+    syncState.userId = "";
+    syncState.remoteUpdatedAt = "";
+    syncState.dirty = false;
+    syncState.lastSync = 0;
+    updateSyncStatus();
+  }
+
+  function refreshFromCloud(){
+    if(document.hidden || !navigator.onLine || !getUser() || syncState.dirty || syncState.pushing || syncState.pulling) return;
+    pullFromCloud();
   }
 
   // === Initialisation ===
   function initSync(){
-    hookAuth();
+    window.addEventListener("authStateChanged", function(event){
+      var detail = event && event.detail ? event.detail : {};
+      if(detail.user) scheduleAccountSync(detail.user, detail.event === "SIGNED_IN" ? 350 : 650);
+      else if(detail.event === "SIGNED_OUT") clearAccountSync();
+    });
+    document.addEventListener("visibilitychange", function(){ if(!document.hidden) refreshFromCloud(); });
+    window.addEventListener("focus", refreshFromCloud);
+    setInterval(refreshFromCloud, 60000);
     updateSyncStatus();
-    // Hook dans saveNow de FinanceSheet (deja hook dans sheet.js directement)
+    // Le client Supabase est créé après le chargement de sa configuration.
+    // Cette courte attente récupère aussi une session déjà ouverte, cas où
+    // l'ancien code ratait le pull initial sur un second appareil.
     var checkInterval = setInterval(function(){
-      if(getFinanceSheet()){ clearInterval(checkInterval); updateSyncStatus(); }
+      var user = getUser();
+      if(getFinanceSheet() && user){ clearInterval(checkInterval); scheduleAccountSync(user, 250); }
     }, 500);
-    setTimeout(function(){ clearInterval(checkInterval); }, 10000);
+    setTimeout(function(){ clearInterval(checkInterval); }, 15000);
   }
 
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", initSync);
@@ -5486,3 +5529,4 @@ function resetDataState(){
   <script src="objectives.js?v=20260916-3"></script>
 </body>
 </html>
+
