@@ -9,9 +9,10 @@
 (function () {
   "use strict";
 
-  // Le tableur démarre sans lignes vides : les lignes importées ou ajoutées
-  // par l'utilisateur déterminent la hauteur réelle de chaque feuille.
-  const DEFAULT_ROWS = 0;
+  // Une feuille réellement vide garde juste assez de lignes pour remplir la
+  // grille sur ordinateur comme sur téléphone. Dès qu'elle contient des
+  // données (saisie ou import), sa hauteur suit exactement ses lignes utiles.
+  const DEFAULT_ROWS = 12;
   const DEFAULT_COLS = 12; // A..L
   const MONTH_HEADERS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 
@@ -103,7 +104,11 @@
     });
     return last + 1;
   }
-  function compactRows(sheet) { if (sheet) sheet.rows = contentRowCount(sheet); }
+  function compactRows(sheet) {
+    if (!sheet) return;
+    const usefulRows = contentRowCount(sheet);
+    sheet.rows = usefulRows > 0 ? usefulRows : DEFAULT_ROWS;
+  }
   function rowHeaderWidth(sheet) {
     const longest = Math.max(0, ...(sheet.rowHeaders || []).map((label) => String(label || "").trim().length));
     return Math.max(188, Math.min(348, 86 + longest * 8.1));
@@ -889,9 +894,9 @@
       dataRowIndex++;
     }
     sheet.cols = Math.max(DEFAULT_COLS, maxC + 1);
-    // L'import restitue exactement ses lignes utiles, sans marge vide.
-    // Le bouton « + 1 ligne » reste disponible lorsque l'utilisateur en veut une.
-    sheet.rows = Math.max(0, maxR + 1);
+    // Un import rempli restitue exactement ses lignes utiles. Un fichier vide
+    // affiche néanmoins une grille complète, prête à être saisie.
+    sheet.rows = maxR >= 0 ? maxR + 1 : DEFAULT_ROWS;
     for (let c = 0; c < sheet.cols; c++) if (!sheet.headers[c]) sheet.headers[c] = colToLetter(c);
     enforceMonthHeaders(sheet);
   }

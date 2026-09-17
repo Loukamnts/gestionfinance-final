@@ -258,31 +258,18 @@ create policy "share_perm_owner_all" on public.share_permissions
 create policy "share_perm_friend_select" on public.share_permissions
   for select using (auth.uid() = friend_id);
 
--- Snapshot complet : le propriétaire écrit; un ami accepté ne lit qu'avec
--- l'autorisation Tableur. La relation d'amitié est testée dans les deux sens.
+-- Snapshot complet : strictement privé. Les amis utilisent exclusivement les
+-- tables finance_shared_* qui ne contiennent que les éléments autorisés.
 drop policy if exists "snapshots_owner_or_authorized_friend_select" on public.finance_snapshots;
+drop policy if exists "snapshots_owner_select" on public.finance_snapshots;
 create policy "snapshots_owner_write" on public.finance_snapshots
   for insert with check (auth.uid() = owner_id);
 create policy "snapshots_owner_update" on public.finance_snapshots
   for update using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
 create policy "snapshots_owner_delete" on public.finance_snapshots
   for delete using (auth.uid() = owner_id);
-create policy "snapshots_owner_or_authorized_friend_select" on public.finance_snapshots
-  for select using (
-    auth.uid() = owner_id
-    or exists (
-      select 1
-      from public.friendships f
-      join public.share_permissions p
-        on p.owner_id = finance_snapshots.owner_id
-       and p.friend_id = auth.uid()
-       and p.year is null and p.month is null and p.row_key is null
-       and p.can_view_sheet = true
-      where f.status = 'accepted'
-        and ((f.owner_id = finance_snapshots.owner_id and f.friend_id = auth.uid())
-          or (f.friend_id = finance_snapshots.owner_id and f.owner_id = auth.uid()))
-    )
-  );
+create policy "snapshots_owner_select" on public.finance_snapshots
+  for select using (auth.uid() = owner_id);
 
 -- Dashboard dérivé : l'accès Dashboard ne peut pas servir à lire le snapshot
 -- complet (tableur, formules et cellules restent dans finance_snapshots).
@@ -338,3 +325,4 @@ language sql security definer set search_path = public as $$
 $$;
 
 grant execute on function public.shared_rows_for_me(int) to authenticated;
+
