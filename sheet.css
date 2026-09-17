@@ -730,3 +730,23 @@ body[data-theme="brutal"] .sheet-starting-balance-modal :is(.sheet-field input,.
   .sheet-bar-right .sheet-divider { margin:0 3px; }
 }
 
+/* Toolbar finale : calculatrice explicite, actions secondaires compactes et
+   aucun grand vide entre les groupes. */
+.sheet-bar { justify-content:flex-start; }
+.sheet-bar-left,.sheet-bar-right { flex:0 0 auto; }
+.sheet-bar-right { margin-left:0; }
+.sheet-bar .sheet-title,.sheet-bar .sheet-spacer { display:none !important; }
+:is(#btnSheetUndo,#btnSheetRedo,#btnSheetImport,#btnSheetExport,#btnSheetClear) .lbl { display:none; }
+:is(#btnSheetUndo,#btnSheetRedo,#btnSheetImport,#btnSheetExport,#btnSheetClear) { width:38px; min-width:38px; justify-content:center; padding:7px; }
+#btnSheetCalc { width:auto; min-width:auto; padding-inline:11px; }
+#btnSheetCalc .lbl { display:inline; }
+.sheet-divider { margin:0 2px; }
+
+@media (max-width:720px) {
+  .sheet-bar { gap:5px; padding:6px 7px; }
+  .sheet-bar-left,.sheet-bar-right { gap:3px; }
+  #btnSheetCalc { width:auto !important; min-width:auto !important; padding:7px 10px !important; }
+  #btnSheetCalc .lbl { display:inline !important; }
+  :is(#btnSheetUndo,#btnSheetRedo,#btnSheetImport,#btnSheetExport,#btnSheetClear) { width:36px; min-width:36px; }
+}
+

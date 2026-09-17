@@ -624,3 +624,20 @@ body[data-theme="glass"][data-mode="light"] :is(.objectives-panel,.objective-for
   .objective-update { width:100%; }
 }
 
+/* Densité finale : Objectifs conserve exactement la même largeur que Partage
+   et amis. Les réglages courts ne gardent plus une grande zone vide. */
+#objectivesPage > .content { width:100%; max-width:1240px; margin:0 auto; }
+.objectives-grid { grid-template-columns:minmax(0,1fr); width:100%; }
+@media (min-width:721px) {
+  .settings-shell > [data-settings-panel="language"],
+  .settings-shell > [data-settings-panel="data"] { min-height:0 !important; }
+  .language-section[data-settings-panel] { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:20px; }
+  .settings-reset-section[data-settings-panel] { max-width:none; min-height:0; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px 18px; }
+  .settings-reset-section .settings-reset-copy { grid-column:1; grid-row:1 / span 2; }
+  .settings-reset-section .settings-reset-btn { grid-column:2; grid-row:1; align-self:center; min-height:40px; height:auto; }
+  .settings-reset-section .settings-delete-btn { grid-column:2; grid-row:2; align-self:center; min-height:40px; height:auto; }
+}
+@media (max-width:720px) {
+  .language-section[data-settings-panel] { display:grid; grid-template-columns:1fr; gap:14px; }
+}
+
