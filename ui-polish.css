@@ -641,3 +641,13 @@ body[data-theme="glass"][data-mode="light"] :is(.objectives-panel,.objective-for
   .language-section[data-settings-panel] { display:grid; grid-template-columns:1fr; gap:14px; }
 }
 
+/* Sur téléphone, les rubriques de réglages reviennent sous la forme des
+   onglets compacts d'origine : une ligne lisible, défilable sans scrollbar. */
+@media (max-width:720px) {
+  .settings-hub { display:flex; gap:8px; width:calc(100% + 2px); margin:0 -1px; padding:0 1px 2px; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; -ms-overflow-style:none; }
+  .settings-hub::-webkit-scrollbar { display:none; height:0; }
+  .settings-hub-item { display:block; flex:0 0 auto; width:auto; min-height:42px; padding:10px 15px; border:0; border-radius:99px; background:var(--input-bg); white-space:nowrap; }
+  .settings-hub-item strong { overflow:visible; font-size:.82rem; line-height:1.25; }
+  .settings-hub-item:hover,.settings-hub-item[aria-current="true"] { border:0; background:var(--button-active-bg); color:var(--accent); }
+}
+
