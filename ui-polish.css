@@ -673,3 +673,12 @@ body[data-theme="glass"][data-mode="light"] :is(.objectives-panel,.objective-for
   .message.is-visible { transform:translate3d(-50%,0,0); }
 }
 
+/* Les retours d'action suivent la même position sur tous les écrans :
+   en haut et au centre, jamais collés aux actions de la page. */
+.message {
+  top:calc(20px + env(safe-area-inset-top, 0px)); right:auto; bottom:auto; left:50%;
+  width:min(430px,calc(100vw - 32px));
+  transform:translate3d(-50%,-10px,0);
+}
+.message.is-visible { transform:translate3d(-50%,0,0); }
+

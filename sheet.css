@@ -764,3 +764,6 @@ body[data-theme="brutal"] .sheet-starting-balance-modal :is(.sheet-field input,.
   .sheet-toast { top:calc(12px + env(safe-area-inset-top, 0px)); bottom:auto; max-width:calc(100vw - 24px); text-align:center; }
 }
 
+/* Même emplacement que les autres confirmations, quel que soit l'écran. */
+.sheet-toast { top:calc(20px + env(safe-area-inset-top, 0px)); bottom:auto; max-width:calc(100vw - 32px); text-align:center; }
+
