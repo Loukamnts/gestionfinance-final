@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+admin-local/admin.env
 supabase/.temp/
 
 # Local tooling artefacts.
@@ -9,3 +10,4 @@ node_modules/
 .vercel/
 *.log
 dist/
+

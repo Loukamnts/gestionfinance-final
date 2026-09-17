@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gestion Finance — Administration locale</title>
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+  <main class="login-shell" id="loginView">
+    <section class="login-card">
+      <div class="brand-mark">GF</div>
+      <p class="eyebrow">Console locale sécurisée</p>
+      <h1>Administration</h1>
+      <p class="intro">Cette interface fonctionne uniquement sur cet ordinateur. La clé secrète reste dans le serveur local.</p>
+      <form id="loginForm">
+        <label>Adresse administrateur<input id="email" type="email" autocomplete="username" required></label>
+        <label>Mot de passe<input id="password" type="password" autocomplete="current-password" required></label>
+        <button class="primary" type="submit">Ouvrir la console</button>
+        <p class="form-message" id="loginMessage" role="status"></p>
+      </form>
+    </section>
+  </main>
+
+  <div class="admin-app" id="adminView" hidden>
+    <aside>
+      <div class="brand"><span class="brand-mark small">GF</span><div><strong>Gestion Finance</strong><small>Administration locale</small></div></div>
+      <nav aria-label="Administration">
+        <button class="nav-item is-active" type="button" data-view="overview">Vue d’ensemble</button>
+        <button class="nav-item" type="button" data-view="users">Utilisateurs</button>
+        <button class="nav-item" type="button" data-view="friendships">Amitiés et partages</button>
+      </nav>
+      <div class="local-proof"><span></span><div><strong>Accès local</strong><small>127.0.0.1 uniquement</small></div></div>
+      <button class="logout" id="logout" type="button">Se déconnecter</button>
+    </aside>
+
+    <main class="workspace">
+      <header><div><p class="eyebrow">Gestion sécurisée</p><h1 id="pageTitle">Vue d’ensemble</h1></div><button class="secondary" id="refresh" type="button">Actualiser</button></header>
+      <p class="notice" id="notice" role="status"></p>
+
+      <section class="view" id="overviewView">
+        <div class="metrics" id="metrics"></div>
+        <article class="panel"><h2>Protections actives</h2><div class="protection-grid"><p><b>Serveur local</b><span>Impossible d’ouvrir la console depuis Internet.</span></p><p><b>Compte unique</b><span>Chaque requête vérifie ton compte Supabase confirmé.</span></p><p><b>Clé isolée</b><span>La clé secrète n’est jamais envoyée au navigateur ni publiée.</span></p><p><b>Actions confirmées</b><span>Les suppressions demandent une phrase exacte.</span></p></div></article>
+      </section>
+
+      <section class="view" id="usersView" hidden>
+        <article class="panel"><div class="panel-head"><div><h2>Utilisateurs</h2><p>Comptes Supabase, confirmation et dernière connexion.</p></div><input id="userSearch" type="search" placeholder="Rechercher un email"></div><div class="table-scroll"><table><thead><tr><th>Email</th><th>État</th><th>Création</th><th>Dernière connexion</th><th></th></tr></thead><tbody id="usersBody"></tbody></table></div></article>
+      </section>
+
+      <section class="view" id="friendshipsView" hidden>
+        <article class="panel"><div class="panel-head"><div><h2>Amitiés et partages</h2><p>Contrôle des relations entre comptes. Aucun accès n’est accordé par défaut.</p></div></div><div class="table-scroll"><table><thead><tr><th>Demandeur</th><th>Destinataire</th><th>État</th><th>Date</th><th></th></tr></thead><tbody id="friendshipsBody"></tbody></table></div></article>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="detailDialog">
+    <div class="dialog-head"><div><p class="eyebrow">Compte</p><h2 id="detailTitle">Détails</h2></div><button class="icon-close" id="detailClose" type="button" aria-label="Fermer">×</button></div>
+    <div id="detailContent"></div>
+  </dialog>
+  <dialog id="confirmDialog">
+    <form method="dialog" id="confirmForm"><div class="dialog-head"><div><p class="eyebrow">Action sensible</p><h2 id="confirmTitle">Confirmer</h2></div></div><p id="confirmText"></p><label>Recopie la phrase<input id="confirmation" autocomplete="off" required></label><div class="dialog-actions"><button value="cancel" type="submit">Annuler</button><button class="danger" id="confirmSubmit" value="default" type="submit">Confirmer</button></div></form>
+  </dialog>
+  <script src="/admin.js"></script>
+</body>
+</html>
+
