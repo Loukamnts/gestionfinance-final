@@ -593,3 +593,34 @@ body[data-theme="glass"] :is(.sheet-status-info,.sheet-status-tooltip) { backgro
   body[data-theme="brutal"] .settings-hub-item { border:2px solid var(--line-strong) !important; box-shadow:none !important; }
 }
 
+/* Objectifs : consulter, mettre à jour l'avancement et voir ce qu'il reste
+   doivent tenir dans une carte sobre, sur toute largeur d'écran. */
+.objective-remaining { margin:0; color:var(--muted); font:650 .76rem/1.35 var(--font-body); }
+.objective-progress-editor { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:10px; padding-top:2px; }
+.objective-progress-editor label { display:grid; gap:6px; min-width:0; color:var(--muted); font:700 .74rem/1.2 var(--font-body); }
+.objective-progress-editor input { width:100%; min-width:0; min-height:38px; box-sizing:border-box; padding:8px 10px; border:1px solid var(--line-strong); border-radius:var(--control-radius); background:var(--input-bg); color:var(--text); font:650 .86rem var(--font-body); }
+.objective-progress-editor input:focus { outline:2px solid var(--accent); outline-offset:2px; }
+.objective-update { min-height:38px; white-space:nowrap; }
+body[data-theme="brutal"] :is(.objective-progress-editor input,.objective-update) { border-radius:0; }
+
+/* Les sections de réglages utilisent une largeur stable et des espacements
+   adaptatifs : aucun bloc ne déborde ni ne devient disproportionné. */
+.settings-shell > [data-settings-panel] { min-width:0; width:100%; box-sizing:border-box; }
+.settings-section,.settings-reset-section { width:100%; box-sizing:border-box; padding:clamp(17px,2.6vw,26px); }
+.settings-reset-section { align-items:stretch; }
+.settings-reset-section .settings-reset-copy { min-width:0; }
+body[data-theme="glass"][data-mode="dark"] :is(.objectives-panel,.objective-form,.objective-card) { background:#11142c; }
+body[data-theme="glass"][data-mode="light"] :is(.objectives-panel,.objective-form,.objective-card) { background:#fff; }
+
+@media (max-width:720px) {
+  /* La navigation des réglages ne devient plus un rail qui se décale : elle
+     s'adapte en deux colonnes et laisse la page défiler naturellement. */
+  #settingsPage { background:var(--bg); }
+  .settings-hub { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; width:100%; margin:0; padding:0; overflow:visible; }
+  .settings-hub-item { display:flex; align-items:center; min-width:0; min-height:54px; width:100%; padding:10px 11px; border:1px solid var(--line); border-radius:var(--control-radius); background:var(--input-bg); white-space:normal; text-align:left; }
+  .settings-hub-item strong { display:block; overflow-wrap:anywhere; font-size:.76rem; line-height:1.2; }
+  .settings-section,.settings-reset-section { padding:16px; }
+  .objective-progress-editor { grid-template-columns:1fr; align-items:stretch; }
+  .objective-update { width:100%; }
+}
+

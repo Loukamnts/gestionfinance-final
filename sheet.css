@@ -708,3 +708,25 @@ body[data-theme="brutal"] .sheet-starting-balance-modal :is(.sheet-field input,.
   .balance-help { position:fixed !important; left:14px !important; right:14px !important; bottom:82px !important; width:auto !important; }
 }
 
+/* Bureau : les actions sont organisées en deux zones légères. La version
+   compacte reste réservée aux écrans étroits et au téléphone. */
+@media (min-width:721px) {
+  .sheet-bar { gap:12px; padding:9px 11px; overflow:visible; }
+  .sheet-bar-left { padding-right:12px; border-right:1px solid var(--line); }
+  .sheet-bar-right { gap:5px; min-width:0; justify-content:flex-end; }
+  .sheet-bar .button { min-height:38px; padding:8px 10px; }
+  .sheet-bar-right .sheet-divider { height:22px; margin:0 5px; opacity:.82; }
+  .sheet-bar-right .sheet-spacer { min-width:4px; }
+}
+
+/* Sur les petits ordinateurs, les icônes gardent leurs intitulés accessibles
+   au survol tout en évitant toute barre coupée. */
+@media (min-width:721px) and (max-width:1080px) {
+  .sheet-bar { gap:8px; padding:8px; }
+  .sheet-bar-left { padding-right:8px; }
+  .sheet-bar .icon-btn { width:38px; min-width:38px; justify-content:center; padding:7px; }
+  .sheet-bar .icon-btn .lbl { display:none; }
+  .sheet-bar .sheet-title { display:none; }
+  .sheet-bar-right .sheet-divider { margin:0 3px; }
+}
+

@@ -9,10 +9,10 @@
 (function () {
   "use strict";
 
-  // Une feuille réellement vide garde juste assez de lignes pour remplir la
-  // grille sur ordinateur comme sur téléphone. Dès qu'elle contient des
+  // Une feuille réellement vide garde neuf lignes pour remplir la
+  // grille sur ordinateur sans la surcharger. Dès qu'elle contient des
   // données (saisie ou import), sa hauteur suit exactement ses lignes utiles.
-  const DEFAULT_ROWS = 12;
+  const DEFAULT_ROWS = 9;
   const DEFAULT_COLS = 12; // A..L
   const MONTH_HEADERS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 
