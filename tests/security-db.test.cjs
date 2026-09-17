@@ -42,9 +42,23 @@ before(async()=>{
     alter default privileges in schema public grant all on tables to anon,authenticated;`);
   for(const file of ['supabase_schema.sql','supabase_granular_friend_sharing.sql',
     'supabase_fix_secure_sharing_access.sql','supabase_fix_shared_snapshot_read.sql',
-    'supabase_security_hardening.sql','supabase_fix_private_sync.sql']){
+    'supabase_security_hardening.sql']){
     await db.exec(fs.readFileSync(path.join(root,file),'utf8'));
   }
+  // Reproduit les deux noms de politiques laissés par d'anciennes versions
+  // afin de vérifier que la migration finale les retire réellement.
+  await db.exec(`create policy snapshots_owner_insert on public.finance_snapshots
+      for insert to public with check (auth.uid() = owner_id);
+    create policy snapshots_select_owner_or_shared on public.finance_snapshots
+      for select to public using (
+        auth.uid() = owner_id or exists (
+          select 1 from public.share_permissions sp
+          where sp.friend_id = auth.uid()
+            and sp.owner_id = finance_snapshots.owner_id
+            and sp.can_view_sheet = true
+        )
+      );`);
+  await db.exec(fs.readFileSync(path.join(root,'supabase_fix_private_sync.sql'),'utf8'));
 });
 beforeEach(async()=>{
   await db.exec('reset role; begin');
@@ -60,6 +74,13 @@ test('Anonymous role cannot read any personal or shared table',async()=>{
     'finance_snapshots','finance_dashboard_snapshots','finance_shared_sheet_snapshots','finance_shared_dashboard_snapshots']){
     await denied('select * from public.'+table,[]);
   }
+});
+test('Legacy full-snapshot policies are removed and only owner policies remain',async()=>{
+  await db.exec('reset role');
+  const result=await query("select policyname from pg_policies where schemaname='public' and tablename='finance_snapshots' order by policyname");
+  assert.deepEqual(result.rows.map(row=>row.policyname),[
+    'snapshots_owner_delete','snapshots_owner_select','snapshots_owner_update','snapshots_owner_write'
+  ]);
 });
 test('Cannot manufacture an already accepted friendship through a direct INSERT',async()=>{
   await as(A);await denied("insert into public.friendships(owner_id,friend_id,status) values($1,$2,'accepted')",[A,B]);
@@ -164,4 +185,3 @@ test('Declining a redundant old invitation preserves an existing accepted share'
   assert.equal(await value('select count(*)::int from public.finance_shared_sheet_snapshots'),1);
   assert.equal(await value("select count(*)::int from public.friendships where status='accepted'"),1);
 });
-

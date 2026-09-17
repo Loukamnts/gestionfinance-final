@@ -12,7 +12,9 @@ revoke all on table public.finance_snapshots from public, anon;
 grant select, insert, update, delete on table public.finance_snapshots to authenticated;
 
 drop policy if exists "snapshots_owner_or_authorized_friend_select" on public.finance_snapshots;
+drop policy if exists "snapshots_select_owner_or_shared" on public.finance_snapshots;
 drop policy if exists "snapshots_owner_select" on public.finance_snapshots;
+drop policy if exists "snapshots_owner_insert" on public.finance_snapshots;
 drop policy if exists "snapshots_owner_write" on public.finance_snapshots;
 drop policy if exists "snapshots_owner_update" on public.finance_snapshots;
 drop policy if exists "snapshots_owner_delete" on public.finance_snapshots;
@@ -35,4 +37,3 @@ create policy "snapshots_owner_delete" on public.finance_snapshots
   using (auth.uid() = owner_id);
 
 commit;
-

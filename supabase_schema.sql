@@ -261,7 +261,12 @@ create policy "share_perm_friend_select" on public.share_permissions
 -- Snapshot complet : strictement privé. Les amis utilisent exclusivement les
 -- tables finance_shared_* qui ne contiennent que les éléments autorisés.
 drop policy if exists "snapshots_owner_or_authorized_friend_select" on public.finance_snapshots;
+drop policy if exists "snapshots_select_owner_or_shared" on public.finance_snapshots;
 drop policy if exists "snapshots_owner_select" on public.finance_snapshots;
+drop policy if exists "snapshots_owner_insert" on public.finance_snapshots;
+drop policy if exists "snapshots_owner_write" on public.finance_snapshots;
+drop policy if exists "snapshots_owner_update" on public.finance_snapshots;
+drop policy if exists "snapshots_owner_delete" on public.finance_snapshots;
 create policy "snapshots_owner_write" on public.finance_snapshots
   for insert with check (auth.uid() = owner_id);
 create policy "snapshots_owner_update" on public.finance_snapshots
@@ -325,4 +330,3 @@ language sql security definer set search_path = public as $$
 $$;
 
 grant execute on function public.shared_rows_for_me(int) to authenticated;
-
