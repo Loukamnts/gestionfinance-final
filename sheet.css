@@ -632,3 +632,135 @@ body[data-theme="glass"] .sheet-table td.cell { background:var(--bg); }
 }
 
 body[data-theme="brutal"] :is(.sheet-bar-left,.sheet-bar-right,.balance-edit,.balance-info,.balance-help,.sheet-starting-balance-modal .sheet-field input) { border-radius:0 !important; }
+
+/* Barre d'outils unifiée : un seul rail, des groupes visuels sobres et aucune
+   capsule imbriquée. Les outils restent accessibles sans élargir la page. */
+.sheet-bar {
+  gap:8px;
+  padding:7px 9px;
+  border-radius:min(10px,var(--radius));
+  box-shadow:none;
+  overflow:hidden;
+}
+.sheet-bar-left,.sheet-bar-right {
+  display:flex;
+  align-items:center;
+  gap:3px;
+  min-width:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.sheet-bar-left { flex:0 0 auto; }
+.sheet-bar-right { flex:1 1 auto; justify-content:flex-end; }
+.sheet-bar .button {
+  min-height:36px;
+  padding:7px 9px;
+  border:1px solid transparent;
+  border-radius:min(7px,var(--control-radius));
+  background:transparent;
+  box-shadow:none;
+}
+.sheet-bar .button-primary { background:var(--button-primary-bg); }
+.sheet-bar .button:hover,.sheet-bar .button:focus-visible { background:var(--button-active-bg); border-color:var(--line); }
+.sheet-bar .button-primary:hover,.sheet-bar .button-primary:focus-visible { background:var(--button-primary-bg); border-color:var(--accent); }
+.sheet-bar .sheet-title { margin:0 5px; font-size:.94rem; }
+.sheet-divider { margin:0 3px; }
+
+/* La sélection de lignes, de colonnes et de cellules reste visible dans les
+   trois thèmes, sans faire croire qu'une colonne est sélectionnée avec une ligne. */
+.sheet-table td.cell { touch-action:none; }
+.sheet-table td.cell.in-range { background:color-mix(in srgb,var(--accent) 16%,transparent) !important; }
+.sheet-table .row-head.row-sel,
+.sheet-table thead th.col-sel {
+  color:var(--accent) !important;
+  background-color:var(--panel-solid) !important;
+  background-image:linear-gradient(color-mix(in srgb,var(--accent) 18%,transparent),color-mix(in srgb,var(--accent) 18%,transparent)) !important;
+  box-shadow:inset 3px 0 0 var(--accent);
+}
+.sheet-table thead th.col-sel { box-shadow:inset 0 -3px 0 var(--accent); }
+body[data-theme] .sheet-table td.cell.in-range { background:color-mix(in srgb,var(--accent) 16%,var(--panel-solid)) !important; }
+body[data-theme] .sheet-table .row-head.row-sel,
+body[data-theme] .sheet-table thead th.col-sel {
+  color:var(--accent) !important;
+  background-color:var(--panel-solid) !important;
+  background-image:linear-gradient(color-mix(in srgb,var(--accent) 20%,transparent),color-mix(in srgb,var(--accent) 20%,transparent)) !important;
+}
+
+/* Solde de départ : vraie fenêtre rectangulaire, pas une bulle. */
+.sheet-starting-balance-modal { border-radius:4px !important; }
+.sheet-starting-balance-modal .sheet-field input,
+.sheet-starting-balance-modal .button { border-radius:4px !important; }
+body[data-theme="editorial"] .sheet-starting-balance-modal,
+body[data-theme="brutal"] .sheet-starting-balance-modal,
+body[data-theme="editorial"] .sheet-starting-balance-modal :is(.sheet-field input,.button),
+body[data-theme="brutal"] .sheet-starting-balance-modal :is(.sheet-field input,.button) { border-radius:0 !important; }
+
+@media (max-width:720px) {
+  #sheetPage { min-width:0; overflow-x:clip; }
+  .sheet-bar { display:flex; gap:4px; padding:6px; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  .sheet-bar::-webkit-scrollbar { display:none; }
+  .sheet-bar-left,.sheet-bar-right { flex:0 0 auto; min-width:max-content; gap:2px; }
+  .sheet-bar-right { justify-content:flex-start; }
+  .sheet-bar .button { width:36px; min-width:36px; min-height:36px; flex:0 0 36px; padding:7px; justify-content:center; }
+  .sheet-bar .icon-btn .lbl,.sheet-bar .sheet-title,.sheet-bar .sheet-divider,.sheet-bar .sheet-spacer { display:none; }
+  .balance-help { position:fixed !important; left:14px !important; right:14px !important; bottom:82px !important; width:auto !important; }
+}
+
+/* Bureau : les actions sont organisées en deux zones légères. La version
+   compacte reste réservée aux écrans étroits et au téléphone. */
+@media (min-width:721px) {
+  .sheet-bar { gap:12px; padding:9px 11px; overflow:visible; }
+  .sheet-bar-left { padding-right:12px; border-right:1px solid var(--line); }
+  .sheet-bar-right { gap:5px; min-width:0; justify-content:flex-end; }
+  .sheet-bar .button { min-height:38px; padding:8px 10px; }
+  .sheet-bar-right .sheet-divider { height:22px; margin:0 5px; opacity:.82; }
+  .sheet-bar-right .sheet-spacer { min-width:4px; }
+}
+
+/* Sur les petits ordinateurs, les icônes gardent leurs intitulés accessibles
+   au survol tout en évitant toute barre coupée. */
+@media (min-width:721px) and (max-width:1080px) {
+  .sheet-bar { gap:8px; padding:8px; }
+  .sheet-bar-left { padding-right:8px; }
+  .sheet-bar .icon-btn { width:38px; min-width:38px; justify-content:center; padding:7px; }
+  .sheet-bar .icon-btn .lbl { display:none; }
+  .sheet-bar .sheet-title { display:none; }
+  .sheet-bar-right .sheet-divider { margin:0 3px; }
+}
+
+/* Toolbar finale : calculatrice explicite, actions secondaires compactes et
+   aucun grand vide entre les groupes. */
+.sheet-bar { justify-content:flex-start; }
+.sheet-bar-left,.sheet-bar-right { flex:0 0 auto; }
+.sheet-bar-right { margin-left:0; }
+.sheet-bar .sheet-title,.sheet-bar .sheet-spacer { display:none !important; }
+:is(#btnSheetUndo,#btnSheetRedo,#btnSheetImport,#btnSheetExport,#btnSheetClear) .lbl { display:none; }
+:is(#btnSheetUndo,#btnSheetRedo,#btnSheetImport,#btnSheetExport,#btnSheetClear) { width:38px; min-width:38px; justify-content:center; padding:7px; }
+#btnSheetCalc { width:auto; min-width:auto; padding-inline:11px; }
+#btnSheetCalc .lbl { display:inline; }
+.sheet-divider { margin:0 2px; }
+
+@media (max-width:720px) {
+  .sheet-bar { gap:5px; padding:6px 7px; }
+  .sheet-bar-left,.sheet-bar-right { gap:3px; }
+  #btnSheetCalc { width:auto !important; min-width:auto !important; padding:7px 10px !important; }
+  #btnSheetCalc .lbl { display:inline !important; }
+  :is(#btnSheetUndo,#btnSheetRedo,#btnSheetImport,#btnSheetExport,#btnSheetClear) { width:36px; min-width:36px; }
+}
+
+/* Rail final : il épouse les outils. Aucune zone vide ne sépare Annuler,
+   Calculatrice et les actions d'import/export, sur ordinateur comme mobile. */
+@media (min-width:721px) {
+  .sheet-bar { display:inline-flex; width:max-content; max-width:100%; gap:4px; padding:6px; }
+  .sheet-bar-left,.sheet-bar-right { gap:3px; }
+  .sheet-bar-left { padding-right:0; border-right:0; }
+  .sheet-bar-right .sheet-divider { display:none; }
+}
+@media (max-width:720px) {
+  .sheet-bar { width:max-content; max-width:100%; gap:4px; }
+  .sheet-bar-right .sheet-divider { display:none; }
+  .sheet-toast { top:calc(12px + env(safe-area-inset-top, 0px)); bottom:auto; max-width:calc(100vw - 24px); text-align:center; }
+}
+

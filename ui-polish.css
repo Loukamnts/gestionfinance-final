@@ -521,6 +521,8 @@ body[data-theme="brutal"] :is(.personal-workspace-link,.personal-workspace-notes
 .global-summary-grid h4 { margin:0 0 12px; color:var(--muted); font:800 .76rem/1.25 var(--font-body); letter-spacing:.08em; text-transform:uppercase; }
 .detail-panel-global { padding:clamp(18px,2.5vw,26px); }
 .detail-panel-global > h3 { margin-bottom:18px; }
+.month-summary { grid-template-columns:minmax(0,1fr); }
+.month-summary .detail-panel-global { grid-column:1 / -1; width:100%; box-sizing:border-box; }
 
 body[data-theme="glass"] :is(.panel,.metric-card,.detail-panel,.home-toolbar,.latest-update-banner,.sheet-status-info,.sheet-status-tooltip,.profile-trigger,.profile-popover,.custom-select-options,.settings-section,.settings-reset-section,.update-entry,.personal-workspace-link,.personal-workspace-notes) {
   backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
@@ -538,7 +540,7 @@ body[data-theme="glass"] :is(.sheet-status-info,.sheet-status-tooltip) { backgro
 
 .personal-workspace-title { grid-column:1/-1; margin:0; color:var(--text); font:800 clamp(1.85rem,3vw,2.35rem)/1.15 var(--font-heading); letter-spacing:-.03em; }
 .personal-workspace-nav { grid-column:1; grid-row:2; }
-.personal-workspace-content { grid-column:2; grid-row:2; }
+.personal-workspace-content { grid-column:2; grid-row:2; width:100%; max-width:none; min-width:0; box-sizing:border-box; }
 .personal-workspace-label { margin:0 0 12px; }
 .personal-workspace-link,.personal-workspace-notes { display:flex; align-items:center; gap:10px; }
 .personal-workspace-link::before,.personal-workspace-notes::before { content:""; width:18px; height:18px; flex:0 0 18px; background:currentColor; mask-repeat:no-repeat; mask-position:center; mask-size:contain; -webkit-mask-repeat:no-repeat; -webkit-mask-position:center; -webkit-mask-size:contain; }
@@ -562,7 +564,10 @@ body[data-theme="glass"] :is(.sheet-status-info,.sheet-status-tooltip) { backgro
 .account-logout-button:hover { border-color:var(--red); background:color-mix(in srgb,var(--red),var(--panel-solid) 88%); }
 
 @media (min-width:721px) {
-  :is(#sharingPage,#sharingAccessPage) > .content.personal-workspace-layout { display:grid; grid-template-columns:minmax(210px,240px) minmax(0,1fr); column-gap:36px; }
+  .settings-shell > [data-settings-panel] { width:100%; max-width:none !important; min-height:560px; box-sizing:border-box; align-self:start; }
+  .personal-workspace-content { min-height:560px; }
+  :is(#sharingPage,#sharingAccessPage) > .content.personal-workspace-layout { display:grid; width:100%; max-width:1240px; grid-template-columns:minmax(210px,240px) minmax(0,1fr); column-gap:36px; }
+  :is(#sharingPage,#sharingAccessPage) :is(#sharingContainer,#sharingAccessContainer) { width:100%; max-width:none; }
   .personal-workspace-nav { position:sticky; top:20px; align-self:start; padding:2px 0; }
   body[data-theme="brutal"] .settings-hub-item { border:0 !important; box-shadow:none !important; }
 }
@@ -587,3 +592,84 @@ body[data-theme="glass"] :is(.sheet-status-info,.sheet-status-tooltip) { backgro
   .account-sync-head strong { justify-self:start; }
   body[data-theme="brutal"] .settings-hub-item { border:2px solid var(--line-strong) !important; box-shadow:none !important; }
 }
+
+/* Objectifs : consulter, mettre à jour l'avancement et voir ce qu'il reste
+   doivent tenir dans une carte sobre, sur toute largeur d'écran. */
+.objective-remaining { margin:0; color:var(--muted); font:650 .76rem/1.35 var(--font-body); }
+.objective-progress-editor { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:10px; padding-top:2px; }
+.objective-progress-editor label { display:grid; gap:6px; min-width:0; color:var(--muted); font:700 .74rem/1.2 var(--font-body); }
+.objective-progress-editor input { width:100%; min-width:0; min-height:38px; box-sizing:border-box; padding:8px 10px; border:1px solid var(--line-strong); border-radius:var(--control-radius); background:var(--input-bg); color:var(--text); font:650 .86rem var(--font-body); }
+.objective-progress-editor input:focus { outline:2px solid var(--accent); outline-offset:2px; }
+.objective-update { min-height:38px; white-space:nowrap; }
+body[data-theme="brutal"] :is(.objective-progress-editor input,.objective-update) { border-radius:0; }
+
+/* Les sections de réglages utilisent une largeur stable et des espacements
+   adaptatifs : aucun bloc ne déborde ni ne devient disproportionné. */
+.settings-shell > [data-settings-panel] { min-width:0; width:100%; box-sizing:border-box; }
+.settings-section,.settings-reset-section { width:100%; box-sizing:border-box; padding:clamp(17px,2.6vw,26px); }
+.settings-reset-section { align-items:stretch; }
+.settings-reset-section .settings-reset-copy { min-width:0; }
+body[data-theme="glass"][data-mode="dark"] :is(.objectives-panel,.objective-form,.objective-card) { background:#11142c; }
+body[data-theme="glass"][data-mode="light"] :is(.objectives-panel,.objective-form,.objective-card) { background:#fff; }
+
+@media (max-width:720px) {
+  /* La navigation des réglages ne devient plus un rail qui se décale : elle
+     s'adapte en deux colonnes et laisse la page défiler naturellement. */
+  #settingsPage { background:var(--bg); }
+  .settings-hub { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; width:100%; margin:0; padding:0; overflow:visible; }
+  .settings-hub-item { display:flex; align-items:center; min-width:0; min-height:54px; width:100%; padding:10px 11px; border:1px solid var(--line); border-radius:var(--control-radius); background:var(--input-bg); white-space:normal; text-align:left; }
+  .settings-hub-item strong { display:block; overflow-wrap:anywhere; font-size:.76rem; line-height:1.2; }
+  .settings-section,.settings-reset-section { padding:16px; }
+  .objective-progress-editor { grid-template-columns:1fr; align-items:stretch; }
+  .objective-update { width:100%; }
+}
+
+/* Densité finale : Objectifs conserve exactement la même largeur que Partage
+   et amis. Les réglages courts ne gardent plus une grande zone vide. */
+#objectivesPage > .content { width:100%; max-width:1240px; margin:0 auto; }
+.objectives-grid { grid-template-columns:minmax(0,1fr); width:100%; }
+@media (min-width:721px) {
+  .settings-shell > [data-settings-panel="language"],
+  .settings-shell > [data-settings-panel="data"] { min-height:0 !important; }
+  .language-section[data-settings-panel] { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:20px; }
+  .settings-reset-section[data-settings-panel] { max-width:none; min-height:0; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px 18px; }
+  .settings-reset-section .settings-reset-copy { grid-column:1; grid-row:1 / span 2; }
+  .settings-reset-section .settings-reset-btn { grid-column:2; grid-row:1; align-self:center; min-height:40px; height:auto; }
+  .settings-reset-section .settings-delete-btn { grid-column:2; grid-row:2; align-self:center; min-height:40px; height:auto; }
+}
+@media (max-width:720px) {
+  .language-section[data-settings-panel] { display:grid; grid-template-columns:1fr; gap:14px; }
+}
+
+/* Sur téléphone, les rubriques de réglages reviennent sous la forme des
+   onglets compacts d'origine : une ligne lisible, défilable sans scrollbar. */
+@media (max-width:720px) {
+  .settings-hub { display:flex; gap:8px; width:calc(100% + 2px); margin:0 -1px; padding:0 1px 2px; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; -ms-overflow-style:none; }
+  .settings-hub::-webkit-scrollbar { display:none; height:0; }
+  .settings-hub-item { display:block; flex:0 0 auto; width:auto; min-height:42px; padding:10px 15px; border:0; border-radius:99px; background:var(--input-bg); white-space:nowrap; }
+  .settings-hub-item strong { overflow:visible; font-size:.82rem; line-height:1.25; }
+  .settings-hub-item:hover,.settings-hub-item[aria-current="true"] { border:0; background:var(--button-active-bg); color:var(--accent); }
+}
+
+/* Même gabarit pour Partage et amis, Objectifs et Nouveautés : la navigation
+   latérale et le panneau principal ne changent plus de largeur d'un onglet à l'autre. */
+:is(#sharingPage,#sharingAccessPage,#updatesPage,#objectivesPage) > .content.personal-workspace-layout {
+  width:100%; max-width:1240px; margin-inline:auto;
+}
+:is(#sharingPage,#sharingAccessPage,#updatesPage,#objectivesPage) .personal-workspace-content {
+  width:100%; max-width:none; min-height:560px;
+}
+#sharingPage:has(.shared-dashboard) > .content { max-width:1240px; }
+
+/* Toutes les confirmations mobiles apparaissent au-dessus du contenu, centrées
+   et hors des boutons de navigation. */
+@media (max-width:720px) {
+  :is(#sharingPage,#sharingAccessPage,#updatesPage,#objectivesPage) .personal-workspace-content { min-height:0; }
+  .message {
+    top:calc(12px + env(safe-area-inset-top, 0px)); right:auto; bottom:auto; left:50%;
+    width:min(430px,calc(100vw - 24px));
+    transform:translate3d(-50%,-10px,0);
+  }
+  .message.is-visible { transform:translate3d(-50%,0,0); }
+}
+
