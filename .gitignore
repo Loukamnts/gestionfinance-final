@@ -2,6 +2,8 @@
 .env
 .env.*
 !.env.example
+admin-local/
+tests/security-admin.test.cjs
 supabase/.temp/
 
 # Local tooling artefacts.

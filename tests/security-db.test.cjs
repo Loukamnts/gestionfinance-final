@@ -42,7 +42,7 @@ before(async()=>{
     alter default privileges in schema public grant all on tables to anon,authenticated;`);
   for(const file of ['supabase_schema.sql','supabase_granular_friend_sharing.sql',
     'supabase_fix_secure_sharing_access.sql','supabase_fix_shared_snapshot_read.sql',
-    'supabase_security_hardening.sql','supabase_security_hardening.sql']){
+    'supabase_security_hardening.sql','supabase_fix_private_sync.sql']){
     await db.exec(fs.readFileSync(path.join(root,file),'utf8'));
   }
 });
@@ -92,6 +92,7 @@ test('Accepting an invitation grants no access by default',async()=>{
 test('Recipient sees only filtered copies; stranger and full snapshot stay private',async()=>{
   await friendship();await share(A,B);
   await query('insert into public.finance_snapshots(owner_id,payload) values($1,$2)',[A,JSON.stringify({private:'not shared'})]);
+  assert.equal(await value('select count(*)::int from public.finance_snapshots'),1);
   await as(B);
   assert.equal(await value('select count(*)::int from public.finance_shared_sheet_snapshots'),1);
   assert.equal(await value('select count(*)::int from public.finance_shared_dashboard_snapshots'),1);
@@ -163,3 +164,4 @@ test('Declining a redundant old invitation preserves an existing accepted share'
   assert.equal(await value('select count(*)::int from public.finance_shared_sheet_snapshots'),1);
   assert.equal(await value("select count(*)::int from public.friendships where status='accepted'"),1);
 });
+

@@ -1908,7 +1908,6 @@
       <section class="content personal-workspace-layout">
         <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
-          <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
           <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
@@ -1924,7 +1923,6 @@
       <section class="content personal-workspace-layout">
         <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
-          <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
           <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
@@ -1939,7 +1937,6 @@
       <section class="content personal-workspace-layout">
         <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
-          <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
           <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
@@ -1970,7 +1967,6 @@
       <section class="content personal-workspace-layout">
         <h2 class="personal-workspace-title">Mon espace</h2>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
-          <span class="personal-workspace-label">Mon espace</span>
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
           <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
@@ -5314,7 +5310,7 @@ function resetDataState(){
      Utilise une table finance_snapshots pour stocker le snapshot complet
      (toutes les feuilles, formules, headers, etc.).
      Hors ligne : sauvegarde locale, sync au retour du reseau. */
-  var syncState = { dirty: false, lastSync: 0, pulling: false, pushing: false, suppressPush: false };
+  var syncState = { dirty: false, lastSync: 0, pulling: false, pushing: false, suppressPush: false, userId: "", remoteUpdatedAt: "", scheduledPull: null };
 
   function getSupabase(){ try{ return window.__account && window.__account.client ? window.__account.client : null; }catch(e){ return null; } }
   function getUser(){ try{ return window.__account && window.__account.user ? window.__account.user : null; }catch(e){ return null; } }
@@ -5338,12 +5334,13 @@ function resetDataState(){
       // des snapshots destinés aux amis.
       var privateProfile = null;
       try { privateProfile = JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile") || "null"); } catch(e) {}
+      var cloudUpdatedAt = new Date().toISOString();
       var payload = JSON.stringify({ v: snap.v || "cloud", sheets: snap.sheets, activeSheetId: snap.activeSheetId, profile: privateProfile && typeof privateProfile === "object" ? privateProfile : null, savedAt: Date.now() });
       
       var res = await sb.from("finance_snapshots").upsert({
         owner_id: user.id,
         payload: payload,
-        updated_at: new Date().toISOString()
+        updated_at: cloudUpdatedAt
       }, { onConflict: "owner_id" });
       
       if(res.error){ console.warn("Sync push error:", res.error.message); syncState.pushing = false; return false; }
@@ -5362,6 +5359,7 @@ function resetDataState(){
       
       syncState.dirty = false;
       syncState.lastSync = Date.now();
+      syncState.remoteUpdatedAt = cloudUpdatedAt;
       updateSyncStatus();
       return true;
     }catch(e){
@@ -5379,12 +5377,21 @@ function resetDataState(){
     var user = getUser();
     var fs = getFinanceSheet();
     if(!sb || !user || !fs){ return false; }
-    if(syncState.pulling) return false;
+    if(syncState.pulling || syncState.pushing || syncState.dirty) return false;
     syncState.pulling = true;
     syncState.suppressPush = true; // Eviter la boucle pull -> save -> push
     try{
-      var res = await sb.from("finance_snapshots").select("payload,updated_at").eq("owner_id", user.id).single();
-      if(res.error || !res.data || !res.data.payload){ syncState.pulling = false; syncState.suppressPush = false; return false; }
+      var res = await sb.from("finance_snapshots").select("payload,updated_at").eq("owner_id", user.id).maybeSingle();
+      if(res.error){ console.warn("Sync pull error:", res.error.message); return false; }
+      // Aucun snapshot : premier appareil de ce compte. Le démarrage pourra
+      // alors envoyer ses données locales au lieu de les considérer perdues.
+      if(!res.data || !res.data.payload) return null;
+      var remoteUpdatedAt = String(res.data.updated_at || "");
+      if(remoteUpdatedAt && remoteUpdatedAt === syncState.remoteUpdatedAt){
+        syncState.lastSync = Date.now();
+        updateSyncStatus();
+        return true;
+      }
       
       var snap = typeof res.data.payload === "string" ? JSON.parse(res.data.payload) : res.data.payload;
       if(!snap || !snap.sheets || !snap.sheets.length){ syncState.pulling = false; syncState.suppressPush = false; return false; }
@@ -5393,13 +5400,20 @@ function resetDataState(){
       }
       
       if(fs.loadSnapshot){
+        // loadSnapshot sauvegarde aussi le cache local après 400 ms. Ce verrou
+        // doit rester actif jusque-là, sinon ce pull déclencherait aussitôt un
+        // push inutile qui pourrait masquer une modification d'un autre appareil.
+        window.__gfSuppressSync = true;
         fs.loadSnapshot({ v: snap.v || "cloud", sheets: snap.sheets, activeSheetId: snap.activeSheetId });
+        setTimeout(function(){ window.__gfSuppressSync = false; }, 800);
         if(typeof window.syncDashboardFromFinanceSheet === "function"){
           try{ window.syncDashboardFromFinanceSheet({ silent: true }); }catch(e){}
         }
       }
       
       syncState.lastSync = Date.now();
+      syncState.remoteUpdatedAt = remoteUpdatedAt;
+      syncState.dirty = false;
       updateSyncStatus();
       return true;
     }catch(e){
@@ -5446,35 +5460,63 @@ function resetDataState(){
   });
   window.addEventListener("offline", function(){ updateSyncStatus(); });
 
-  // === Hook dans onAuthStateChange pour pull au login ===
-  function hookAuth(){
-    var sb = getSupabase();
-    if(!sb || !sb.auth) return;
-    sb.auth.onAuthStateChange(function(evt, session){
-      if(evt === "SIGNED_IN" && session && session.user){
-        setTimeout(function(){
-          pullFromCloud().then(function(pulled){
-            if(!pulled){ updateSyncStatus(); }
-          });
-        }, 800);
-      }
-      if(evt === "SIGNED_OUT"){
-        syncState.dirty = false;
-        syncState.lastSync = 0;
+  // Une seule synchronisation est programmée même si Supabase et le module
+  // Compte annoncent presque simultanément la restauration de la session.
+  function scheduleAccountSync(user, delay){
+    if(!user || !user.id) return;
+    var changedAccount = syncState.userId !== user.id;
+    syncState.userId = user.id;
+    if(changedAccount){ syncState.remoteUpdatedAt = ""; syncState.lastSync = 0; syncState.dirty = false; }
+    if(syncState.scheduledPull) clearTimeout(syncState.scheduledPull);
+    syncState.scheduledPull = setTimeout(async function(){
+      syncState.scheduledPull = null;
+      var current = getUser();
+      if(!current || current.id !== user.id || !navigator.onLine) return;
+      var pulled = await pullFromCloud();
+      if(pulled === null){
+        // Nouveau compte sans snapshot : on conserve et envoie le contenu
+        // présent sur l'appareil (tableur, objectifs et notes).
+        syncState.dirty = true;
         updateSyncStatus();
-      }
-    });
+        await pushToCloud();
+      }else if(pulled === false){ updateSyncStatus(); }
+    }, typeof delay === "number" ? delay : 500);
+  }
+
+  function clearAccountSync(){
+    if(syncState.scheduledPull) clearTimeout(syncState.scheduledPull);
+    syncState.scheduledPull = null;
+    syncState.userId = "";
+    syncState.remoteUpdatedAt = "";
+    syncState.dirty = false;
+    syncState.lastSync = 0;
+    updateSyncStatus();
+  }
+
+  function refreshFromCloud(){
+    if(document.hidden || !navigator.onLine || !getUser() || syncState.dirty || syncState.pushing || syncState.pulling) return;
+    pullFromCloud();
   }
 
   // === Initialisation ===
   function initSync(){
-    hookAuth();
+    window.addEventListener("authStateChanged", function(event){
+      var detail = event && event.detail ? event.detail : {};
+      if(detail.user) scheduleAccountSync(detail.user, detail.event === "SIGNED_IN" ? 350 : 650);
+      else if(detail.event === "SIGNED_OUT") clearAccountSync();
+    });
+    document.addEventListener("visibilitychange", function(){ if(!document.hidden) refreshFromCloud(); });
+    window.addEventListener("focus", refreshFromCloud);
+    setInterval(refreshFromCloud, 60000);
     updateSyncStatus();
-    // Hook dans saveNow de FinanceSheet (deja hook dans sheet.js directement)
+    // Le client Supabase est créé après le chargement de sa configuration.
+    // Cette courte attente récupère aussi une session déjà ouverte, cas où
+    // l'ancien code ratait le pull initial sur un second appareil.
     var checkInterval = setInterval(function(){
-      if(getFinanceSheet()){ clearInterval(checkInterval); updateSyncStatus(); }
+      var user = getUser();
+      if(getFinanceSheet() && user){ clearInterval(checkInterval); scheduleAccountSync(user, 250); }
     }, 500);
-    setTimeout(function(){ clearInterval(checkInterval); }, 10000);
+    setTimeout(function(){ clearInterval(checkInterval); }, 15000);
   }
 
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", initSync);

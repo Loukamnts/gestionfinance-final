@@ -139,6 +139,9 @@ where not exists (
 -- Réaffirme que les instantanés complets restent exclusivement personnels.
 drop policy if exists snapshots_owner_or_authorized_friend_select on public.finance_snapshots;
 drop policy if exists dashboard_snapshots_authorized_friend_select on public.finance_dashboard_snapshots;
+drop policy if exists snapshots_owner_select on public.finance_snapshots;
+create policy snapshots_owner_select on public.finance_snapshots
+  for select to authenticated using (auth.uid() = owner_id);
 
 -- Même ordre de verrouillage partout : relation, puis permissions.
 -- Une synchronisation concurrente ne peut pas remettre des copies après le retrait.
@@ -295,3 +298,4 @@ grant execute on function public.refresh_friend_share_snapshots(uuid,jsonb,jsonb
 
 
 commit;
+
