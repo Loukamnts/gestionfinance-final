@@ -651,6 +651,25 @@ body[data-theme="glass"][data-mode="light"] :is(.objectives-panel,.objective-for
   .settings-hub-item:hover,.settings-hub-item[aria-current="true"] { border:0; background:var(--button-active-bg); color:var(--accent); }
 }
 
+/* Objectifs est encore en évolution : le repère reste visible mais discret. */
+.personal-workspace-link[data-page="objectives"]::after,
+.personal-destination[data-page="objectives"] strong::after {
+  content:"Beta";
+  display:inline-flex;
+  align-items:center;
+  width:max-content;
+  margin-left:auto;
+  padding:3px 7px;
+  border:1px solid color-mix(in srgb,var(--accent),var(--line) 45%);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--accent),transparent 88%);
+  color:var(--accent);
+  font:800 .62rem/1 var(--font-body);
+  letter-spacing:.04em;
+}
+.personal-destination[data-page="objectives"] strong::after { margin-left:8px; vertical-align:middle; }
+body[data-theme="brutal"] :is(.personal-workspace-link[data-page="objectives"]::after,.personal-destination[data-page="objectives"] strong::after) { border-radius:0; }
+
 /* Même gabarit pour Partage et amis, Objectifs et Nouveautés : la navigation
    latérale et le panneau principal ne changent plus de largeur d'un onglet à l'autre. */
 :is(#sharingPage,#sharingAccessPage,#updatesPage,#objectivesPage) > .content.personal-workspace-layout {
