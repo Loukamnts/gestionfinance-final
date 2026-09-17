@@ -9,9 +9,10 @@
 (function () {
   "use strict";
 
-  // Le tableur démarre sans lignes vides : les lignes importées ou ajoutées
-  // par l'utilisateur déterminent la hauteur réelle de chaque feuille.
-  const DEFAULT_ROWS = 0;
+  // Une feuille réellement vide garde neuf lignes pour remplir la
+  // grille sur ordinateur sans la surcharger. Dès qu'elle contient des
+  // données (saisie ou import), sa hauteur suit exactement ses lignes utiles.
+  const DEFAULT_ROWS = 9;
   const DEFAULT_COLS = 12; // A..L
   const MONTH_HEADERS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 
@@ -103,7 +104,11 @@
     });
     return last + 1;
   }
-  function compactRows(sheet) { if (sheet) sheet.rows = contentRowCount(sheet); }
+  function compactRows(sheet) {
+    if (!sheet) return;
+    const usefulRows = contentRowCount(sheet);
+    sheet.rows = usefulRows > 0 ? usefulRows : DEFAULT_ROWS;
+  }
   function rowHeaderWidth(sheet) {
     const longest = Math.max(0, ...(sheet.rowHeaders || []).map((label) => String(label || "").trim().length));
     return Math.max(188, Math.min(348, 86 + longest * 8.1));
@@ -407,7 +412,9 @@
     if (state.editing && (state.active.r !== r || state.active.c !== c)) { commitActiveEdit(); }
     if (e.shiftKey) { setRange(state.range.r0, state.range.c0, r, c); syncFormulaBar(); return; }
     ptr.active = true; ptr.moved = false;
-    ptr.touchSelecting = e.pointerType !== "touch" || td.classList.contains("selected");
+    // Un seul geste suffit, y compris au doigt : le premier glissement étend
+    // immédiatement la sélection au lieu d'exiger un second passage.
+    ptr.touchSelecting = true;
     ptr.pointerId = e.pointerId;
     ptr.startX = e.clientX; ptr.startY = e.clientY;
     ptr.r0 = r; ptr.c0 = c; ptr.startCell = { r, c };
@@ -426,7 +433,6 @@
       if (dx * dx + dy * dy < 36) return;
       ptr.moved = true;
     }
-    if (e.pointerType === "touch" && !ptr.touchSelecting) return;
     e.preventDefault();
     if (e.pointerType === "touch" && sheetScroll) {
       const rect = sheetScroll.getBoundingClientRect(), edge = 36, step = 14;
@@ -468,8 +474,8 @@
     state.range = { r0: Math.min(r0, r1), c0: Math.min(c0, c1), r1: Math.max(r0, r1), c1: Math.max(c0, c1) };
     applySelectionStyle();
   }
-  function selectRow(r) { setRange(r, 0, r, state.cols - 1, "row"); state.active = { r, c: state.range.c0 }; syncFormulaBar(); }
-  function selectCol(c) { setRange(0, c, state.rows - 1, c, "col"); state.active = { r: state.range.r0, c }; syncFormulaBar(); }
+  function selectRow(r) { state.active = { r, c: 0 }; setRange(r, 0, r, state.cols - 1, "row"); syncFormulaBar(); }
+  function selectCol(c) { state.active = { r: 0, c }; setRange(0, c, state.rows - 1, c, "col"); syncFormulaBar(); }
 
   function applySelectionStyle() {
     const r0 = state.range.r0, c0 = state.range.c0, r1 = state.range.r1, c1 = state.range.c1;
@@ -888,9 +894,9 @@
       dataRowIndex++;
     }
     sheet.cols = Math.max(DEFAULT_COLS, maxC + 1);
-    // L'import restitue exactement ses lignes utiles, sans marge vide.
-    // Le bouton « + 1 ligne » reste disponible lorsque l'utilisateur en veut une.
-    sheet.rows = Math.max(0, maxR + 1);
+    // Un import rempli restitue exactement ses lignes utiles. Un fichier vide
+    // affiche néanmoins une grille complète, prête à être saisie.
+    sheet.rows = maxR >= 0 ? maxR + 1 : DEFAULT_ROWS;
     for (let c = 0; c < sheet.cols; c++) if (!sheet.headers[c]) sheet.headers[c] = colToLetter(c);
     enforceMonthHeaders(sheet);
   }
@@ -1607,3 +1613,4 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
+
