@@ -407,7 +407,9 @@
     if (state.editing && (state.active.r !== r || state.active.c !== c)) { commitActiveEdit(); }
     if (e.shiftKey) { setRange(state.range.r0, state.range.c0, r, c); syncFormulaBar(); return; }
     ptr.active = true; ptr.moved = false;
-    ptr.touchSelecting = e.pointerType !== "touch" || td.classList.contains("selected");
+    // Un seul geste suffit, y compris au doigt : le premier glissement étend
+    // immédiatement la sélection au lieu d'exiger un second passage.
+    ptr.touchSelecting = true;
     ptr.pointerId = e.pointerId;
     ptr.startX = e.clientX; ptr.startY = e.clientY;
     ptr.r0 = r; ptr.c0 = c; ptr.startCell = { r, c };
@@ -426,7 +428,6 @@
       if (dx * dx + dy * dy < 36) return;
       ptr.moved = true;
     }
-    if (e.pointerType === "touch" && !ptr.touchSelecting) return;
     e.preventDefault();
     if (e.pointerType === "touch" && sheetScroll) {
       const rect = sheetScroll.getBoundingClientRect(), edge = 36, step = 14;
@@ -468,8 +469,8 @@
     state.range = { r0: Math.min(r0, r1), c0: Math.min(c0, c1), r1: Math.max(r0, r1), c1: Math.max(c0, c1) };
     applySelectionStyle();
   }
-  function selectRow(r) { setRange(r, 0, r, state.cols - 1, "row"); state.active = { r, c: state.range.c0 }; syncFormulaBar(); }
-  function selectCol(c) { setRange(0, c, state.rows - 1, c, "col"); state.active = { r: state.range.r0, c }; syncFormulaBar(); }
+  function selectRow(r) { state.active = { r, c: 0 }; setRange(r, 0, r, state.cols - 1, "row"); syncFormulaBar(); }
+  function selectCol(c) { state.active = { r: 0, c }; setRange(0, c, state.rows - 1, c, "col"); syncFormulaBar(); }
 
   function applySelectionStyle() {
     const r0 = state.range.r0, c0 = state.range.c0, r1 = state.range.r1, c1 = state.range.c1;
@@ -1607,3 +1608,4 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
+

@@ -632,3 +632,79 @@ body[data-theme="glass"] .sheet-table td.cell { background:var(--bg); }
 }
 
 body[data-theme="brutal"] :is(.sheet-bar-left,.sheet-bar-right,.balance-edit,.balance-info,.balance-help,.sheet-starting-balance-modal .sheet-field input) { border-radius:0 !important; }
+
+/* Barre d'outils unifiée : un seul rail, des groupes visuels sobres et aucune
+   capsule imbriquée. Les outils restent accessibles sans élargir la page. */
+.sheet-bar {
+  gap:8px;
+  padding:7px 9px;
+  border-radius:min(10px,var(--radius));
+  box-shadow:none;
+  overflow:hidden;
+}
+.sheet-bar-left,.sheet-bar-right {
+  display:flex;
+  align-items:center;
+  gap:3px;
+  min-width:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.sheet-bar-left { flex:0 0 auto; }
+.sheet-bar-right { flex:1 1 auto; justify-content:flex-end; }
+.sheet-bar .button {
+  min-height:36px;
+  padding:7px 9px;
+  border:1px solid transparent;
+  border-radius:min(7px,var(--control-radius));
+  background:transparent;
+  box-shadow:none;
+}
+.sheet-bar .button-primary { background:var(--button-primary-bg); }
+.sheet-bar .button:hover,.sheet-bar .button:focus-visible { background:var(--button-active-bg); border-color:var(--line); }
+.sheet-bar .button-primary:hover,.sheet-bar .button-primary:focus-visible { background:var(--button-primary-bg); border-color:var(--accent); }
+.sheet-bar .sheet-title { margin:0 5px; font-size:.94rem; }
+.sheet-divider { margin:0 3px; }
+
+/* La sélection de lignes, de colonnes et de cellules reste visible dans les
+   trois thèmes, sans faire croire qu'une colonne est sélectionnée avec une ligne. */
+.sheet-table td.cell { touch-action:none; }
+.sheet-table td.cell.in-range { background:color-mix(in srgb,var(--accent) 16%,transparent) !important; }
+.sheet-table .row-head.row-sel,
+.sheet-table thead th.col-sel {
+  color:var(--accent) !important;
+  background-color:var(--panel-solid) !important;
+  background-image:linear-gradient(color-mix(in srgb,var(--accent) 18%,transparent),color-mix(in srgb,var(--accent) 18%,transparent)) !important;
+  box-shadow:inset 3px 0 0 var(--accent);
+}
+.sheet-table thead th.col-sel { box-shadow:inset 0 -3px 0 var(--accent); }
+body[data-theme] .sheet-table td.cell.in-range { background:color-mix(in srgb,var(--accent) 16%,var(--panel-solid)) !important; }
+body[data-theme] .sheet-table .row-head.row-sel,
+body[data-theme] .sheet-table thead th.col-sel {
+  color:var(--accent) !important;
+  background-color:var(--panel-solid) !important;
+  background-image:linear-gradient(color-mix(in srgb,var(--accent) 20%,transparent),color-mix(in srgb,var(--accent) 20%,transparent)) !important;
+}
+
+/* Solde de départ : vraie fenêtre rectangulaire, pas une bulle. */
+.sheet-starting-balance-modal { border-radius:4px !important; }
+.sheet-starting-balance-modal .sheet-field input,
+.sheet-starting-balance-modal .button { border-radius:4px !important; }
+body[data-theme="editorial"] .sheet-starting-balance-modal,
+body[data-theme="brutal"] .sheet-starting-balance-modal,
+body[data-theme="editorial"] .sheet-starting-balance-modal :is(.sheet-field input,.button),
+body[data-theme="brutal"] .sheet-starting-balance-modal :is(.sheet-field input,.button) { border-radius:0 !important; }
+
+@media (max-width:720px) {
+  #sheetPage { min-width:0; overflow-x:clip; }
+  .sheet-bar { display:flex; gap:4px; padding:6px; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  .sheet-bar::-webkit-scrollbar { display:none; }
+  .sheet-bar-left,.sheet-bar-right { flex:0 0 auto; min-width:max-content; gap:2px; }
+  .sheet-bar-right { justify-content:flex-start; }
+  .sheet-bar .button { width:36px; min-width:36px; min-height:36px; flex:0 0 36px; padding:7px; justify-content:center; }
+  .sheet-bar .icon-btn .lbl,.sheet-bar .sheet-title,.sheet-bar .sheet-divider,.sheet-bar .sheet-spacer { display:none; }
+  .balance-help { position:fixed !important; left:14px !important; right:14px !important; bottom:82px !important; width:auto !important; }
+}
+
