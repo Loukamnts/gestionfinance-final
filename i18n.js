@@ -676,11 +676,10 @@ const dictionary=Object.freeze({
   "Détail des graphiques": "Chart details",
   "Clique sur un mois pour voir son récapitulatif.": "Click a month to see its summary.",
   "Un compte déjà configuré récupère ses données avant d’afficher le tutoriel.": "An existing account retrieves its data before showing the tutorial.",
-  "Nouveautés": "New features",
-  "Améliorations": "Improvements",
-  "Nouveautés récentes": "Recent new features",
+  "Nouveauté": "New feature",
+  "Amélioration": "Improvement",
+  "Un espace plus clair et plus complet": "A clearer, more complete space",
   "Mon espace accueille désormais les objectifs (en bêta) et les notes privées. Tu peux créer un objectif d’épargne, d’investissement, de dépense ou un projet personnel, suivre son avancement et conserver tes idées dans un bloc-notes synchronisé lorsque tu es connecté. Le partage entre amis reste privé par défaut : tu choisis précisément les lignes, les mois et les vues que chacun peut consulter.": "My space now includes goals (in beta) and private notes. You can create a savings, investment, expense or personal goal, track its progress and keep ideas in a notepad that syncs when you are signed in. Friend sharing remains private by default: you choose exactly which rows, months and views each person can see.",
-  "Améliorations récentes": "Recent improvements",
   "Le tableur est plus confortable avec une barre d’outils suivie, des sélections plus lisibles et des explications de solde plus claires. L’accueil, les réglages, le partage et les tableaux de bord s’adaptent mieux aux petits écrans. Le français et l’anglais couvrent aussi les contenus recréés, les réglages et les nouveautés, sans modifier tes données.": "The spreadsheet is more comfortable with a following toolbar, clearer selections and clearer balance explanations. Home, Settings, sharing and dashboards adapt better to smaller screens. French and English also cover recreated content, Settings and updates without changing your data.",
   "Tableur plus confortable": "A more comfortable spreadsheet",
   "La barre d’outils suit l’édition, garde des dimensions adaptées à chaque thème et reste utilisable sur téléphone comme sur ordinateur.": "The toolbar follows editing, keeps dimensions suited to each theme and remains easy to use on phone and desktop.",
@@ -692,6 +691,9 @@ const dictionary=Object.freeze({
   "Les accès se configurent ligne par ligne et mois par mois, uniquement en lecture. Les tableaux de bord et tableurs partagés s’ouvrent depuis la fiche de chaque ami.": "Access is configured row by row and month by month, in read-only mode. Shared dashboards and spreadsheets open from each friend's card.",
   "Réglages plus cohérents": "More consistent settings",
   "Les rubriques Compte, apparence, langue, données et informations sont organisées dans un même espace de réglages, adapté au téléphone et au bureau.": "Account, appearance, language, data and information are organised in one settings space, adapted to phone and desktop.",
+  "Partage et réglages simplifiés": "Simpler sharing and settings",
+  "Tu peux maintenant consulter le tableur ou le tableau de bord partagé depuis la fiche d’un ami, sans lui donner le droit de modifier tes données.": "You can now view a shared spreadsheet or dashboard from a friend's card without giving them permission to change your data.",
+  "Les accès se configurent ligne par ligne et mois par mois, uniquement en lecture. Les réglages et les pages de partage sont mieux organisés sur téléphone comme sur ordinateur.": "Access is configured row by row and month by month, in read-only mode. Settings and sharing pages are better organised on phone and desktop.",
   "Enregistrement automatique sur cet appareil, puis dans ton compte lorsque tu es connecté.": "Saved automatically on this device, then to your account when you are signed in."
 });
 const months=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];

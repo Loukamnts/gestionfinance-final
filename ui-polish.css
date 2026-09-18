@@ -646,17 +646,16 @@ body[data-theme="glass"][data-mode="dark"] :is(#dashboardPage .sheet-status-tool
 body[data-theme="glass"][data-mode="light"] :is(#dashboardPage .sheet-status-tooltip,.balance-help) { background-color:#ffffff !important; }
 :is(.sheet-status-info,.balance-info) { cursor:pointer; }
 
-/* Historique : deux rubriques, sans ajouter de panneaux massifs. */
-.updates-list { gap:22px; }
-.updates-group { display:grid; gap:10px; }
-.updates-group-head { display:flex; align-items:center; gap:10px; }
-.updates-group-head::before { content:""; width:8px; height:8px; flex:0 0 8px; border-radius:50%; background:var(--accent); }
-.updates-group-improvement .updates-group-head::before { background:var(--accent-2); }
-.updates-group-head h2 { margin:0; color:var(--text); font:800 .82rem/1.2 var(--font-body); letter-spacing:.08em; text-transform:uppercase; }
-.updates-group .update-entry { padding:16px 18px; }
-.updates-group .update-entry + .update-entry { margin-top:0; }
-body[data-theme="brutal"] .updates-group-head::before { border-radius:0; }
-@media (max-width:560px) { .updates-list { gap:18px; } .updates-group { gap:8px; } .updates-group .update-entry { padding:14px; } }
+/* Historique : les étiquettes restent à l'intérieur de chaque mise à jour,
+   sans créer de grands groupes qui cassent la lecture chronologique. */
+.updates-list { gap:14px; }
+.update-summaries { display:grid; gap:10px; margin-top:12px; }
+.update-summary { display:grid; grid-template-columns:max-content minmax(0,1fr); align-items:start; gap:10px; }
+.update-type-badge { display:inline-flex; align-items:center; min-height:22px; padding:3px 7px; border:1px solid var(--line-strong); border-radius:5px; color:var(--accent); background:var(--input-bg); font:800 .63rem/1 var(--font-body); letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; }
+.update-summary-improvement .update-type-badge { color:var(--accent-2); }
+.update-summary p { margin:1px 0 0; max-width:76ch; color:var(--muted); font-size:.84rem; line-height:1.5; }
+body[data-theme="brutal"] .update-type-badge { border-radius:0; }
+@media (max-width:560px) { .updates-list { gap:12px; } .update-summary { grid-template-columns:1fr; gap:6px; } }
 
 .latest-update-banner { position:relative; isolation:isolate; }
 .latest-update-banner[hidden] { display:none !important; }
