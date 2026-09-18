@@ -989,3 +989,43 @@ body[data-theme="brutal"] .sheet-bar { box-shadow:4px 4px 0 var(--line-strong); 
   .sheet-bar #btnSheetCalc { height:37px; min-height:37px; padding-inline:9px !important; }
 }
 
+/* Barre suivie : elle reste présente pendant l'édition, sans zone floue ni
+   commandes minuscules. Son fond est volontairement opaque pour rester lisible
+   au-dessus du tableur. */
+.sheet-bar {
+  position:sticky;
+  top:12px;
+  z-index:150;
+  align-self:center;
+  margin-inline:auto;
+  min-height:54px;
+  gap:7px;
+  padding:5px;
+  background:var(--panel-solid);
+  box-shadow:0 12px 28px color-mix(in srgb,var(--text) 14%,transparent);
+}
+.sheet-bar-left,.sheet-bar-file-actions { padding:2px; }
+.sheet-bar-right { gap:7px; }
+.sheet-bar .button {
+  width:40px;
+  min-width:40px;
+  height:40px;
+  min-height:40px;
+  flex-basis:40px;
+}
+.sheet-bar #btnSheetCalc {
+  height:44px;
+  min-height:44px;
+  padding-inline:15px;
+}
+@media (max-width:720px) {
+  .sheet-bar {
+    top:8px;
+    min-height:50px;
+    gap:5px;
+    padding:4px;
+    max-width:calc(100vw - 20px);
+  }
+  .sheet-bar .button { width:37px; min-width:37px; height:37px; min-height:37px; flex-basis:37px; }
+  .sheet-bar #btnSheetCalc { height:41px; min-height:41px; padding-inline:11px !important; }
+}
