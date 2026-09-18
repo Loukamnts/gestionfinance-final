@@ -531,6 +531,49 @@ body[data-theme="glass"][data-mode="dark"] :is(.panel,.metric-card,.detail-panel
 body[data-theme="glass"][data-mode="light"] :is(.panel,.metric-card,.detail-panel,.home-toolbar,.latest-update-banner,.profile-popover,.custom-select-options,.settings-section,.settings-reset-section,.update-entry) { background:#fff; }
 body[data-theme="glass"] :is(.sheet-status-info,.sheet-status-tooltip) { background:var(--input-focus-bg) !important; }
 
+/* Accueil : statut du tableur sans halo lumineux, et explication opaque, nette
+   et discrète dans tous les thèmes. */
+#dashboardPage .sheet-status-dot { box-shadow:none !important; }
+#dashboardPage .sheet-status-info {
+  width:20px;
+  height:20px;
+  border-radius:6px;
+  background:var(--input-focus-bg) !important;
+}
+#dashboardPage .sheet-status-tooltip,
+body[data-theme="glass"] #dashboardPage .sheet-status-tooltip {
+  border-radius:7px !important;
+  background:var(--panel-solid) !important;
+  border-color:var(--line-strong) !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+body[data-theme="glass"][data-mode="dark"] #dashboardPage .sheet-status-tooltip { background:#11142c !important; }
+body[data-theme="glass"][data-mode="light"] #dashboardPage .sheet-status-tooltip { background:#ffffff !important; }
+body[data-theme="brutal"] #dashboardPage :is(.sheet-status-info,.sheet-status-tooltip) { border-radius:0 !important; }
+
+/* Partage et amis : l'actualisation est une action lisible, pas une icône
+   isolée dont la fonction doit être devinée. */
+.sf-toolbar-actions > .sf-button.sf-refresh {
+  min-height:42px;
+  padding:0 12px;
+  border-color:var(--line-strong);
+  border-radius:min(9px,var(--sf-control));
+  background:var(--input-bg);
+  color:var(--text);
+  box-shadow:none;
+}
+.sf-toolbar-actions > .sf-button.sf-refresh:hover:not(:disabled) {
+  border-color:var(--accent);
+  background:var(--button-active-bg);
+  color:var(--accent);
+}
+.sf-toolbar-actions > .sf-button.sf-refresh .sf-icon { color:var(--accent); }
+body[data-theme="brutal"] .sf-toolbar-actions > .sf-button.sf-refresh { border-radius:0; }
+@media (max-width:560px) {
+  .sf-toolbar-actions > .sf-button.sf-refresh { min-height:40px; padding-inline:10px; }
+}
+
 .latest-update-banner { position:relative; isolation:isolate; }
 .latest-update-banner[hidden] { display:none !important; }
 .latest-update-dismiss { position:relative; z-index:3; pointer-events:auto; touch-action:manipulation; }
@@ -700,4 +743,3 @@ body[data-theme="brutal"] :is(.personal-workspace-link[data-page="objectives"]::
   transform:translate3d(-50%,-10px,0);
 }
 .message.is-visible { transform:translate3d(-50%,0,0); }
-
