@@ -633,7 +633,49 @@ const dictionary=Object.freeze({
   "Adresse, accès et déconnexion": "Email, access and sign-out",
   "Préférences": "Preferences",
   "Données": "Data",
-  "À propos": "About"
+  "À propos": "About",
+  "Interface": "Interface",
+  "Tes données et les intitulés que tu as créés ne sont pas traduits.": "Your data and the headings you created are not translated.",
+  "Interface en français": "Interface in French",
+  "Interface in English": "Interface in English",
+  "Amis et invitations": "Friends and invitations",
+  "Argent de départ enregistré": "Starting balance saved",
+  "Argent de départ retiré": "Starting balance removed",
+  "Le montant disponible au début du mois choisi. Il sert de base au solde restant, sans compter comme un revenu.": "The amount already available at the beginning of the selected month. It is the basis for the remaining balance and is not income.",
+  "Laissez le montant vide puis enregistrez pour retirer ce réglage.": "Leave the amount empty, then save to remove this setting.",
+  "Mois de départ": "Starting month",
+  "Enregistré": "Saved",
+  "Mettre à jour": "Update",
+  "Montant atteint pour ": "Amount reached for ",
+  "Limite de ": "Limit of ",
+  "Supprimer cette feuille et son contenu ?": "Delete this sheet and its contents?",
+  "Un espace plus simple sur tous les écrans": "A simpler workspace on every screen",
+  "L’en-tête, le tableur et les graphiques s’adaptent mieux au téléphone, à la tablette et au bureau. Les objectifs et un bloc-notes privé rejoignent désormais ton espace personnel.": "The header, spreadsheet and charts now adapt better to phones, tablets and desktop. Goals and a private notepad are now part of your personal space.",
+  "Les mêmes repères dans les partages": "The same clarity in shared views",
+  "Le tableau de bord d’un ami reprend maintenant les cartes et graphiques de l’accueil. Les indications de partage sont plus simples et les traductions anglaises ont été complétées. Sur téléphone, les nouveautés restent dans le bandeau de l’accueil.": "A friend's dashboard now includes the same cards and charts as Home. Sharing guidance is clearer and English translations are complete. On phones, updates remain in the Home banner.",
+  "Un accueil plus léger": "A lighter Home page",
+  "L’en-tête prend moins de place, les filtres sont alignés et les actualisations sont animées. Les tableaux de bord partagés ont leurs graphiques. Français ou anglais : à toi de choisir dans les paramètres.": "The header takes less room, filters are aligned and refresh actions are animated. Shared dashboards now have charts. Choose French or English in Settings.",
+  "Le partage, plus clair": "Clearer sharing",
+  "Une fiche par ami, les mois et lignes à cocher dans le tableur, et un résumé avant d’enregistrer. Les partages reçus s’ouvrent depuis la même fiche.": "One card per friend, months and rows to choose in the spreadsheet, and a summary before saving. Shared views open from the same card.",
+  "Confirmation de compte simplifiée": "Simpler account confirmation",
+  "La création de compte envoie désormais un lien sécurisé à ouvrir, sans code à recopier. La confirmation d’e-mail reste active.": "Creating an account now sends a secure link to open, with no code to copy. Email confirmation remains enabled.",
+  "Accès et partage repensés": "Access and sharing redesigned",
+  "La barre d’accueil est mieux structurée et les partages s’ouvrent dans une vraie vue de consultation.": "The Home toolbar is better structured and shares open in a dedicated read-only view.",
+  "Accès amis simplifié": "Simpler friend access",
+  "Le partage se configure maintenant en deux étapes : les écrans à ouvrir, puis les mois et lignes visibles. Les réglages sont enregistrés de façon sécurisée.": "Sharing is now configured in two steps: available views, then visible months and rows. Settings are saved securely.",
+  "Tableur plus stable": "A more stable spreadsheet",
+  "Les intitulés de lignes se renomment sans modifier leur numéro et restent correctement alignés, même lorsqu’ils sont longs.": "Row headings can be renamed without changing their number and stay aligned, even when long.",
+  "Partage et tableur plus fluides": "Smoother sharing and spreadsheet",
+  "La page Partage et amis reste stable pendant la consultation. Le tableur n’ajoute plus de lignes vides et ses intitulés s’adaptent à leur contenu.": "The Sharing & friends page stays stable while browsing. The spreadsheet no longer adds empty rows and its labels adapt to their content.",
+  "Un partage plus précis": "More precise sharing",
+  "Tu peux maintenant choisir les mois et les lignes visibles par chaque ami. Rien n’est partagé sans ton accord.": "You can now choose the months and rows visible to each friend. Nothing is shared without your approval.",
+  "Accueil plus net": "A clearer Home page",
+  "Les filtres restent au-dessus des graphiques et seules les années présentes dans le tableur sont proposées.": "Filters stay above the charts and only years available in the spreadsheet are offered.",
+  "Tableur plus lisible": "A more readable spreadsheet",
+  "Les colonnes A, B, C… et les numéros de ligne facilitent la lecture des formules.": "Columns A, B, C… and row numbers make formulas easier to read.",
+  "Détail des graphiques": "Chart details",
+  "Clique sur un mois pour voir son récapitulatif.": "Click a month to see its summary.",
+  "Un compte déjà configuré récupère ses données avant d’afficher le tutoriel.": "An existing account retrieves its data before showing the tutorial."
 });
 const months=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 const englishMonths=["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -746,6 +788,8 @@ function setLanguage(value){
   document.documentElement.lang=value;
   document.querySelectorAll("[data-language]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.language===value)));
   apply(document.body);window.dispatchEvent(new CustomEvent("gf:languagechange",{detail:{language:value}}));
+  requestAnimationFrame(()=>apply(document.body));
+  setTimeout(()=>apply(document.body),0);
 }
 function start(){
   document.documentElement.lang=language;
@@ -761,3 +805,4 @@ function start(){
 window.GFI18n={t,locale,money,setLanguage,getLanguage:()=>language,apply};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
 })();
+
