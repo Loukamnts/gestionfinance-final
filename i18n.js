@@ -678,10 +678,10 @@ const dictionary=Object.freeze({
   "Un compte déjà configuré récupère ses données avant d’afficher le tutoriel.": "An existing account retrieves its data before showing the tutorial.",
   "Nouveautés": "New features",
   "Améliorations": "Improvements",
-  "Les dernières finitions": "Latest refinements",
-  "Les infobulles, les commandes de partage et la barre du tableur ont été affinées pour être plus lisibles et plus agréables à utiliser.": "Tooltips, sharing controls and the spreadsheet toolbar have been refined to be clearer and more pleasant to use.",
-  "Une interface anglaise plus complète": "A more complete English interface",
-  "Le changement de langue met désormais aussi à jour les contenus recréés, les titres de réglages et les notes de mise à jour. Tes données restent inchangées.": "Changing language now also updates recreated content, Settings headings and release notes. Your data remains unchanged.",
+  "Nouveautés récentes": "Recent new features",
+  "Mon espace accueille désormais les objectifs (en bêta) et les notes privées. Tu peux créer un objectif d’épargne, d’investissement, de dépense ou un projet personnel, suivre son avancement et conserver tes idées dans un bloc-notes synchronisé lorsque tu es connecté. Le partage entre amis reste privé par défaut : tu choisis précisément les lignes, les mois et les vues que chacun peut consulter.": "My space now includes goals (in beta) and private notes. You can create a savings, investment, expense or personal goal, track its progress and keep ideas in a notepad that syncs when you are signed in. Friend sharing remains private by default: you choose exactly which rows, months and views each person can see.",
+  "Améliorations récentes": "Recent improvements",
+  "Le tableur est plus confortable avec une barre d’outils suivie, des sélections plus lisibles et des explications de solde plus claires. L’accueil, les réglages, le partage et les tableaux de bord s’adaptent mieux aux petits écrans. Le français et l’anglais couvrent aussi les contenus recréés, les réglages et les nouveautés, sans modifier tes données.": "The spreadsheet is more comfortable with a following toolbar, clearer selections and clearer balance explanations. Home, Settings, sharing and dashboards adapt better to smaller screens. French and English also cover recreated content, Settings and updates without changing your data.",
   "Tableur plus confortable": "A more comfortable spreadsheet",
   "La barre d’outils suit l’édition, garde des dimensions adaptées à chaque thème et reste utilisable sur téléphone comme sur ordinateur.": "The toolbar follows editing, keeps dimensions suited to each theme and remains easy to use on phone and desktop.",
   "Objectifs en bêta": "Goals in beta",
@@ -691,7 +691,8 @@ const dictionary=Object.freeze({
   "Partage et amis simplifiés": "Simpler sharing and friends",
   "Les accès se configurent ligne par ligne et mois par mois, uniquement en lecture. Les tableaux de bord et tableurs partagés s’ouvrent depuis la fiche de chaque ami.": "Access is configured row by row and month by month, in read-only mode. Shared dashboards and spreadsheets open from each friend's card.",
   "Réglages plus cohérents": "More consistent settings",
-  "Les rubriques Compte, apparence, langue, données et informations sont organisées dans un même espace de réglages, adapté au téléphone et au bureau.": "Account, appearance, language, data and information are organised in one settings space, adapted to phone and desktop."
+  "Les rubriques Compte, apparence, langue, données et informations sont organisées dans un même espace de réglages, adapté au téléphone et au bureau.": "Account, appearance, language, data and information are organised in one settings space, adapted to phone and desktop.",
+  "Enregistrement automatique sur cet appareil, puis dans ton compte lorsque tu es connecté.": "Saved automatically on this device, then to your account when you are signed in."
 });
 const months=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 const englishMonths=["January","February","March","April","May","June","July","August","September","October","November","December"];
