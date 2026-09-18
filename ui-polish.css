@@ -625,6 +625,39 @@ body[data-theme="editorial"] .language-options button { border-radius:4px; }
 @media (max-width:720px) { .language-section[data-settings-panel] { grid-template-columns:1fr; gap:16px; } .language-options button { min-height:76px; } }
 @media (max-width:390px) { .language-options { grid-template-columns:1fr; } }
 
+/* Langue : réglage direct et compact, sans cartes qui alourdissent la page. */
+.language-section[data-settings-panel] { grid-template-columns:minmax(0,1fr) auto; gap:24px; min-height:0 !important; }
+.language-kicker,.language-option-mark,.language-option-check { display:none; }
+.language-section h3 { font-size:1.12rem; margin-bottom:5px; }
+.language-section p { max-width:55ch; font-size:.84rem; }
+.language-options { display:inline-flex; width:auto; gap:4px; padding:4px; border:1px solid var(--line); border-radius:min(9px,var(--radius)); background:var(--input-bg); }
+.language-options button { display:inline-flex; align-items:center; justify-content:center; min-height:42px; min-width:94px; padding:8px 13px; border:1px solid transparent; border-radius:min(6px,var(--control-radius)); background:transparent; text-align:center; }
+.language-options button[aria-pressed="true"] { border-color:var(--line-strong); background:var(--panel-solid); }
+.language-options small { display:none; }
+.language-options strong { font-size:.84rem; font-weight:750; }
+body[data-theme="brutal"] .language-options { border-radius:0; }
+body[data-theme="editorial"] .language-options { border-radius:4px; }
+@media (max-width:720px) { .language-section[data-settings-panel] { grid-template-columns:1fr; gap:14px; } .language-options { width:100%; } .language-options button { flex:1 1 0; } }
+
+/* Aide : le contenu ne laisse jamais transparaître un trait du tableau de bord.
+   Les petits "i" sont de vrais boutons, sans curseur d'aide en point d'interrogation. */
+#dashboardPage .sheet-status-tooltip,.balance-help { background-image:none !important; background-color:var(--panel-solid) !important; background-clip:padding-box; isolation:isolate; }
+body[data-theme="glass"][data-mode="dark"] :is(#dashboardPage .sheet-status-tooltip,.balance-help) { background-color:#151936 !important; }
+body[data-theme="glass"][data-mode="light"] :is(#dashboardPage .sheet-status-tooltip,.balance-help) { background-color:#ffffff !important; }
+:is(.sheet-status-info,.balance-info) { cursor:pointer; }
+
+/* Historique : deux rubriques, sans ajouter de panneaux massifs. */
+.updates-list { gap:22px; }
+.updates-group { display:grid; gap:10px; }
+.updates-group-head { display:flex; align-items:center; gap:10px; }
+.updates-group-head::before { content:""; width:8px; height:8px; flex:0 0 8px; border-radius:50%; background:var(--accent); }
+.updates-group-improvement .updates-group-head::before { background:var(--accent-2); }
+.updates-group-head h2 { margin:0; color:var(--text); font:800 .82rem/1.2 var(--font-body); letter-spacing:.08em; text-transform:uppercase; }
+.updates-group .update-entry { padding:16px 18px; }
+.updates-group .update-entry + .update-entry { margin-top:0; }
+body[data-theme="brutal"] .updates-group-head::before { border-radius:0; }
+@media (max-width:560px) { .updates-list { gap:18px; } .updates-group { gap:8px; } .updates-group .update-entry { padding:14px; } }
+
 .latest-update-banner { position:relative; isolation:isolate; }
 .latest-update-banner[hidden] { display:none !important; }
 .latest-update-dismiss { position:relative; z-index:3; pointer-events:auto; touch-action:manipulation; }

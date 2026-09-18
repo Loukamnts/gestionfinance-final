@@ -675,7 +675,23 @@ const dictionary=Object.freeze({
   "Les colonnes A, B, C… et les numéros de ligne facilitent la lecture des formules.": "Columns A, B, C… and row numbers make formulas easier to read.",
   "Détail des graphiques": "Chart details",
   "Clique sur un mois pour voir son récapitulatif.": "Click a month to see its summary.",
-  "Un compte déjà configuré récupère ses données avant d’afficher le tutoriel.": "An existing account retrieves its data before showing the tutorial."
+  "Un compte déjà configuré récupère ses données avant d’afficher le tutoriel.": "An existing account retrieves its data before showing the tutorial.",
+  "Nouveautés": "New features",
+  "Améliorations": "Improvements",
+  "Les dernières finitions": "Latest refinements",
+  "Les infobulles, les commandes de partage et la barre du tableur ont été affinées pour être plus lisibles et plus agréables à utiliser.": "Tooltips, sharing controls and the spreadsheet toolbar have been refined to be clearer and more pleasant to use.",
+  "Une interface anglaise plus complète": "A more complete English interface",
+  "Le changement de langue met désormais aussi à jour les contenus recréés, les titres de réglages et les notes de mise à jour. Tes données restent inchangées.": "Changing language now also updates recreated content, Settings headings and release notes. Your data remains unchanged.",
+  "Tableur plus confortable": "A more comfortable spreadsheet",
+  "La barre d’outils suit l’édition, garde des dimensions adaptées à chaque thème et reste utilisable sur téléphone comme sur ordinateur.": "The toolbar follows editing, keeps dimensions suited to each theme and remains easy to use on phone and desktop.",
+  "Objectifs en bêta": "Goals in beta",
+  "Un espace Objectifs permet de suivre une épargne, un investissement, une dépense prévue ou un projet personnel. Chaque objectif reste privé par défaut.": "A Goals space lets you track savings, an investment, a planned expense or a personal project. Every goal remains private by default.",
+  "Notes privées": "Private notes",
+  "Un bloc-notes personnel rejoint Mon espace pour conserver idées et rappels. Il est enregistré avec le reste de ton espace lorsque tu es connecté.": "A personal notepad joins My space to keep ideas and reminders. It is saved with the rest of your space while you are signed in.",
+  "Partage et amis simplifiés": "Simpler sharing and friends",
+  "Les accès se configurent ligne par ligne et mois par mois, uniquement en lecture. Les tableaux de bord et tableurs partagés s’ouvrent depuis la fiche de chaque ami.": "Access is configured row by row and month by month, in read-only mode. Shared dashboards and spreadsheets open from each friend's card.",
+  "Réglages plus cohérents": "More consistent settings",
+  "Les rubriques Compte, apparence, langue, données et informations sont organisées dans un même espace de réglages, adapté au téléphone et au bureau.": "Account, appearance, language, data and information are organised in one settings space, adapted to phone and desktop."
 });
 const months=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 const englishMonths=["January","February","March","April","May","June","July","August","September","October","November","December"];
