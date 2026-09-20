@@ -14,10 +14,11 @@
 - [x] Ajouter la suppression d’une ligne du tableur.
 - [x] Compter les règles appliquées automatiquement comme utilisées.
 - [x] Clarifier les nouveautés, les thèmes, la marque et le haut de page.
-- [ ] Vérifier les tests, le rendu mobile et la mise en ligne.
+- [x] Vérifier les tests, le rendu mobile et la mise en ligne.
 
 - [x] Faire choisir séparément la palette Ardoise, Édition et Contraste avant la prochaine refonte visuelle.
 
 - [x] Rejeter les premières propositions et produire de nouvelles directions plus professionnelles pour le logo et Objectifs.
 
 - [x] Garder la progression de chaque objectif immédiatement visible : montant actuel/cible, pourcentage et barre, sans ouvrir les détails.
+- [ ] Harmoniser formes et tailles de tous les blocs du site (cartes, panneaux, boutons) par thème

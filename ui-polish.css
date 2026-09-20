@@ -948,3 +948,141 @@ body[data-theme="brutal"] .objective-rhythm { text-align:left; }
   .objective-amount-wrap > strong { font-size:.88rem; }
   .objective-rhythm > strong { font-size:.78rem; }
 }
+
+/* ───────────────────────────────────────────────────────────────
+   Objectifs : un résumé lisible (libellé au-dessus, valeur nette),
+   des commandes discrètes et une identité de forme par thème.
+   ─────────────────────────────────────────────────────────────── */
+.objectives-overview {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.objective-stat {
+  display:grid;
+  align-content:start;
+  gap:6px;
+  min-width:0;
+  padding:12px 16px;
+  border:0;
+  border-right:1px solid var(--line);
+  border-radius:0;
+  background:transparent;
+}
+.objective-stat:last-child { border-right:0; }
+.objective-stat span {
+  display:block;
+  color:var(--muted);
+  font:700 .6rem/1.25 var(--font-body);
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  overflow-wrap:anywhere;
+}
+.objective-stat strong {
+  display:block;
+  color:var(--text);
+  font:800 clamp(1.05rem,2.4vw,1.5rem)/1.05 var(--font-heading);
+  font-variant-numeric:tabular-nums;
+}
+.objective-percent { font-size:clamp(1.6rem,4.4vw,2.2rem); line-height:1; }
+.objective-card h4 { font-size:clamp(1rem,2.4vw,1.16rem); }
+.objective-meta { font-size:.74rem; }
+.objective-progress { height:10px; }
+body[data-theme="brutal"] .objective-progress { height:14px; }
+.objective-amount-wrap > strong { font-size:.95rem; }
+.objective-rhythm > strong { font-size:.85rem; }
+
+/* Commandes : compactes, sobres, jamais des blocs pleine largeur. */
+.objective-card-actions { gap:6px; }
+.objective-card-actions .button,
+.objective-update {
+  min-height:30px;
+  padding:5px 10px;
+  border:1px solid var(--line);
+  border-radius:7px;
+  background:transparent;
+  color:var(--muted);
+  font:700 .72rem/1.1 var(--font-body);
+}
+.objective-card-actions .button:hover,
+.objective-card-actions .button:focus-visible,
+.objective-update:hover,
+.objective-update:focus-visible { border-color:var(--accent); color:var(--accent); background:var(--button-active-bg); }
+.objective-card-actions .objective-remove:hover { border-color:var(--red); color:var(--red); }
+.objective-progress-editor input { min-height:34px; font-size:.82rem; }
+.objectives-tabs button { min-height:30px; padding:5px 10px; font-size:.74rem; }
+
+/* Chaque thème garde sa forme : adouci, imprimé ou franc. */
+body[data-theme="glass"] :is(.objective-card-actions .button,.objective-update,.objectives-tabs,.objectives-tabs button) { border-radius:8px; }
+body[data-theme="editorial"] :is(.objective-card-actions .button,.objective-update,.objectives-tabs,.objectives-tabs button,.objective-progress-editor input) { border-radius:2px; }
+body[data-theme="editorial"] .objective-stat strong { font-family:var(--font-heading); }
+body[data-theme="brutal"] :is(.objective-card-actions .button,.objective-update,.objectives-tabs,.objectives-tabs button,.objective-progress-editor input,.objective-stat) { border-radius:0; }
+body[data-theme="brutal"] :is(.objective-card-actions .button,.objective-update) { border-width:2px; border-color:var(--line-strong); color:var(--text); }
+
+@media (max-width:560px) {
+  .objectives-overview { grid-template-columns:1fr 1fr; }
+  .objective-stat { padding:10px 12px; }
+  .objective-stat:nth-child(2) { border-right:0; }
+  .objective-stat:last-child { grid-column:1/-1; border-top:1px solid var(--line); border-right:0; }
+  .objective-stat span { font-size:.58rem; }
+  .objective-stat strong { font-size:1.15rem; }
+  .objective-card-actions .button,.objective-update { flex:0 1 auto; width:auto; }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Harmonisation générale : une seule échelle de formes et de
+   tailles pour tous les blocs, déclinée par thème.
+   ─────────────────────────────────────────────────────────────── */
+:root { --block-pad: 18px; --block-gap: 14px; }
+@media (max-width:560px) { :root { --block-pad: 14px; --block-gap: 12px; } }
+
+.panel,
+.metric-card,
+.savings-goal-card,
+.analysis-panel,
+.analysis-kpi,
+.analysis-column,
+.import-badge,
+.category-row,
+.balance-card,
+.objectives-panel,
+.notebook-panel,
+.settings-hub-item,
+.personal-notes-panel {
+  border-radius: var(--panel-radius, var(--radius));
+}
+.panel,
+.analysis-panel,
+.objectives-panel,
+.notebook-panel { padding: var(--block-pad); }
+.metric-card,
+.savings-goal-card,
+.balance-card { padding: calc(var(--block-pad) - 2px); }
+.analysis-kpi,
+.analysis-column,
+.import-badge,
+.category-row { padding: calc(var(--block-pad) - 6px) calc(var(--block-pad) - 4px); }
+
+.button { min-height: 40px; padding: 9px 15px; border-radius: var(--control-radius); font-size: .85rem; }
+.button.button-small { min-height: 32px; padding: 6px 11px; font-size: .76rem; }
+input, select.native-select, .custom-select-trigger, textarea { min-height: 42px; border-radius: var(--control-radius); }
+
+/* Ardoise : arrondis doux mais mesurés, jamais des pastilles. */
+body[data-theme="glass"] { --panel-radius: 12px; }
+body[data-theme="glass"] :is(.button,input,select.native-select,.custom-select-trigger) { border-radius: 10px; }
+/* Édition : angles presque droits, filets nets. */
+body[data-theme="editorial"] { --panel-radius: 3px; }
+body[data-theme="editorial"] :is(.panel,.metric-card,.balance-card,.objectives-panel,.notebook-panel,.button,input,select.native-select,.custom-select-trigger) { border-radius: 3px; }
+/* Contraste : aucun arrondi, bords francs. */
+body[data-theme="brutal"] { --panel-radius: 0px; }
+body[data-theme="brutal"] :is(.panel,.metric-card,.savings-goal-card,.analysis-panel,.analysis-kpi,.analysis-column,.import-badge,.category-row,.balance-card,.objectives-panel,.notebook-panel,.settings-hub-item,.button,input,select.native-select,.custom-select-trigger,textarea) { border-radius: 0; }
+body[data-theme="brutal"] :is(.panel,.metric-card,.balance-card,.objectives-panel) { border-width: 2px; }
+
+/* Le résumé et les filtres gardent leur hauteur naturelle. */
+.objectives-shell { align-content:start; }
+.objectives-overview,.objectives-tabs { align-self:start; }
+.objectives-overview { align-items:start; }
+.objectives-tabs { align-items:center; }
+.objectives-tabs button { align-self:center; }

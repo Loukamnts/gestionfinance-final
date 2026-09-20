@@ -1100,3 +1100,72 @@ body[data-theme="brutal"] .sheet-bar {
   body[data-theme="brutal"] .sheet-bar { width:100%; padding-inline:0; }
 }
 
+
+/* ───────────────────────────────────────────────────────────────
+   Barre du tableur : un rail compact, jamais étiré sur toute la
+   largeur, avec une couleur de surface propre à chaque thème.
+   ─────────────────────────────────────────────────────────────── */
+.sheet-bar,
+body[data-theme="glass"] .sheet-bar,
+body[data-theme="editorial"] .sheet-bar,
+body[data-theme="brutal"] .sheet-bar {
+  width: max-content;
+  max-width: 100%;
+  align-self: flex-start;
+  min-height: 42px;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-solid);
+  box-shadow: none;
+}
+.sheet-bar .sheet-divider { height: 18px; background: var(--line); }
+.sheet-bar .button,
+body[data-theme="glass"] .sheet-bar .button,
+body[data-theme="editorial"] .sheet-bar .button,
+body[data-theme="brutal"] .sheet-bar .button {
+  width: 32px; min-width: 32px; height: 32px; min-height: 32px; flex-basis: 32px;
+  border-radius: 8px;
+  color: var(--muted);
+  background: transparent;
+  border-color: transparent;
+}
+.sheet-bar .button svg { width: 16px; height: 16px; flex-basis: 16px; }
+.sheet-bar .button:hover:not(:disabled),
+.sheet-bar .button:focus-visible {
+  color: var(--accent);
+  background: var(--button-active-bg);
+  border-color: transparent;
+}
+.sheet-bar #btnSheetCalc,
+body[data-theme="glass"] .sheet-bar #btnSheetCalc,
+body[data-theme="editorial"] .sheet-bar #btnSheetCalc,
+body[data-theme="brutal"] .sheet-bar #btnSheetCalc {
+  width: auto; min-width: 0; flex-basis: auto;
+  height: 32px; min-height: 32px;
+  padding-inline: 12px;
+  border-radius: 8px;
+  color: var(--accent);
+  background: var(--button-active-bg);
+}
+body[data-theme="editorial"] .sheet-bar { border-radius: 2px; border-color: var(--line-strong); }
+body[data-theme="editorial"] .sheet-bar :is(.button,#btnSheetCalc) { border-radius: 2px; }
+body[data-theme="brutal"] .sheet-bar { border: 2px solid var(--line-strong); border-radius: 0; }
+body[data-theme="brutal"] .sheet-bar :is(.button,#btnSheetCalc) { border-radius: 0; }
+@media (max-width: 720px) {
+  .sheet-bar,
+  body[data-theme="glass"] .sheet-bar,
+  body[data-theme="editorial"] .sheet-bar,
+  body[data-theme="brutal"] .sheet-bar {
+    width: 100%;
+    min-height: 40px;
+    padding: 4px 6px;
+  }
+  .sheet-bar .button,
+  body[data-theme="editorial"] .sheet-bar .button,
+  body[data-theme="brutal"] .sheet-bar .button { width: 31px; min-width: 31px; height: 31px; min-height: 31px; flex-basis: 31px; }
+  .sheet-bar #btnSheetCalc,
+  body[data-theme="editorial"] .sheet-bar #btnSheetCalc,
+  body[data-theme="brutal"] .sheet-bar #btnSheetCalc { height: 31px !important; min-height: 31px !important; padding-inline: 10px !important; }
+}
