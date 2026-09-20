@@ -24,7 +24,8 @@ const copy = (from, to = from) => put(to, fs.readFileSync(path.join(root, from))
 const integrity = content => 'sha384-' + crypto.createHash('sha384').update(content).digest('base64');
 const publicFiles = ['sheet.js','sheet.css','onboarding.js','onboarding.css','friends.js',
   'i18n.js','shared-dashboard.js','sharing.css','ui-controls.js','ui-polish.css','objectives.js',
-  'store-shim.js','favicon.ico','app-icon-180.png','app-icon-512.png','manifest.webmanifest','supabase_config.json'];
+  'store-shim.js','favicon.ico','app-icon-180.png','app-icon-512.png','manifest.webmanifest','supabase_config.json',
+  'robots.txt','sitemap.xml','public.css','share-card.png'];
 for (const file of publicFiles) copy(file);
 const config = JSON.parse(fs.readFileSync(path.join(root,'supabase_config.json'),'utf8'));
 require('./public-config.cjs')(config);
@@ -64,6 +65,11 @@ html = html.replace(/https:\/\/cdn\.jsdelivr\.net\/npm\/chart\.js@[^" ]+/g,'vend
 html = html.replace(/https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@[^" ]+/g,'vendor/supabase.js');
 html = html.replace(/<script src="https:\/\/cdn\.sheetjs\.com\/[^" ]+"><\/script>/,
   '<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>');
+// Chargement différé du module Excel : version épinglée + empreinte d'intégrité.
+html = html.replace(/https:\/\/cdn\.sheetjs\.com\/xlsx-0\.20\.2\/package\/dist\/xlsx\.full\.min\.js/g,
+  'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js');
+html = html.replace('var integrities={xlsx:""};',
+  'var integrities={xlsx:"sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT"};');
 let inlineCount = 0;
 html = html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi,(tag,attrs,code)=>{
   if (/\bsrc\s*=/.test(attrs)) return tag;
@@ -92,6 +98,9 @@ html = html.replace(/<script\b([^>]*?)\bsrc="([^"?#]+)([^" ]*)"([^>]*)><\/script
   return `<script ${before}src="${src}${query}"${after} integrity="${integrity(code)}" crossorigin="anonymous"></script>`;
 });
 put('index.html',html);
+for (const page of ['presentation.html','confidentialite.html','conditions.html']) {
+  if (fs.existsSync(path.join(root,page))) copy(page);
+}
 // Contact facultatif tant que le propriétaire n'a pas choisi son adresse publique.
 if (fs.existsSync(path.join(root,'.well-known/security.txt'))) copy('.well-known/security.txt');
 console.log(`Build sécurisé : ${publicFiles.length} fichiers applicatifs, ${inlineCount} scripts séparés, aucun SQL publié.`);

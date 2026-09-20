@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /$
+Allow: /presentation
+Allow: /confidentialite
+Allow: /conditions
+Disallow: /tableur
+Disallow: /objectifs
+Disallow: /partage
+Disallow: /nouveautes
+Disallow: /parametres
+
+Sitemap: https://gestion-finance-coral.vercel.app/sitemap.xml

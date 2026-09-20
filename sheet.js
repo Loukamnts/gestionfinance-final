@@ -979,7 +979,8 @@
 
   async function importXlsx(file, options) {
     options = options || {};
-    if (typeof XLSX === "undefined") { toast("Bibliothèque Excel non chargée."); return false; }
+    if (typeof XLSX === "undefined" && window.GFVendors) { try { await window.GFVendors.xlsx(); } catch (e) {} }
+    if (typeof XLSX === "undefined") { toast("Le module Excel n'a pas pu être préparé. Vérifiez votre connexion internet."); return false; }
     let wb;
     try { wb = await readWorkbook(file); }
     catch (err) { toast("Import impossible : " + (err && err.message ? err.message : "erreur")); return false; }
@@ -1026,7 +1027,14 @@
     return true;
   }
   function exportXlsx() {
-    if (typeof XLSX === "undefined") { toast("Bibliothèque Excel non chargée."); return; }
+    if (typeof XLSX === "undefined") {
+      if (window.GFVendors) {
+        toast("Préparation de l'export…");
+        window.GFVendors.xlsx().then(exportXlsx).catch(function(){ toast("Le module Excel n'a pas pu être préparé. Vérifiez votre connexion internet."); });
+        return;
+      }
+      toast("Le module Excel n'a pas pu être préparé. Vérifiez votre connexion internet."); return;
+    }
     try {
       const wb = buildExportWorkbook();
       XLSX.writeFile(wb, "tableau-finances.xlsx");

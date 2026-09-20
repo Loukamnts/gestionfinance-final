@@ -8,6 +8,13 @@ const {execFileSync}=require('node:child_process');
 const root=path.resolve(__dirname,'..');
 execFileSync(process.execPath,['scripts/build.cjs'],{cwd:root});
 const html=fs.readFileSync(path.join(root,'dist/index.html'),'utf8');
+// Les scripts en ligne sont extraits vers dist/app/ : on les inclut pour les
+// verifications de contenu (URLs des bibliotheques, absence de CDN externes).
+const appDir=path.join(root,'dist/app');
+const inlineScripts=fs.existsSync(appDir)
+  ? fs.readdirSync(appDir).filter(f=>f.endsWith('.js')).map(f=>fs.readFileSync(path.join(appDir,f),'utf8')).join('\n')
+  : '';
+const published=html+'\n'+inlineScripts;
 const headers=JSON.parse(fs.readFileSync(path.join(root,'vercel.json'))).headers[0].headers;
 const csp=headers.find(h=>h.key==='Content-Security-Policy').value;
 test('Public configuration rejects encoded service-role credentials and unexpected fields',()=>{
@@ -48,8 +55,8 @@ test('Every script is integrity checked and every local digest matches the built
   }
 });
 test('Fonts, Chart.js and Supabase are served locally',()=>{
-  assert(!/fonts\.googleapis|fonts\.gstatic|cdn\.jsdelivr/.test(html));
-  for(const file of ['vendor/fonts.css','vendor/chart.js','vendor/supabase.js'])assert(html.includes(file));
+  assert(!/fonts\.googleapis|fonts\.gstatic|cdn\.jsdelivr/.test(published));
+  for(const file of ['vendor/fonts.css','vendor/chart.js','vendor/supabase.js'])assert(published.includes(file),file);
 });
 test('SQL, tests, package sources and credentials are absent from public output',()=>{
   for(const name of ['supabase_schema.sql','supabase_security_hardening.sql','.git','.env',

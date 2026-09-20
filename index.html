@@ -2,8 +2,21 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <title>Gestion finance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Gestion Finance — Votre tableur de finances personnelles</title>
+  <meta name="description" content="Gestion Finance réunit un tableur intelligent, un tableau de bord et des objectifs d'épargne pour suivre vos revenus, vos dépenses et votre épargne mois par mois." />
+  <link rel="canonical" href="https://gestion-finance-coral.vercel.app/" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Gestion Finance" />
+  <meta property="og:url" content="https://gestion-finance-coral.vercel.app/" />
+  <meta property="og:title" content="Gestion Finance — Votre tableur de finances personnelles" />
+  <meta property="og:description" content="Un tableur intelligent, un tableau de bord clair et des objectifs d'épargne : suivez vos revenus, vos dépenses et votre épargne mois par mois." />
+  <meta property="og:image" content="https://gestion-finance-coral.vercel.app/share-card.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Gestion Finance — Votre tableur de finances personnelles" />
+  <meta name="twitter:description" content="Un tableur intelligent, un tableau de bord clair et des objectifs d'épargne : suivez vos revenus, vos dépenses et votre épargne mois par mois." />
+  <meta name="twitter:image" content="https://gestion-finance-coral.vercel.app/share-card.png" />
   <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="app-icon-180.png" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -11,8 +24,36 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,900;1,400;1,900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <script>
+    /* Chargement différé des grosses bibliothèques : la page s'affiche sans les attendre.
+       Les URLs sont réécrites vers les copies hébergées par le site au moment du build. */
+    (function(){
+      var sources={chart:"https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js",xlsx:"https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"};
+      var integrities={xlsx:""};
+      var pending={};
+      function load(name){
+        if(pending[name]) return pending[name];
+        pending[name]=new Promise(function(resolve,reject){
+          var script=document.createElement("script");
+          script.src=sources[name];
+          if(integrities[name]){ script.integrity=integrities[name]; script.crossOrigin="anonymous"; }
+          script.onload=function(){ resolve(true); };
+          script.onerror=function(){ pending[name]=null; reject(new Error("Chargement impossible : "+name)); };
+          (document.head||document.documentElement).appendChild(script);
+        });
+        return pending[name];
+      }
+      window.GFVendors={
+        chart:function(){ return typeof window.Chart==="function"?Promise.resolve(true):load("chart"); },
+        xlsx:function(){ return (window.XLSX&&window.XLSX.utils)?Promise.resolve(true):load("xlsx"); }
+      };
+      // Préchargement discret une fois la page prête, pour que rien ne traîne au clic.
+      function warm(){ var idle=window.requestIdleCallback||function(fn){ return setTimeout(fn,1200); };
+        idle(function(){ window.GFVendors.chart().catch(function(){}); });
+        idle(function(){ window.GFVendors.xlsx().catch(function(){}); }); }
+      if(document.readyState==="complete") warm(); else window.addEventListener("load",warm);
+    })();
+  </script>
   <script src="store-shim.js"></script>
   <link rel="stylesheet" href="sheet.css?v=20260918-r1" />
   <link rel="stylesheet" href="onboarding.css?v=20260901-9" />
@@ -1845,9 +1886,9 @@
             <span class="sheet-status-label">Tableur</span>
             <span class="sheet-status-info" aria-describedby="sheetStatusHelp">i
               <span class="sheet-status-tooltip" id="sheetStatusHelp" role="tooltip">
-                <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--red,#fb7185)"></span> Non chargé</span>
-                <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:#3b82f6"></span> Connecté hors-ligne</span>
-                <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--green,#2ed47a)"></span> Connecté en ligne</span>
+                <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--red,#fb7185)"></span> Aucune donnée pour l’instant</span>
+                <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:#3b82f6"></span> Données sur cet appareil uniquement</span>
+                <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--green,#2ed47a)"></span> Données sauvegardées sur votre compte</span>
               </span>
             </span>
           </div><button type="button" id="syncSheetButton" class="gf-button gf-refresh" title="Mettre à jour le tableau de bord depuis le tableur" aria-label="Synchroniser les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Actualiser</span></button></div></div>
@@ -2157,6 +2198,11 @@
           <div class="legal-section"><strong>Connexion HTTPS</strong><p>Le site est servi via HTTPS pour garantir le chiffrement des données en transit.</p></div>
           <div class="legal-section"><strong>Synchronisation de compte (optionnelle)</strong><p>Lorsque tu te connectes, ton tableur est synchronisé avec ton compte Supabase via une connexion chiffrée.</p></div>
           <div class="legal-section"><strong>Pas de tracking publicitaire</strong><p>Ce site ne contient aucun tracker, cookie publicitaire ni script d'analyse tierce. Aucune donnée n'est vendue ou partagée avec des tiers.</p></div>
+          <div class="legal-section"><strong>Ce qui est enregistré</strong><p>Ton adresse email et ton mot de passe (chiffré), le contenu de ton tableur (libellés, montants, dates), tes objectifs, tes réglages d'affichage et les partages que tu accordes. Aucune coordonnée bancaire n'est demandée ni stockée.</p></div>
+          <div class="legal-section"><strong>Qui peut voir tes données</strong><p>Toi seul, et les personnes à qui tu donnes explicitement accès depuis la page Partage — jusqu'à ce que tu retires cet accès. Les règles de sécurité de la base de données empêchent tout autre compte de lire tes lignes.</p></div>
+          <div class="legal-section"><strong>Durée de conservation</strong><p>Tes données sont conservées tant que ton compte existe. Après suppression du compte, elles sont effacées de la base ; les sauvegardes techniques expirent sous 30 jours.</p></div>
+          <div class="legal-section"><strong>Récupérer ou supprimer tes données</strong><p>Le bouton « Exporter » du tableur télécharge tout au format Excel. Pour effacer : « Données et synchronisation » réinitialise ton tableur, et « Profil et connexion » supprime définitivement ton compte.</p></div>
+          <div class="legal-section"><strong>Une question sur tes données ?</strong><p>Écris-nous depuis l'adresse email de ton compte. Tu peux aussi consulter la <a href="/confidentialite" target="_blank" rel="noopener">politique de confidentialité complète</a> et les <a href="/conditions" target="_blank" rel="noopener">conditions d'utilisation</a>.</p></div>
         </section>
         <section class="settings-section panel settings-reading-page" data-settings-panel="legal" hidden>
           <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
@@ -2164,6 +2210,8 @@
           <div class="legal-section"><strong>Éditeur du site</strong><p>Site « Gestion finance », outil personnel de gestion budgétaire. Les informations saisies relèvent de l'utilisateur et demeurent sous sa responsabilité.</p></div>
           <div class="legal-section"><strong>Nature du service</strong><p>Application de tableur et de tableau de bord financiers. Aucune donnée bancaire n'est collectée : les saisies sont manuelles et restent locales, avec synchronisation de compte optionnelle.</p></div>
           <div class="legal-section"><strong>Propriété intellectuelle &amp; responsabilité</strong><p>Les données saisies sont les tiennes. Le site est fourni « en l'état », sans garantie de résultat. Il ne constitue pas un conseil financier, fiscal ou juridique.</p></div>
+          <div class="legal-section"><strong>Suspension de compte</strong><p>Un compte qui tente d'accéder aux données d'autrui ou de perturber le service peut être suspendu. Le détail figure dans les <a href="/conditions" target="_blank" rel="noopener">conditions d'utilisation</a>.</p></div>
+          <div class="legal-section"><strong>Pages publiques</strong><p><a href="/presentation" target="_blank" rel="noopener">Présentation du service</a> · <a href="/confidentialite" target="_blank" rel="noopener">Confidentialité</a> · <a href="/conditions" target="_blank" rel="noopener">Conditions d'utilisation</a></p></div>
         </section>
       </div>
     </section>
@@ -2648,7 +2696,21 @@
       if(chartScroll) chartScroll.classList.toggle("is-scrollable",usesTimeline&&visibleMonths.length>5);
       if(chartWrap) chartWrap.style.setProperty("--chart-min-width",usesTimeline?Math.max(760,visibleMonths.length*128)+"px":"0px");
       if(!visibleMonths.length){ elements.chartTitle.textContent="Répartition du mois"; elements.chartSubtitle.textContent="Importe une source financière pour afficher les graphiques."; elements.emptyState.classList.add("is-visible"); return; }
-      if(typeof Chart!=="function"){ elements.chartTitle.textContent="Chart.js indisponible"; elements.chartSubtitle.textContent="Le fichier Chart.js n'a pas pu être chargé depuis le CDN."; elements.emptyState.classList.add("is-visible"); showMessage("Chart.js n'a pas pu être chargé. Vérifie ta connexion internet."); return; }
+      if(typeof Chart!=="function"){
+        if(window.GFVendors){
+          elements.chartSubtitle.textContent="Préparation du graphique…";
+          window.GFVendors.chart().then(function(){ renderChart(); }).catch(function(){
+            elements.chartTitle.textContent="Graphique indisponible";
+            elements.chartSubtitle.textContent="Le graphique n'a pas pu être préparé.";
+            elements.emptyState.classList.add("is-visible");
+            showMessage("Le graphique n'a pas pu être préparé. Vérifiez votre connexion internet.");
+          });
+          return;
+        }
+        elements.chartTitle.textContent="Graphique indisponible";
+        elements.emptyState.classList.add("is-visible");
+        return;
+      }
       const config=getChartConfig(); elements.chartTitle.textContent=config.title; elements.chartSubtitle.textContent=config.subtitle; elements.emptyState.classList.remove("is-visible");
       if(window.GFI18n){ const tr=window.GFI18n.t; config.chart.data.labels=(config.chart.data.labels||[]).map(label=>tr(label)); config.chart.data.datasets.forEach(ds=>{ if(["Salaire","Dépense","Dépenses","Épargne"].includes(ds.label))ds.label=tr(ds.label); }); }
       state.chart=new Chart(elements.chartCanvas,config.chart); generateCustomLegend(state.chart);
@@ -2729,7 +2791,34 @@
     function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
     function updateChartColorTokens(){ const styles=getComputedStyle(document.body); COLORS.salary=readCssVar(styles,"--chart-salary",COLORS.salary); COLORS.expenses=readCssVar(styles,"--chart-expenses",COLORS.expenses); COLORS.savings=readCssVar(styles,"--chart-savings",COLORS.savings); COLORS.grid=readCssVar(styles,"--chart-grid",COLORS.grid); COLORS.tick=readCssVar(styles,"--chart-tick",COLORS.tick); COLORS.text=readCssVar(styles,"--chart-text",COLORS.text); }
     function readCssVar(styles,name,fallback){ return styles.getPropertyValue(name).trim()||fallback; }
-    function setPage(page){ const requested=page==="personal"?"sharing":page; const previous=state.page; const next=(requested==="settings"||requested==="sheet"||requested==="sharing"||requested==="sharingAccess"||requested==="updates"||requested==="objectives")?requested:"dashboard"; if(next===previous) return; state.page=next; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing"; if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess"; if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates"; if(elements.personalPage) elements.personalPage.hidden=true; if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="settings"&&previous!=="settings") showSettingsView("account"); if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); } if(state.page==="updates") renderUpdatesPage(); if(state.page==="objectives"&&window.GFObjectives) window.GFObjectives.render(); }
+
+    /* === Adresse web par écran ===
+       Chaque écran a sa propre adresse (/tableur, /objectifs, …) : on peut
+       l'ouvrir directement, la mettre en favori, et les boutons Précédent /
+       Suivant du navigateur fonctionnent comme sur un site classique. */
+    const PAGE_PATHS={dashboard:"/",sheet:"/tableur",objectives:"/objectifs",sharing:"/partage",updates:"/nouveautes",settings:"/parametres"};
+    const PATH_PAGES=Object.keys(PAGE_PATHS).reduce(function(acc,key){ acc[PAGE_PATHS[key]]=key; return acc; },{});
+    function pageFromLocation(){
+      const path=(window.location.pathname||"/").replace(/\/+$/,"")||"/";
+      return PATH_PAGES[path]||PATH_PAGES[path+"/"]||"";
+    }
+    function syncPageUrl(page,options){
+      const path=PAGE_PATHS[page];
+      if(!path||!window.history||!window.history.pushState) return;
+      const target=path+window.location.search+window.location.hash;
+      if(target===window.location.pathname+window.location.search+window.location.hash) return;
+      try{ window.history[options&&options.replaceUrl?"replaceState":"pushState"]({gfPage:page},"",target); }catch(e){}
+    }
+    function initPageRouting(){
+      const initial=pageFromLocation();
+      if(initial&&initial!==state.page) setPage(initial,{replaceUrl:true});
+      else syncPageUrl(state.page,{replaceUrl:true});
+      window.addEventListener("popstate",function(){
+        const page=pageFromLocation();
+        if(page) setPage(page,{fromHistory:true});
+      });
+    }
+    function setPage(page,options){ options=options||{}; const requested=page==="personal"?"sharing":page; const previous=state.page; const next=(requested==="settings"||requested==="sheet"||requested==="sharing"||requested==="sharingAccess"||requested==="updates"||requested==="objectives")?requested:"dashboard"; if(next===previous){ if(!options.fromHistory) syncPageUrl(next,options); return; } state.page=next; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing"; if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess"; if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates"; if(elements.personalPage) elements.personalPage.hidden=true; if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="settings"&&previous!=="settings") showSettingsView("account"); if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); } if(state.page==="updates") renderUpdatesPage(); if(state.page==="objectives"&&window.GFObjectives) window.GFObjectives.render();  if(!options.fromHistory) syncPageUrl(next,options); }
     const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],account:["Paramètres","Compte","Connexion, protection de l'accès et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."]};
     function showSettingsView(view){ const next=view!=="home"&&Object.prototype.hasOwnProperty.call(SETTINGS_VIEW_COPY,view)?view:"account",copy=SETTINGS_VIEW_COPY[next],translate=window.GFI18n?window.GFI18n.t:function(value){return value;}; document.querySelectorAll("[data-settings-panel]").forEach(function(panel){ panel.hidden=panel.dataset.settingsPanel!==next; }); const kicker=document.getElementById("settingsKicker"),title=document.getElementById("settingsTitle"),subtitle=document.getElementById("settingsSubtitle"); if(kicker) kicker.textContent=translate(copy[0]); if(title) title.textContent=translate(copy[1]); if(subtitle) subtitle.textContent=translate(copy[2]); document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.setAttribute("aria-current",String(button.dataset.settingsView===next)); }); }
     function renderPersonalSpace(){ const profileEmail=document.getElementById("profileEmail"),profileAvatar=document.getElementById("profileAvatar"),email=document.getElementById("personalEmail"),avatar=document.getElementById("personalAvatar"),meta=document.getElementById("personalObjectivesMeta"); if(email){ const value=String(profileEmail?.textContent||"").trim(); email.textContent=value&&value!=="Non connecté"?value:"Un espace privé pour organiser tes projets et tes accès."; } if(avatar) avatar.textContent=String(profileAvatar?.textContent||"?").trim().slice(0,2)||"?"; if(meta){ let goals=[]; try{ const profile=JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile")||"{}"); goals=Array.isArray(profile?.objectives)?profile.objectives.filter(Boolean):[]; }catch(e){} meta.textContent=goals.length?goals.length+" objectif"+(goals.length>1?"s":"")+" en cours.":"Crée et suis tes projets financiers."; } }
@@ -2980,6 +3069,7 @@ function resetDataState(){
       // Événement pour vider l'état du dashboard (appelé par le bouton admin)
       window.addEventListener("financeClearData", () => { resetDataState(); updateInterface(); });
       document.querySelectorAll("[data-page]").forEach(function(button){ button.addEventListener("click",function(){ setPage(button.dataset.page); }); });
+      initPageRouting();
       var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileSettings=document.getElementById("profileSettingsButton"), profilePersonal=document.getElementById("profilePersonalButton"), profileNotes=document.getElementById("profileNotesButton");
       if(profileButton && profilePopover){ profileButton.addEventListener("click",function(){ var open=profilePopover.hidden; profilePopover.hidden=!open; profileButton.setAttribute("aria-expanded",String(open)); }); document.addEventListener("click",function(event){ if(profileMenu && !profileMenu.contains(event.target)){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); document.addEventListener("keydown",function(event){ if(event.key==="Escape"){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); }
       if(profileSettings){ profileSettings.addEventListener("click",function(){ setPage("settings"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
@@ -4720,7 +4810,13 @@ function resetDataState(){
           return false;
         }
         if(typeof window.XLSX === "undefined" || !window.XLSX?.utils?.sheet_to_json){
-          if(!silent) showMessage("La bibliothèque Excel n'est pas chargée. Vérifie ta connexion internet.");
+          if(window.GFVendors){
+            window.GFVendors.xlsx().then(function(){ syncDashboardFromFinanceSheet(opts); }).catch(function(){
+              if(!silent) showMessage("Le module de lecture Excel n'a pas pu être préparé. Vérifiez votre connexion internet.");
+            });
+            return false;
+          }
+          if(!silent) showMessage("Le module de lecture Excel n'a pas pu être préparé. Vérifiez votre connexion internet.");
           return false;
         }
         const wb = window.FinanceSheet.buildWorkbook();
@@ -4957,8 +5053,9 @@ function resetDataState(){
       try{
         let tables = [], workbook = null, decodeIssues = [], encoding = "";
         if(spreadsheetLike){
+          if(window.GFVendors){ try{ await window.GFVendors.xlsx(); }catch(e){} }
           if(typeof window.XLSX === "undefined" || !window.XLSX?.read || !window.XLSX?.utils?.sheet_to_json){
-            showMessage("Le module Excel n'a pas pu être chargé. Vérifie la connexion internet.");
+            showMessage("Le module de lecture Excel n'a pas pu être préparé. Vérifiez votre connexion internet.");
             return;
           }
           const buffer = await readFileArrayBuffer(file);
@@ -5080,6 +5177,11 @@ function resetDataState(){
     if(/email not confirmed|email.*not.*confirm/.test(normalized)) return "Ton adresse email n’est pas encore confirmée.";
     if(/user already registered|already.*registered/.test(normalized)) return "Un compte existe déjà avec cette adresse email.";
     if(/password should be at least|password.*least/.test(normalized)) return "Le mot de passe doit contenir au moins 8 caractères.";
+    if(/banned|user is banned|account.*(banned|suspend|disabled)|blocked/.test(normalized)) return "Ce compte est suspendu et ne peut plus être utilisé pour le moment. Contacte l’administrateur si tu penses qu’il s’agit d’une erreur.";
+    if(/user not found|no user found/.test(normalized)) return "Aucun compte n’existe avec cette adresse email.";
+    if(/email address.*invalid|invalid email/.test(normalized)) return "Cette adresse email n’est pas valide.";
+    if(/signups? not allowed|signup is disabled/.test(normalized)) return "Les nouvelles inscriptions sont temporairement fermées.";
+    if(/session.*(expired|missing)|refresh token/.test(normalized)) return "Ta session a expiré. Reconnecte-toi pour continuer.";
     if(/rate limit|too many requests/.test(normalized)) return "Trop de tentatives. Réessaie dans quelques instants.";
     if(/network|fetch/.test(normalized)) return "Impossible de contacter le service de connexion. Vérifie ta connexion internet.";
     return raw || "Une erreur est survenue. Réessaie.";
