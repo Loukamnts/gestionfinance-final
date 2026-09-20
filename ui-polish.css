@@ -1154,13 +1154,17 @@ body[data-theme="brutal"] #dashboardPage .home-toolbar { border-width:2px !impor
 
 /* L'aide conserve une largeur stable, des lignes respirantes et la forme du thème. */
 #dashboardPage .sheet-status-tooltip {
-  width:min(310px,calc(100vw - 32px));
-  min-width:260px;
-  max-width:310px;
-  padding:13px 14px;
+  width:min(260px,calc(100vw - 32px));
+  min-width:220px;
+  max-width:260px;
+  padding:10px 12px;
   border:1px solid var(--line-strong);
   border-radius:var(--control-radius);
-  background:var(--panel-solid);
+  background-color:var(--panel-solid) !important;
+  background-image:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  opacity:1;
   color:var(--text);
   box-shadow:var(--shadow);
 }
@@ -1168,18 +1172,22 @@ body[data-theme="brutal"] #dashboardPage .home-toolbar { border-width:2px !impor
   display:grid;
   grid-template-columns:9px minmax(0,1fr);
   align-items:start;
-  gap:9px;
+  gap:8px;
   margin:0;
-  padding:5px 0;
+  padding:3px 0;
   color:var(--text);
-  font-size:.78rem;
-  line-height:1.42;
+  font-size:.74rem;
+  line-height:1.35;
   white-space:normal;
 }
 #dashboardPage .sheet-status-tooltip-dot { width:9px; height:9px; margin-top:.22em; }
 body[data-theme="glass"] #dashboardPage .sheet-status-tooltip { border-radius:10px; }
 body[data-theme="editorial"] #dashboardPage .sheet-status-tooltip { border-radius:3px; box-shadow:2px 3px 0 var(--line); }
 body[data-theme="brutal"] #dashboardPage .sheet-status-tooltip { border-radius:0 !important; border-width:2px; box-shadow:4px 4px 0 var(--line-strong); }
+body[data-theme="glass"][data-mode="dark"] #dashboardPage .sheet-status-tooltip { background-color:#252A2F !important; border-color:#C9825A !important; color:#F1F3F4; }
+body[data-theme="editorial"][data-mode="dark"] #dashboardPage .sheet-status-tooltip { background-color:#242629 !important; border-color:#702F3A !important; color:#F8F6F2; }
+body[data-theme="brutal"][data-mode="dark"] #dashboardPage .sheet-status-tooltip { background-color:#101214 !important; border-color:#FAFAF8 !important; color:#FAFAF8; }
+body[data-mode="dark"] #dashboardPage .sheet-status-tooltip-item { color:inherit; }
 
 /* Les surfaces claires utilisent la palette propre de chaque thème. */
 body[data-theme="glass"][data-mode="light"] #dashboardPage .home-toolbar,
@@ -1197,12 +1205,12 @@ body[data-theme="brutal"][data-mode="light"] #dashboardPage :is(.sheet-status-la
   #dashboardPage .home-toolbar { padding:14px !important; }
   #dashboardPage .sheet-status-tooltip {
     position:fixed;
-    left:14px;
+    left:auto;
     right:14px;
     bottom:calc(86px + env(safe-area-inset-bottom,0px));
-    width:auto;
+    width:min(250px,calc(100vw - 28px));
     min-width:0;
-    max-width:none;
+    max-width:250px;
     transform:translateY(4px);
   }
 }
