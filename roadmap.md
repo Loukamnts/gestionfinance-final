@@ -24,3 +24,4 @@
 - [x] Harmoniser formes et tailles de tous les blocs du site (cartes, panneaux, boutons) par thème.
 - [x] Restaurer le fond du tableau de bord, dimensionner son aide, centrer la barre collante et uniformiser la largeur des pages.
 - [x] Supprimer le défilement sous la barre, ajuster sa taille et corriger ses couleurs sombres ainsi que l’aide Tableur.
+- [x] Retirer le bleu de la barre claire du thème Contraste au profit du noir et blanc.
