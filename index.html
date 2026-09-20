@@ -591,7 +591,7 @@
     .sheet-status-info:hover .sheet-status-tooltip { opacity: 1; visibility: visible; transform: translateY(0); }
     .sheet-status-tooltip {
       position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(4px);
-      background: var(--panel-solid, #1e1b4b); border: 1px solid var(--line-strong, rgba(255,255,255,0.15));
+      background: var(--panel-solid, #1B1B20); border: 1px solid var(--line-strong, rgba(255,255,255,0.15));
       border-radius: 10px; padding: 12px 14px; min-width: 200px; max-width: 260px;
       box-shadow: 0 12px 40px rgba(0,0,0,0.4); z-index: 100;
       opacity: 0; visibility: hidden; transition: all 0.2s; pointer-events: none;
@@ -698,7 +698,9 @@
     .preview-glass { color: #d9bda3; background: radial-gradient(circle at 0 0, rgba(192,132,87,0.30), transparent 38%), radial-gradient(circle at 100% 0, rgba(126,140,160,0.20), transparent 34%), #111114; border: 1px solid rgba(237,237,240,0.1); box-shadow: inset 0 1px 0 rgba(237,237,240,0.1); }
     .preview-glass .preview-title { border-radius: 999px; }
     .preview-glass .preview-tabs i, .preview-glass .preview-cards i { border: 1px solid rgba(237,237,240,0.12); border-radius: 10px; background: rgba(237,237,240,0.06); backdrop-filter: blur(6px); }
-    .preview-glass .preview-chart i { border-radius: 6px 6px 0 0; background: linear-gradient(180deg,#c08457,#8fa0b5); }
+    .preview-glass .preview-chart i { border-radius: 6px 6px 0 0; background: #c08457; }
+    .preview-glass .preview-chart i:nth-child(2) { background: #52607a; }
+    .preview-glass .preview-chart i:nth-child(3) { background: #4fa87b; }
     .preview-editorial { color: #1a1a1e; background: #f6f3ee; border: 1px solid #e3ddd3; box-shadow: 2px 4px 0 #e3ddd3; font-family: "Playfair Display", Georgia, serif; }
     .preview-editorial .preview-title { background: #1a1a1e; border-radius: 2px; }
     .preview-editorial .preview-tabs i { border: 1px solid #c9c1b4; background: #fbf9f6; border-radius: 3px; }
@@ -730,7 +732,7 @@
     .custom-rule-inputs button:hover { transform: var(--hover-transform); }
     #customRulesList { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
     .custom-rule-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 40px; font-size: 0.85rem; color: var(--text); transition: all 0.2s ease; }
-    .custom-rule-badge.in-use { border-left: 3px solid var(--accent); background: var(--button-active-bg); box-shadow: inset 0 0 0 1px rgba(129,140,248,0.2); }
+    .custom-rule-badge.in-use { border-left: 3px solid var(--accent); background: var(--button-active-bg); box-shadow: inset 0 0 0 1px rgba(192,132,87,0.2); }
     .custom-rule-badge .rule-name { font-weight: 600; }
     .custom-rule-badge .rule-status { font-size: 0.7rem; background: color-mix(in srgb, var(--accent), transparent 80%); padding: 2px 6px; border-radius: 30px; color: var(--accent); margin-left: 4px; }
     .btn-edit, .btn-del { background: none; border: none; padding: 0; min-height: unset; font-size: 0; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 0.15s, transform 0.15s; color: var(--muted); border-radius: 30px; }
@@ -1386,7 +1388,7 @@
     .mode-segment button { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; background: transparent; color: var(--muted); font-family: var(--font-body); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: color 0.18s ease, background 0.18s ease; white-space: nowrap; }
     .mode-segment button svg { width: 16px; height: 16px; flex-shrink: 0; }
   .mode-segment button.is-active { color: var(--button-primary-text, #090a1f); background: var(--button-primary-bg); }
-  .mode-segment button:not(.is-active):hover { color: var(--text); background: var(--button-active-bg, rgba(129,140,248,0.08)); }
+  .mode-segment button:not(.is-active):hover { color: var(--text); background: var(--button-active-bg, rgba(192,132,87,0.08)); }
   body[data-theme="brutal"] .mode-segment { border-radius: 0; }
   body[data-theme="brutal"] .mode-segment button { text-transform: uppercase; font-family: var(--font-heading); }
   @media (max-width: 560px) { .mode-segment button { padding: 8px 14px; font-size: 0.82rem; } }

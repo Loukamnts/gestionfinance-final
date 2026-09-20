@@ -12,9 +12,9 @@
   };
 
   const THEMES = [
-    { id: "glass", name: "Glass", preview: "linear-gradient(135deg,#1e1b4b,#312e81,#1e1b4b)" },
-    { id: "editorial", name: "Éditorial", preview: "linear-gradient(135deg,#2a1a0e,#4a3220,#2a1a0e)" },
-    { id: "brutal", name: "Brutal", preview: "linear-gradient(135deg,#0a0a0a,#1a1a1a,#0a0a0a)" },
+    { id: "glass", name: "Ardoise", preview: "linear-gradient(135deg,#111114,#1B1B20,#2a2a31)" },
+    { id: "editorial", name: "Édition", preview: "linear-gradient(135deg,#2a1a0e,#4a3220,#2a1a0e)" },
+    { id: "brutal", name: "Contraste", preview: "linear-gradient(135deg,#0a0a0a,#1a1a1a,#0a0a0a)" },
   ];
 
   let currentStep = 0;

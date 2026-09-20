@@ -497,13 +497,13 @@ body[data-theme="glass"] :is(.personal-notes-panel,.personal-notes-close,.notebo
 body[data-theme="glass"] .personal-notes-panel textarea { border-radius:10px; }
 body[data-theme="glass"] .personal-workspace-link,.personal-workspace-notes { background:transparent; }
 body[data-theme="glass"] .personal-workspace-link.is-active,body[data-theme="glass"] .personal-workspace-link:hover,body[data-theme="glass"] .personal-workspace-notes:hover { background:var(--button-active-bg); }
-body[data-theme="glass"][data-mode="dark"] :is(.personal-notes-panel,.objectives-panel,.objective-form,.objective-card) { background:rgba(17,20,44,.96); }
+body[data-theme="glass"][data-mode="dark"] :is(.personal-notes-panel,.objectives-panel,.objective-form,.objective-card) { background:rgba(27,27,32,.96); }
 body[data-theme="glass"][data-mode="light"] :is(.personal-notes-panel,.objectives-panel,.objective-form,.objective-card) { background:rgba(255,255,255,.96); }
-body[data-theme="glass"][data-mode="dark"] .personal-workspace-notes { background:rgba(17,20,44,.96); }
+body[data-theme="glass"][data-mode="dark"] .personal-workspace-notes { background:rgba(27,27,32,.96); }
 body[data-theme="glass"][data-mode="light"] .personal-workspace-notes { background:rgba(255,255,255,.96); }
 @media (max-width:720px) {
   body[data-theme="glass"] :is(.objective-form,.objective-card,.objectives-panel,.personal-notes-panel) { border-radius:8px; }
-  body[data-theme="glass"][data-mode="dark"] :is(.objective-form,.objective-card,.objectives-panel,.personal-notes-panel) { background:rgba(17,20,44,.96); }
+  body[data-theme="glass"][data-mode="dark"] :is(.objective-form,.objective-card,.objectives-panel,.personal-notes-panel) { background:rgba(27,27,32,.96); }
   body[data-theme="glass"][data-mode="light"] :is(.objective-form,.objective-card,.objectives-panel,.personal-notes-panel) { background:rgba(255,255,255,.96); }
   body[data-theme="glass"] :is(.objective-kind,.objective-progress,.objective-plan-toggle,.objective-plan-fields) { border-radius:6px; }
 }
@@ -527,7 +527,7 @@ body[data-theme="brutal"] :is(.personal-workspace-link,.personal-workspace-notes
 body[data-theme="glass"] :is(.panel,.metric-card,.detail-panel,.home-toolbar,.latest-update-banner,.sheet-status-info,.sheet-status-tooltip,.profile-trigger,.profile-popover,.custom-select-options,.settings-section,.settings-reset-section,.update-entry,.personal-workspace-link,.personal-workspace-notes) {
   backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
 }
-body[data-theme="glass"][data-mode="dark"] :is(.panel,.metric-card,.detail-panel,.home-toolbar,.latest-update-banner,.profile-popover,.custom-select-options,.settings-section,.settings-reset-section,.update-entry) { background:#11142c; }
+body[data-theme="glass"][data-mode="dark"] :is(.panel,.metric-card,.detail-panel,.home-toolbar,.latest-update-banner,.profile-popover,.custom-select-options,.settings-section,.settings-reset-section,.update-entry) { background:#1B1B20; }
 body[data-theme="glass"][data-mode="light"] :is(.panel,.metric-card,.detail-panel,.home-toolbar,.latest-update-banner,.profile-popover,.custom-select-options,.settings-section,.settings-reset-section,.update-entry) { background:#fff; }
 body[data-theme="glass"] :is(.sheet-status-info,.sheet-status-tooltip) { background:var(--input-focus-bg) !important; }
 
@@ -548,7 +548,7 @@ body[data-theme="glass"] #dashboardPage .sheet-status-tooltip {
   backdrop-filter:none !important;
   -webkit-backdrop-filter:none !important;
 }
-body[data-theme="glass"][data-mode="dark"] #dashboardPage .sheet-status-tooltip { background:#11142c !important; }
+body[data-theme="glass"][data-mode="dark"] #dashboardPage .sheet-status-tooltip { background:#1B1B20 !important; }
 body[data-theme="glass"][data-mode="light"] #dashboardPage .sheet-status-tooltip { background:#ffffff !important; }
 body[data-theme="brutal"] #dashboardPage :is(.sheet-status-info,.sheet-status-tooltip) { border-radius:0 !important; }
 
@@ -582,9 +582,9 @@ body[data-theme="brutal"] .sf-toolbar-actions > .sf-button.sf-refresh { border-r
   backdrop-filter:none !important;
   -webkit-backdrop-filter:none !important;
 }
-body[data-theme="glass"][data-mode="dark"] :is(#dashboardPage .sheet-status-tooltip,.balance-help) { background:#151936 !important; }
+body[data-theme="glass"][data-mode="dark"] :is(#dashboardPage .sheet-status-tooltip,.balance-help) { background:#23232a !important; }
 body[data-theme="glass"][data-mode="light"] :is(#dashboardPage .sheet-status-tooltip,.balance-help) { background:#ffffff !important; }
-body[data-theme="editorial"][data-mode="dark"] .balance-help { background:#21160b !important; border-radius:3px !important; }
+body[data-theme="editorial"][data-mode="dark"] .balance-help { background:#241d14 !important; border-radius:3px !important; }
 body[data-theme="editorial"][data-mode="light"] .balance-help { background:#ffffff !important; border-radius:3px !important; }
 body[data-theme="brutal"] .balance-help { border-radius:0 !important; }
 
@@ -642,7 +642,7 @@ body[data-theme="editorial"] .language-options { border-radius:4px; }
 /* Aide : le contenu ne laisse jamais transparaître un trait du tableau de bord.
    Les petits "i" sont de vrais boutons, sans curseur d'aide en point d'interrogation. */
 #dashboardPage .sheet-status-tooltip,.balance-help { background-image:none !important; background-color:var(--panel-solid) !important; background-clip:padding-box; isolation:isolate; }
-body[data-theme="glass"][data-mode="dark"] :is(#dashboardPage .sheet-status-tooltip,.balance-help) { background-color:#151936 !important; }
+body[data-theme="glass"][data-mode="dark"] :is(#dashboardPage .sheet-status-tooltip,.balance-help) { background-color:#23232a !important; }
 body[data-theme="glass"][data-mode="light"] :is(#dashboardPage .sheet-status-tooltip,.balance-help) { background-color:#ffffff !important; }
 :is(.sheet-status-info,.balance-info) { cursor:pointer; }
 
@@ -735,7 +735,7 @@ body[data-theme="brutal"] :is(.objective-progress-editor input,.objective-update
 .settings-section,.settings-reset-section { width:100%; box-sizing:border-box; padding:clamp(17px,2.6vw,26px); }
 .settings-reset-section { align-items:stretch; }
 .settings-reset-section .settings-reset-copy { min-width:0; }
-body[data-theme="glass"][data-mode="dark"] :is(.objectives-panel,.objective-form,.objective-card) { background:#11142c; }
+body[data-theme="glass"][data-mode="dark"] :is(.objectives-panel,.objective-form,.objective-card) { background:#1B1B20; }
 body[data-theme="glass"][data-mode="light"] :is(.objectives-panel,.objective-form,.objective-card) { background:#fff; }
 
 @media (max-width:720px) {
