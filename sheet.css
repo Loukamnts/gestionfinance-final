@@ -1218,11 +1218,12 @@ body[data-theme="editorial"][data-mode="dark"] .sheet-bar .button { color:#24262
 body[data-theme="editorial"][data-mode="dark"] .sheet-bar #btnSheetCalc { background:#702F3A; color:#F8F6F2; }
 body[data-theme="brutal"][data-mode="dark"] .sheet-bar { background:#101214; border-color:#FAFAF8; }
 body[data-theme="brutal"][data-mode="dark"] .sheet-bar .button { color:#FAFAF8; }
-body[data-theme="brutal"][data-mode="dark"] .sheet-bar #btnSheetCalc { background:#2457A7; color:#FAFAF8; }
-body[data-theme="glass"][data-mode="light"] .sheet-bar { background:#252A2F; border-color:#C9825A; }
-body[data-theme="glass"][data-mode="light"] .sheet-bar .button { color:#F1F3F4; }
+body[data-theme="brutal"][data-mode="dark"] .sheet-bar #btnSheetCalc { background:#FAFAF8; color:#101214; }
+body[data-theme="glass"][data-mode="light"] .sheet-bar { background:#F1F3F4; border-color:#C9825A; }
+body[data-theme="glass"][data-mode="light"] .sheet-bar .button { color:#171A1D; }
 body[data-theme="glass"][data-mode="light"] .sheet-bar .button:hover:not(:disabled),
-body[data-theme="glass"][data-mode="light"] .sheet-bar .button:focus-visible { color:#F1F3F4; background:color-mix(in srgb,#C9825A 28%,transparent); }
+body[data-theme="glass"][data-mode="light"] .sheet-bar .button:focus-visible { color:#171A1D; background:color-mix(in srgb,#C9825A 22%,#F1F3F4); }
+body[data-theme="glass"][data-mode="light"] .sheet-bar #btnSheetCalc { background:#C9825A; color:#171A1D; }
 body[data-theme="editorial"][data-mode="light"] .sheet-bar { background:#F8F6F2; border-color:#702F3A; }
 body[data-theme="editorial"][data-mode="light"] .sheet-bar .button { color:#242629; }
 body[data-theme="editorial"][data-mode="light"] .sheet-bar #btnSheetCalc { background:#702F3A; color:#F8F6F2; }
