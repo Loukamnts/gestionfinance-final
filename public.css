@@ -75,4 +75,4 @@
   .public-nav .btn{min-height:38px;padding:8px 12px;font-size:.74rem;gap:8px;white-space:nowrap}
 }
 
-.brand-initial{position:relative;display:inline-block;color:var(--accent);font-style:normal;font-size:1.08em}.brand-initial:after{content:"";position:absolute;left:8%;right:-3%;bottom:-1px;height:2px;background:var(--accent);transform:skewY(-14deg);transform-origin:right center}.preview-brand>.brand-initial{margin:0;background:none;color:var(--accent)}
+.brand-m{width:1.24em;height:1.24em;margin:0 -.04em 0 -.08em;color:var(--accent);vertical-align:-.24em;flex:0 0 auto}.brand-m path{stroke-width:2.9}.brand-m circle{r:2.6}.public-brand>span,.preview-brand>span{display:inline-flex;align-items:center}

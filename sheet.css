@@ -665,10 +665,6 @@ body[data-theme="glass"] .sheet-table td.cell { background:var(--bg); }
 @media (max-width:720px) {
   .sheet-bar { display:flex; grid-template-columns:none; align-items:center; gap:7px; overflow-x:auto; overflow-y:hidden; padding:7px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .sheet-bar::-webkit-scrollbar { display:none; }
-    margin-top:10px;
-    min-height:42px;
-    padding:3px;
-    gap:3px;
   .sheet-bar-left,.sheet-bar-right { display:flex; flex:0 0 auto; min-width:max-content; margin:0; gap:4px; overflow:visible; padding:3px; }
   .sheet-bar .button { width:32px; min-width:32px; height:32px; min-height:32px; flex-basis:32px; }
   .sheet-bar .button svg { width:16px; height:16px; flex-basis:16px; }
@@ -1005,22 +1001,27 @@ body[data-theme="brutal"] .sheet-bar { box-shadow:4px 4px 0 var(--line-strong); 
   .sheet-bar #btnSheetCalc .lbl { display:inline !important; font-size:.75rem; }
 }
 
-/* Barre compacte et sans effet de panneau autour des commandes. */
+/* Barre sobre qui reste visible pendant le défilement du tableur. */
 .sheet-bar {
-  position:relative;
-  top:auto;
-  align-self:center;
-  margin-inline:auto;
-  min-height:44px;
-  gap:5px;
-  padding:3px;
-  border-color:transparent;
-  background:transparent;
-  box-shadow:none;
+  position:sticky;
+  top:10px;
+  z-index:26;
+  align-self:stretch;
+  width:auto;
+  max-width:100%;
+  margin-inline:0;
+  min-height:46px;
+  gap:8px;
+  padding:5px 8px;
+  border:1px solid var(--line);
+  border-radius:min(12px,var(--radius));
+  background:var(--panel-solid);
+  box-shadow:0 1px 0 var(--line);
   backdrop-filter:none;
 }
-.sheet-bar-left,.sheet-bar-file-actions { padding:1px; }
-.sheet-bar-right { gap:5px; }
+.sheet-bar-left,.sheet-bar-file-actions { gap:2px; padding:2px; border-color:transparent; background:transparent; }
+.sheet-bar-right { gap:8px; margin-left:auto; }
+.sheet-bar .sheet-divider { display:block; height:22px; background:var(--line); }
 .sheet-bar .button {
   width:34px;
   min-width:34px;
@@ -1029,36 +1030,43 @@ body[data-theme="brutal"] .sheet-bar { box-shadow:4px 4px 0 var(--line-strong); 
   flex-basis:34px;
 }
 .sheet-bar #btnSheetCalc {
-  height:38px;
-  min-height:38px;
-  padding-inline:12px;
+  height:36px;
+  min-height:36px;
+  padding-inline:14px;
 }
+.sheet-bar #btnSheetClear,
+.sheet-bar #btnSheetClear:hover:not(:disabled) { color:var(--muted); background:transparent; border-color:transparent; }
+.sheet-bar #btnSheetClear:hover:not(:disabled),
+.sheet-bar #btnSheetDeleteRow:hover:not(:disabled) { color:var(--text); border-color:var(--line-strong); background:var(--button-active-bg); }
+.sheet-bar #btnSheetDeleteRow .lbl { display:none; }
 
 @media (max-width:720px) {
   .sheet-bar {
-    position:relative;
-    top:auto;
-    align-self:center;
-    margin-inline:auto;
+    position:sticky;
+    top:6px;
+    width:auto;
+    margin-inline:0;
     min-height:42px;
-    padding:3px;
+    gap:6px;
+    padding:4px 6px;
   }
+  .sheet-bar .sheet-divider { display:none; }
   .sheet-bar .button { width:33px; min-width:33px; height:33px; min-height:33px; flex-basis:33px; }
-  .sheet-bar #btnSheetCalc { height:37px; min-height:37px; padding-inline:9px !important; }
+  .sheet-bar #btnSheetCalc { height:37px; min-height:37px; padding-inline:11px !important; }
 }
 
 /* Chaque univers garde sa personnalité sur les boutons, pas sur un cadre. */
-body[data-theme="glass"] .sheet-bar { border-radius:0; border-color:transparent; background:transparent; box-shadow:none; }
+body[data-theme="glass"] .sheet-bar { border-radius:12px; border-color:var(--line); background:var(--panel-solid); }
 body[data-theme="glass"] :is(.sheet-bar-left,.sheet-bar-file-actions) { border-radius:8px; }
 body[data-theme="editorial"] .sheet-bar {
-  min-height:44px;
-  border-radius:0;
-  box-shadow:none;
+  min-height:46px;
+  border-radius:2px;
+  background:var(--panel-solid);
 }
 body[data-theme="editorial"] :is(.sheet-bar-left,.sheet-bar-file-actions,.sheet-bar .button) { border-radius:3px; }
 body[data-theme="editorial"] .sheet-bar .button { width:38px; min-width:38px; height:38px; min-height:38px; flex-basis:38px; }
 body[data-theme="editorial"] .sheet-bar #btnSheetCalc { height:42px; min-height:42px; }
-body[data-theme="brutal"] .sheet-bar { min-height:48px; padding:3px; border:0; box-shadow:none; }
+body[data-theme="brutal"] .sheet-bar { min-height:48px; padding:4px 6px; border:2px solid var(--line-strong); box-shadow:none; background:var(--panel-solid); }
 body[data-theme="brutal"] .sheet-bar .button { width:42px; min-width:42px; height:42px; min-height:42px; flex-basis:42px; }
 body[data-theme="brutal"] .sheet-bar #btnSheetCalc { height:46px; min-height:46px; }
 @media (max-width:720px) {

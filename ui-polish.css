@@ -4,8 +4,10 @@ body { --ui-radius: min(12px,var(--control-radius,12px)); }
 .app-header .brand { display:flex;align-items:center;min-width:0; }
 .app-header .brand-copy { min-width:0; }
 .app-header .brand-copy h1 { font-size:clamp(1.55rem,2.3vw,2rem);line-height:1.2;letter-spacing:0;margin:0;white-space:nowrap; }
-.brand-initial { position:relative; display:inline-block; color:var(--accent); font-size:1.08em; }
-.brand-initial::after { content:""; position:absolute; left:8%; right:-3%; bottom:-1px; height:2px; background:var(--accent); transform:skewY(-14deg); transform-origin:right center; }
+.brand-m { width:1.24em; height:1.24em; margin:0 -0.04em 0 -0.08em; color:var(--accent); vertical-align:-0.24em; flex:0 0 auto; }
+.brand-m path { stroke-width:2.9; }
+.brand-m circle { r:2.6; }
+.brand-copy h1 { display:inline-flex; align-items:center; }
 .app-header .top-actions { justify-self:end;margin:0; }
 .app-header .desktop-nav { margin:0;justify-self:center;order:0;width:auto; }
 .app-header .profile-trigger { min-height:42px;padding:5px 10px 5px 5px; }
