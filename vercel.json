@@ -49,23 +49,23 @@
   "rewrites": [
     {
       "source": "/tableur",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/objectifs",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/partage",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/nouveautes",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/parametres",
-      "destination": "/index.html"
+      "destination": "/"
     }
   ]
 }
