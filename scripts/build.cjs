@@ -25,7 +25,7 @@ const integrity = content => 'sha384-' + crypto.createHash('sha384').update(cont
 const publicFiles = ['sheet.js','sheet.css','onboarding.js','onboarding.css','friends.js',
   'i18n.js','shared-dashboard.js','sharing.css','ui-controls.js','ui-polish.css','objectives.js',
   'store-shim.js','favicon.ico','app-icon-180.png','app-icon-512.png','manifest.webmanifest','supabase_config.json',
-  'robots.txt','sitemap.xml','public.css','share-card.png'];
+  'robots.txt','sitemap.xml','public.css','public.js','share-card.png'];
 for (const file of publicFiles) copy(file);
 const config = JSON.parse(fs.readFileSync(path.join(root,'supabase_config.json'),'utf8'));
 require('./public-config.cjs')(config);
@@ -97,10 +97,11 @@ html = html.replace(/<script\b([^>]*?)\bsrc="([^"?#]+)([^" ]*)"([^>]*)><\/script
   new vm.Script(code.toString('utf8'),{filename:src});
   return `<script ${before}src="${src}${query}"${after} integrity="${integrity(code)}" crossorigin="anonymous"></script>`;
 });
-put('index.html',html);
+put('app.html',html);
 for (const page of ['presentation.html','confidentialite.html','conditions.html']) {
   if (fs.existsSync(path.join(root,page))) copy(page);
 }
+copy('presentation.html','index.html');
 // Contact facultatif tant que le propriétaire n'a pas choisi son adresse publique.
 if (fs.existsSync(path.join(root,'.well-known/security.txt'))) copy('.well-known/security.txt');
 console.log(`Build sécurisé : ${publicFiles.length} fichiers applicatifs, ${inlineCount} scripts séparés, aucun SQL publié.`);

@@ -7,7 +7,7 @@ const vm=require('node:vm');
 const {execFileSync}=require('node:child_process');
 const root=path.resolve(__dirname,'..');
 execFileSync(process.execPath,['scripts/build.cjs'],{cwd:root});
-const html=fs.readFileSync(path.join(root,'dist/index.html'),'utf8');
+const html=fs.readFileSync(path.join(root,'dist/app.html'),'utf8');
 // Les scripts en ligne sont extraits vers dist/app/ : on les inclut pour les
 // verifications de contenu (URLs des bibliotheques, absence de CDN externes).
 const appDir=path.join(root,'dist/app');

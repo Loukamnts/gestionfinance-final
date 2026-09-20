@@ -3,6 +3,13 @@
   "outputDirectory": "dist",
   "installCommand": "npm ci --ignore-scripts --include=dev",
   "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/presentation",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -48,24 +55,28 @@
   ],
   "rewrites": [
     {
+      "source": "/accueil",
+      "destination": "/app"
+    },
+    {
       "source": "/tableur",
-      "destination": "/"
+      "destination": "/app"
     },
     {
       "source": "/objectifs",
-      "destination": "/"
+      "destination": "/app"
     },
     {
       "source": "/partage",
-      "destination": "/"
+      "destination": "/app"
     },
     {
       "source": "/nouveautes",
-      "destination": "/"
+      "destination": "/app"
     },
     {
       "source": "/parametres",
-      "destination": "/"
+      "destination": "/app"
     }
   ]
 }

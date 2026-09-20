@@ -1,8 +1,8 @@
 User-agent: *
 Allow: /$
-Allow: /presentation
 Allow: /confidentialite
 Allow: /conditions
+Disallow: /accueil
 Disallow: /tableur
 Disallow: /objectifs
 Disallow: /partage

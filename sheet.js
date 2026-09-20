@@ -260,7 +260,8 @@
   }
 
   // ═════════════════════════ Rendu ════════════════════════════════
-  let tbody, thead, container, tabsEl, sheetScroll, fillHandle;
+  let tbody, thead, container, tabsEl, sheetScroll, fillHandle, mobileMonthLabel;
+  let mobileMonth = Math.max(0, Math.min(11, new Date().getMonth()));
   let lastComputed = {};
   const cellMap = new Map();
   let rowHeadEls = [];
@@ -286,6 +287,13 @@
     // ne doit jamais empêcher la sélection de se redessiner sur la nouvelle grille.
     cellMap.clear(); rowHeadEls = []; colHeadEls = [];
     prevInRange = new Set(); prevActiveKey = null;
+    const monthNav = document.createElement("div"); monthNav.className = "sheet-mobile-month"; monthNav.setAttribute("aria-label", "Mois affiché");
+    const previousMonth = document.createElement("button"); previousMonth.type = "button"; previousMonth.className = "sheet-mobile-month-button"; previousMonth.textContent = "‹"; previousMonth.setAttribute("aria-label", "Mois précédent");
+    mobileMonthLabel = document.createElement("strong"); mobileMonthLabel.className = "sheet-mobile-month-label";
+    const nextMonth = document.createElement("button"); nextMonth.type = "button"; nextMonth.className = "sheet-mobile-month-button"; nextMonth.textContent = "›"; nextMonth.setAttribute("aria-label", "Mois suivant");
+    previousMonth.addEventListener("click", () => setMobileMonth(mobileMonth - 1));
+    nextMonth.addEventListener("click", () => setMobileMonth(mobileMonth + 1));
+    monthNav.append(previousMonth, mobileMonthLabel, nextMonth);
     const scroll = document.createElement("div"); scroll.className = "sheet-scroll"; sheetScroll = scroll;
     const table = document.createElement("table"); table.className = "sheet-table";
     table.style.setProperty("--sheet-row-header-width", Math.round(rowHeaderWidth(activeSheet())) + "px");
@@ -330,8 +338,24 @@
     addBtn.title = "Ajouter une ligne";
     addBtn.addEventListener("click", () => { state.rows += 1; buildTable(); renderValues(); scheduleSave(); });
     addBar.appendChild(addBtn);
-    container.appendChild(scroll); container.appendChild(addBar);
+    container.appendChild(monthNav); container.appendChild(scroll); container.appendChild(addBar);
+    applyMobileMonth();
     applySelectionStyle();
+  }
+
+  function setMobileMonth(index) {
+    mobileMonth = (index + 12) % 12;
+    state.active = { r: Math.max(0, Math.min(state.active.r, state.rows - 1)), c: mobileMonth };
+    setRange(state.active.r, mobileMonth, state.active.r, mobileMonth);
+    applyMobileMonth();
+    syncFormulaBar();
+  }
+  function applyMobileMonth() {
+    if (mobileMonthLabel) mobileMonthLabel.textContent = headerLabel(mobileMonth);
+    if (!container) return;
+    container.querySelectorAll("[data-c]").forEach((element) => {
+      element.classList.toggle("mobile-month-active", Number(element.dataset.c) === mobileMonth);
+    });
   }
 
   function renderValues() {
@@ -465,6 +489,10 @@
   }
   function setActive(r, c) {
     state.active = { r, c };
+    if (window.matchMedia && window.matchMedia("(max-width: 720px)").matches && c !== mobileMonth) {
+      mobileMonth = c;
+      applyMobileMonth();
+    }
     setRange(r, c, r, c);
     syncFormulaBar();
   }
@@ -1380,6 +1408,10 @@
     container = document.getElementById("sheetApp"); if (!container) return;
     load();
     if (!state.sheets.length) { resetToDefaultSheets(); }
+    if (window.matchMedia && window.matchMedia("(max-width: 720px)").matches) {
+      state.active.c = mobileMonth;
+      state.range = { r0: state.active.r, c0: mobileMonth, r1: state.active.r, c1: mobileMonth };
+    }
     // Migration : supprime les anciennes lignes de template si présentes
     migrateOldTemplate();
     const wrap = container.parentElement;
