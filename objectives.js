@@ -7,6 +7,8 @@
   const MAX_GOALS = 40;
   const MAX_NOTE_LENGTH = 20000;
   let noteTimer = null;
+  let editingId = "";
+  let activeFilter = "active";
 
   function readProfile() {
     try {
@@ -24,7 +26,10 @@
     if (!title || !Number.isFinite(target) || target < 0) return null;
     const dueDate = /^\d{4}-\d{2}-\d{2}$/.test(String(goal.dueDate || "")) ? goal.dueDate : "";
     const cadence = ["once", "monthly", "yearly"].includes(goal.cadence) ? goal.cadence : "once";
-    return { id: String(goal.id || "").slice(0, 64) || makeId(), title, type, target, current, dueDate, cadence };
+    const sourceId = String(goal.sourceId || "").slice(0, 100);
+    const paused = Boolean(goal.paused);
+    const archived = Boolean(goal.archived);
+    return { id: String(goal.id || "").slice(0, 64) || makeId(), title, type, target, current, dueDate, cadence, sourceId, paused, archived };
   }
 
   function goalsFrom(profile) {
@@ -66,42 +71,78 @@
     return ({ monthly: "Chaque mois", yearly: "Chaque année" })[cadence] || "Sans récurrence";
   }
 
+  function sources() {
+    try { return window.FinanceSheet?.getObjectiveSources?.() || []; } catch (_) { return []; }
+  }
+
+  function effectiveCurrent(goal, availableSources) {
+    const linked = goal.sourceId && availableSources.find(source => source.id === goal.sourceId);
+    return linked ? linked.value : goal.current;
+  }
+
+  function monthsRemaining(dueDate) {
+    if (!dueDate) return 0;
+    const due = new Date(dueDate + "T00:00:00"), now = new Date();
+    return Math.max(1, (due.getFullYear() - now.getFullYear()) * 12 + due.getMonth() - now.getMonth() + 1);
+  }
+
+  function renderOverview(goals, availableSources) {
+    const overview = document.getElementById("objectivesOverview");
+    if (!overview) return;
+    const active = goals.filter(goal => !goal.archived);
+    const totalTarget = active.reduce((sum, goal) => sum + goal.target, 0);
+    const totalCurrent = active.reduce((sum, goal) => sum + effectiveCurrent(goal, availableSources), 0);
+    const reached = active.filter(goal => effectiveCurrent(goal, availableSources) >= goal.target).length;
+    overview.replaceChildren();
+    [["Objectifs en cours", String(active.length)], ["Progression totale", totalTarget ? Math.min(100, Math.round(totalCurrent / totalTarget * 100)) + " %" : "0 %"], ["Objectifs atteints", String(reached)]].forEach(function(item) {
+      const stat = document.createElement("article"); stat.className = "objective-stat";
+      const label = document.createElement("span"); label.textContent = item[0];
+      const value = document.createElement("strong"); value.textContent = item[1];
+      stat.append(label, value); overview.append(stat);
+    });
+  }
+
   function render() {
     const list = document.getElementById("objectivesList");
     const notebook = document.getElementById("notebookInput");
     if (!list || !notebook) return;
     const profile = readProfile();
     const goals = goalsFrom(profile);
+    const availableSources = sources();
+    renderOverview(goals, availableSources);
     list.replaceChildren();
-    if (!goals.length) {
+    const visibleGoals = goals.filter(goal => activeFilter === "archived" ? goal.archived : !goal.archived);
+    if (!visibleGoals.length) {
       const empty = document.createElement("p");
       empty.className = "objectives-empty";
-      empty.textContent = "Aucun objectif pour le moment. Crée le premier quand tu es prêt.";
+      empty.textContent = activeFilter === "archived" ? "Aucun objectif archivé." : "Aucun objectif pour le moment. Crée le premier quand tu es prêt.";
       list.append(empty);
     }
-    goals.forEach(function (goal) {
+    visibleGoals.forEach(function (goal) {
+      const displayedCurrent = effectiveCurrent(goal, availableSources);
       const card = document.createElement("article"); card.className = "objective-card";
+      if (goal.paused) card.classList.add("is-paused");
       const top = document.createElement("div"); top.className = "objective-card-top";
       const copy = document.createElement("div");
       const title = document.createElement("h4"); title.textContent = goal.title;
       const kind = document.createElement("span"); kind.className = "objective-kind objective-kind-" + goal.type; kind.textContent = typeName(goal.type);
       copy.append(title, kind);
-      const remove = document.createElement("button"); remove.type = "button"; remove.className = "objective-remove"; remove.textContent = "Supprimer"; remove.setAttribute("aria-label", "Supprimer l’objectif " + goal.title);
-      remove.addEventListener("click", function () {
-        const current = readProfile();
-        current.objectives = goalsFrom(current).filter(item => item.id !== goal.id);
-        saveProfile(current); render();
-      });
-      top.append(copy, remove);
-      const progress = Math.min(100, goal.target ? Math.round((goal.current / goal.target) * 100) : 0);
+      const stateLabel = document.createElement("span"); stateLabel.className = "objective-status";
+      stateLabel.textContent = goal.paused ? "En pause" : displayedCurrent >= goal.target ? "Atteint" : goal.sourceId ? "Lié au tableur" : "En cours";
+      if (goal.paused) stateLabel.classList.add("is-paused");
+      copy.append(stateLabel); top.append(copy);
+      const progress = Math.min(100, goal.target ? Math.round((displayedCurrent / goal.target) * 100) : 0);
       const line = document.createElement("div"); line.className = "objective-progress";
       const fill = document.createElement("span"); fill.style.width = progress + "%"; line.append(fill);
       const details = document.createElement("div"); details.className = "objective-details";
-      const amount = document.createElement("span"); amount.textContent = euro(goal.current) + " / " + euro(goal.target);
+      const amount = document.createElement("span"); amount.textContent = euro(displayedCurrent) + " / " + euro(goal.target);
       const percent = document.createElement("strong"); percent.textContent = progress + " %";
       details.append(amount, percent);
       const remaining = document.createElement("p"); remaining.className = "objective-remaining";
-      remaining.textContent = goal.target > goal.current ? "Reste " + euro(goal.target - goal.current) : "Objectif atteint";
+      remaining.textContent = goal.target > displayedCurrent ? "Reste " + euro(goal.target - displayedCurrent) : "Objectif atteint";
+      const insight = document.createElement("p"); insight.className = "objective-insight";
+      const remainingAmount = Math.max(0, goal.target - displayedCurrent), remainingMonths = monthsRemaining(goal.dueDate);
+      insight.innerHTML = remainingMonths && remainingAmount ? "Pour tenir l’échéance : <strong>" + euro(Math.ceil(remainingAmount / remainingMonths)) + " / mois</strong>" : goal.sourceId ? "Progression mise à jour depuis le tableur." : "Ajoute tes avancées quand tu le souhaites.";
 
       // L'objectif reste léger à créer, mais son avancement peut être mis à
       // jour directement depuis sa carte. Cette modification passe par le
@@ -113,13 +154,15 @@
       currentInput.min = "0";
       currentInput.step = "0.01";
       currentInput.inputMode = "decimal";
-      currentInput.value = String(goal.current);
+      currentInput.value = String(displayedCurrent);
+      currentInput.disabled = Boolean(goal.sourceId);
       currentInput.setAttribute("aria-label", "Montant atteint pour " + goal.title);
       currentLabel.append(currentInput);
       const update = document.createElement("button");
       update.type = "button";
       update.className = "button button-ghost objective-update";
-      update.textContent = "Mettre à jour";
+      update.textContent = goal.sourceId ? "Automatique" : "Mettre à jour";
+      update.disabled = Boolean(goal.sourceId);
       function saveProgress() {
         const value = Number(currentInput.value);
         if (!Number.isFinite(value) || value < 0) { currentInput.focus(); return; }
@@ -135,27 +178,48 @@
         if (event.key === "Enter") { event.preventDefault(); saveProgress(); }
       });
       progressEditor.append(currentLabel, update);
-      card.append(top, line, details, remaining, progressEditor);
+      card.append(top, line, details, remaining, insight, progressEditor);
       if (goal.dueDate) {
         const due = document.createElement("p"); due.className = "objective-due"; due.textContent = "Échéance : " + new Intl.DateTimeFormat(document.documentElement.lang === "en" ? "en-GB" : "fr-FR", { dateStyle: "long" }).format(new Date(goal.dueDate + "T00:00:00")); card.append(due);
       }
       if (goal.cadence && goal.cadence !== "once") {
         const cadence = document.createElement("p"); cadence.className = "objective-cadence"; cadence.textContent = cadenceName(goal.cadence); card.append(cadence);
       }
+      const actions = document.createElement("div"); actions.className = "objective-card-actions";
+      function action(label, handler, danger) { const button = document.createElement("button"); button.type = "button"; button.className = "button button-ghost"; if (danger) button.classList.add("objective-remove"); button.textContent = label; button.addEventListener("click", handler); actions.append(button); }
+      action("Modifier", function() { openForm(goal); });
+      action(goal.paused ? "Reprendre" : "Mettre en pause", function() { const current = readProfile(); current.objectives = goalsFrom(current).map(item => item.id === goal.id ? Object.assign({}, item, { paused: !item.paused }) : item); saveProfile(current); render(); });
+      action(goal.archived ? "Réactiver" : "Archiver", function() { const current = readProfile(); current.objectives = goalsFrom(current).map(item => item.id === goal.id ? Object.assign({}, item, { archived: !item.archived }) : item); saveProfile(current); render(); });
+      action("Supprimer", function() { const current = readProfile(); current.objectives = goalsFrom(current).filter(item => item.id !== goal.id); saveProfile(current); render(); }, true);
+      card.append(actions);
       list.append(card);
     });
     if (document.activeElement !== notebook) notebook.value = String(profile.notebook || "").slice(0, MAX_NOTE_LENGTH);
     status("Enregistré");
   }
 
-  function openForm() {
+  function fillSourceSelect(selected) {
+    const select = document.getElementById("objectiveSheetSource"); if (!select) return;
+    select.replaceChildren(new Option("Aucune liaison", ""));
+    sources().forEach(source => select.append(new Option(source.label + " · " + euro(source.value), source.id)));
+    select.value = selected || "";
+  }
+
+  function openForm(goal) {
     const form = document.getElementById("objectiveForm");
     if (!form) return;
     form.reset();
-    document.getElementById("objectiveCurrent").value = "0";
+    editingId = goal?.id || "";
+    document.getElementById("objectiveTitle").value = goal?.title || "";
+    document.getElementById("objectiveType").value = goal?.type || "savings";
+    document.getElementById("objectiveTarget").value = goal?.target ?? "";
+    document.getElementById("objectiveCurrent").value = goal?.current ?? "0";
+    document.getElementById("objectiveCadence").value = goal?.cadence || "once";
+    document.getElementById("objectiveDueDate").value = goal?.dueDate || "";
+    fillSourceSelect(goal?.sourceId);
     const planFields = document.getElementById("objectivePlanFields"), planToggle = document.getElementById("objectivePlanToggle");
-    if (planFields) planFields.hidden = true;
-    if (planToggle) planToggle.setAttribute("aria-expanded", "false");
+    if (planFields) planFields.hidden = !(goal?.dueDate || goal?.cadence !== "once" || goal?.sourceId);
+    if (planToggle) planToggle.setAttribute("aria-expanded", String(!planFields?.hidden));
     form.hidden = false;
     document.getElementById("objectiveTitle")?.focus();
   }
@@ -163,6 +227,7 @@
   function closeForm() {
     const form = document.getElementById("objectiveForm");
     if (form) form.hidden = true;
+    editingId = "";
   }
 
   function setNotesOpen(open) {
@@ -189,6 +254,7 @@
       const fields = document.getElementById("objectivePlanFields"); if (!fields) return;
       fields.hidden = !fields.hidden; this.setAttribute("aria-expanded", String(!fields.hidden));
     });
+    document.querySelectorAll("[data-objective-filter]").forEach(function(button) { button.addEventListener("click", function() { activeFilter = button.dataset.objectiveFilter || "active"; document.querySelectorAll("[data-objective-filter]").forEach(item => { const selected = item === button; item.classList.toggle("is-active", selected); item.setAttribute("aria-selected", String(selected)); }); render(); }); });
     document.querySelectorAll("[data-open-notes]").forEach(function (button) { button.addEventListener("click", function () { setNotesOpen(true); }); });
     document.getElementById("personalNotesClose")?.addEventListener("click", function () { setNotesOpen(false); });
     // Le voile ne ferme pas la note : cela évite une fermeture accidentelle
@@ -202,9 +268,11 @@
       if (!title || !Number.isFinite(target) || target < 0) return;
       const profile = readProfile();
       const goals = goalsFrom(profile);
-      if (goals.length >= MAX_GOALS) { status("Limite de " + MAX_GOALS + " objectifs atteinte"); return; }
-      goals.unshift({ id: makeId(), title, type: document.getElementById("objectiveType")?.value || "custom", target, current, dueDate: document.getElementById("objectiveDueDate")?.value || "", cadence: document.getElementById("objectiveCadence")?.value || "once" });
-      profile.objectives = goals;
+      if (!editingId && goals.length >= MAX_GOALS) { status("Limite de " + MAX_GOALS + " objectifs atteinte"); return; }
+      const previous = editingId ? goals.find(goal => goal.id === editingId) : null;
+      const data = { id: editingId || makeId(), title, type: document.getElementById("objectiveType")?.value || "custom", target, current, dueDate: document.getElementById("objectiveDueDate")?.value || "", cadence: document.getElementById("objectiveCadence")?.value || "once", sourceId: document.getElementById("objectiveSheetSource")?.value || "", paused: Boolean(previous?.paused), archived: Boolean(previous?.archived) };
+      if (editingId) profile.objectives = goals.map(goal => goal.id === editingId ? Object.assign({}, goal, data) : goal);
+      else goals.unshift(data), profile.objectives = goals;
       saveProfile(profile); closeForm(); render();
     });
     notebook.addEventListener("input", function () {

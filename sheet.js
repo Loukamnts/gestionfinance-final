@@ -109,6 +109,31 @@
     const usefulRows = contentRowCount(sheet);
     sheet.rows = usefulRows > 0 ? usefulRows : DEFAULT_ROWS;
   }
+  function shiftFormulaAfterRowDelete(raw, deletedRow) {
+    if (typeof raw !== "string" || raw.charAt(0) !== "=") return raw;
+    return raw.replace(/\b([A-Z]+)(\d+)\b/gi, function(match, column, rowText) {
+      const row = Number(rowText) - 1;
+      return row > deletedRow ? String(column).toUpperCase() + row : match;
+    });
+  }
+  async function deleteSelectedRow() {
+    const row = Math.max(0, Math.min(state.active.r, state.rows - 1));
+    if (!(await confirmDialog("Supprimer la ligne " + (row + 1) + " ?"))) return;
+    const sheet = activeSheet(), nextCells = {};
+    Object.entries(sheet.cells || {}).forEach(function(entry) {
+      const parts = entry[0].split(","), currentRow = Number(parts[0]), column = Number(parts[1]);
+      if (currentRow === row) return;
+      const targetRow = currentRow > row ? currentRow - 1 : currentRow;
+      nextCells[cellKey(targetRow, column)] = { raw: shiftFormulaAfterRowDelete(entry[1]?.raw || "", row) };
+    });
+    sheet.cells = nextCells;
+    sheet.rowHeaders = (sheet.rowHeaders || []).filter(function(_, index) { return index !== row; });
+    sheet.rows = Math.max(1, sheet.rows - 1);
+    state.active = { r: Math.min(row, sheet.rows - 1), c: state.active.c };
+    state.range = { r0: state.active.r, c0: state.active.c, r1: state.active.r, c1: state.active.c };
+    buildTable(); renderValues(); scheduleSave();
+    toast("Ligne supprimée.");
+  }
   function rowHeaderWidth(sheet) {
     const longest = Math.max(0, ...(sheet.rowHeaders || []).map((label) => String(label || "").trim().length));
     return Math.max(188, Math.min(348, 86 + longest * 8.1));
@@ -1438,6 +1463,7 @@
     bind("btnSheetExport", exportXlsx);
     bind("btnSheetImport", () => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".xlsx,.xls,.xlsm,.csv"; inp.addEventListener("change", () => { const f = inp.files[0]; if (!f) return; importXlsx(f); }); inp.click(); });
     bind("btnSheetClear", async () => { if (await confirmDialog("Vider la feuille active ?")) { const sheet = activeSheet(); sheet.cells = {}; sheet.rowHeaders = []; sheet.rows = DEFAULT_ROWS; enforceMonthHeaders(sheet); buildTable(); renderValues(); scheduleSave(); } });
+    bind("btnSheetDeleteRow", deleteSelectedRow);
     bind("btnSheetCalc", openCalculator);
     bind("btnSheetUndo", undo);
     bind("btnSheetRedo", redo);
@@ -1619,6 +1645,29 @@
     if (balRemaining) balRemaining.textContent = fmt(remaining);
   }
 
+  // Sources proposées aux objectifs : chaque ligne chiffrée peut alimenter
+  // automatiquement un objectif, tout en gardant la liaison facultative.
+  function getObjectiveSources() {
+    var sources = [];
+    (state.sheets || []).forEach(function(sheet) {
+      if (!sheet || !sheet.cells) return;
+      var computed = recompute(sheet.cells);
+      (sheet.rowHeaders || []).forEach(function(label, row) {
+        label = String(label || "").trim();
+        if (!label) return;
+        var total = 0, hasValue = false;
+        for (var col = 0; col < Math.max(12, sheet.cols || 0); col++) {
+          var result = computed[row + "," + col];
+          if (result && !result.error && typeof result.value === "number" && Number.isFinite(result.value)) {
+            total += Math.abs(result.value); hasValue = true;
+          }
+        }
+        if (hasValue) sources.push({ id: sheet.id + ":" + row, label: label + " — " + sheet.name, value: total });
+      });
+    });
+    return sources;
+  }
+
   // === Migration : supprime les anciennes lignes de template (Solde départ, etc.) ===
   function migrateOldTemplate() {
     var sheet = activeSheet();
@@ -1644,7 +1693,7 @@
     }
   }
 
-  window.FinanceSheet = { init, recompute, saveNow, openCalculator, openStartingBalance, getSnapshot, loadSnapshot, buildWorkbook, importXlsx, exportXlsx, loadDemoData, clearDemoDataFS, updateSheetBalanceCards, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
+  window.FinanceSheet = { init, recompute, saveNow, openCalculator, openStartingBalance, getSnapshot, loadSnapshot, buildWorkbook, importXlsx, exportXlsx, loadDemoData, clearDemoDataFS, updateSheetBalanceCards, getObjectiveSources, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
   // Hook appelé après import / édition / création de feuille pour rafraîchir le dashboard.
   let dashTimer = null;
   function notifyDashboard() {

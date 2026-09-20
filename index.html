@@ -79,7 +79,7 @@
       --font-heading: "Syne", sans-serif;
       --font-body: "Space Grotesk", sans-serif;
       --bg: #111114;
-      --body-bg: linear-gradient(180deg, #131317 0%, #111114 46%, #111114 100%);
+      --body-bg: #111114;
       --panel-bg: #1b1b20;
       --panel-solid: #1b1b20;
       --panel-border: 1px solid rgba(237,237,240,0.09);
@@ -130,7 +130,7 @@
       --font-heading: "Syne", sans-serif;
       --font-body: "Space Grotesk", sans-serif;
       --bg: #f4f3f1;
-      --body-bg: linear-gradient(180deg, #f7f6f4 0%, #f4f3f1 46%, #f4f3f1 100%);
+      --body-bg: #f4f3f1;
       --panel-bg: #ffffff;
       --panel-solid: #ffffff;
       --panel-border: 1px solid rgba(17,17,20,0.10);
@@ -1857,8 +1857,7 @@
   <main class="app">
     <header class="topbar app-header">
       <div class="brand" aria-label="Meuniance">
-        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><path d="M12 52V22l14 18 14-18" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 22L52 10" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><path d="M40 10h12v12" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <div class="brand-copy"><h1>Meuniance</h1></div>
+        <div class="brand-copy"><h1><span class="brand-initial">M</span>euniance</h1></div>
       </div>
       <nav class="desktop-nav" aria-label="Navigation principale">
         <button class="desktop-nav-link" id="desktopHomeButton" type="button" data-page="dashboard">Accueil</button>
@@ -2016,6 +2015,8 @@
           <button class="personal-workspace-notes" type="button" data-open-notes>Notes</button>
         </nav>
         <div class="personal-workspace-content objectives-shell">
+          <section class="objectives-overview" id="objectivesOverview" aria-label="Résumé des objectifs"></section>
+          <div class="objectives-tabs" role="tablist" aria-label="Filtrer les objectifs"><button type="button" class="is-active" data-objective-filter="active" role="tab" aria-selected="true">En cours</button><button type="button" data-objective-filter="archived" role="tab" aria-selected="false">Archivés</button></div>
           <div class="objectives-grid">
           <section class="panel objectives-panel"><div class="objectives-panel-head"><div><h3>Mes objectifs</h3><p>Épargne, investissement, dépense prévue ou projet personnel.</p></div><button class="button button-primary" id="objectiveAddButton" type="button">Ajouter un objectif</button></div><form class="objective-form" id="objectiveForm" hidden>
             <label><span>Nom de l'objectif</span><input id="objectiveTitle" maxlength="80" placeholder="Ex. Apport immobilier" required /></label>
@@ -2023,7 +2024,7 @@
             <label><span>Montant visé (€)</span><input id="objectiveTarget" type="number" min="0" step="0.01" inputmode="decimal" required /></label>
             <label><span>Déjà atteint (€)</span><input id="objectiveCurrent" type="number" min="0" step="0.01" inputmode="decimal" value="0" /></label>
             <button class="objective-plan-toggle" id="objectivePlanToggle" type="button" aria-expanded="false" aria-controls="objectivePlanFields">Planifier cet objectif <span>Facultatif</span></button>
-            <div class="objective-plan-fields" id="objectivePlanFields" hidden><label><span>Rythme</span><select id="objectiveCadence"><option value="once">Sans récurrence</option><option value="monthly">Chaque mois</option><option value="yearly">Chaque année</option></select></label><label><span>Échéance <em>facultative</em></span><input id="objectiveDueDate" type="date" /></label></div>
+            <div class="objective-plan-fields" id="objectivePlanFields" hidden><label><span>Rythme</span><select id="objectiveCadence"><option value="once">Sans récurrence</option><option value="monthly">Chaque mois</option><option value="yearly">Chaque année</option></select></label><label><span>Échéance <em>facultative</em></span><input id="objectiveDueDate" type="date" /></label><label class="objective-link-field"><span>Lier au tableur <em>facultatif</em></span><select id="objectiveSheetSource"><option value="">Aucune liaison</option></select></label></div>
             <div class="objective-form-actions"><button class="button button-ghost" id="objectiveCancelButton" type="button">Annuler</button><button class="button button-primary" type="submit">Enregistrer l'objectif</button></div>
           </form><div class="objectives-list" id="objectivesList"></div></section>
           </div>
@@ -2063,6 +2064,10 @@
           </div>
           <span class="sheet-spacer"></span>
           <span class="sheet-divider"></span>
+          <button class="button button-ghost icon-btn" id="btnSheetDeleteRow" type="button" title="Supprimer la ligne sélectionnée" data-tooltip="Supprimer la ligne" aria-label="Supprimer la ligne sélectionnée">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 11h6M9 15h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 4v16h12V4" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span class="lbl">Ligne</span>
+          </button>
           <button class="button button-ghost icon-btn" id="btnSheetClear" type="button" title="Vider le tableau" data-tooltip="Vider la feuille" aria-label="Vider la feuille active">
             <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span class="lbl">Corbeille</span>
@@ -2441,7 +2446,7 @@
     function saveCustomRules(r){ safeStore.setItem(STORAGE_KEYS.customRules,JSON.stringify(r||[])); }
     function getAvailableRules(){ const custom=getCustomRules(); const prop=Object.values(getPropertyRules()).map(migrateRuleValue); const used=prop.filter(r=>r&&r!=="auto"&&r!=="Ignorer"); const merged=[...SYSTEM_RULES,...custom,...used].map(normalizeRuleName).filter(Boolean); const u=[],seen=new Set(); merged.forEach(rule=>{ const key=normalizePropertyName(rule); if(!key||seen.has(key)) return; seen.add(key); u.push(rule); }); return u; }
     function isSystemRule(r){ return SYSTEM_RULES.some(sys=>normalizePropertyName(sys)===normalizePropertyName(r)); }
-    function isRuleInUse(r){ const key=normalizePropertyName(r); return Object.values(getPropertyRules()).some(val=>normalizePropertyName(migrateRuleValue(val))===key); }
+    function isRuleInUse(r){ const key=normalizePropertyName(r); const savedUse=Object.values(getPropertyRules()).some(val=>normalizePropertyName(migrateRuleValue(val))===key); const automaticUse=(state.detectedProperties||[]).some(prop=>normalizePropertyName(prop.rule||prop.detectedRule)===key); return savedUse||automaticUse; }
     function addCustomRule(name){ const t=normalizeRuleName(name); if(!t) return{ok:false,reason:"empty"}; if(isSystemRule(t)) return{ok:false,reason:"system"}; const custom=getCustomRules(); const key=normalizePropertyName(t); if(custom.some(rule=>normalizePropertyName(rule)===key)) return{ok:false,reason:"duplicate"}; custom.push(t); saveCustomRules(custom); return{ok:true,name:t}; }
     function deleteCustomRule(name){ const t=normalizeRuleName(name); if(isSystemRule(t)) return{ok:false,reason:"system"}; if(isRuleInUse(t)) return{ok:false,reason:"in_use"}; const custom=getCustomRules().filter(rule=>normalizePropertyName(rule)!==normalizePropertyName(t)); saveCustomRules(custom); return{ok:true}; }
     function renameCustomRule(oldN,newN){ const oldT=normalizeRuleName(oldN),newT=normalizeRuleName(newN); if(!oldT||!newT) return{ok:false,reason:"empty"}; if(isSystemRule(oldT)) return{ok:false,reason:"system"}; if(normalizePropertyName(oldT)===normalizePropertyName(newT)) return{ok:false,reason:"same"}; const custom=getCustomRules(); if(custom.some(rule=>normalizePropertyName(rule)===normalizePropertyName(newT))) return{ok:false,reason:"duplicate"}; const updated=custom.map(rule=>normalizePropertyName(rule)===normalizePropertyName(oldT)?newT:rule); saveCustomRules(updated); const propRules=getPropertyRules(); const newProp={}; Object.entries(propRules).forEach(([k,val])=>{ const mv=migrateRuleValue(val); newProp[k]=normalizePropertyName(mv)===normalizePropertyName(oldT)?newT:mv; }); savePropertyRules(newProp); return{ok:true,name:newT}; }
@@ -3033,7 +3038,8 @@ function resetDataState(){
 
     const RELEASE_NOTES_VERSION="2026-09-18-polish-and-language";
     const RELEASE_NOTES=[
-      {date:"18 septembre 2026",title:"Un espace plus clair et plus complet",sections:[{type:"new",text:"Mon espace accueille désormais les objectifs (en bêta) et les notes privées. Tu peux créer un objectif d’épargne, d’investissement, de dépense ou un projet personnel, suivre son avancement et conserver tes idées dans un bloc-notes synchronisé lorsque tu es connecté. Le partage entre amis reste privé par défaut : tu choisis précisément les lignes, les mois et les vues que chacun peut consulter."},{type:"improvement",text:"Le tableur est plus confortable avec une barre d’outils suivie, des sélections plus lisibles et des explications de solde plus claires. L’accueil, les réglages, le partage et les tableaux de bord s’adaptent mieux aux petits écrans. Le français et l’anglais couvrent aussi les contenus recréés, les réglages et les nouveautés, sans modifier tes données."}]},
+      {date:"20 septembre 2026",title:"Objectifs et tableur passent un cap",sections:[{type:"new",text:"Les objectifs disposent maintenant d’un résumé global, d’un suivi actif ou archivé, d’une mise en pause et d’une liaison facultative avec une ligne du tableur."},{type:"improvement",text:"Tu peux supprimer une ligne du tableur directement depuis la barre d’outils. Les règles reconnues automatiquement sont désormais bien indiquées comme utilisées."}]},
+      {date:"18 septembre 2026",title:"Un espace plus clair et plus complet",sections:[{type:"new",text:"Mon espace accueille les objectifs et les notes privées. Tu peux créer un objectif d’épargne, d’investissement, de dépense ou un projet personnel, suivre son avancement et conserver tes idées dans un bloc-notes synchronisé lorsque tu es connecté. Le partage entre amis reste privé par défaut : tu choisis précisément les lignes, les mois et les vues que chacun peut consulter."},{type:"improvement",text:"Le tableur est plus confortable avec une barre d’outils suivie, des sélections plus lisibles et des explications de solde plus claires. L’accueil, les réglages, le partage et les tableaux de bord s’adaptent mieux aux petits écrans. Le français et l’anglais couvrent aussi les contenus recréés, les réglages et les nouveautés, sans modifier tes données."}]},
       {date:"17 septembre 2026",title:"Partage et réglages simplifiés",sections:[{type:"new",text:"Tu peux maintenant consulter le tableur ou le tableau de bord partagé depuis la fiche d’un ami, sans lui donner le droit de modifier tes données."},{type:"improvement",text:"Les accès se configurent ligne par ligne et mois par mois, uniquement en lecture. Les réglages et les pages de partage sont mieux organisés sur téléphone comme sur ordinateur."}]},
       {date:"16 septembre 2026",title:"Un espace plus simple sur tous les écrans",text:"L’en-tête, le tableur et les graphiques s’adaptent mieux au téléphone, à la tablette et au bureau. Les objectifs et un bloc-notes privé rejoignent désormais ton espace personnel."},
       {date:"10 septembre 2026",title:"Des actions de compte plus claires",text:"Supprimer mon compte apparaît uniquement lorsque vous êtes connecté. Hors connexion, Réinitialiser reste disponible pour effacer les données locales."},

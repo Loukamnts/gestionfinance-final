@@ -665,7 +665,14 @@ body[data-theme="glass"] .sheet-table td.cell { background:var(--bg); }
 @media (max-width:720px) {
   .sheet-bar { display:flex; grid-template-columns:none; align-items:center; gap:7px; overflow-x:auto; overflow-y:hidden; padding:7px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .sheet-bar::-webkit-scrollbar { display:none; }
+    margin-top:10px;
+    min-height:42px;
+    padding:3px;
+    gap:3px;
   .sheet-bar-left,.sheet-bar-right { display:flex; flex:0 0 auto; min-width:max-content; margin:0; gap:4px; overflow:visible; padding:3px; }
+  .sheet-bar .button { width:32px; min-width:32px; height:32px; min-height:32px; flex-basis:32px; }
+  .sheet-bar .button svg { width:16px; height:16px; flex-basis:16px; }
+  .sheet-bar #btnSheetCalc { height:36px; min-height:36px; padding-inline:9px !important; }
   .sheet-bar-right { margin-left:0; }
   .sheet-bar .icon-btn { width:38px; min-width:38px; flex:0 0 38px; }
   .sheet-balance-cards { grid-template-columns:1fr 1fr; gap:8px; padding:0; }
@@ -998,8 +1005,7 @@ body[data-theme="brutal"] .sheet-bar { box-shadow:4px 4px 0 var(--line-strong); 
   .sheet-bar #btnSheetCalc .lbl { display:inline !important; font-size:.75rem; }
 }
 
-/* Barre centrée dans son espace : elle défile avec le tableur au lieu de
-   rester coincée dans la zone supérieure du navigateur. */
+/* Barre compacte et sans effet de panneau autour des commandes. */
 .sheet-bar {
   position:relative;
   top:auto;
@@ -1008,7 +1014,10 @@ body[data-theme="brutal"] .sheet-bar { box-shadow:4px 4px 0 var(--line-strong); 
   min-height:44px;
   gap:5px;
   padding:3px;
-  box-shadow:0 7px 20px color-mix(in srgb,var(--text) 8%,transparent);
+  border-color:transparent;
+  background:transparent;
+  box-shadow:none;
+  backdrop-filter:none;
 }
 .sheet-bar-left,.sheet-bar-file-actions { padding:1px; }
 .sheet-bar-right { gap:5px; }
@@ -1038,64 +1047,18 @@ body[data-theme="brutal"] .sheet-bar { box-shadow:4px 4px 0 var(--line-strong); 
   .sheet-bar #btnSheetCalc { height:37px; min-height:37px; padding-inline:9px !important; }
 }
 
-/* Barre suivie : elle reste présente pendant l'édition, sans zone floue ni
-   commandes minuscules. Son fond est volontairement opaque pour rester lisible
-   au-dessus du tableur. */
-.sheet-bar {
-  position:sticky;
-  top:12px;
-  z-index:150;
-  align-self:center;
-  margin-inline:auto;
-  min-height:54px;
-  gap:7px;
-  padding:5px;
-  background:var(--panel-solid);
-  box-shadow:0 12px 28px color-mix(in srgb,var(--text) 14%,transparent);
-}
-.sheet-bar-left,.sheet-bar-file-actions { padding:2px; }
-.sheet-bar-right { gap:7px; }
-.sheet-bar .button {
-  width:40px;
-  min-width:40px;
-  height:40px;
-  min-height:40px;
-  flex-basis:40px;
-}
-.sheet-bar #btnSheetCalc {
-  height:44px;
-  min-height:44px;
-  padding-inline:15px;
-}
-@media (max-width:720px) {
-  .sheet-bar {
-    top:8px;
-    min-height:50px;
-    gap:5px;
-    padding:4px;
-    max-width:calc(100vw - 20px);
-  }
-  .sheet-bar .button { width:37px; min-width:37px; height:37px; min-height:37px; flex-basis:37px; }
-  .sheet-bar #btnSheetCalc { height:41px; min-height:41px; padding-inline:11px !important; }
-}
-
-/* Chaque univers garde sa personnalité sans sacrifier l'espace d'édition. */
-body[data-theme="glass"] .sheet-bar {
-  border-radius:12px;
-  border-color:color-mix(in srgb,var(--line-strong),var(--accent) 16%);
-  background:var(--panel-solid);
-  box-shadow:0 14px 30px color-mix(in srgb,var(--text) 15%,transparent);
-}
+/* Chaque univers garde sa personnalité sur les boutons, pas sur un cadre. */
+body[data-theme="glass"] .sheet-bar { border-radius:0; border-color:transparent; background:transparent; box-shadow:none; }
 body[data-theme="glass"] :is(.sheet-bar-left,.sheet-bar-file-actions) { border-radius:8px; }
 body[data-theme="editorial"] .sheet-bar {
-  min-height:52px;
-  border-radius:5px;
-  box-shadow:3px 3px 0 color-mix(in srgb,var(--accent),transparent 82%);
+  min-height:44px;
+  border-radius:0;
+  box-shadow:none;
 }
 body[data-theme="editorial"] :is(.sheet-bar-left,.sheet-bar-file-actions,.sheet-bar .button) { border-radius:3px; }
 body[data-theme="editorial"] .sheet-bar .button { width:38px; min-width:38px; height:38px; min-height:38px; flex-basis:38px; }
 body[data-theme="editorial"] .sheet-bar #btnSheetCalc { height:42px; min-height:42px; }
-body[data-theme="brutal"] .sheet-bar { min-height:58px; padding:6px; }
+body[data-theme="brutal"] .sheet-bar { min-height:48px; padding:3px; border:0; box-shadow:none; }
 body[data-theme="brutal"] .sheet-bar .button { width:42px; min-width:42px; height:42px; min-height:42px; flex-basis:42px; }
 body[data-theme="brutal"] .sheet-bar #btnSheetCalc { height:46px; min-height:46px; }
 @media (max-width:720px) {
