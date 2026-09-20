@@ -1228,7 +1228,7 @@ body[data-theme="editorial"][data-mode="light"] .sheet-bar .button { color:#2426
 body[data-theme="editorial"][data-mode="light"] .sheet-bar #btnSheetCalc { background:#702F3A; color:#F8F6F2; }
 body[data-theme="brutal"][data-mode="light"] .sheet-bar { background:#FAFAF8; border-color:#101214; }
 body[data-theme="brutal"][data-mode="light"] .sheet-bar .button { color:#101214; }
-body[data-theme="brutal"][data-mode="light"] .sheet-bar #btnSheetCalc { background:#2457A7; color:#FAFAF8; }
+body[data-theme="brutal"][data-mode="light"] .sheet-bar #btnSheetCalc { background:#101214; color:#FAFAF8; }
 @media (max-width:720px) {
   .sheet-bar,
   body[data-theme="glass"] .sheet-bar,
