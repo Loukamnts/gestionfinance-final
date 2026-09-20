@@ -94,7 +94,7 @@
     const totalCurrent = active.reduce((sum, goal) => sum + effectiveCurrent(goal, availableSources), 0);
     const reached = active.filter(goal => effectiveCurrent(goal, availableSources) >= goal.target).length;
     overview.replaceChildren();
-    [["Objectifs en cours", String(active.length)], ["Progression totale", totalTarget ? Math.min(100, Math.round(totalCurrent / totalTarget * 100)) + " %" : "0 %"], ["Objectifs atteints", String(reached)]].forEach(function(item) {
+    [["En cours", String(active.length)], ["Progression globale", totalTarget ? Math.min(100, Math.round(totalCurrent / totalTarget * 100)) + " %" : "0 %"], ["Atteints", String(reached)]].forEach(function(item) {
       const stat = document.createElement("article"); stat.className = "objective-stat";
       const label = document.createElement("span"); label.textContent = item[0];
       const value = document.createElement("strong"); value.textContent = item[1];
@@ -123,26 +123,33 @@
       const card = document.createElement("article"); card.className = "objective-card";
       if (goal.paused) card.classList.add("is-paused");
       const top = document.createElement("div"); top.className = "objective-card-top";
-      const copy = document.createElement("div");
+      const copy = document.createElement("div"); copy.className = "objective-heading";
       const title = document.createElement("h4"); title.textContent = goal.title;
-      const kind = document.createElement("span"); kind.className = "objective-kind objective-kind-" + goal.type; kind.textContent = typeName(goal.type);
-      copy.append(title, kind);
+      const meta = document.createElement("p"); meta.className = "objective-meta";
+      meta.textContent = goal.dueDate ? "Objectif : " + new Intl.DateTimeFormat(document.documentElement.lang === "en" ? "en-GB" : "fr-FR", { month: "long", year: "numeric" }).format(new Date(goal.dueDate + "T00:00:00")) : typeName(goal.type);
+      copy.append(title, meta);
       const stateLabel = document.createElement("span"); stateLabel.className = "objective-status";
       stateLabel.textContent = goal.paused ? "En pause" : displayedCurrent >= goal.target ? "Atteint" : goal.sourceId ? "Lié au tableur" : "En cours";
       if (goal.paused) stateLabel.classList.add("is-paused");
-      copy.append(stateLabel); top.append(copy);
       const progress = Math.min(100, goal.target ? Math.round((displayedCurrent / goal.target) * 100) : 0);
+      const percent = document.createElement("strong"); percent.className = "objective-percent"; percent.textContent = progress + "%";
+      top.append(copy, percent);
       const line = document.createElement("div"); line.className = "objective-progress";
       const fill = document.createElement("span"); fill.style.width = progress + "%"; line.append(fill);
       const details = document.createElement("div"); details.className = "objective-details";
-      const amount = document.createElement("span"); amount.textContent = euro(displayedCurrent) + " / " + euro(goal.target);
-      const percent = document.createElement("strong"); percent.textContent = progress + " %";
-      details.append(amount, percent);
+      const amountWrap = document.createElement("div"); amountWrap.className = "objective-amount-wrap";
+      const amountLabel = document.createElement("span"); amountLabel.textContent = "Progression actuelle";
+      const amount = document.createElement("strong"); amount.textContent = euro(displayedCurrent) + " / " + euro(goal.target);
+      amountWrap.append(amountLabel, amount);
       const remaining = document.createElement("p"); remaining.className = "objective-remaining";
       remaining.textContent = goal.target > displayedCurrent ? "Reste " + euro(goal.target - displayedCurrent) : "Objectif atteint";
       const insight = document.createElement("p"); insight.className = "objective-insight";
       const remainingAmount = Math.max(0, goal.target - displayedCurrent), remainingMonths = monthsRemaining(goal.dueDate);
-      insight.innerHTML = remainingMonths && remainingAmount ? "Pour tenir l’échéance : <strong>" + euro(Math.ceil(remainingAmount / remainingMonths)) + " / mois</strong>" : goal.sourceId ? "Progression mise à jour depuis le tableur." : "Ajoute tes avancées quand tu le souhaites.";
+      const rhythm = document.createElement("div"); rhythm.className = "objective-rhythm";
+      const rhythmLabel = document.createElement("span"); rhythmLabel.textContent = remainingMonths && remainingAmount ? "Rythme conseillé" : "Statut";
+      const rhythmValue = document.createElement("strong"); rhythmValue.textContent = remainingMonths && remainingAmount ? euro(Math.ceil(remainingAmount / remainingMonths)) + " / mois" : stateLabel.textContent;
+      rhythm.append(rhythmLabel, rhythmValue);
+      details.append(amountWrap, rhythm);
 
       // L'objectif reste léger à créer, mais son avancement peut être mis à
       // jour directement depuis sa carte. Cette modification passe par le
@@ -178,20 +185,16 @@
         if (event.key === "Enter") { event.preventDefault(); saveProgress(); }
       });
       progressEditor.append(currentLabel, update);
-      card.append(top, line, details, remaining, insight, progressEditor);
-      if (goal.dueDate) {
-        const due = document.createElement("p"); due.className = "objective-due"; due.textContent = "Échéance : " + new Intl.DateTimeFormat(document.documentElement.lang === "en" ? "en-GB" : "fr-FR", { dateStyle: "long" }).format(new Date(goal.dueDate + "T00:00:00")); card.append(due);
-      }
-      if (goal.cadence && goal.cadence !== "once") {
-        const cadence = document.createElement("p"); cadence.className = "objective-cadence"; cadence.textContent = cadenceName(goal.cadence); card.append(cadence);
-      }
       const actions = document.createElement("div"); actions.className = "objective-card-actions";
       function action(label, handler, danger) { const button = document.createElement("button"); button.type = "button"; button.className = "button button-ghost"; if (danger) button.classList.add("objective-remove"); button.textContent = label; button.addEventListener("click", handler); actions.append(button); }
       action("Modifier", function() { openForm(goal); });
       action(goal.paused ? "Reprendre" : "Mettre en pause", function() { const current = readProfile(); current.objectives = goalsFrom(current).map(item => item.id === goal.id ? Object.assign({}, item, { paused: !item.paused }) : item); saveProfile(current); render(); });
       action(goal.archived ? "Réactiver" : "Archiver", function() { const current = readProfile(); current.objectives = goalsFrom(current).map(item => item.id === goal.id ? Object.assign({}, item, { archived: !item.archived }) : item); saveProfile(current); render(); });
       action("Supprimer", function() { const current = readProfile(); current.objectives = goalsFrom(current).filter(item => item.id !== goal.id); saveProfile(current); render(); }, true);
-      card.append(actions);
+      const management = document.createElement("details"); management.className = "objective-management";
+      const managementLabel = document.createElement("summary"); managementLabel.textContent = "Gérer l’objectif";
+      management.append(managementLabel, progressEditor, remaining, actions);
+      card.append(top, line, details, management);
       list.append(card);
     });
     if (document.activeElement !== notebook) notebook.value = String(profile.notebook || "").slice(0, MAX_NOTE_LENGTH);
@@ -201,7 +204,17 @@
   function fillSourceSelect(selected) {
     const select = document.getElementById("objectiveSheetSource"); if (!select) return;
     select.replaceChildren(new Option("Aucune liaison", ""));
-    sources().forEach(source => select.append(new Option(source.label + " · " + euro(source.value), source.id)));
+    const groups = new Map();
+    sources().forEach(function(source) {
+      const year = String(source.label).match(/\b(20\d{2})\b/)?.[1] || "Autres périodes";
+      if (!groups.has(year)) groups.set(year, []);
+      groups.get(year).push(source);
+    });
+    Array.from(groups.keys()).sort(function(a, b) { return b.localeCompare(a, "fr", { numeric: true }); }).forEach(function(year) {
+      const group = document.createElement("optgroup"); group.label = year;
+      groups.get(year).forEach(source => group.append(new Option(source.label + " · " + euro(source.value), source.id)));
+      select.append(group);
+    });
     select.value = selected || "";
   }
 

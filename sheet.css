@@ -1079,3 +1079,24 @@ body[data-theme="brutal"] .sheet-bar #btnSheetCalc { height:46px; min-height:46p
   body[data-theme="brutal"] .sheet-bar #btnSheetCalc { height:42px; min-height:42px; }
 }
 
+/* La barre retrouve toute la largeur du tableur ; seul le bouton de ligne
+   enrichit les commandes historiques, sans cadre décoratif supplémentaire. */
+.sheet-bar,
+body[data-theme="glass"] .sheet-bar,
+body[data-theme="editorial"] .sheet-bar,
+body[data-theme="brutal"] .sheet-bar {
+  width:100%;
+  align-self:stretch;
+  padding-inline:0;
+  border:0;
+  border-radius:0;
+  background:var(--body-bg);
+  box-shadow:none;
+}
+@media (max-width:720px) {
+  .sheet-bar,
+  body[data-theme="glass"] .sheet-bar,
+  body[data-theme="editorial"] .sheet-bar,
+  body[data-theme="brutal"] .sheet-bar { width:100%; padding-inline:0; }
+}
+
