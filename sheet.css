@@ -1169,3 +1169,48 @@ body[data-theme="brutal"] .sheet-bar :is(.button,#btnSheetCalc) { border-radius:
   body[data-theme="editorial"] .sheet-bar #btnSheetCalc,
   body[data-theme="brutal"] .sheet-bar #btnSheetCalc { height: 31px !important; min-height: 31px !important; padding-inline: 10px !important; }
 }
+
+/* Barre finale : centrée, collante et dessinée par les tokens du thème. */
+.sheet-bar,
+body[data-theme="glass"] .sheet-bar,
+body[data-theme="editorial"] .sheet-bar,
+body[data-theme="brutal"] .sheet-bar {
+  position:sticky;
+  top:10px;
+  z-index:80;
+  width:max-content;
+  max-width:100%;
+  align-self:center;
+  margin-inline:auto;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:5px 7px;
+  border:1px solid var(--line-strong);
+  background:var(--panel-solid);
+  box-shadow:0 6px 18px color-mix(in srgb,var(--text) 9%,transparent);
+}
+body[data-theme="glass"] .sheet-bar { border-radius:10px; }
+body[data-theme="editorial"] .sheet-bar { border-radius:3px; border-top:3px solid var(--accent); }
+body[data-theme="brutal"] .sheet-bar { border-width:2px; border-radius:0; box-shadow:4px 4px 0 var(--line-strong); }
+body[data-theme="glass"][data-mode="light"] .sheet-bar { background:#252A2F; border-color:#C9825A; }
+body[data-theme="glass"][data-mode="light"] .sheet-bar .button { color:#F1F3F4; }
+body[data-theme="glass"][data-mode="light"] .sheet-bar .button:hover:not(:disabled),
+body[data-theme="glass"][data-mode="light"] .sheet-bar .button:focus-visible { color:#F1F3F4; background:color-mix(in srgb,#C9825A 28%,transparent); }
+body[data-theme="editorial"][data-mode="light"] .sheet-bar { background:#F8F6F2; border-color:#702F3A; }
+body[data-theme="editorial"][data-mode="light"] .sheet-bar .button { color:#242629; }
+body[data-theme="editorial"][data-mode="light"] .sheet-bar #btnSheetCalc { background:#702F3A; color:#F8F6F2; }
+body[data-theme="brutal"][data-mode="light"] .sheet-bar { background:#FAFAF8; border-color:#101214; }
+body[data-theme="brutal"][data-mode="light"] .sheet-bar .button { color:#101214; }
+body[data-theme="brutal"][data-mode="light"] .sheet-bar #btnSheetCalc { background:#2457A7; color:#FAFAF8; }
+@media (max-width:720px) {
+  .sheet-bar,
+  body[data-theme="glass"] .sheet-bar,
+  body[data-theme="editorial"] .sheet-bar,
+  body[data-theme="brutal"] .sheet-bar {
+    top:8px;
+    width:max-content;
+    max-width:100%;
+    align-self:center;
+    margin-inline:auto;
+  }
+}
