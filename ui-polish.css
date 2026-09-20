@@ -4,9 +4,11 @@ body { --ui-radius: min(12px,var(--control-radius,12px)); }
 .app-header .brand { display:flex;align-items:center;min-width:0; }
 .app-header .brand-copy { min-width:0; }
 .app-header .brand-copy h1 { font-size:clamp(1.55rem,2.3vw,2rem);line-height:1.2;letter-spacing:0;margin:0;white-space:nowrap; }
-.brand-m { width:1.24em; height:1.24em; margin:0 -0.04em 0 -0.08em; color:var(--accent); vertical-align:-0.24em; flex:0 0 auto; }
-.brand-m path { stroke-width:2.9; }
-.brand-m circle { r:2.6; }
+.brand-m { width:1.18em; height:1.18em; margin:0 .06em 0 -0.06em; color:var(--accent); vertical-align:-0.2em; flex:0 0 auto; }
+.brand-m path { stroke-width:2.6; }
+.brand-m circle { r:1.9; }
+.brand-word { font-size:.78em; font-weight:800; letter-spacing:.075em; }
+
 .brand-copy h1 { display:inline-flex; align-items:center; }
 .app-header .top-actions { justify-self:end;margin:0; }
 .app-header .desktop-nav { margin:0;justify-self:center;order:0;width:auto; }
@@ -852,3 +854,30 @@ body[data-theme="glass"][data-mode="light"] :is(.objectives-panel,.objective-for
 }
 .message.is-visible { transform:translate3d(-50%,0,0); }
 
+
+/* --- Réglages : l'en-tête de page n'est plus un panneau (plus de bloc en fond) --- */
+.settings-header, .settings-shell > .settings-header, .settings-page .settings-header {
+  background:transparent !important; background-image:none !important; border:0 !important;
+  border-radius:0 !important; box-shadow:none !important; backdrop-filter:none !important;
+  padding:0 0 4px !important;
+}
+
+/* --- Nouveautés : étiquettes courtes, texte dessous --- */
+.update-summary { grid-template-columns:minmax(0,1fr) !important; gap:6px !important; }
+.update-type-badge { justify-self:start; min-height:0; padding:2px 7px; border-radius:999px;
+  font:800 .58rem/1.5 var(--font-body); letter-spacing:.03em; text-transform:uppercase; }
+body[data-theme="brutal"] .update-type-badge { border-radius:0; }
+
+/* --- Trois thèmes nettement différenciés --- */
+body[data-theme="glass"] .panel, body[data-theme="glass"] .metric-card, body[data-theme="glass"] .update-entry {
+  border-radius:18px; box-shadow:0 18px 40px rgba(0,0,0,.20);
+}
+body[data-theme="editorial"] .panel, body[data-theme="editorial"] .metric-card, body[data-theme="editorial"] .update-entry {
+  border-radius:2px; box-shadow:none; border-top:3px solid var(--accent);
+}
+body[data-theme="editorial"] h2, body[data-theme="editorial"] h3 { font-family:var(--font-heading); letter-spacing:.005em; }
+body[data-theme="editorial"] .eyebrow { font-variant:small-caps; letter-spacing:.14em; }
+body[data-theme="brutal"] .panel, body[data-theme="brutal"] .metric-card, body[data-theme="brutal"] .update-entry {
+  border-radius:0; border:2px solid var(--line-strong); box-shadow:5px 5px 0 var(--accent);
+}
+body[data-theme="brutal"] .button-primary, body[data-theme="brutal"] .update-type-badge { box-shadow:3px 3px 0 var(--line-strong); }
