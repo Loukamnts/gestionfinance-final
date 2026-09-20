@@ -1,9 +1,9 @@
 {
-  "name": "Gestion Finance",
-  "short_name": "Gestion Finance",
-  "description": "Tableau de bord et tableur de gestion financière.",
+  "name": "Meuniance",
+  "short_name": "Meuniance",
+  "description": "Tableau de bord et tableur de finances personnelles.",
   "lang": "fr",
-  "start_url": "/",
+  "start_url": "/accueil",
   "scope": "/",
   "display": "standalone",
   "background_color": "#11142c",

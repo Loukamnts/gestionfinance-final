@@ -249,6 +249,55 @@ body[data-theme="brutal"] .sheet-divider { background: var(--line-strong, #fff);
   .sheet-fx .fx-preview { display: none; }
 }
 
+/* Mode téléphone : une seule période à la fois. Les lignes restent toutes
+   visibles et éditables, tandis que les mois se parcourent avec deux grandes
+   commandes tactiles. Le modèle de données à douze colonnes reste intact. */
+.sheet-mobile-month { display:none; }
+@media (max-width:720px) {
+  #sheetPage { gap:10px; }
+  .sheet-mobile-month {
+    display:grid; grid-template-columns:48px minmax(0,1fr) 48px; align-items:center;
+    min-height:54px; border:1px solid var(--line-strong); border-radius:min(12px,var(--radius));
+    background:var(--panel-solid); overflow:hidden;
+  }
+  .sheet-mobile-month-button {
+    width:48px; height:52px; border:0; background:transparent; color:var(--text);
+    font:700 1.8rem/1 var(--font-body); cursor:pointer; touch-action:manipulation;
+  }
+  .sheet-mobile-month-button:first-child { border-right:1px solid var(--line); }
+  .sheet-mobile-month-button:last-child { border-left:1px solid var(--line); }
+  .sheet-mobile-month-button:active { background:var(--button-active-bg); }
+  .sheet-mobile-month-label { min-width:0; text-align:center; font:800 1rem var(--font-heading); color:var(--text); }
+  .sheet-wrap { overflow:visible; border-radius:min(12px,var(--radius)); }
+  .sheet-scroll { height:min(55vh,560px); overflow-y:auto; overflow-x:hidden; }
+  .sheet-table { width:100%; table-layout:fixed; }
+  .sheet-table thead th.col-letter { display:none; }
+  .sheet-table thead th.col-head,
+  .sheet-table tbody td.cell { display:none; }
+  .sheet-table thead th.col-head.mobile-month-active,
+  .sheet-table tbody td.cell.mobile-month-active { display:table-cell; }
+  .sheet-table .corner-head { width:54%; min-width:0; }
+  .sheet-table .row-head { width:54%; min-width:0; }
+  .sheet-table thead th.col-head { top:0; width:46%; min-width:0; height:44px; font-size:.82rem; }
+  .sheet-table td.cell { width:46%; min-width:0; height:48px; }
+  .sheet-table td.cell .cv { display:flex; align-items:center; justify-content:flex-end; padding:10px 12px; font-size:1rem; }
+  .sheet-table .row-head .row-head-content { min-width:0; display:grid; grid-template-columns:28px minmax(0,1fr) 34px; align-items:center; }
+  .sheet-table .row-head .rh-number { width:28px; min-width:28px; margin:7px 4px; }
+  .sheet-table .row-head .rh-label { max-width:none; min-width:0; padding:10px 4px; line-height:1.25; white-space:normal; overflow-wrap:anywhere; font-size:.8rem; }
+  .sheet-table .row-head .rh-edit-btn { position:static; transform:none; width:34px; min-height:40px; opacity:.8; }
+  .sheet-fill-handle { display:none !important; }
+  .sheet-fx { min-height:50px; }
+  .sheet-fx .fx-ref { min-width:48px; padding-inline:8px; }
+  .sheet-fx .fx-fn { padding-inline:8px; }
+  .sheet-fx .fx-input { padding-inline:9px; }
+  .sheet-balance-cards { grid-template-columns:1fr; padding:0; gap:8px; }
+  .balance-card { padding:12px; }
+  .balance-note { display:none; }
+  .sheet-addrows { padding:9px; }
+  .sheet-addrows .button { min-height:42px; width:100%; justify-content:center; }
+  body[data-theme="brutal"] .sheet-mobile-month { border-radius:0; box-shadow:4px 4px 0 var(--line-strong); }
+}
+
 /* ═══════════════════════════════════════════════════════════════
    BARRE DE NAVIGATION INFÉRIEURE — exclusivement mobile.
    ═══════════════════════════════════════════════════════════════ */

@@ -962,7 +962,7 @@
       overlay.innerHTML = `
         <div class="wizard-card">
           <div class="wizard-header">
-            <h2>Bienvenue sur Gestion finance</h2>
+            <h2>Bienvenue sur Meuniance</h2>
             <p>Configurons ton tableau de bord en quelques étapes.</p>
           </div>
           <div class="wizard-progress" id="wizardProgress"></div>

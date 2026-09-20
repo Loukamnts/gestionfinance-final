@@ -161,7 +161,7 @@
     dialog.addEventListener("close",function(){document.body.style.overflow=previousOverflow;dialog.remove();},{once:true});dialog.showModal();return dialog;
   }
   function inviteDialog(container){
-    var dialog=openDialog("Inviter un ami","Il doit déjà avoir un compte Gestion Finance. L’invitation apparaîtra dans son espace.");
+    var dialog=openDialog("Inviter un ami","Il doit déjà avoir un compte Meuniance. L’invitation apparaîtra dans son espace.");
     var form=el("form","sf-invite-form"),label=el("label","sf-field","Son adresse e-mail"),input=document.createElement("input"),feedback=el("div"),submit=action("Envoyer l’invitation",function(){},"primary","mail");
     input.type="email";input.required=true;input.placeholder="nom@exemple.fr";input.autocomplete="off";label.append(input);submit.type="submit";form.append(label,feedback,submit);
     form.addEventListener("submit",async function(event){event.preventDefault();submit.disabled=true;feedback.replaceChildren();var result=await sendRequest(input.value.trim());if(result.error){feedback.append(notice(result.error,"error"));submit.disabled=false;return;}dialog.close();selectedTab="invitations";nextMessage="Invitation envoyée.";renderSharing(container,{force:true});});
