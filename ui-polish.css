@@ -1086,3 +1086,45 @@ body[data-theme="brutal"] :is(.panel,.metric-card,.balance-card,.objectives-pane
 .objectives-overview { align-items:start; }
 .objectives-tabs { align-items:center; }
 .objectives-tabs button { align-self:center; }
+
+/* ───── Tableau de bord : plus de bloc de fond derrière le titre ───── */
+#dashboardPage .home-toolbar,
+body[data-theme="glass"] #dashboardPage .home-toolbar,
+body[data-theme="editorial"] #dashboardPage .home-toolbar,
+body[data-theme="brutal"] #dashboardPage .home-toolbar {
+  background:transparent !important; background-image:none !important;
+  border:0 !important; box-shadow:none !important; border-radius:0 !important;
+  padding:0 0 18px !important; margin:0 0 18px !important;
+  border-bottom:1px solid var(--line) !important;
+}
+
+/* Pastille d'état : palette ardoise & cuivre, jamais de néon. */
+#dashboardPage .sheet-status-dot.online { background:var(--accent) !important; }
+#dashboardPage .sheet-status-dot.not-loaded,
+#dashboardPage .sheet-status-dot.offline,
+#dashboardPage .sheet-status-dot.connected-offline { background:var(--muted) !important; opacity:.7; }
+/* Le « i » du Tableur dans un rond parfait. */
+#dashboardPage .sheet-status-info {
+  width:20px; height:20px; border-radius:50% !important;
+  border:1px solid var(--line) !important; color:var(--muted);
+  font:700 .68rem/1 var(--font-body); place-items:center;
+}
+body[data-theme="brutal"] #dashboardPage .sheet-status-info { border-radius:50% !important; }
+
+/* ───── Objectifs : résumé et filtres plus nets ───── */
+.objective-stat { align-content:start; padding:12px 14px; }
+.objective-stat span { letter-spacing:.06em; text-transform:uppercase; }
+.objective-stat strong { font-size:1.35rem; font-variant-numeric:tabular-nums; }
+.objectives-tabs { gap:2px; padding:4px; }
+.objectives-tabs button { min-height:32px; padding:6px 14px; letter-spacing:.01em; }
+.objectives-tabs button.is-active { background:var(--accent); color:var(--accent-contrast, #14161a); }
+body[data-theme="glass"] .objectives-tabs button.is-active { color:#14161a; }
+
+@media (max-width:620px) {
+  .objectives-overview { grid-template-columns:1fr; gap:0; padding:0; border:1px solid var(--line); border-radius:var(--panel-radius, var(--radius)); overflow:hidden; }
+  .objective-stat { grid-column:auto !important; display:flex; align-items:baseline; justify-content:space-between; gap:12px; border:0; border-bottom:1px solid var(--line); border-radius:0; padding:11px 14px; background:transparent; }
+  .objective-stat:last-child { border-bottom:0; }
+  .objective-stat strong { font-size:1.15rem; }
+  .objectives-tabs { width:100%; }
+  .objectives-tabs button { flex:1; }
+}
