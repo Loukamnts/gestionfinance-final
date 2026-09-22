@@ -1891,13 +1891,13 @@
           <div class="home-toolbar-top"><h2>Tableau de bord</h2><div class="home-toolbar-actions"><div class="sheet-status-bar dashboard-toolbar-status" id="sheetStatusBar">
             <span class="sheet-status-dot not-loaded" id="sheetStatusDot"></span>
             <span class="sheet-status-label">Tableur</span>
-            <span class="sheet-status-info" aria-describedby="sheetStatusHelp">i
+            <button class="sheet-status-info" id="sheetStatusInfo" type="button" aria-describedby="sheetStatusHelp" aria-controls="sheetStatusMobileDialog" aria-expanded="false" aria-label="Comprendre l’état du tableur">i
               <span class="sheet-status-tooltip" id="sheetStatusHelp" role="tooltip">
                 <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--red,#fb7185)"></span> Aucune donnée pour l’instant</span>
                 <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:#3b82f6"></span> Données sur cet appareil uniquement</span>
                 <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--green,#2ed47a)"></span> Données sauvegardées sur votre compte</span>
               </span>
-            </span>
+            </button>
           </div><button type="button" id="syncSheetButton" class="gf-button gf-refresh" title="Mettre à jour le tableau de bord depuis le tableur" aria-label="Synchroniser les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Actualiser</span></button></div></div>
           <div class="home-filter-grid">
             <label class="home-filter"><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
@@ -2040,6 +2040,14 @@
     <div class="personal-notes-overlay" id="personalNotesDrawer" hidden role="dialog" aria-modal="true" aria-labelledby="personalNotesTitle">
       <section class="personal-notes-panel"><div class="personal-notes-head"><div><span class="eyebrow">Mon espace</span><h2 id="personalNotesTitle">Notes</h2><p>Idées et rappels privés, enregistrés automatiquement.</p></div><div class="personal-notes-head-actions"><span class="notebook-status" id="notebookStatus" aria-live="polite">Enregistré</span><button class="personal-notes-close" id="personalNotesClose" type="button" aria-label="Fermer les notes">×</button></div></div><label class="notebook-label" for="notebookInput">Tes notes</label><textarea id="notebookInput" maxlength="20000" placeholder="Ex. Comparer les offres d'épargne, préparer le budget vacances…"></textarea><div class="personal-notes-foot"><p class="notebook-help">Enregistrement automatique sur cet appareil, puis dans ton compte lorsque tu es connecté.</p></div></section>
     </div>
+    <dialog class="sheet-status-mobile-dialog" id="sheetStatusMobileDialog" aria-labelledby="sheetStatusMobileTitle">
+      <div class="sheet-status-mobile-head"><h2 id="sheetStatusMobileTitle">État du tableur</h2><button class="sheet-status-mobile-close" id="sheetStatusMobileClose" type="button" aria-label="Fermer">×</button></div>
+      <div class="sheet-status-mobile-list">
+        <p><span class="sheet-status-tooltip-dot" style="background:var(--red,#fb7185)"></span>Aucune donnée pour l’instant</p>
+        <p><span class="sheet-status-tooltip-dot" style="background:#3b82f6"></span>Données sur cet appareil uniquement</p>
+        <p><span class="sheet-status-tooltip-dot" style="background:var(--green,#2ed47a)"></span>Données sauvegardées sur votre compte</p>
+      </div>
+    </dialog>
     <section class="sheet-page app-page" id="sheetPage" hidden>
       <div class="sheet-bar" role="toolbar" aria-label="Outils du tableur">
         <div class="sheet-bar-left" role="group" aria-label="Historique des modifications">
@@ -2056,6 +2064,10 @@
           <button class="button button-primary icon-btn" id="btnSheetCalc" type="button" title="Ouvrir la calculatrice" data-tooltip="Ouvrir la calculatrice">
             <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 6h8M8 10h0M12 10h0M16 10h0M8 14h0M12 14h0M16 14h0M8 18h0M12 18h0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             <span class="lbl">Calculatrice</span>
+          </button>
+          <button class="button button-ghost icon-btn sheet-mobile-more" id="btnSheetMobileMore" type="button" title="Autres outils du tableur" aria-label="Autres outils du tableur" aria-controls="sheetMobileTools" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1.75" fill="currentColor"/><circle cx="12" cy="12" r="1.75" fill="currentColor"/><circle cx="19" cy="12" r="1.75" fill="currentColor"/></svg>
+            <span class="lbl">Plus</span>
           </button>
           <span class="sheet-divider"></span>
           <div class="sheet-bar-file-actions" role="group" aria-label="Importer ou exporter">
@@ -2078,6 +2090,12 @@
             <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span class="lbl">Corbeille</span>
           </button>
+          <div class="sheet-mobile-tools" id="sheetMobileTools" role="menu" aria-label="Autres outils du tableur" hidden>
+            <button type="button" role="menuitem" data-sheet-mobile-action="import">Importer un fichier</button>
+            <button type="button" role="menuitem" data-sheet-mobile-action="export">Exporter en Excel</button>
+            <button type="button" role="menuitem" data-sheet-mobile-action="delete">Supprimer la ligne</button>
+            <button type="button" role="menuitem" data-sheet-mobile-action="clear">Vider la feuille</button>
+          </div>
         </div>
       </div>
       <div class="sheet-fx">
@@ -2683,7 +2701,15 @@
       elements.monthSelect.disabled=false;
       syncCustomDropdown(elements.monthSelect);
     }
-    function updateInterface(){ populateMonthSelect(); const hasData=getVisibleMonths().length>0; elements.emptyState.classList.toggle("is-visible",!hasData); if(!hasData) elements.emptyState.textContent=state.selectedYear?`Aucun mois renseigné pour ${getYearLabel(state.selectedYear)}.`:"Aucune donnée à afficher pour le moment."; if(elements.yearSelect) syncCustomDropdown(elements.yearSelect); syncCustomDropdown(elements.monthSelect); updateSummaryCards(); updateMonthDetails(getSelectedMonth()); renderCategorySettings(); renderCustomRulesList(); renderChart(); }
+    function renderEmptyDashboardState(){
+      if(!elements.emptyState)return;
+      const copy=document.createElement("p"),action=document.createElement("button");
+      copy.textContent=state.selectedYear?`Aucun mois renseigné pour ${getYearLabel(state.selectedYear)}.`:"Aucune donnée à afficher pour le moment.";
+      action.type="button";action.className="empty-state-action";action.textContent="Ouvrir le tableur";
+      action.addEventListener("click",function(){ setPage("sheet"); });
+      elements.emptyState.replaceChildren(copy,action);
+    }
+    function updateInterface(){ populateMonthSelect(); const hasData=getVisibleMonths().length>0; elements.emptyState.classList.toggle("is-visible",!hasData); if(!hasData) renderEmptyDashboardState(); if(elements.yearSelect) syncCustomDropdown(elements.yearSelect); syncCustomDropdown(elements.monthSelect); updateSummaryCards(); updateMonthDetails(getSelectedMonth()); renderCategorySettings(); renderCustomRulesList(); renderChart(); }
 
     function updateMonthDetails(selected){
       elements.savingsBreakdown.innerHTML="";
@@ -2810,6 +2836,7 @@
        l'ouvrir directement, la mettre en favori, et les boutons Précédent /
        Suivant du navigateur fonctionnent comme sur un site classique. */
     const PAGE_PATHS={dashboard:"/accueil",sheet:"/tableur",objectives:"/objectifs",sharing:"/partage",updates:"/nouveautes",settings:"/parametres"};
+    const PAGE_TITLES={dashboard:"Meuniance — Tableau de bord",sheet:"Meuniance — Tableur",objectives:"Meuniance — Objectifs",sharing:"Meuniance — Partage et amis",sharingAccess:"Meuniance — Accès partagé",updates:"Meuniance — Nouveautés",settings:"Meuniance — Paramètres"};
     const PATH_PAGES=Object.keys(PAGE_PATHS).reduce(function(acc,key){ acc[PAGE_PATHS[key]]=key; return acc; },{});
     function pageFromLocation(){
       const path=(window.location.pathname||"/").replace(/\/+$/,"")||"/";
@@ -2825,13 +2852,61 @@
     function initPageRouting(){
       const initial=pageFromLocation();
       if(initial&&initial!==state.page) setPage(initial,{replaceUrl:true});
-      else syncPageUrl(state.page,{replaceUrl:true});
+      else { syncPageUrl(state.page,{replaceUrl:true}); updatePageTitle(state.page); syncPersonalWorkspaceNavigation(state.page); }
       window.addEventListener("popstate",function(){
         const page=pageFromLocation();
         if(page) setPage(page,{fromHistory:true});
       });
     }
-    function setPage(page,options){ options=options||{}; const requested=page==="personal"?"sharing":page; const previous=state.page; const next=(requested==="settings"||requested==="sheet"||requested==="sharing"||requested==="sharingAccess"||requested==="updates"||requested==="objectives")?requested:"dashboard"; if(next===previous){ if(!options.fromHistory) syncPageUrl(next,options); return; } state.page=next; document.body.dataset.page=state.page; elements.dashboardPage.hidden=state.page!=="dashboard"; elements.settingsPage.hidden=state.page!=="settings"; if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing"; if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess"; if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates"; if(elements.personalPage) elements.personalPage.hidden=true; if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives"; if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet"; document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active", button.dataset.page===state.page); }); if(state.page==="settings"&&previous!=="settings") showSettingsView("account"); if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}} if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}} if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); } if(state.page==="updates") renderUpdatesPage(); if(state.page==="objectives"&&window.GFObjectives) window.GFObjectives.render();  if(!options.fromHistory) syncPageUrl(next,options); }
+    function updatePageTitle(page){ document.title=PAGE_TITLES[page]||"Meuniance"; }
+    function syncPersonalWorkspaceNavigation(page){
+      document.querySelectorAll(".personal-workspace-nav").forEach(function(nav){
+        const active=nav.querySelector('[data-page="'+page+'"]');
+        nav.querySelectorAll("[data-page]").forEach(function(button){ button.setAttribute("aria-current",button===active?"page":"false"); });
+        if(active&&window.matchMedia&&window.matchMedia("(max-width:720px)").matches){
+          requestAnimationFrame(function(){ active.scrollIntoView({block:"nearest",inline:"center",behavior:"auto"}); });
+        }
+      });
+    }
+    function setPage(page,options){
+      options=options||{};
+      const requested=page==="personal"?"sharing":page;
+      const previous=state.page;
+      const next=(requested==="settings"||requested==="sheet"||requested==="sharing"||requested==="sharingAccess"||requested==="updates"||requested==="objectives")?requested:"dashboard";
+      if(next===previous){ updatePageTitle(next); syncPersonalWorkspaceNavigation(next); if(!options.fromHistory) syncPageUrl(next,options); return; }
+      state.page=next;
+      document.body.dataset.page=state.page;
+      elements.dashboardPage.hidden=state.page!=="dashboard";
+      elements.settingsPage.hidden=state.page!=="settings";
+      if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing";
+      if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess";
+      if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates";
+      if(elements.personalPage) elements.personalPage.hidden=true;
+      if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives";
+      if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet";
+      document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active",button.dataset.page===state.page); });
+      updatePageTitle(next);
+      syncPersonalWorkspaceNavigation(next);
+      if(state.page==="settings"&&previous!=="settings") showSettingsView("account");
+      if(state.page==="sheet"&&window.FinanceSheet&&previous!=="sheet"){try{window.FinanceSheet.recompute();}catch(e){}}
+      if(state.page==="dashboard"&&previous==="sheet"&&typeof window.syncDashboardFromFinanceSheet==="function"){try{window.syncDashboardFromFinanceSheet({silent:true});}catch(e){}}
+      if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); }
+      if(state.page==="updates") renderUpdatesPage();
+      if(state.page==="objectives"&&window.GFObjectives) window.GFObjectives.render();
+      if(!options.fromHistory) syncPageUrl(next,options);
+    }
+    function initSheetStatusHelp(){
+      const trigger=document.getElementById("sheetStatusInfo"),dialog=document.getElementById("sheetStatusMobileDialog"),close=document.getElementById("sheetStatusMobileClose");
+      if(!trigger||!dialog)return;
+      const closeDialog=function(){ if(dialog.open)dialog.close(); };
+      trigger.addEventListener("click",function(){
+        if(window.matchMedia&&window.matchMedia("(max-width:560px)").matches&&!dialog.open){ dialog.showModal(); trigger.setAttribute("aria-expanded","true"); }
+      });
+      if(close)close.addEventListener("click",closeDialog);
+      dialog.addEventListener("click",function(event){ if(event.target===dialog)closeDialog(); });
+      dialog.addEventListener("close",function(){ trigger.setAttribute("aria-expanded","false"); });
+    }
+    initSheetStatusHelp();
     const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],account:["Paramètres","Compte","Connexion, protection de l'accès et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."]};
     function showSettingsView(view){ const next=view!=="home"&&Object.prototype.hasOwnProperty.call(SETTINGS_VIEW_COPY,view)?view:"account",copy=SETTINGS_VIEW_COPY[next],translate=window.GFI18n?window.GFI18n.t:function(value){return value;}; document.querySelectorAll("[data-settings-panel]").forEach(function(panel){ panel.hidden=panel.dataset.settingsPanel!==next; }); const kicker=document.getElementById("settingsKicker"),title=document.getElementById("settingsTitle"),subtitle=document.getElementById("settingsSubtitle"); if(kicker) kicker.textContent=translate(copy[0]); if(title) title.textContent=translate(copy[1]); if(subtitle) subtitle.textContent=translate(copy[2]); document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.setAttribute("aria-current",String(button.dataset.settingsView===next)); }); }
     function renderPersonalSpace(){ const profileEmail=document.getElementById("profileEmail"),profileAvatar=document.getElementById("profileAvatar"),email=document.getElementById("personalEmail"),avatar=document.getElementById("personalAvatar"),meta=document.getElementById("personalObjectivesMeta"); if(email){ const value=String(profileEmail?.textContent||"").trim(); email.textContent=value&&value!=="Non connecté"?value:"Un espace privé pour organiser tes projets et tes accès."; } if(avatar) avatar.textContent=String(profileAvatar?.textContent||"?").trim().slice(0,2)||"?"; if(meta){ let goals=[]; try{ const profile=JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile")||"{}"); goals=Array.isArray(profile?.objectives)?profile.objectives.filter(Boolean):[]; }catch(e){} meta.textContent=goals.length?goals.length+" objectif"+(goals.length>1?"s":"")+" en cours.":"Crée et suis tes projets financiers."; } }
@@ -5335,7 +5410,7 @@ function resetDataState(){
   function msg(t, kind){ var m = el("accountMsg"); if(m){ m.textContent = t; m.className = "account-msg " + (kind||""); } }
   function clearMsg(){ msg(""); }
   function setLoading(v){ ["accountLoginBtn","accountRegisterBtn","accountResendBtn","accountConfirmCheckBtn","accountChangeEmailBtn"].forEach(function(id){var button=el(id);if(button)button.disabled=v;}); }
-  function accountPane(name){var loginPane=el("accountLoginPane"),registerPane=el("accountRegisterPane"),confirmPane=el("accountEmailConfirmStep"),loginTab=el("accountLoginTab"),registerTab=el("accountRegisterTab");if(loginPane)loginPane.hidden=name!=="login";if(registerPane)registerPane.hidden=name!=="register";if(confirmPane)confirmPane.hidden=name!=="confirm";if(loginTab){loginTab.classList.toggle("is-active",name==="login");loginTab.setAttribute("aria-selected",String(name==="login"));}if(registerTab){registerTab.classList.toggle("is-active",name==="register"||name==="confirm");registerTab.setAttribute("aria-selected",String(name==="register"||name==="confirm"));}}
+  function accountPane(name){var loginPane=el("accountLoginPane"),registerPane=el("accountRegisterPane"),confirmPane=el("accountEmailConfirmStep"),loginTab=el("accountLoginTab"),registerTab=el("accountRegisterTab"),loginActive=name==="login",registerActive=name==="register"||name==="confirm";if(loginPane)loginPane.hidden=!loginActive;if(registerPane)registerPane.hidden=name!=="register";if(confirmPane)confirmPane.hidden=name!=="confirm";if(loginTab){loginTab.classList.toggle("is-active",loginActive);loginTab.setAttribute("aria-selected",String(loginActive));loginTab.setAttribute("aria-current",loginActive?"step":"false");}if(registerTab){registerTab.classList.toggle("is-active",registerActive);registerTab.setAttribute("aria-selected",String(registerActive));registerTab.setAttribute("aria-current",registerActive?"step":"false");}}
   function accountEmail(kind){var id=kind==="register"?"accountRegisterEmail":"accountLoginEmail";return String(el(id)&&el(id).value||"").trim();}
   function showEmailConfirmation(email){sb.pendingSignupEmail=email;accountPane("confirm");var description=el("accountConfirmDescription");if(description)description.textContent="Nous avons envoyé un lien sécurisé à "+email+".";}
 

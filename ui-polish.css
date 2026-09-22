@@ -1214,3 +1214,80 @@ body[data-theme="brutal"][data-mode="light"] #dashboardPage :is(.sheet-status-la
     transform:translateY(4px);
   }
 }
+
+/* ───── Correctifs d'usage mobile : aide, accès et navigation ───── */
+/* Les deux chemins d'accès au compte restent explicitement identifiables. */
+.account-tabs {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:4px;
+  padding:4px;
+  border:1px solid var(--line);
+  border-radius:var(--control-radius);
+  background:var(--input-bg);
+}
+.account-tab {
+  min-height:42px;
+  padding:9px 10px;
+  border:1px solid transparent;
+  border-radius:calc(var(--control-radius) - 3px);
+  background:transparent;
+  color:var(--muted);
+  font:750 .86rem/1.2 var(--font-body);
+}
+.account-tab.is-active {
+  border-color:var(--line-strong);
+  background:var(--panel-solid);
+  color:var(--accent);
+  box-shadow:0 2px 8px color-mix(in srgb,var(--text) 9%,transparent);
+}
+body[data-theme="editorial"] .account-tabs { border-radius:4px; }
+body[data-theme="editorial"] .account-tab { border-radius:2px; }
+body[data-theme="brutal"] .account-tabs,
+body[data-theme="brutal"] .account-tab { border-radius:0; }
+
+/* Sur téléphone, l'aide du statut devient une vraie petite fenêtre modale :
+   aucune infobulle ne peut partir hors écran ni masquer l'en-tête. */
+.sheet-status-mobile-dialog {
+  width:min(380px,calc(100vw - 28px));
+  max-width:none;
+  margin:auto;
+  padding:18px;
+  border:1px solid var(--line-strong);
+  border-radius:var(--control-radius);
+  background:var(--panel-solid);
+  color:var(--text);
+  box-shadow:var(--shadow);
+}
+.sheet-status-mobile-dialog::backdrop { background:color-mix(in srgb,var(--bg) 72%,transparent); backdrop-filter:blur(3px); }
+.sheet-status-mobile-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:12px; border-bottom:1px solid var(--line); }
+.sheet-status-mobile-head h2 { margin:0; font:800 1.05rem/1.2 var(--font-heading); }
+.sheet-status-mobile-close { width:34px; height:34px; min-height:34px; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--input-bg); color:var(--text); font:500 1.5rem/1 var(--font-body); cursor:pointer; }
+.sheet-status-mobile-list { display:grid; gap:10px; padding-top:14px; }
+.sheet-status-mobile-list p { display:grid; grid-template-columns:10px minmax(0,1fr); gap:9px; align-items:start; margin:0; color:var(--text); font:500 .84rem/1.4 var(--font-body); }
+.sheet-status-mobile-list .sheet-status-tooltip-dot { width:10px; height:10px; margin-top:.28em; }
+body[data-theme="editorial"] .sheet-status-mobile-dialog { border-radius:3px; }
+body[data-theme="editorial"] .sheet-status-mobile-close { border-radius:2px; }
+body[data-theme="brutal"] .sheet-status-mobile-dialog,
+body[data-theme="brutal"] .sheet-status-mobile-close { border-radius:0; }
+@media (min-width:561px) { .sheet-status-mobile-dialog { display:none !important; } }
+@media (max-width:560px) {
+  #dashboardPage .sheet-status-info { cursor:pointer; }
+  #dashboardPage .sheet-status-tooltip { display:none !important; }
+  .sheet-status-mobile-dialog { max-height:min(360px,calc(100dvh - 32px)); }
+}
+
+/* Un onglet personnel actif reste à l'écran au changement de page. */
+@media (max-width:720px) {
+  .personal-workspace-nav { scroll-snap-type:x proximity; scroll-padding-inline:16px; }
+  .personal-workspace-link,.personal-workspace-notes { scroll-snap-align:center; }
+  .personal-workspace-nav::after { content:""; flex:0 0 12px; }
+}
+
+/* Un tableau de bord sans données indique directement le prochain geste. */
+.empty-state { gap:12px; }
+.empty-state p { margin:0; }
+.empty-state-action { min-height:40px; padding:9px 13px; border:1px solid var(--line-strong); border-radius:var(--control-radius); background:var(--button-active-bg); color:var(--accent); font:750 .84rem/1.2 var(--font-body); cursor:pointer; }
+.empty-state-action:hover,.empty-state-action:focus-visible { border-color:var(--accent); background:var(--panel-solid); }
+body[data-theme="editorial"] .empty-state-action { border-radius:2px; }
+body[data-theme="brutal"] .empty-state-action { border-radius:0; }
