@@ -1065,6 +1065,93 @@ body[data-theme="brutal"] .sheet-starting-balance-modal :is(.sheet-field input,.
   .sheet-bar #btnSheetCalc .lbl { display:inline !important; }
 }
 
+/* Dernier passage visuel : la barre reste compacte, lisible et sans halo.
+   Ces règles sont placées en fin de feuille afin de neutraliser les variantes
+   de thème plus anciennes qui ajoutaient des ombres ou des espaces. */
+.sheet-bar,
+body[data-theme="glass"] .sheet-bar,
+body[data-theme="editorial"] .sheet-bar,
+body[data-theme="brutal"] .sheet-bar {
+  width:fit-content !important;
+  max-width:calc(100% - 16px) !important;
+  gap:8px !important;
+  padding:7px 9px !important;
+  background:var(--panel-solid) !important;
+  color:var(--text) !important;
+  border-color:var(--line-strong) !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+.sheet-bar-left,
+.sheet-bar-right,
+.sheet-bar-file-actions {
+  gap:7px !important;
+  padding:0 !important;
+  margin-left:0 !important;
+  border:0 !important;
+  background:transparent !important;
+}
+.sheet-bar-right { flex:0 0 auto !important; }
+.sheet-bar .sheet-divider,
+.sheet-bar .sheet-spacer { display:none !important; }
+.sheet-bar .button,
+body[data-theme="glass"] .sheet-bar .button,
+body[data-theme="editorial"] .sheet-bar .button,
+body[data-theme="brutal"] .sheet-bar .button {
+  width:38px !important;
+  min-width:38px !important;
+  height:38px !important;
+  min-height:38px !important;
+  flex-basis:38px !important;
+  padding:8px !important;
+  box-shadow:none !important;
+}
+.sheet-bar .button svg { width:18px !important; height:18px !important; filter:none !important; }
+.sheet-bar #btnSheetCalc,
+body[data-theme="glass"] .sheet-bar #btnSheetCalc,
+body[data-theme="editorial"] .sheet-bar #btnSheetCalc,
+body[data-theme="brutal"] .sheet-bar #btnSheetCalc {
+  width:auto !important;
+  min-width:136px !important;
+  height:38px !important;
+  min-height:38px !important;
+  flex-basis:auto !important;
+  padding-inline:13px !important;
+  box-shadow:none !important;
+}
+@media (max-width:720px) {
+  .sheet-bar,
+  body[data-theme="glass"] .sheet-bar,
+  body[data-theme="editorial"] .sheet-bar,
+  body[data-theme="brutal"] .sheet-bar {
+    top:calc(14px + env(safe-area-inset-top,0px)) !important;
+    width:calc(100% - 16px) !important;
+    max-width:calc(100% - 16px) !important;
+    gap:7px !important;
+    padding:7px 8px !important;
+    box-shadow:none !important;
+  }
+  .sheet-bar .button,
+  body[data-theme="glass"] .sheet-bar .button,
+  body[data-theme="editorial"] .sheet-bar .button,
+  body[data-theme="brutal"] .sheet-bar .button {
+    width:38px !important;
+    min-width:38px !important;
+    height:38px !important;
+    min-height:38px !important;
+    flex-basis:38px !important;
+  }
+  .sheet-bar #btnSheetCalc,
+  body[data-theme="glass"] .sheet-bar #btnSheetCalc,
+  body[data-theme="editorial"] .sheet-bar #btnSheetCalc,
+  body[data-theme="brutal"] .sheet-bar #btnSheetCalc {
+    min-width:132px !important;
+    height:38px !important;
+    min-height:38px !important;
+  }
+}
+
 /* ───── Rail final : largeur au contenu, groupes sans espaces fantômes ───── */
 .sheet-bar,
 body[data-theme="glass"] .sheet-bar,
