@@ -1291,3 +1291,29 @@ body[data-theme="brutal"] .sheet-status-mobile-close { border-radius:0; }
 .empty-state-action:hover,.empty-state-action:focus-visible { border-color:var(--accent); background:var(--panel-solid); }
 body[data-theme="editorial"] .empty-state-action { border-radius:2px; }
 body[data-theme="brutal"] .empty-state-action { border-radius:0; }
+
+/* ───── Palette stable de l'accueil ─────
+   Les surfaces suivent maintenant exactement le mode clair/sombre et ne
+   récupèrent plus une couleur hardcodée d'un autre thème. */
+#dashboardPage :is(.home-toolbar,.metric-card,.mobile-finance-summary,.savings-goal-card,.chart-panel,.detail-panel-global),
+#dashboardPage .global-summary-grid > section {
+  background:var(--panel-solid) !important;
+  color:var(--text) !important;
+  border-color:var(--line-strong) !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+#dashboardPage .home-toolbar :is(h2,.metric-label,.metric-value,.metric-note),
+#dashboardPage .chart-panel :is(h2,p),
+#dashboardPage .detail-panel-global :is(h3,h4,p,span,strong) { color:inherit; }
+#dashboardPage .home-toolbar .custom-select-trigger { background:var(--input-bg) !important; color:var(--text) !important; border-color:var(--line-strong) !important; box-shadow:none !important; }
+#dashboardPage .home-toolbar .custom-select-options { background:var(--panel-solid) !important; color:var(--text) !important; border-color:var(--line-strong) !important; box-shadow:none !important; backdrop-filter:none !important; }
+
+/* Les petits repères restent nets : aucune aura, même dans le thème sombre. */
+#dashboardPage :is(.sheet-status-dot,.sheet-status-info,.sheet-status-tooltip-dot) {
+  box-shadow:none !important;
+  filter:none !important;
+  text-shadow:none !important;
+}
+#dashboardPage .sheet-status-info { background:transparent !important; }
