@@ -55,7 +55,7 @@
     })();
   </script>
   <script src="store-shim.js"></script>
-  <link rel="stylesheet" href="sheet.css?v=20260922-r3" />
+  <link rel="stylesheet" href="sheet.css?v=20260923-r4" />
   <link rel="stylesheet" href="onboarding.css?v=20260901-9" />
   <style>
     /* Anti-zoom mobile : empêche le zoom automatique sur les inputs */
@@ -2065,10 +2065,6 @@
             <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 6h8M8 10h0M12 10h0M16 10h0M8 14h0M12 14h0M16 14h0M8 18h0M12 18h0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             <span class="lbl">Calculatrice</span>
           </button>
-          <button class="button button-ghost icon-btn sheet-mobile-more" id="btnSheetMobileMore" type="button" title="Autres outils du tableur" aria-label="Autres outils du tableur" aria-controls="sheetMobileTools" aria-expanded="false">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1.75" fill="currentColor"/><circle cx="12" cy="12" r="1.75" fill="currentColor"/><circle cx="19" cy="12" r="1.75" fill="currentColor"/></svg>
-            <span class="lbl">Plus</span>
-          </button>
           <span class="sheet-divider"></span>
           <div class="sheet-bar-file-actions" role="group" aria-label="Importer ou exporter">
             <button class="button button-ghost icon-btn" id="btnSheetImport" type="button" title="Importer un fichier Excel" data-tooltip="Importer un fichier Excel" aria-label="Importer un fichier Excel">
@@ -2090,12 +2086,6 @@
             <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span class="lbl">Corbeille</span>
           </button>
-          <div class="sheet-mobile-tools" id="sheetMobileTools" role="menu" aria-label="Autres outils du tableur" hidden>
-            <button type="button" role="menuitem" data-sheet-mobile-action="import">Importer un fichier</button>
-            <button type="button" role="menuitem" data-sheet-mobile-action="export">Exporter en Excel</button>
-            <button type="button" role="menuitem" data-sheet-mobile-action="delete">Supprimer la ligne</button>
-            <button type="button" role="menuitem" data-sheet-mobile-action="clear">Vider la feuille</button>
-          </div>
         </div>
       </div>
       <div class="sheet-fx">
@@ -5247,7 +5237,7 @@ function resetDataState(){
     }
     init();
   </script>
-  <script src="sheet.js?v=20260908-r9"></script>
+  <script src="sheet.js?v=20260923-r1"></script>
   <script src="onboarding.js?v=20260908-r9"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
   <script src="friends.js?v=20260918-r1"></script>

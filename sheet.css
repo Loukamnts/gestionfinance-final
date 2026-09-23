@@ -1619,36 +1619,96 @@ body[data-theme="brutal"][data-mode="light"] .sheet-bar #btnSheetCalc { backgrou
   }
 }
 
-/* Correctif final pour les appareils avec encoche : le rail reste dans une
-   zone lisible, quelques pixels sous le bord du navigateur. */
+/* Rendu final de la toolbar : toutes les actions sont visibles sans menu
+   « trois points », le rail reste compact et suit les couleurs du thème. */
+.sheet-bar,
+body[data-theme="glass"] .sheet-bar,
+body[data-theme="editorial"] .sheet-bar,
+body[data-theme="brutal"] .sheet-bar {
+  width:fit-content !important;
+  max-width:calc(100% - 16px) !important;
+  margin-inline:auto !important;
+  gap:7px !important;
+  padding:7px 9px !important;
+  background:var(--panel-solid) !important;
+  color:var(--text) !important;
+  border-color:var(--line-strong) !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+.sheet-bar::before { display:none !important; }
+.sheet-bar-left,.sheet-bar-right,.sheet-bar-file-actions {
+  gap:6px !important;
+  padding:0 !important;
+  margin:0 !important;
+  border:0 !important;
+  background:transparent !important;
+}
+.sheet-bar .sheet-divider,.sheet-bar .sheet-spacer { display:none !important; }
+.sheet-bar .button,
+body[data-theme="glass"] .sheet-bar .button,
+body[data-theme="editorial"] .sheet-bar .button,
+body[data-theme="brutal"] .sheet-bar .button {
+  width:38px !important;
+  min-width:38px !important;
+  height:38px !important;
+  min-height:38px !important;
+  flex:0 0 38px !important;
+  padding:8px !important;
+  box-shadow:none !important;
+}
+.sheet-bar #btnSheetCalc,
+body[data-theme="glass"] .sheet-bar #btnSheetCalc,
+body[data-theme="editorial"] .sheet-bar #btnSheetCalc,
+body[data-theme="brutal"] .sheet-bar #btnSheetCalc {
+  width:auto !important;
+  min-width:132px !important;
+  height:38px !important;
+  min-height:38px !important;
+  flex:0 0 auto !important;
+  padding-inline:12px !important;
+}
+.sheet-mobile-more,.sheet-mobile-tools { display:none !important; }
 @media (max-width:720px) {
   .sheet-bar,
   body[data-theme="glass"] .sheet-bar,
   body[data-theme="editorial"] .sheet-bar,
   body[data-theme="brutal"] .sheet-bar {
     top:calc(14px + env(safe-area-inset-top,0px)) !important;
-    min-height:48px !important;
-    padding:6px 8px !important;
+    width:calc(100% - 16px) !important;
+    max-width:calc(100% - 16px) !important;
+    min-height:52px !important;
+    justify-content:flex-start !important;
+    padding:7px 8px !important;
     gap:6px !important;
-    box-shadow:0 10px 28px color-mix(in srgb,var(--text) 16%,transparent) !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    scrollbar-width:none !important;
+    box-shadow:none !important;
   }
+  .sheet-bar::-webkit-scrollbar { display:none !important; }
+  .sheet-bar-left,.sheet-bar-right,.sheet-bar-file-actions { flex:0 0 auto !important; min-width:max-content !important; }
+  .sheet-bar-file-actions { display:flex !important; }
+  .sheet-bar-right > #btnSheetDeleteRow,
+  .sheet-bar-right > #btnSheetClear { display:inline-flex !important; }
   .sheet-bar .button,
   body[data-theme="glass"] .sheet-bar .button,
   body[data-theme="editorial"] .sheet-bar .button,
   body[data-theme="brutal"] .sheet-bar .button {
-    width:36px !important;
-    min-width:36px !important;
-    height:36px !important;
-    min-height:36px !important;
-    flex-basis:36px !important;
+    width:38px !important;
+    min-width:38px !important;
+    height:38px !important;
+    min-height:38px !important;
+    flex-basis:38px !important;
   }
   .sheet-bar #btnSheetCalc,
   body[data-theme="glass"] .sheet-bar #btnSheetCalc,
   body[data-theme="editorial"] .sheet-bar #btnSheetCalc,
   body[data-theme="brutal"] .sheet-bar #btnSheetCalc {
-    min-width:126px !important;
-    height:36px !important;
-    min-height:36px !important;
+    min-width:124px !important;
+    height:38px !important;
+    min-height:38px !important;
   }
   .sheet-bar #btnSheetCalc .lbl { display:inline !important; }
 }

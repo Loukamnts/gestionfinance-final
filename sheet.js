@@ -1467,32 +1467,6 @@
     bind("btnSheetCalc", openCalculator);
     bind("btnSheetUndo", undo);
     bind("btnSheetRedo", redo);
-    const mobileToolsButton = document.getElementById("btnSheetMobileMore");
-    const mobileTools = document.getElementById("sheetMobileTools");
-    const closeMobileTools = () => {
-      if (!mobileTools || mobileTools.hidden) return;
-      mobileTools.hidden = true;
-      if (mobileToolsButton) mobileToolsButton.setAttribute("aria-expanded", "false");
-    };
-    if (mobileToolsButton && mobileTools) {
-      mobileToolsButton.addEventListener("click", (event) => {
-        event.stopPropagation();
-        mobileTools.hidden = !mobileTools.hidden;
-        mobileToolsButton.setAttribute("aria-expanded", String(!mobileTools.hidden));
-      });
-      mobileTools.querySelectorAll("[data-sheet-mobile-action]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const action = button.dataset.sheetMobileAction;
-          const target = document.getElementById(action === "delete" ? "btnSheetDeleteRow" : action === "clear" ? "btnSheetClear" : action === "export" ? "btnSheetExport" : "btnSheetImport");
-          closeMobileTools();
-          if (target) target.click();
-        });
-      });
-      document.addEventListener("click", (event) => {
-        if (!mobileTools.hidden && !mobileTools.contains(event.target) && !mobileToolsButton.contains(event.target)) closeMobileTools();
-      });
-      document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeMobileTools(); });
-    }
     container.addEventListener("paste", (e) => { if (state.editing) return; const text = (e.clipboardData || window.clipboardData).getData("text"); if (text) { e.preventDefault(); paste(text); } });
     container.addEventListener("copy", (e) => { if (state.editing) return; e.clipboardData.setData("text/plain", copySelection()); e.preventDefault(); });
     notifyDashboard();
