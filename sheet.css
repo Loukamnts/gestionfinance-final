@@ -955,6 +955,11 @@ body[data-theme="brutal"] .sheet-starting-balance-modal :is(.sheet-field input,.
     transform:translate(-50%,0);
   }
 }
+/* Verrou fiable du fond sur Safari iOS et Android : une calculatrice ou une
+   confirmation ne fait jamais défiler la page qui se trouve derrière. */
+html[data-sheet-modal-open="true"],html:has(body.sheet-modal-open),body.sheet-modal-open { overflow:hidden !important; overscroll-behavior:none; }
+body.sheet-modal-open { position:fixed; top:var(--sheet-modal-scroll-y,0px); left:0; right:0; width:100%; height:100%; touch-action:none; }
+.sheet-modal-overlay { overscroll-behavior:contain; touch-action:pan-y; }
 
 /* ───── Barre mobile : actions visibles, position sûre, aucune découpe ───── */
 .sheet-mobile-more,.sheet-mobile-tools { display:none; }

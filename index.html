@@ -55,7 +55,7 @@
     })();
   </script>
   <script src="store-shim.js"></script>
-  <link rel="stylesheet" href="sheet.css?v=20260923-r4" />
+  <link rel="stylesheet" href="sheet.css?v=20260923-r5" />
   <link rel="stylesheet" href="onboarding.css?v=20260901-9" />
   <style>
     /* Anti-zoom mobile : empêche le zoom automatique sur les inputs */
@@ -1826,9 +1826,9 @@
   @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260923-r2">
-  <link rel="stylesheet" href="ui-polish.css?v=20260923-r4">
-  <link rel="stylesheet" href="theme-directions.css?v=20260923-r3">
-  <script src="i18n.js?v=20260918-r4"></script>
+  <link rel="stylesheet" href="ui-polish.css?v=20260923-r5">
+  <link rel="stylesheet" href="theme-directions.css?v=20260923-r5">
+  <script src="i18n.js?v=20260923-r5"></script>
   <script src="ui-controls.js?v=20260908-r9" defer></script>
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard" data-interface="classic">
@@ -2044,7 +2044,7 @@
             <label><span>Type</span><select id="objectiveType"><option value="savings">Épargne</option><option value="investment">Investissement</option><option value="expense">Dépense prévue</option><option value="custom">Personnalisé</option></select></label>
             <label><span>Montant visé (€)</span><input id="objectiveTarget" type="number" min="0" step="0.01" inputmode="decimal" required /></label>
             <label><span>Déjà atteint (€)</span><input id="objectiveCurrent" type="number" min="0" step="0.01" inputmode="decimal" value="0" /></label>
-            <button class="objective-plan-toggle" id="objectivePlanToggle" type="button" aria-expanded="false" aria-controls="objectivePlanFields">Planifier cet objectif <span>Facultatif</span></button>
+            <button class="objective-plan-toggle" id="objectivePlanToggle" type="button" aria-expanded="false" aria-controls="objectivePlanFields">Définir une échéance ou une récurrence <span>Facultatif</span></button>
             <div class="objective-plan-fields" id="objectivePlanFields" hidden><label><span>Rythme</span><select id="objectiveCadence"><option value="once">Sans récurrence</option><option value="monthly">Chaque mois</option><option value="yearly">Chaque année</option></select></label><label><span>Échéance <em>facultative</em></span><input id="objectiveDueDate" type="date" /></label><label class="objective-link-field"><span>Lier au tableur <em>facultatif</em></span><select id="objectiveSheetSource"><option value="">Aucune liaison</option></select></label></div>
             <div class="objective-form-actions"><button class="button button-ghost" id="objectiveCancelButton" type="button">Annuler</button><button class="button button-primary" type="submit">Enregistrer l'objectif</button></div>
           </form><div class="objectives-list" id="objectivesList"></div></section>

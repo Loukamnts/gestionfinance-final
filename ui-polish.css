@@ -350,8 +350,11 @@ body.personal-notes-open { overflow:hidden !important; overscroll-behavior:none;
 
 /* Objectifs : la planification est utile mais toujours optionnelle. */
 .objectives-grid { grid-template-columns:minmax(0,860px); }
-.objective-plan-toggle { grid-column:1 / -1; width:max-content; max-width:100%; padding:0; border:0; background:transparent; color:var(--accent); font:750 .82rem/1.4 var(--font-body); text-align:left; cursor:pointer; }
-.objective-plan-toggle span { display:inline-block; margin-left:6px; color:var(--muted); font-weight:500; }
+.objective-plan-toggle { grid-column:1 / -1; display:inline-flex; align-items:center; gap:8px; width:max-content; max-width:100%; min-height:40px; padding:8px 11px; border:1px solid var(--line-strong); border-radius:var(--control-radius); background:var(--input-bg); color:var(--text); font:750 .82rem/1.3 var(--font-body); text-align:left; cursor:pointer; }
+.objective-plan-toggle::before { content:"+"; display:grid; place-items:center; width:18px; height:18px; flex:0 0 18px; border:1px solid var(--accent); border-radius:50%; color:var(--accent); font:800 1rem/1 var(--font-body); }
+.objective-plan-toggle:hover,.objective-plan-toggle:focus-visible { border-color:var(--accent); background:var(--button-active-bg); color:var(--text); }
+.objective-plan-toggle span { display:inline-block; margin-left:2px; color:var(--muted); font-weight:600; }
+body[data-theme="brutal"] .objective-plan-toggle,body[data-theme="brutal"] .objective-plan-toggle::before { border-radius:0; }
 .objective-plan-fields { grid-column:1 / -1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:12px; border-left:3px solid var(--accent); background:color-mix(in srgb,var(--input-bg),var(--accent) 5%); }
 .objective-plan-fields[hidden] { display:none; }
 .objective-cadence { margin:0; color:var(--accent); font:700 .76rem/1.35 var(--font-body); }

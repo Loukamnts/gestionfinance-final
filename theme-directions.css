@@ -6,13 +6,13 @@ body[data-theme="glass"][data-mode="dark"] {
   --panel-blur:none;
   --line:#33364d; --line-strong:#5e6485; --text:#f5f3ff; --muted:#c0bfd2; --muted-2:#a3a4bf;
   --input-bg:#141622; --input-focus-bg:#27293b; --metric-bg:#1b1d2b; --detail-bg:#1b1d2b;
-  --accent:#b19afa; --accent-2:#d2a6e8; --accent-3:#8b8fe8; --green:#b19afa; --red:#ef829c;
-  --button-primary-bg:#b19afa; --button-primary-text:#151026; --button-active-bg:#34304b; --button-active-text:#f5f3ff;
+  --accent:#9b8fbd; --accent-2:#aa7a89; --accent-3:#6c7d92; --green:#9b8fbd; --red:#c7707e;
+  --button-primary-bg:#9b8fbd; --button-primary-text:#151026; --button-active-bg:#34304b; --button-active-text:#f5f3ff;
   --title-gradient:none; --shadow:0 14px 36px #08091455;
-  --chart-salary:#b19afa; --chart-expenses:#e697c0; --chart-savings:#8799ee;
+  --chart-salary:#9b8fbd; --chart-expenses:#aa7a89; --chart-savings:#6c7d92;
   --chart-grid:#3c3f57; --chart-tick:#c0bfd2; --chart-text:#f5f3ff;
-  --chart-1:#b19afa; --chart-2:#e697c0; --chart-3:#8799ee; --chart-4:#c1b2ee;
-  --chart-5:#8671c8; --chart-6:#d9b1e5; --chart-7:#7283c5; --chart-8:#b99aca;
+  --chart-1:#9b8fbd; --chart-2:#aa7a89; --chart-3:#6c7d92; --chart-4:#b7aec6;
+  --chart-5:#766f98; --chart-6:#c0939e; --chart-7:#87919d; --chart-8:#9185aa;
   --pie-border-color:#1b1d2b;
 }
 body[data-theme="glass"][data-mode="light"] {
@@ -22,13 +22,13 @@ body[data-theme="glass"][data-mode="light"] {
   --panel-blur:none;
   --line:#d8d9e8; --line-strong:#a7a9c8; --text:#22233c; --muted:#5c5c76; --muted-2:#6d6c85;
   --input-bg:#f5f5fc; --input-focus-bg:#fff; --metric-bg:#fff; --detail-bg:#fff;
-  --accent:#5940a5; --accent-2:#8346a9; --accent-3:#535dc2; --green:#5940a5; --red:#ad3c63;
-  --button-primary-bg:#5940a5; --button-primary-text:#fff; --button-active-bg:#eae6fa; --button-active-text:#3b2878;
+  --accent:#665878; --accent-2:#9e6f78; --accent-3:#61738b; --green:#665878; --red:#a94b5b;
+  --button-primary-bg:#665878; --button-primary-text:#fff; --button-active-bg:#eae6fa; --button-active-text:#45364f;
   --title-gradient:none; --shadow:0 12px 30px #21174418;
-  --chart-salary:#5940a5; --chart-expenses:#9b4580; --chart-savings:#5263be;
+  --chart-salary:#665878; --chart-expenses:#9e6f78; --chart-savings:#61738b;
   --chart-grid:#d8d9e8; --chart-tick:#5c5c76; --chart-text:#22233c;
-  --chart-1:#5940a5; --chart-2:#9b4580; --chart-3:#5263be; --chart-4:#7656bf;
-  --chart-5:#3f307d; --chart-6:#b25ca0; --chart-7:#455196; --chart-8:#784b9b;
+  --chart-1:#665878; --chart-2:#9e6f78; --chart-3:#61738b; --chart-4:#84748f;
+  --chart-5:#4c425a; --chart-6:#b78a91; --chart-7:#4f6178; --chart-8:#7b687e;
   --pie-border-color:#fff;
 }
 body[data-theme="editorial"][data-mode="light"] {
@@ -37,13 +37,13 @@ body[data-theme="editorial"][data-mode="light"] {
   --panel-border:1px solid #e4d4cb; --panel-top-border:2px solid #8e2948;
   --line:#e4d4cb; --line-strong:#cbaea7; --text:#2c1d23; --muted:#6c535b; --muted-2:#80646d;
   --input-bg:#faf3ef; --input-focus-bg:#fffdf9; --metric-bg:#fffdf9; --detail-bg:#fffdf9;
-  --accent:#8e2948; --accent-2:#b34c67; --accent-3:#a16963; --green:#8e2948; --red:#b33a55;
-  --button-primary-bg:#8e2948; --button-primary-text:#fffdf9; --button-active-bg:#f5e2e5; --button-active-text:#702039;
+  --accent:#7a3348; --accent-2:#a96a76; --accent-3:#897368; --green:#7a3348; --red:#ab4057;
+  --button-primary-bg:#7a3348; --button-primary-text:#fffdf9; --button-active-bg:#f5e2e5; --button-active-text:#702039;
   --shadow:0 2px 0 #e4d4cb;
-  --chart-salary:#8e2948; --chart-expenses:#c55873; --chart-savings:#9d675f;
+  --chart-salary:#7a3348; --chart-expenses:#a96a76; --chart-savings:#897368;
   --chart-grid:#e4d4cb; --chart-tick:#6c535b; --chart-text:#2c1d23;
-  --chart-1:#8e2948; --chart-2:#c55873; --chart-3:#9d675f; --chart-4:#cf8a90;
-  --chart-5:#692039; --chart-6:#b85f68; --chart-7:#75514e; --chart-8:#a53e54;
+  --chart-1:#7a3348; --chart-2:#a96a76; --chart-3:#897368; --chart-4:#bd8a90;
+  --chart-5:#5b2637; --chart-6:#b97881; --chart-7:#68504a; --chart-8:#8e4c5b;
   --pie-border-color:#fffdf9;
 }
 body[data-theme="editorial"][data-mode="dark"] {
@@ -52,13 +52,13 @@ body[data-theme="editorial"][data-mode="dark"] {
   --panel-border:1px solid #50313b; --panel-top-border:2px solid #ed9eae;
   --line:#50313b; --line-strong:#80515e; --text:#fff4ee; --muted:#d7bdc2; --muted-2:#b699a1;
   --input-bg:#23171c; --input-focus-bg:#39252d; --metric-bg:#2b1c22; --detail-bg:#2b1c22;
-  --accent:#ed9eae; --accent-2:#ee7f99; --accent-3:#d3a097; --green:#ed9eae; --red:#f17891;
-  --button-primary-bg:#ed9eae; --button-primary-text:#281218; --button-active-bg:#53303b; --button-active-text:#fff4ee;
+  --accent:#c6959f; --accent-2:#ad6878; --accent-3:#9b8177; --green:#c6959f; --red:#d36f82;
+  --button-primary-bg:#c6959f; --button-primary-text:#281218; --button-active-bg:#53303b; --button-active-text:#fff4ee;
   --shadow:0 12px 30px #0806074d;
-  --chart-salary:#ed9eae; --chart-expenses:#ef7394; --chart-savings:#c4988b;
+  --chart-salary:#c6959f; --chart-expenses:#ad6878; --chart-savings:#9b8177;
   --chart-grid:#50313b; --chart-tick:#d7bdc2; --chart-text:#fff4ee;
-  --chart-1:#ed9eae; --chart-2:#ef7394; --chart-3:#c4988b; --chart-4:#d1a5aa;
-  --chart-5:#b95e75; --chart-6:#f2b5b9; --chart-7:#a88178; --chart-8:#d1828e;
+  --chart-1:#c6959f; --chart-2:#ad6878; --chart-3:#9b8177; --chart-4:#d3b1b5;
+  --chart-5:#976674; --chart-6:#d7aeb1; --chart-7:#7d6963; --chart-8:#b77a85;
   --pie-border-color:#2b1c22;
 }
 body[data-theme="brutal"][data-mode="dark"] {
@@ -67,13 +67,13 @@ body[data-theme="brutal"][data-mode="dark"] {
   --panel-border:1px solid #a7a18d; --panel-top-border:1px solid #a7a18d;
   --line:#5b594f; --line-strong:#c9c1a6; --text:#fffaf0; --muted:#d1cabc; --muted-2:#aea797;
   --input-bg:#151512; --input-focus-bg:#27261f; --metric-bg:#1b1b18; --detail-bg:#1b1b18;
-  --accent:#eac56d; --accent-2:#f1d993; --accent-3:#efe7d5; --green:#eac56d; --red:#ef8f8a;
-  --button-primary-bg:#eac56d; --button-primary-text:#211907; --button-active-bg:#383220; --button-active-text:#fffaf0;
+  --accent:#c08457; --accent-2:#8fa0b5; --accent-3:#ded8cf; --green:#c08457; --red:#bf7570;
+  --button-primary-bg:#c08457; --button-primary-text:#211907; --button-active-bg:#352b22; --button-active-text:#fffaf0;
   --shadow:0 0 0 1px #c9c1a6;
-  --chart-salary:#eac56d; --chart-expenses:#f0a59c; --chart-savings:#ded8cb;
+  --chart-salary:#c08457; --chart-expenses:#8fa0b5; --chart-savings:#ded8cf;
   --chart-grid:#4b493f; --chart-tick:#d1cabc; --chart-text:#fffaf0;
-  --chart-1:#eac56d; --chart-2:#f0a59c; --chart-3:#ded8cb; --chart-4:#c89b4e;
-  --chart-5:#ab7d39; --chart-6:#d17e78; --chart-7:#b9b2a5; --chart-8:#f0d28f;
+  --chart-1:#c08457; --chart-2:#8fa0b5; --chart-3:#ded8cf; --chart-4:#9c714f;
+  --chart-5:#765039; --chart-6:#718197; --chart-7:#aaa69d; --chart-8:#b3947a;
   --pie-border-color:#1b1b18;
 }
 body[data-theme="brutal"][data-mode="light"] {
@@ -82,34 +82,34 @@ body[data-theme="brutal"][data-mode="light"] {
   --panel-border:1px solid #24221c; --panel-top-border:1px solid #24221c;
   --line:#b4ac99; --line-strong:#24221c; --text:#1e1c17; --muted:#514c41; --muted-2:#655f50;
   --input-bg:#faf7ee; --input-focus-bg:#fffefa; --metric-bg:#fffefa; --detail-bg:#fffefa;
-  --accent:#6e4b16; --accent-2:#95681e; --accent-3:#25221b; --green:#6e4b16; --red:#a43e3b;
-  --button-primary-bg:#6e4b16; --button-primary-text:#fffefa; --button-active-bg:#f3e5bd; --button-active-text:#4e340f;
+  --accent:#a9683f; --accent-2:#52607a; --accent-3:#242525; --green:#a9683f; --red:#a64c48;
+  --button-primary-bg:#a9683f; --button-primary-text:#fffefa; --button-active-bg:#eee1d5; --button-active-text:#724027;
   --shadow:0 0 0 1px #24221c;
-  --chart-salary:#76521b; --chart-expenses:#a4413c; --chart-savings:#424039;
+  --chart-salary:#a9683f; --chart-expenses:#52607a; --chart-savings:#242525;
   --chart-grid:#d2cbbb; --chart-tick:#514c41; --chart-text:#1e1c17;
-  --chart-1:#76521b; --chart-2:#a4413c; --chart-3:#424039; --chart-4:#ad7a2b;
-  --chart-5:#503911; --chart-6:#c9745a; --chart-7:#77715f; --chart-8:#916a2a;
+  --chart-1:#a9683f; --chart-2:#52607a; --chart-3:#242525; --chart-4:#c19a6b;
+  --chart-5:#7e4f32; --chart-6:#7e8ca0; --chart-7:#77716a; --chart-8:#8a7466;
   --pie-border-color:#fffefa;
 }
 
 /* Les aperçus reflètent réellement la palette sélectionnée. */
 .preview-glass { color:#f5f3ff; background:#11121b; border-color:#5e6485; box-shadow:none; }
-.preview-glass .preview-title { background:#b19afa; }
+.preview-glass .preview-title { background:#9b8fbd; }
 .preview-glass .preview-tabs i,.preview-glass .preview-cards i { background:#1b1d2b; border-color:#5e6485; backdrop-filter:none; }
-.preview-glass .preview-chart i { background:#b19afa; }
-.preview-glass .preview-chart i:nth-child(2) { background:#e697c0; }
-.preview-glass .preview-chart i:nth-child(3) { background:#8799ee; }
+.preview-glass .preview-chart i { background:#9b8fbd; }
+.preview-glass .preview-chart i:nth-child(2) { background:#aa7a89; }
+.preview-glass .preview-chart i:nth-child(3) { background:#6c7d92; }
 .preview-editorial { color:#2c1d23; background:#f5f0e8; border-color:#e4d4cb; box-shadow:none; }
-.preview-editorial .preview-cards i { border-color:#e4d4cb; border-top-color:#8e2948; background:#fffdf9; box-shadow:none; }
-.preview-editorial .preview-chart i { background:#8e2948; }
-.preview-editorial .preview-chart i:nth-child(2) { background:#c55873; }
-.preview-editorial .preview-chart i:nth-child(3) { background:#9d675f; }
+.preview-editorial .preview-cards i { border-color:#e4d4cb; border-top-color:#7a3348; background:#fffdf9; box-shadow:none; }
+.preview-editorial .preview-chart i { background:#7a3348; }
+.preview-editorial .preview-chart i:nth-child(2) { background:#a96a76; }
+.preview-editorial .preview-chart i:nth-child(3) { background:#897368; }
 .preview-brutal { color:#fffaf0; background:#10100f; border-color:#c9c1a6; box-shadow:none; }
-.preview-brutal .preview-title { background:#eac56d; }
+.preview-brutal .preview-title { background:#c08457; }
 .preview-brutal .preview-tabs i,.preview-brutal .preview-cards i { border-color:#c9c1a6; background:#1b1b18; box-shadow:none; }
-.preview-brutal .preview-chart i { border-color:#c9c1a6; background:#eac56d; }
-.preview-brutal .preview-chart i:nth-child(2) { background:#f0a59c; }
-.preview-brutal .preview-chart i:nth-child(3) { background:#ded8cb; }
+.preview-brutal .preview-chart i { border-color:#c9c1a6; background:#c08457; }
+.preview-brutal .preview-chart i:nth-child(2) { background:#8fa0b5; }
+.preview-brutal .preview-chart i:nth-child(3) { background:#ded8cf; }
 
 /* Le rendu Ardoise reste opaque, y compris pour les éléments surélevés. */
 body[data-theme="glass"] :is(.panel,.metric-card,.detail-panel,.latest-update-banner,.profile-popover,.custom-select-options,.settings-section,.settings-reset-section,.update-entry) { background:var(--panel-solid) !important; }
@@ -176,6 +176,15 @@ body[data-theme="brutal"] :is(.interface-choice,.interface-layout-toggle,.interf
   body[data-theme="brutal"][data-interface="studio"] .studio-sidebar-nav button,body[data-theme="brutal"][data-interface="studio"] .studio-sidebar-mark { border-radius:0; }
   body[data-theme="brutal"][data-interface="studio"] .studio-sidebar-brand strong { font-size:.93rem; }
 }
+
+/* Les aides du tableur restent au-dessus de la grille et des graphiques. */
+#dashboardPage .home-toolbar { position:relative; z-index:120; overflow:visible !important; isolation:isolate; }
+#dashboardPage .home-toolbar-actions,
+#dashboardPage .sheet-status-bar,
+.sheet-balance-cards,
+.balance-info-wrap { position:relative; z-index:130; overflow:visible !important; }
+#dashboardPage .sheet-status-tooltip,
+.balance-help { z-index:10020 !important; }
 @media (max-width:999px) {
   body[data-interface="studio"] #dashboardPage .studio-hero { display:grid; gap:5px; padding:0 2px 7px; }
   body[data-interface="studio"] #dashboardPage .studio-hero span { color:var(--accent); font:800 .65rem/1 var(--font-body); letter-spacing:.12em; }
@@ -309,4 +318,27 @@ body[data-theme] .settings-shell > .settings-header {
   body[data-interface="studio"] .settings-shell > [data-settings-panel] { grid-column:1; grid-row:3; }
   body[data-theme="brutal"][data-interface="studio"] .studio-sidebar-profile-host .profile-trigger,
   body[data-theme="brutal"][data-interface="studio"] .settings-hub-item { border-radius:0; }
+}
+
+/* Finition de densité : l'ancienne interface utilise la largeur disponible,
+   tandis que la nouvelle ne crée pas de hauteur vide artificielle. */
+@media (min-width:721px) {
+  body[data-interface="classic"] .app {
+    width:100%;
+    max-width:none;
+    padding-inline:clamp(24px,3.2vw,58px);
+  }
+}
+@media (min-width:1000px) {
+  body[data-interface="studio"] .studio-sidebar {
+    min-height:0;
+    height:fit-content;
+  }
+  body[data-interface="studio"] .studio-sidebar-foot { margin:16px 8px 10px; }
+  body[data-interface="studio"] .studio-sidebar-profile-host { margin-top:0; }
+  body[data-interface="studio"] .settings-shell > [data-settings-panel],
+  body[data-interface="studio"] .personal-workspace-content,
+  body[data-interface="studio"] :is(#sharingPage,#sharingAccessPage,#updatesPage,#objectivesPage) .personal-workspace-content {
+    min-height:0 !important;
+  }
 }

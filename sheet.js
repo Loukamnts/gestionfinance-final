@@ -25,6 +25,66 @@
   const STORAGE_KEY = "finance_sheet_v3";
   const LEGACY_KEY = "finance_sheet_v2";
   const VERSION = "v4-20260831";
+  let modalScrollY = 0;
+  let modalLockStyles = null;
+
+  // iOS peut continuer à faire défiler la page sous une fenêtre créée en JS.
+  // Ce verrou conserve exactement la position de lecture puis la restaure à la fermeture.
+  function lockModalBackground() {
+    if (document.documentElement.dataset.sheetModalOpen === "true") return;
+    modalScrollY = window.scrollY || window.pageYOffset || 0;
+    const body = document.body, root = document.documentElement;
+    modalLockStyles = {
+      rootOverflow: root.style.overflow,
+      rootOverscroll: root.style.overscrollBehavior,
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      height: body.style.height,
+      overflow: body.style.overflow,
+      overscroll: body.style.overscrollBehavior,
+      touchAction: body.style.touchAction,
+      scrollOffset: body.style.getPropertyValue("--sheet-modal-scroll-y")
+    };
+    root.dataset.sheetModalOpen = "true";
+    root.style.overflow = "hidden";
+    root.style.overscrollBehavior = "none";
+    document.body.style.setProperty("--sheet-modal-scroll-y", "-" + modalScrollY + "px");
+    document.body.classList.add("sheet-modal-open");
+    body.style.position = "fixed";
+    body.style.top = "-" + modalScrollY + "px";
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.height = "100%";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+    body.style.touchAction = "none";
+  }
+  function unlockModalBackground() {
+    if (document.querySelector(".sheet-modal-overlay")) return;
+    if (document.documentElement.dataset.sheetModalOpen !== "true") return;
+    const body = document.body, root = document.documentElement, styles = modalLockStyles || {};
+    delete root.dataset.sheetModalOpen;
+    root.style.overflow = styles.rootOverflow || "";
+    root.style.overscrollBehavior = styles.rootOverscroll || "";
+    body.classList.remove("sheet-modal-open");
+    body.style.position = styles.position || "";
+    body.style.top = styles.top || "";
+    body.style.left = styles.left || "";
+    body.style.right = styles.right || "";
+    body.style.width = styles.width || "";
+    body.style.height = styles.height || "";
+    body.style.overflow = styles.overflow || "";
+    body.style.overscrollBehavior = styles.overscroll || "";
+    body.style.touchAction = styles.touchAction || "";
+    if (styles.scrollOffset) body.style.setProperty("--sheet-modal-scroll-y", styles.scrollOffset);
+    else body.style.removeProperty("--sheet-modal-scroll-y");
+    modalLockStyles = null;
+    requestAnimationFrame(() => window.scrollTo(0, modalScrollY));
+  }
 
   function colToLetter(n) {
     let s = ""; n = n + 1;
@@ -969,7 +1029,7 @@
       const p = document.createElement("p"); p.textContent = "Comment importer ces feuilles ?";
       p.style.cssText = "margin:0 0 16px;line-height:1.5"; modal.appendChild(p);
       const actions = document.createElement("div"); actions.className = "sheet-modal-actions";
-      const close = (v) => { overlay.remove(); resolve(v); };
+      const close = (v) => { overlay.remove(); unlockModalBackground(); resolve(v); };
       const rep = document.createElement("button"); rep.className = "button button-primary"; rep.textContent = "Remplacer tout";
       const add = document.createElement("button"); add.className = "button button-ghost"; add.textContent = "Ajouter à l'existant";
       const cancel = document.createElement("button"); cancel.className = "button button-ghost"; cancel.textContent = "Annuler";
@@ -979,7 +1039,7 @@
       overlay.addEventListener("click", (e) => { if (e.target === overlay) close(null); });
       actions.appendChild(rep); actions.appendChild(add); actions.appendChild(cancel);
       modal.appendChild(actions); overlay.appendChild(modal);
-      document.body.appendChild(overlay); rep.focus();
+      document.body.appendChild(overlay); lockModalBackground(); rep.focus();
     });
   }
   // Fusionne les lignes importées dans une feuille existante :
@@ -1215,8 +1275,8 @@
     modal.appendChild(document.createElement("h3")).textContent = "Calculatrice";
     modal.appendChild(display); modal.appendChild(grid); modal.appendChild(actions);
     overlay.appendChild(modal); overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
-    function close() { overlay.remove(); }
-    document.body.appendChild(overlay);
+    function close() { overlay.remove(); unlockModalBackground(); }
+    document.body.appendChild(overlay); lockModalBackground();
   }
 
   // ═══════════════ Boîtes de dialogue (toast / confirm) ══════════
@@ -1234,11 +1294,11 @@
       const actions = document.createElement("div"); actions.className = "sheet-modal-actions";
       const no = document.createElement("button"); no.className = "button button-ghost"; no.textContent = "Annuler";
       const yes = document.createElement("button"); yes.className = "button button-primary"; yes.textContent = "Confirmer";
-      const close = (v) => { overlay.remove(); resolve(v); };
+      const close = (v) => { overlay.remove(); unlockModalBackground(); resolve(v); };
       no.addEventListener("click", () => close(false)); yes.addEventListener("click", () => close(true));
       overlay.addEventListener("click", (e) => { if (e.target === overlay) close(false); });
       actions.appendChild(no); actions.appendChild(yes); modal.appendChild(actions); overlay.appendChild(modal);
-      document.body.appendChild(overlay); yes.focus();
+      document.body.appendChild(overlay); lockModalBackground(); yes.focus();
     });
   }
 
@@ -1273,7 +1333,7 @@
     const actions = document.createElement("div"); actions.className = "sheet-modal-actions sheet-modal-actions-row";
     const cancel = document.createElement("button"); cancel.type = "button"; cancel.className = "button button-ghost"; cancel.textContent = "Annuler";
     const save = document.createElement("button"); save.type = "button"; save.className = "button button-primary"; save.textContent = "Enregistrer";
-    const close = () => overlay.remove();
+    const close = () => { overlay.remove(); unlockModalBackground(); };
 
     cancel.addEventListener("click", close);
     save.addEventListener("click", () => {
@@ -1299,7 +1359,7 @@
     overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
     actions.append(cancel, save);
     modal.append(title, intro, amountLabel, monthLabel, helper, actions);
-    overlay.appendChild(modal); document.body.appendChild(overlay); amount.focus();
+    overlay.appendChild(modal); document.body.appendChild(overlay); lockModalBackground(); amount.focus();
   }
 
   function clearInitialBalanceCells() {

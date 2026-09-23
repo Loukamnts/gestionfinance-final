@@ -605,7 +605,7 @@ const dictionary=Object.freeze({
   "Nom de l'objectif": "Goal name",
   "Montant visé (€)": "Target amount (€)",
   "Déjà atteint (€)": "Already reached (€)",
-  "Planifier cet objectif": "Schedule this goal",
+  "Définir une échéance ou une récurrence": "Set a deadline or recurrence",
   "Facultatif": "Optional",
   "Rythme": "Frequency",
   "Sans récurrence": "No recurrence",
