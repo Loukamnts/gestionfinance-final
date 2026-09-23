@@ -1827,10 +1827,11 @@
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260923-r2">
   <link rel="stylesheet" href="ui-polish.css?v=20260923-r4">
+  <link rel="stylesheet" href="theme-directions.css?v=20260923-r1">
   <script src="i18n.js?v=20260918-r4"></script>
   <script src="ui-controls.js?v=20260908-r9" defer></script>
 </head>
-<body data-theme="glass" data-mode="dark" data-page="dashboard">
+<body data-theme="glass" data-mode="dark" data-page="dashboard" data-interface="classic">
   <div class="loader" id="loader" aria-live="polite" aria-label="Chargement"><div class="spinner"></div></div>
   <div class="message" id="messageBox" role="alert" aria-live="polite" aria-atomic="true">
     <span class="message-text" id="messageText"></span>
@@ -1861,6 +1862,18 @@
     </div>
   </div>
   <main class="app">
+    <aside class="studio-sidebar" aria-label="Navigation de la nouvelle interface">
+      <div class="studio-sidebar-brand"><span class="studio-sidebar-mark" aria-hidden="true">M</span><strong>Meuniance</strong><small>TON ESPACE FINANCIER</small></div>
+      <nav class="studio-sidebar-nav" aria-label="Navigation principale">
+        <button type="button" data-page="dashboard" class="is-active" aria-current="page"><span aria-hidden="true">⌂</span>Accueil</button>
+        <button type="button" data-page="sheet"><span aria-hidden="true">▦</span>Tableur</button>
+        <button type="button" data-page="objectives"><span aria-hidden="true">◎</span>Objectifs</button>
+        <button type="button" data-page="sharing"><span aria-hidden="true">♧</span>Partage et amis</button>
+        <button type="button" data-page="updates"><span aria-hidden="true">✦</span>Nouveautés</button>
+        <button type="button" data-page="settings"><span aria-hidden="true">⚙</span>Paramètres</button>
+      </nav>
+      <p class="studio-sidebar-foot">Une vue plus claire de tes finances.</p>
+    </aside>
     <header class="topbar app-header">
       <div class="brand" aria-label="Meuniance">
         <div class="brand-copy"><h1 aria-label="Meuniance"><svg class="brand-m" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M3 20.4V7.4l6.4 7.2L21 3.8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.4 3.8H21v5.6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="3" cy="7.4" r="1.9" fill="currentColor"/><circle cx="9.4" cy="14.6" r="1.9" fill="currentColor"/></svg><span class="brand-word" aria-hidden="true">EUNIANCE</span></h1></div>
@@ -1887,6 +1900,7 @@
     </header>
     <section class="app-page" id="dashboardPage">
       <section class="content">
+        <section class="studio-hero" aria-label="Introduction au tableau de bord"><span>VUE D’ENSEMBLE</span><h2>Ton argent, en perspective.</h2><p>Retrouve tes chiffres essentiels et avance à ton rythme.</p></section>
         <section class="home-toolbar" aria-label="Filtres du tableau de bord">
           <div class="home-toolbar-top"><h2>Tableau de bord</h2><div class="home-toolbar-actions"><div class="sheet-status-bar dashboard-toolbar-status" id="sheetStatusBar">
             <span class="sheet-status-dot not-loaded" id="sheetStatusDot"></span>
@@ -2195,6 +2209,7 @@
             <button class="theme-card" type="button" data-theme-option="brutal" aria-label="Contraste"><span class="theme-check" aria-hidden="true">✓</span><span class="theme-preview preview-brutal" aria-hidden="true"><span class="preview-title"></span><span class="preview-tabs"><i></i><i></i><i></i></span><span class="preview-cards"><i></i><i></i><i></i></span><span class="preview-chart"><i></i><i></i><i></i></span></span><span class="theme-name">Contraste</span><span class="theme-tone">Net et franc</span></button>
           </div>
           <div class="settings-section-head split" style="margin-top: 20px;"><div><h3>Mode d'affichage</h3><p>Clair ou sombre — garde la personnalité du thème.</p></div><div class="mode-segment" id="modeToggle" role="group" aria-label="Mode d'affichage"><button type="button" data-mode-option="light"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Clair</button><button type="button" data-mode-option="dark"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sombre</button></div></div>
+          <div class="interface-choice"><div><span class="interface-choice-kicker">DISPOSITION</span><h3>Nouvelle interface</h3><p>Un accueil plus éditorial et une navigation latérale sur ordinateur, inspirés de la maquette Ardoise.</p></div><button id="interfaceLayoutToggle" class="interface-layout-toggle" type="button" role="switch" aria-checked="false" aria-label="Activer la nouvelle interface"><span class="interface-layout-thumb" aria-hidden="true"></span><span class="interface-layout-state">Désactivée</span></button></div>
         </section>
 
         <!-- Actions sensibles : sobres et séparées du pied de page. -->
@@ -2375,21 +2390,18 @@
       customRules: "personalFinanceDashboard.customRules",
       theme: "personalFinanceDashboard.theme",
       mode: "personalFinanceDashboard.mode",
+      interface: "personalFinanceDashboard.interface",
       view: "personalFinanceDashboard.currentView",
     };
     let COLORS = {
-      salary: "#60a5fa",
-      expenses: "#fb7185",
-      savings: "#2ed47a",
+      salary: "#c5afcb",
+      expenses: "#bc859f",
+      savings: "#9982aa",
       grid: "rgba(255, 255, 255, 0.1)",
       tick: "#9ba9bf",
       text: "#eef4ff"
     };
-    const CATEGORY_COLORS = [
-      "#22d3ee", "#2ed47a", "#a78bfa", "#f8c14a", "#fb923c",
-      "#60a5fa", "#fb7185", "#14b8a6", "#c084fc", "#f97316",
-      "#38bdf8", "#84cc16"
-    ];
+    const CATEGORY_COLORS = ["#c5afcb","#bc859f","#9982aa","#a6969d","#775e7c","#d0adb7","#857b90","#ae97b3"];
     const euroFormatter = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
     const compactEuroFormatter = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", notation: "compact", maximumFractionDigits: 1 });
 
@@ -2404,7 +2416,7 @@
       rawPages: [], months: [], detectedProperties: [], availableRules: SYSTEM_RULES.slice(),
       selectedMonthId: "", selectedYear: "", currentView: "pie", chart: null, isGlobal: false, page: "dashboard", source: "tableur",
       importedFile: null, importAnalysis: null,
-      appearance: { theme: "glass", mode: "dark" }, pendingRename: { oldName: null, callback: null }
+      appearance: { theme: "glass", mode: "dark", interface: "classic" }, pendingRename: { oldName: null, callback: null }
     };
 
     const elements = {
@@ -2589,10 +2601,8 @@
       const sys={depense:COLORS.expenses,depenses:COLORS.expenses,epargne:COLORS.savings,ignore:"rgba(148,163,184,0.95)"};
       if(sys[n]) return sys[n];
       let hash=0; for(let i=0;i<n.length;i++) hash=(hash*131+n.charCodeAt(i))>>>0;
-      const hue=(hash*137.508)%360;
-      const saturation=document.body.dataset.theme==="brutal"?84:76;
-      const lightness=document.body.dataset.mode==="dark"?60:50;
-      return `hsl(${hue.toFixed(1)} ${saturation}% ${lightness}%)`;
+      const index=hash%8+1;
+      return readCssVar(getComputedStyle(document.body),`--chart-${index}`,CATEGORY_COLORS[index-1]);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -2776,7 +2786,7 @@
     function createLineDataset(l,c,d){ return{label:l,data:d,borderColor:c,backgroundColor:c,pointBackgroundColor:c,pointBorderColor:"#0d1422",pointBorderWidth:2,pointRadius:4,pointHoverRadius:6,borderWidth:3,tension:0.35}; }
     function axisChartOptions({stacked,onMonthClick}){ return baseChartOptions({ maintainAspectRatio:false, interaction:{mode:"index",intersect:false}, onClick:function(event,active,chart){ const point=(active&&active[0])||chart.getElementsAtEventForMode(event,"nearest",{intersect:true},true)[0]; if(onMonthClick){ if(point) onMonthClick(point.index); return; } const month=getVisibleMonths()[point?.index]; if(month) openChartMonthDetail(month); }, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, scales:{ x:{ stacked, grid:{color:"rgba(255,255,255,0.04)"}, ticks:{color:COLORS.tick,maxRotation:0,autoSkip:true} }, y:{ stacked, beginAtZero:true, grid:{color:COLORS.grid}, ticks:{color:COLORS.tick,callback:v=>compactEuroFormatter.format(v)} } }, animation:{duration:1000,easing:"easeOutQuart"} }); }
     function baseChartOptions(extra){ return deepMerge({ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:tooltipOptions()}, transitions:{ active:{animation:{duration:300,easing:"easeOutCubic"}}, show:{animations:{x:{from:0,duration:1000,easing:"easeOutQuart"},y:{from:0,duration:1000,easing:"easeOutQuart"},r:{from:0,duration:1000,easing:"easeOutQuart"},borderWidth:{from:0,duration:500,easing:"linear"}}}, hide:{animations:{x:{to:0,duration:600,easing:"easeInCubic"},y:{to:0,duration:600,easing:"easeInCubic"}}} } },extra); }
-    function tooltipOptions(){ const isDark=document.body.dataset.mode==="dark", theme=document.body.dataset.theme; let bg,text,border; if(theme==="glass"){ bg=isDark?"rgba(17,17,20,0.97)":"rgba(255,255,255,0.97)"; border=isDark?"rgba(192,132,87,0.35)":"rgba(169,104,63,0.28)"; text=isDark?"#ededf0":"#17171b"; }else if(theme==="editorial"){ bg=isDark?"rgba(22,22,26,0.97)":"rgba(255,255,255,0.98)"; border=isDark?"rgba(192,132,87,0.35)":"rgba(169,104,63,0.28)"; text=isDark?"#f2efea":"#1a1a1e"; }else{ bg=isDark?"rgba(14,14,16,0.97)":"rgba(255,255,255,0.97)"; border=isDark?"#ededf0":"#111114"; text=isDark?"#ededf0":"#111114"; } return{ backgroundColor:bg, borderColor:border, borderWidth:theme==="brutal"?2:1, titleColor:text, bodyColor:text, padding:12, cornerRadius:theme==="brutal"?0:8, callbacks:{ label:ctx=>{ const lbl=ctx.dataset.label||ctx.label||""; return`${lbl}: ${formatEuro(ctx.parsed?.y??ctx.parsed??0)}`; } } }; }
+    function tooltipOptions(){ const styles=getComputedStyle(document.body),theme=document.body.dataset.theme; return{ backgroundColor:readCssVar(styles,"--panel-solid","#222026"), borderColor:readCssVar(styles,"--line-strong","#5d5361"), borderWidth:1, titleColor:readCssVar(styles,"--text","#f2edf2"), bodyColor:readCssVar(styles,"--text","#f2edf2"), padding:12, cornerRadius:theme==="brutal"?0:8, callbacks:{ label:ctx=>{ const lbl=ctx.dataset.label||ctx.label||""; return`${lbl}: ${formatEuro(ctx.parsed?.y??ctx.parsed??0)}`; } } }; }
     function openChartMonthDetail(month,options={}){ const modal=document.getElementById("chartDetailModal"), title=document.getElementById("chartDetailTitle"), subtitle=document.getElementById("chartDetailSubtitle"), grid=document.getElementById("chartDetailGrid"); if(!modal||!grid) return; title.textContent=`Détail — ${month.label||"Mois"}`; subtitle.textContent="Clique sur un autre point pour consulter un autre mois."; const lines=[{label:"Salaire",value:month.salary||0},{label:"Dépenses",value:Math.abs(month.expenses||0)},{label:"Épargne",value:month.savingsTotal||0},...(month.ruleBreakdown||[]).filter(item=>item.name!=="Dépense"&&item.name!=="Épargne").map(item=>({label:item.name,value:Math.abs(item.value||0)}))]; grid.replaceChildren(...lines.filter(item=>!options.shared||(item.label==="Salaire"?month.hasIncome:item.label==="Dépenses"?month.hasExpenses:item.label==="Épargne"?month.hasSavings:true)).map(item=>{ const el=document.createElement("div"),label=document.createElement("span"),value=document.createElement("strong"); label.textContent=item.label; value.textContent=formatEuro(item.value); el.append(label,value); return el; })); modal.hidden=false; }
 
     // A shared view supplies its own filtered months; never fall back to personal data.
@@ -2811,7 +2821,7 @@
     // ═══════════════════════════════════════════════════════════════════════
     // THÈMES & APPARENCE (avec persistance de la vue)
     // ═══════════════════════════════════════════════════════════════════════
-    function restoreAppearance(){ const savedTheme=safeStore.getItem(STORAGE_KEYS.theme); const savedMode=safeStore.getItem(STORAGE_KEYS.mode); state.appearance.theme=["glass","editorial","brutal"].includes(savedTheme)?savedTheme:"glass"; state.appearance.mode=["dark","light"].includes(savedMode)?savedMode:"dark"; const savedView=safeStore.getItem(STORAGE_KEYS.view); if(["pie","grouped","stacked","line"].includes(savedView)) state.currentView=savedView; applyAppearance({persist:false,refreshChart:false}); if(elements.viewSelect){ elements.viewSelect.value=state.currentView; syncCustomDropdown(elements.viewSelect); } }
+    function restoreAppearance(){ const savedTheme=safeStore.getItem(STORAGE_KEYS.theme); const savedMode=safeStore.getItem(STORAGE_KEYS.mode); const savedInterface=safeStore.getItem(STORAGE_KEYS.interface); state.appearance.theme=["glass","editorial","brutal"].includes(savedTheme)?savedTheme:"glass"; state.appearance.mode=["dark","light"].includes(savedMode)?savedMode:"dark"; state.appearance.interface=savedInterface==="studio"?"studio":"classic"; const savedView=safeStore.getItem(STORAGE_KEYS.view); if(["pie","grouped","stacked","line"].includes(savedView)) state.currentView=savedView; applyAppearance({persist:false,refreshChart:false}); if(elements.viewSelect){ elements.viewSelect.value=state.currentView; syncCustomDropdown(elements.viewSelect); } }
     window.addEventListener("gf:languagechange",function(){
       updateInterface();
       const activeSettings=document.querySelector('[data-settings-view][aria-current="true"]')?.dataset.settingsView;
@@ -2819,9 +2829,10 @@
       if(state.page==="updates") renderUpdatesPage(updatesPageNumber);
       requestAnimationFrame(function(){ if(window.GFI18n) window.GFI18n.apply(document.body); });
     });
-    function setTheme(theme){ if(!["glass","editorial","brutal"].includes(theme)) return; state.appearance.theme=theme; applyAppearance({persist:true,refreshChart:true}); }
+    function setTheme(theme){ if(!["glass","editorial","brutal"].includes(theme)) return; if(state.appearance.theme!==theme) state.appearance.mode=theme==="editorial"?"light":"dark"; state.appearance.theme=theme; applyAppearance({persist:true,refreshChart:true}); }
     function setMode(mode){ if(!["dark","light"].includes(mode)) return; state.appearance.mode=mode; applyAppearance({persist:true,refreshChart:true}); }
-    function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
+    function setInterfaceLayout(layout){ state.appearance.interface=layout==="studio"?"studio":"classic"; applyAppearance({persist:true,refreshChart:false}); }
+    function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; document.body.dataset.interface=state.appearance.interface; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); const interfaceToggle=document.getElementById("interfaceLayoutToggle"); if(interfaceToggle){ const active=state.appearance.interface==="studio"; interfaceToggle.setAttribute("aria-checked",String(active)); interfaceToggle.querySelector(".interface-layout-state").textContent=active?"Activée":"Désactivée"; } updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); safeStore.setItem(STORAGE_KEYS.interface,state.appearance.interface); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
     function updateChartColorTokens(){ const styles=getComputedStyle(document.body); COLORS.salary=readCssVar(styles,"--chart-salary",COLORS.salary); COLORS.expenses=readCssVar(styles,"--chart-expenses",COLORS.expenses); COLORS.savings=readCssVar(styles,"--chart-savings",COLORS.savings); COLORS.grid=readCssVar(styles,"--chart-grid",COLORS.grid); COLORS.tick=readCssVar(styles,"--chart-tick",COLORS.tick); COLORS.text=readCssVar(styles,"--chart-text",COLORS.text); }
     function readCssVar(styles,name,fallback){ return styles.getPropertyValue(name).trim()||fallback; }
 
@@ -2879,6 +2890,7 @@
       if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives";
       if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet";
       document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active",button.dataset.page===state.page); });
+      document.querySelectorAll(".studio-sidebar-nav [data-page]").forEach(function(button){ button.setAttribute("aria-current",button.dataset.page===state.page?"page":"false"); });
       updatePageTitle(next);
       syncPersonalWorkspaceNavigation(next);
       if(state.page==="settings"&&previous!=="settings") showSettingsView("account");
@@ -2888,6 +2900,7 @@
       if(state.page==="updates") renderUpdatesPage();
       if(state.page==="objectives"&&window.GFObjectives) window.GFObjectives.render();
       if(!options.fromHistory) syncPageUrl(next,options);
+      window.scrollTo({top:0,behavior:"instant"});
     }
     function initSheetStatusHelp(){
       const trigger=document.getElementById("sheetStatusInfo"),dialog=document.getElementById("sheetStatusMobileDialog"),close=document.getElementById("sheetStatusMobileClose");
@@ -3169,6 +3182,7 @@ function resetDataState(){
       document.getElementById("startingBalanceEdit")?.addEventListener("click",function(){ if(window.FinanceSheet?.openStartingBalance) window.FinanceSheet.openStartingBalance(); });
       elements.backDashboardButton?.addEventListener("click",()=>setPage("dashboard"));
       elements.themeButtons.forEach(btn=>btn.addEventListener("click",()=>setTheme(btn.dataset.themeOption)));
+      document.getElementById("interfaceLayoutToggle")?.addEventListener("click",function(){setInterfaceLayout(state.appearance.interface==="studio"?"classic":"studio");});
       Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.addEventListener("click",()=>setMode(btn.dataset.modeOption)));
       var accEyeBtn = document.getElementById("accountEyeButton");
       if(accEyeBtn){ accEyeBtn.addEventListener("click", function(){ var inp=document.getElementById("accountLoginPw"); var show=document.getElementById("accountEyeShow"); var hide=document.getElementById("accountEyeHide"); if(!inp) return; var isPass=inp.type==="password"; inp.type=isPass?"text":"password"; if(show) show.style.display=isPass?"none":""; if(hide) hide.style.display=isPass?"":"none"; }); }

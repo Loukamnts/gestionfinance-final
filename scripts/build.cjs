@@ -23,7 +23,7 @@ const put = (name, contents) => {
 const copy = (from, to = from) => put(to, fs.readFileSync(path.join(root, from)));
 const integrity = content => 'sha384-' + crypto.createHash('sha384').update(content).digest('base64');
 const publicFiles = ['sheet.js','sheet.css','onboarding.js','onboarding.css','friends.js',
-  'i18n.js','shared-dashboard.js','sharing.css','ui-controls.js','ui-polish.css','objectives.js',
+  'i18n.js','shared-dashboard.js','sharing.css','ui-controls.js','ui-polish.css','theme-directions.css','objectives.js',
   'store-shim.js','favicon.ico','app-icon-180.png','app-icon-512.png','manifest.webmanifest','supabase_config.json',
   'robots.txt','sitemap.xml','public.css','public.js','share-card.png'];
 for (const file of publicFiles) copy(file);

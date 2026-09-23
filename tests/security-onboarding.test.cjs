@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const source=fs.readFileSync(path.join(__dirname,'../onboarding.js'),'utf8');
-const appSource=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const appSource=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8').replace(/\r\n/g,'\n');
 test('Every dynamic onboarding step is free of inline handlers and interpolated input values',()=>{
   const code=source.slice(source.indexOf('  function renderStepConnexion()'),source.indexOf('  function finishWizard()'));
   const context={wizardData:{currentAmount:'" onfocus="alert(1)',startingMonth:'"><script>bad</script>',theme:'glass',mode:'light'},

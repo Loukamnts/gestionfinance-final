@@ -2,6 +2,17 @@
 (function(){
 "use strict";
 const dictionary=Object.freeze({
+  "TON ESPACE FINANCIER": "YOUR FINANCIAL SPACE",
+  "Une vue plus claire de tes finances.": "A clearer view of your finances.",
+  "VUE D’ENSEMBLE": "OVERVIEW",
+  "Ton argent, en perspective.": "Your money, in perspective.",
+  "Retrouve tes chiffres essentiels et avance à ton rythme.": "See your essential figures and move at your own pace.",
+  "DISPOSITION": "LAYOUT",
+  "Nouvelle interface": "New interface",
+  "Un accueil plus éditorial et une navigation latérale sur ordinateur, inspirés de la maquette Ardoise.": "An editorial dashboard with side navigation on desktop, inspired by the Slate concept.",
+  "Activer la nouvelle interface": "Enable the new interface",
+  "Activée": "Enabled",
+  "Désactivée": "Disabled",
   "Des actions de compte plus claires": "Clearer account actions",
   "Supprimer mon compte apparaît uniquement lorsque vous êtes connecté. Hors connexion, Réinitialiser reste disponible pour effacer les données locales.": "Delete my account now appears only while you are signed in. When signed out, Reset remains available to clear local data.",
   "Des partages mieux protégés": "Better protected sharing",
