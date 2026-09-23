@@ -173,8 +173,7 @@
     var dialog=el("dialog","sf-dialog"),header=el("div","sf-dialog-head"),heading=el("h2","",title);
     heading.id="sharing-dialog-title";dialog.setAttribute("aria-labelledby",heading.id);
     header.append(heading,action("Fermer",function(){dialog.close();},"icon-button","close"));dialog.append(header,el("p","sf-muted",description));document.body.append(dialog);
-    var previousOverflow=document.body.style.overflow;document.body.style.overflow="hidden";
-    dialog.addEventListener("close",function(){document.body.style.overflow=previousOverflow;dialog.remove();},{once:true});dialog.showModal();return dialog;
+    dialog.addEventListener("close",function(){dialog.remove();},{once:true});dialog.showModal();window.GFUI?.syncModalLock?.();return dialog;
   }
   function inviteDialog(container){
     var dialog=openDialog("Inviter un ami","Il doit déjà avoir un compte Meuniance. L’invitation apparaîtra dans son espace.");
@@ -268,7 +267,7 @@
     });scope.append(choices);main.append(scope);
     var dataset=el("section","sf-section sf-dataset");dataset.append(step(2,"Les données visibles","Coche les mois en haut et les lignes à gauche. Ton ami verra uniquement les cases en couleur."));
     var tools=el("div","sf-table-tools"),pickerLabel=el("label","sf-field","Année / feuille"),picker=document.createElement("select"),host=el("div","sf-dataset-host");picker.setAttribute("aria-label","Année ou feuille à partager");
-    sheets.forEach(function(sheet,i){var option=el("option","",sheet.name||("Feuille "+(i+1)));option.value=String(i);picker.append(option);});pickerLabel.append(picker);
+    sheets.forEach(function(sheet,i){var option=el("option","",sheet.name||("Feuille "+(i+1)));option.value=String(i);picker.append(option);});pickerLabel.append(picker);window.GFCustomSelect?.create?.(picker);
     var clear=action("Effacer la sélection",function(){var state=selection[idOf(sheets[Number(picker.value)],Number(picker.value))];state.rows.clear();state.months.clear();syncDataset();},"clear","close");
     tools.append(pickerLabel,clear);dataset.append(tools,host);main.append(dataset);
     var summaryTitle=el("h3","","Résumé de l’accès"),summaryText=el("p","sf-summary-text"),summaryItems=el("div","sf-summary-items"),summaryStatus=tag("Aucun partage","lock"),countText=el("p","sf-summary-count"),save=action("Enregistrer l’accès",async function(){

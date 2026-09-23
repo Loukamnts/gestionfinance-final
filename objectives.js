@@ -216,6 +216,7 @@
       select.append(group);
     });
     select.value = selected || "";
+    window.GFCustomSelect?.sync?.(select);
   }
 
   function openForm(goal) {
@@ -230,6 +231,7 @@
     document.getElementById("objectiveCadence").value = goal?.cadence || "once";
     document.getElementById("objectiveDueDate").value = goal?.dueDate || "";
     fillSourceSelect(goal?.sourceId);
+    ["objectiveType","objectiveCadence","objectiveSheetSource"].forEach(id=>window.GFCustomSelect?.sync?.(document.getElementById(id)));
     const planFields = document.getElementById("objectivePlanFields"), planToggle = document.getElementById("objectivePlanToggle");
     if (planFields) planFields.hidden = !(goal?.dueDate || goal?.cadence !== "once" || goal?.sourceId);
     if (planToggle) planToggle.setAttribute("aria-expanded", String(!planFields?.hidden));

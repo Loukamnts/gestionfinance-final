@@ -1826,10 +1826,10 @@
   @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260923-r2">
-  <link rel="stylesheet" href="ui-polish.css?v=20260923-r5">
-  <link rel="stylesheet" href="theme-directions.css?v=20260923-r5">
-  <script src="i18n.js?v=20260923-r5"></script>
-  <script src="ui-controls.js?v=20260908-r9" defer></script>
+  <link rel="stylesheet" href="ui-polish.css?v=20260923-r6">
+  <link rel="stylesheet" href="theme-directions.css?v=20260923-r6">
+  <script src="i18n.js?v=20260923-r6"></script>
+  <script src="ui-controls.js?v=20260923-r10" defer></script>
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard" data-interface="classic">
   <div class="loader" id="loader" aria-live="polite" aria-label="Chargement"><div class="spinner"></div></div>
@@ -1862,18 +1862,19 @@
     </div>
   </div>
   <main class="app">
-    <aside class="studio-sidebar" aria-label="Navigation de la nouvelle interface">
+    <button class="studio-sidebar-scrim" id="studioSidebarScrim" type="button" aria-label="Fermer la navigation" hidden></button>
+    <aside class="studio-sidebar" id="studioSidebar" aria-label="Navigation de la nouvelle interface">
       <div class="studio-sidebar-brand"><span class="studio-sidebar-mark" aria-hidden="true">M</span><strong>Meuniance</strong><small>TON ESPACE FINANCIER</small></div>
+      <div class="studio-sidebar-profile-host" id="studioProfileHost"></div>
       <nav class="studio-sidebar-nav" aria-label="Navigation principale">
-        <button type="button" data-page="dashboard" class="is-active" aria-current="page"><span aria-hidden="true">⌂</span>Accueil</button>
-        <button type="button" data-page="sheet"><span aria-hidden="true">▦</span>Tableur</button>
-        <button type="button" data-page="objectives"><span aria-hidden="true">◎</span>Objectifs</button>
-        <button type="button" data-page="sharing"><span aria-hidden="true">♧</span>Partage et amis</button>
-        <button type="button" data-page="updates"><span aria-hidden="true">✦</span>Nouveautés</button>
-        <button type="button" data-page="settings"><span aria-hidden="true">⚙</span>Paramètres</button>
+        <button type="button" data-page="dashboard" class="is-active" aria-current="page"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>Accueil</button>
+        <button type="button" data-page="sheet"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 9h18M3 15h18M9 3v18" stroke="currentColor" stroke-width="1.8"/></svg></span>Tableur</button>
+        <button type="button" data-page="objectives"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><path d="m12 12 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>Objectifs</button>
+        <button type="button" data-page="sharing"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 10.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM17 10a3 3 0 0 1 0-6M21 20v-1.5a4 4 0 0 0-2.5-3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Partage et amis</button>
+        <button type="button" data-page="updates"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m12 2 1.7 5.3L19 9l-5.3 1.7L12 16l-1.7-5.3L5 9l5.3-1.7L12 2ZM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>Nouveautés</button>
+        <button type="button" data-page="settings"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.36a1.7 1.7 0 0 0-1 .64 1.7 1.7 0 0 0-.36 1.06V21h-4v-.09A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.24 15a1.7 1.7 0 0 0-.64-1A1.7 1.7 0 0 0 2.54 13H2v-4h.09A1.7 1.7 0 0 0 3.6 8a1.7 1.7 0 0 0-.34-1.87L3.2 6.07l2.83-2.83.06.06A1.7 1.7 0 0 0 8 3.64a1.7 1.7 0 0 0 1-.64A1.7 1.7 0 0 0 9.36 2H13v.09A1.7 1.7 0 0 0 14 3.6a1.7 1.7 0 0 0 1.87-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.36 8c.16.37.38.7.64 1 .28.3.66.47 1.06.47H21v4h-.09A1.7 1.7 0 0 0 19.4 15Z" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Paramètres</button>
       </nav>
       <p class="studio-sidebar-foot">Une vue plus claire de tes finances.</p>
-      <div class="studio-sidebar-profile-host" id="studioProfileHost"></div>
     </aside>
     <header class="topbar app-header">
       <div class="brand" aria-label="Meuniance">
@@ -1885,6 +1886,7 @@
         <button class="desktop-nav-link" id="desktopSettingsButton" type="button" data-page="settings">Paramètres</button>
       </nav>
       <div class="top-actions">
+        <button class="studio-mobile-menu-button" id="studioMobileMenuButton" type="button" aria-label="Ouvrir la navigation" aria-controls="studioSidebar" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <div class="profile-menu" id="profileMenu">
           <button class="profile-trigger" id="profileMenuButton" type="button" aria-expanded="false" aria-controls="profilePopover"><span class="profile-avatar" id="profileAvatar">?</span><span class="profile-trigger-label" id="profileLabel">Profil</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <div class="profile-popover" id="profilePopover" hidden>
@@ -2210,7 +2212,7 @@
             <button class="theme-card" type="button" data-theme-option="brutal" aria-label="Contraste"><span class="theme-check" aria-hidden="true">✓</span><span class="theme-preview preview-brutal" aria-hidden="true"><span class="preview-title"></span><span class="preview-tabs"><i></i><i></i><i></i></span><span class="preview-cards"><i></i><i></i><i></i></span><span class="preview-chart"><i></i><i></i><i></i></span></span><span class="theme-name">Contraste</span><span class="theme-tone">Net et franc</span></button>
           </div>
           <div class="settings-section-head split" style="margin-top: 20px;"><div><h3>Mode d'affichage</h3><p>Clair ou sombre — garde la personnalité du thème.</p></div><div class="mode-segment" id="modeToggle" role="group" aria-label="Mode d'affichage"><button type="button" data-mode-option="light"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Clair</button><button type="button" data-mode-option="dark"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sombre</button></div></div>
-          <div class="interface-choice"><div><span class="interface-choice-kicker">DISPOSITION</span><h3>Nouvelle interface</h3><p>Un accueil plus éditorial et une navigation latérale sur ordinateur, inspirés de la maquette Ardoise.</p></div><button id="interfaceLayoutToggle" class="interface-layout-toggle" type="button" role="switch" aria-checked="false" aria-label="Activer la nouvelle interface"><span class="interface-layout-thumb" aria-hidden="true"></span><span class="interface-layout-state">Désactivée</span></button></div>
+          <div class="interface-choice"><div><span class="interface-choice-kicker">DISPOSITION</span><h3>Nouvelle interface</h3><p>Navigation latérale sur ordinateur, menu dédié sur mobile.</p></div><button id="interfaceLayoutToggle" class="interface-layout-toggle" type="button" role="switch" aria-checked="false" aria-label="Activer la nouvelle interface"><span class="interface-layout-thumb" aria-hidden="true"></span><span class="interface-layout-state">Désactivée</span></button></div>
         </section>
 
         <!-- Actions sensibles : sobres et séparées du pied de page. -->
@@ -2518,10 +2520,36 @@
     // ═══════════════════════════════════════════════════════════════════════
     // DROPDOWNS (inchangé)
     // ═══════════════════════════════════════════════════════════════════════
-    function createCustomDropdown(sel){ if(!sel) return; sel.classList.remove("native-select-hidden"); sel.classList.add("native-select"); }
-    function syncCustomDropdown(sel){ if(!sel) return; sel.classList.remove("native-select-hidden"); sel.classList.add("native-select"); }
-    function closeAllDropdowns(){ document.querySelectorAll(".custom-select-wrapper.is-open").forEach(w=>w.classList.remove("is-open")); }
+    function createCustomDropdown(sel){
+      if(!sel||sel.multiple) return;
+      if(sel.dataset.customSelectReady==="true"){ syncCustomDropdown(sel); return; }
+      sel.dataset.customSelectReady="true";
+      sel.classList.remove("native-select"); sel.classList.add("native-select-hidden");
+      const wrapper=document.createElement("div"),trigger=document.createElement("button"),value=document.createElement("span"),options=document.createElement("div");
+      wrapper.className="custom-select-wrapper"; trigger.className="custom-select-trigger"; value.className="custom-select-value"; options.className="custom-select-options";
+      trigger.type="button"; trigger.setAttribute("aria-haspopup","listbox"); trigger.setAttribute("aria-expanded","false"); options.setAttribute("role","listbox");
+      trigger.append(value); trigger.insertAdjacentHTML("beforeend",'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 9 5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+      wrapper.append(trigger,options); sel.insertAdjacentElement("afterend",wrapper);
+      trigger.addEventListener("click",function(event){ event.stopPropagation(); if(sel.disabled)return; const open=!wrapper.classList.contains("is-open"); closeAllDropdowns(); wrapper.classList.toggle("is-open",open); trigger.setAttribute("aria-expanded",String(open)); if(open) options.querySelector('[aria-selected="true"]')?.scrollIntoView({block:"nearest"}); });
+      trigger.addEventListener("keydown",function(event){ if(event.key==="Escape"){ wrapper.classList.remove("is-open"); trigger.setAttribute("aria-expanded","false"); } if(["ArrowDown","Enter"," "].includes(event.key)&&!wrapper.classList.contains("is-open")){ event.preventDefault(); trigger.click(); } });
+      sel.addEventListener("change",function(){ syncCustomDropdown(sel); });
+      syncCustomDropdown(sel);
+    }
+    function syncCustomDropdown(sel){
+      if(!sel||sel.multiple)return;
+      if(sel.dataset.customSelectReady!=="true"){ createCustomDropdown(sel); return; }
+      const wrapper=sel.nextElementSibling;if(!wrapper?.classList.contains("custom-select-wrapper"))return;
+      const trigger=wrapper.querySelector(".custom-select-trigger"),value=wrapper.querySelector(".custom-select-value"),list=wrapper.querySelector(".custom-select-options"),selected=sel.options[sel.selectedIndex];
+      value.textContent=selected?.textContent||"Sélectionner"; trigger.disabled=!!sel.disabled; wrapper.classList.toggle("is-disabled",!!sel.disabled); list.replaceChildren();
+      Array.from(sel.children).forEach(function(child){
+        if(child.tagName==="OPTGROUP"){ const group=document.createElement("span"); group.className="custom-select-group"; group.textContent=child.label; list.append(group); Array.from(child.children).forEach(addOption); }
+        else if(child.tagName==="OPTION") addOption(child);
+      });
+      function addOption(option){ const item=document.createElement("button"); item.type="button"; item.className="custom-select-option"+(option.selected?" is-selected":""); item.setAttribute("role","option"); item.setAttribute("aria-selected",String(option.selected)); item.disabled=option.disabled; item.textContent=option.textContent; item.addEventListener("click",function(event){ event.stopPropagation(); sel.value=option.value; sel.dispatchEvent(new Event("change",{bubbles:true})); closeAllDropdowns(); trigger.focus(); }); list.append(item); }
+    }
+    function closeAllDropdowns(){ document.querySelectorAll(".custom-select-wrapper.is-open").forEach(function(wrapper){ wrapper.classList.remove("is-open"); wrapper.querySelector(".custom-select-trigger")?.setAttribute("aria-expanded","false"); }); }
     document.addEventListener("click",closeAllDropdowns);
+    window.GFCustomSelect={create:createCustomDropdown,sync:syncCustomDropdown,refreshAll:function(root){ (root||document).querySelectorAll("select:not([multiple])").forEach(createCustomDropdown); }};
 
     // ═══════════════════════════════════════════════════════════════════════
     // DONNÉES FINANCIÈRES
@@ -2828,13 +2856,14 @@
       const activeSettings=document.querySelector('[data-settings-view][aria-current="true"]')?.dataset.settingsView;
       if(activeSettings) showSettingsView(activeSettings);
       if(state.page==="updates") renderUpdatesPage(updatesPageNumber);
-      requestAnimationFrame(function(){ if(window.GFI18n) window.GFI18n.apply(document.body); });
+      requestAnimationFrame(function(){ if(window.GFI18n) window.GFI18n.apply(document.body); window.GFCustomSelect?.refreshAll?.(); });
     });
     function setTheme(theme){ if(!["glass","editorial","brutal"].includes(theme)) return; state.appearance.theme=theme; applyAppearance({persist:true,refreshChart:true}); }
     function setMode(mode){ if(!["dark","light"].includes(mode)) return; state.appearance.mode=mode; applyAppearance({persist:true,refreshChart:true}); }
     function setInterfaceLayout(layout){ state.appearance.interface=layout==="studio"?"studio":"classic"; applyAppearance({persist:true,refreshChart:false}); }
-    function placeProfileMenu(){ const menu=document.getElementById("profileMenu"), sidebarHost=document.getElementById("studioProfileHost"), headerHost=document.querySelector(".app-header .top-actions"); const sidebarMode=state.appearance.interface==="studio" && window.matchMedia("(min-width:1000px)").matches; const target=sidebarMode?sidebarHost:headerHost; if(menu && target && menu.parentElement!==target){ document.getElementById("profilePopover").hidden=true; document.getElementById("profileMenuButton").setAttribute("aria-expanded","false"); target.prepend(menu); } }
-    function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; document.body.dataset.interface=state.appearance.interface; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); const interfaceToggle=document.getElementById("interfaceLayoutToggle"); if(interfaceToggle){ const active=state.appearance.interface==="studio"; interfaceToggle.setAttribute("aria-checked",String(active)); interfaceToggle.querySelector(".interface-layout-state").textContent=active?"Activée":"Désactivée"; } placeProfileMenu(); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); safeStore.setItem(STORAGE_KEYS.interface,state.appearance.interface); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
+    function placeProfileMenu(){ const menu=document.getElementById("profileMenu"), sidebarHost=document.getElementById("studioProfileHost"), headerHost=document.querySelector(".app-header .top-actions"); const target=state.appearance.interface==="studio"?sidebarHost:headerHost; if(menu && target && menu.parentElement!==target){ document.getElementById("profilePopover").hidden=true; document.getElementById("profileMenuButton").setAttribute("aria-expanded","false"); target.prepend(menu); } }
+    function setStudioMobileMenu(open){ const sidebar=document.querySelector(".studio-sidebar"),scrim=document.getElementById("studioSidebarScrim"),button=document.getElementById("studioMobileMenuButton"),mobile=window.matchMedia("(max-width:999px)").matches; const active=!!open&&state.appearance.interface==="studio"&&mobile; sidebar?.classList.toggle("is-mobile-open",active); if(sidebar){ if(state.appearance.interface==="studio"&&mobile){sidebar.setAttribute("aria-hidden",String(!active));sidebar.inert=!active;}else{sidebar.removeAttribute("aria-hidden");sidebar.inert=false;} } document.body.classList.toggle("studio-mobile-menu-open",active); if(scrim)scrim.hidden=!active; if(button){const label=active?"Fermer la navigation":"Ouvrir la navigation";button.setAttribute("aria-expanded",String(active));button.setAttribute("aria-label",window.GFI18n?window.GFI18n.t(label):label);} window.GFUI?.syncModalLock?.(); }
+    function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; document.body.dataset.interface=state.appearance.interface; setStudioMobileMenu(false); elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); const interfaceToggle=document.getElementById("interfaceLayoutToggle"); if(interfaceToggle){ const active=state.appearance.interface==="studio"; interfaceToggle.setAttribute("aria-checked",String(active)); interfaceToggle.querySelector(".interface-layout-state").textContent=active?"Activée":"Désactivée"; } placeProfileMenu(); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); safeStore.setItem(STORAGE_KEYS.interface,state.appearance.interface); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
     function updateChartColorTokens(){ const styles=getComputedStyle(document.body); COLORS.salary=readCssVar(styles,"--chart-salary",COLORS.salary); COLORS.expenses=readCssVar(styles,"--chart-expenses",COLORS.expenses); COLORS.savings=readCssVar(styles,"--chart-savings",COLORS.savings); COLORS.grid=readCssVar(styles,"--chart-grid",COLORS.grid); COLORS.tick=readCssVar(styles,"--chart-tick",COLORS.tick); COLORS.text=readCssVar(styles,"--chart-text",COLORS.text); }
     function readCssVar(styles,name,fallback){ return styles.getPropertyValue(name).trim()||fallback; }
 
@@ -2880,6 +2909,7 @@
       const requested=page==="personal"?"sharing":page;
       const previous=state.page;
       const next=(requested==="settings"||requested==="sheet"||requested==="sharing"||requested==="sharingAccess"||requested==="updates"||requested==="objectives")?requested:"dashboard";
+      setStudioMobileMenu(false);
       if(next===previous){ updatePageTitle(next); syncPersonalWorkspaceNavigation(next); if(!options.fromHistory) syncPageUrl(next,options); return; }
       state.page=next;
       document.body.dataset.page=state.page;
@@ -3169,7 +3199,11 @@ function resetDataState(){
       document.querySelectorAll("[data-page]").forEach(function(button){ button.addEventListener("click",function(){ setPage(button.dataset.page); }); });
       initPageRouting();
       var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileSettings=document.getElementById("profileSettingsButton"), profilePersonal=document.getElementById("profilePersonalButton"), profileNotes=document.getElementById("profileNotesButton");
-      window.addEventListener("resize",placeProfileMenu);
+      window.addEventListener("resize",function(){placeProfileMenu();setStudioMobileMenu(false);});
+      const studioMenuButton=document.getElementById("studioMobileMenuButton"),studioScrim=document.getElementById("studioSidebarScrim");
+      studioMenuButton?.addEventListener("click",function(){setStudioMobileMenu(studioMenuButton.getAttribute("aria-expanded")!=="true");});
+      studioScrim?.addEventListener("click",function(){setStudioMobileMenu(false);});
+      document.querySelectorAll(".studio-sidebar-nav [data-page]").forEach(function(button){button.addEventListener("click",function(){setStudioMobileMenu(false);});});
       if(profileButton && profilePopover){ profileButton.addEventListener("click",function(){ var open=profilePopover.hidden; profilePopover.hidden=!open; profileButton.setAttribute("aria-expanded",String(open)); }); document.addEventListener("click",function(event){ if(profileMenu && !profileMenu.contains(event.target)){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); document.addEventListener("keydown",function(event){ if(event.key==="Escape"){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); }
       if(profileSettings){ profileSettings.addEventListener("click",function(){ setPage("settings"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
       if(profilePersonal){ profilePersonal.addEventListener("click",function(){ setPage("sharing"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
@@ -3181,7 +3215,7 @@ function resetDataState(){
       document.getElementById("chartDetailModal")?.addEventListener("click",function(event){ if(event.target===this) closeChartMonthDetail(); });
       document.getElementById("latestUpdateDismissButton")?.addEventListener("click",dismissLatestUpdate);
       document.getElementById("latestUpdateAllButton")?.addEventListener("click",function(){ dismissLatestUpdate(); setPage("updates"); });
-      document.addEventListener("keydown",function(event){ if(event.key!=="Escape") return; closeChartMonthDetail(); });
+      document.addEventListener("keydown",function(event){ if(event.key!=="Escape") return; closeChartMonthDetail(); setStudioMobileMenu(false); });
       document.getElementById("startingBalanceEdit")?.addEventListener("click",function(){ if(window.FinanceSheet?.openStartingBalance) window.FinanceSheet.openStartingBalance(); });
       elements.backDashboardButton?.addEventListener("click",()=>setPage("dashboard"));
       elements.themeButtons.forEach(btn=>btn.addEventListener("click",()=>setTheme(btn.dataset.themeOption)));
@@ -5252,7 +5286,7 @@ function resetDataState(){
     window.__fileAnalysisSelfTest = runFileAnalysisSelfTest;
     // FILE_ANALYSIS_ENGINE_END
 
-    function init(){ restoreAppearance(); restoreConfiguration(); setActiveSource("tableur"); renderImportBadge(null); createCustomDropdown(elements.yearSelect); createCustomDropdown(elements.viewSelect); createCustomDropdown(elements.monthSelect); wireEvents(); renderCustomRulesList(); updateInterface(); // Re-populate yearSelect après que FinanceSheet soit initialisé
+    function init(){ restoreAppearance(); restoreConfiguration(); setActiveSource("tableur"); renderImportBadge(null); document.querySelectorAll("select:not([multiple])").forEach(createCustomDropdown); wireEvents(); renderCustomRulesList(); updateInterface(); // Re-populate yearSelect après que FinanceSheet soit initialisé
       setTimeout(function(){ try{ populateYearSelect(); }catch(e){} }, 600);
       setTimeout(showLatestUpdate,1800);
     }
@@ -5261,7 +5295,7 @@ function resetDataState(){
   <script src="sheet.js?v=20260923-r1"></script>
   <script src="onboarding.js?v=20260908-r9"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
-  <script src="friends.js?v=20260923-r2"></script>
+  <script src="friends.js?v=20260923-r3"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>(function(){
   /* === Auth email + mot de passe (Supabase) ===
@@ -5743,7 +5777,7 @@ function resetDataState(){
   window.__gfSync = { pushToCloud: pushToCloud, pullFromCloud: pullFromCloud, markDirty: markDirty, updateSyncStatus: updateSyncStatus };
 })();
 </script>
-  <script src="objectives.js?v=20260916-3"></script>
+  <script src="objectives.js?v=20260923-r4"></script>
 </body>
 </html>
 
