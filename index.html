@@ -1827,7 +1827,7 @@
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260923-r2">
   <link rel="stylesheet" href="ui-polish.css?v=20260923-r4">
-  <link rel="stylesheet" href="theme-directions.css?v=20260923-r2">
+  <link rel="stylesheet" href="theme-directions.css?v=20260923-r3">
   <script src="i18n.js?v=20260918-r4"></script>
   <script src="ui-controls.js?v=20260908-r9" defer></script>
 </head>
@@ -1873,6 +1873,7 @@
         <button type="button" data-page="settings"><span aria-hidden="true">⚙</span>Paramètres</button>
       </nav>
       <p class="studio-sidebar-foot">Une vue plus claire de tes finances.</p>
+      <div class="studio-sidebar-profile-host" id="studioProfileHost"></div>
     </aside>
     <header class="topbar app-header">
       <div class="brand" aria-label="Meuniance">
@@ -2829,10 +2830,11 @@
       if(state.page==="updates") renderUpdatesPage(updatesPageNumber);
       requestAnimationFrame(function(){ if(window.GFI18n) window.GFI18n.apply(document.body); });
     });
-    function setTheme(theme){ if(!["glass","editorial","brutal"].includes(theme)) return; if(state.appearance.theme!==theme) state.appearance.mode=theme==="editorial"?"light":"dark"; state.appearance.theme=theme; applyAppearance({persist:true,refreshChart:true}); }
+    function setTheme(theme){ if(!["glass","editorial","brutal"].includes(theme)) return; state.appearance.theme=theme; applyAppearance({persist:true,refreshChart:true}); }
     function setMode(mode){ if(!["dark","light"].includes(mode)) return; state.appearance.mode=mode; applyAppearance({persist:true,refreshChart:true}); }
     function setInterfaceLayout(layout){ state.appearance.interface=layout==="studio"?"studio":"classic"; applyAppearance({persist:true,refreshChart:false}); }
-    function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; document.body.dataset.interface=state.appearance.interface; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); const interfaceToggle=document.getElementById("interfaceLayoutToggle"); if(interfaceToggle){ const active=state.appearance.interface==="studio"; interfaceToggle.setAttribute("aria-checked",String(active)); interfaceToggle.querySelector(".interface-layout-state").textContent=active?"Activée":"Désactivée"; } updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); safeStore.setItem(STORAGE_KEYS.interface,state.appearance.interface); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
+    function placeProfileMenu(){ const menu=document.getElementById("profileMenu"), sidebarHost=document.getElementById("studioProfileHost"), headerHost=document.querySelector(".app-header .top-actions"); const sidebarMode=state.appearance.interface==="studio" && window.matchMedia("(min-width:1000px)").matches; const target=sidebarMode?sidebarHost:headerHost; if(menu && target && menu.parentElement!==target){ document.getElementById("profilePopover").hidden=true; document.getElementById("profileMenuButton").setAttribute("aria-expanded","false"); target.prepend(menu); } }
+    function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; document.body.dataset.interface=state.appearance.interface; elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); const interfaceToggle=document.getElementById("interfaceLayoutToggle"); if(interfaceToggle){ const active=state.appearance.interface==="studio"; interfaceToggle.setAttribute("aria-checked",String(active)); interfaceToggle.querySelector(".interface-layout-state").textContent=active?"Activée":"Désactivée"; } placeProfileMenu(); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); safeStore.setItem(STORAGE_KEYS.interface,state.appearance.interface); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
     function updateChartColorTokens(){ const styles=getComputedStyle(document.body); COLORS.salary=readCssVar(styles,"--chart-salary",COLORS.salary); COLORS.expenses=readCssVar(styles,"--chart-expenses",COLORS.expenses); COLORS.savings=readCssVar(styles,"--chart-savings",COLORS.savings); COLORS.grid=readCssVar(styles,"--chart-grid",COLORS.grid); COLORS.tick=readCssVar(styles,"--chart-tick",COLORS.tick); COLORS.text=readCssVar(styles,"--chart-text",COLORS.text); }
     function readCssVar(styles,name,fallback){ return styles.getPropertyValue(name).trim()||fallback; }
 
@@ -3167,6 +3169,7 @@ function resetDataState(){
       document.querySelectorAll("[data-page]").forEach(function(button){ button.addEventListener("click",function(){ setPage(button.dataset.page); }); });
       initPageRouting();
       var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileSettings=document.getElementById("profileSettingsButton"), profilePersonal=document.getElementById("profilePersonalButton"), profileNotes=document.getElementById("profileNotesButton");
+      window.addEventListener("resize",placeProfileMenu);
       if(profileButton && profilePopover){ profileButton.addEventListener("click",function(){ var open=profilePopover.hidden; profilePopover.hidden=!open; profileButton.setAttribute("aria-expanded",String(open)); }); document.addEventListener("click",function(event){ if(profileMenu && !profileMenu.contains(event.target)){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); document.addEventListener("keydown",function(event){ if(event.key==="Escape"){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); }
       if(profileSettings){ profileSettings.addEventListener("click",function(){ setPage("settings"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
       if(profilePersonal){ profilePersonal.addEventListener("click",function(){ setPage("sharing"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); }); }
