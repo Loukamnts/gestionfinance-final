@@ -110,6 +110,8 @@ body[data-theme="glass"] :is(.panel,.metric-card,.detail-panel,.latest-update-ba
 body[data-theme="glass"] :is(.custom-select-trigger,.sheet-status-tooltip) { background:var(--panel-solid) !important; backdrop-filter:none !important; }
 body[data-theme="glass"] h1 { background:none; -webkit-background-clip:initial; background-clip:initial; color:var(--text); }
 body[data-theme="glass"] .sheet-status-dot.online,body[data-theme="glass"] .status-pill.is-online .status-dot { box-shadow:none; }
+body .sheet-status-dot.connected-offline,body .sheet-status-tooltip-dot[style*="#3b82f6"] { background:var(--accent-2) !important; }
+body .sync-badge.syncing { background:color-mix(in srgb,var(--accent-2),transparent 88%); border-color:color-mix(in srgb,var(--accent-2),transparent 55%); color:var(--accent-2); }
 body .account-btn-primary,body .account-user-avatar { background:var(--button-primary-bg); color:var(--button-primary-text); }
 body .account-btn-secondary { border-color:var(--line-strong); }
 body .account-btn-secondary:hover { border-color:var(--accent); background:var(--button-active-bg); }
