@@ -153,6 +153,22 @@
   function emptyState(title,description,graphic,cta){
     var root=el("div","sf-empty");root.append(icon(graphic||"people"),el("h3","",title),el("p","",description));if(cta)root.append(cta);return root;
   }
+  function openAccountPane(register){
+    if(window.setPage)window.setPage("settings");
+    window.requestAnimationFrame(function(){
+      var tab=document.getElementById(register?"accountRegisterTab":"accountLoginTab");
+      if(tab)tab.click();
+    });
+  }
+  function renderSignedOutSharing(container){
+    var root=el("section","sf-empty sf-empty-onboarding"),kicker=el("p","sf-onboarding-kicker","ESPACE PRIVÉ"),title=el("h3","","Partage tes finances, seulement quand tu le décides"),copy=el("p","","Le partage reste désactivé par défaut. Connecte ton compte pour inviter une personne et choisir précisément les données qu’elle pourra consulter."),steps=el("ol","sf-onboarding-steps"),actions=el("div","sf-onboarding-actions"),note=el("p","sf-onboarding-note");
+    [["1","Connecte ton espace","Retrouve tes données et tes réglages sur tes appareils."],["2","Invite un proche","Son adresse doit déjà être associée à un compte Meuniance."],["3","Choisis ce qui est visible","Tu coches les lignes et les mois à partager, uniquement en lecture."]].forEach(function(item){
+      var step=el("li","sf-onboarding-step"),number=el("span","sf-onboarding-number",item[0]),texts=el("span","sf-onboarding-copy");texts.append(el("strong","",item[1]),el("small","",item[2]));step.append(number,texts);steps.append(step);
+    });
+    actions.append(action("Se connecter",function(){openAccountPane(false);},"primary","lock"),action("Créer un compte",function(){openAccountPane(true);},"secondary","people"));
+    note.append(icon("lock"),document.createTextNode("Aucune donnée n’est partagée sans ton autorisation explicite."));
+    root.append(icon("people"),kicker,title,copy,steps,actions,note);container.replaceChildren(root);
+  }
   function openDialog(title,description){
     var dialog=el("dialog","sf-dialog"),header=el("div","sf-dialog-head"),heading=el("h2","",title);
     heading.id="sharing-dialog-title";dialog.setAttribute("aria-labelledby",heading.id);
@@ -310,7 +326,7 @@
   }
   async function renderSharing(container,options){
     options=options||{};if(!container)return;container.hidden=false;closeSharedView();var me=user();
-    if(!me){container.dataset.sharingReady="";container.replaceChildren(emptyState("Tes finances, à partager avec tes proches","Connecte-toi pour inviter un ami et choisir ce qu’il peut consulter.","people",action("Se connecter",function(){if(window.setPage)window.setPage("settings");},"primary")));return;}
+    if(!me){container.dataset.sharingReady="";renderSignedOutSharing(container);return;}
     if(!options.force&&container.dataset.sharingReady===me.id&&container._sharingData===cache.data&&cache.data&&Date.now()-cache.loadedAt<30000)return;
     var version=++renderVersion,started=Date.now();if(!container.childElementCount)container.replaceChildren(notice("Chargement de tes amis…"));
     var data=await loadFriends({force:!!options.force});
@@ -345,4 +361,9 @@
     chooseTab(selectedTab);container.replaceChildren(shell);container.dataset.sharingReady=me.id;container._sharingData=data;
   }
   window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots};
+  // Lorsqu'on arrive directement sur /partage, le routeur est exécuté avant
+  // ce fichier. On rend donc l'état initial ici, puis à chaque connexion.
+  function refreshVisibleSharing(){var page=document.getElementById("sharingPage"),container=document.getElementById("sharingContainer");if(page&&!page.hidden&&container)renderSharing(container,{force:true});}
+  refreshVisibleSharing();
+  window.addEventListener("authStateChanged",refreshVisibleSharing);
 })();

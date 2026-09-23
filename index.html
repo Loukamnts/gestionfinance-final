@@ -1825,8 +1825,8 @@
   body[data-theme="brutal"] .account-tabs, body[data-theme="brutal"] .account-tab, body[data-theme="brutal"] .account-auth-pane input, body[data-theme="brutal"] .account-code-step, body[data-theme="brutal"] .account-code-inputs input, body[data-theme="brutal"] .account-btn-primary, body[data-theme="brutal"] .account-btn-secondary { border-radius: 0 !important; }
   @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
-  <link rel="stylesheet" href="sharing.css?v=20260908-1">
-  <link rel="stylesheet" href="ui-polish.css?v=20260922-r3">
+  <link rel="stylesheet" href="sharing.css?v=20260923-r2">
+  <link rel="stylesheet" href="ui-polish.css?v=20260923-r4">
   <script src="i18n.js?v=20260918-r4"></script>
   <script src="ui-controls.js?v=20260908-r9" defer></script>
 </head>
@@ -2693,11 +2693,15 @@
     }
     function renderEmptyDashboardState(){
       if(!elements.emptyState)return;
-      const copy=document.createElement("p"),action=document.createElement("button");
-      copy.textContent=state.selectedYear?`Aucun mois renseigné pour ${getYearLabel(state.selectedYear)}.`:"Aucune donnée à afficher pour le moment.";
-      action.type="button";action.className="empty-state-action";action.textContent="Ouvrir le tableur";
-      action.addEventListener("click",function(){ setPage("sheet"); });
-      elements.emptyState.replaceChildren(copy,action);
+      const eyebrow=document.createElement("span"),title=document.createElement("h3"),copy=document.createElement("p"),steps=document.createElement("ol"),actions=document.createElement("div"),start=document.createElement("button"),importFile=document.createElement("button");
+      eyebrow.className="empty-dashboard-kicker";eyebrow.textContent="POUR COMMENCER";
+      title.textContent=state.selectedYear?`Aucun mois renseigné pour ${getYearLabel(state.selectedYear)}.`:"Ton tableau de bord est prêt";
+      copy.textContent="Ajoute quelques montants dans le tableur ou importe ton fichier : les graphiques et les indicateurs se mettront à jour automatiquement.";
+      [["1","Configure ton solde de départ"],["2","Ajoute ou importe tes opérations"],["3","Découvre tes graphiques"]].forEach(function(item){const step=document.createElement("li"),number=document.createElement("span"),label=document.createElement("span");number.textContent=item[0];label.textContent=item[1];step.append(number,label);steps.append(step);});
+      start.type="button";start.className="empty-state-action empty-state-primary";start.textContent="Configurer mon tableur";start.addEventListener("click",function(){setPage("sheet");});
+      importFile.type="button";importFile.className="empty-state-action";importFile.textContent="Importer un fichier";importFile.addEventListener("click",function(){setPage("sheet");window.requestAnimationFrame(function(){const button=document.getElementById("btnSheetImport");if(button)button.click();});});
+      actions.className="empty-dashboard-actions";actions.append(start,importFile);
+      steps.className="empty-dashboard-steps";elements.emptyState.className="empty-state is-visible empty-dashboard";elements.emptyState.replaceChildren(eyebrow,title,copy,steps,actions);
     }
     function updateInterface(){ populateMonthSelect(); const hasData=getVisibleMonths().length>0; elements.emptyState.classList.toggle("is-visible",!hasData); if(!hasData) renderEmptyDashboardState(); if(elements.yearSelect) syncCustomDropdown(elements.yearSelect); syncCustomDropdown(elements.monthSelect); updateSummaryCards(); updateMonthDetails(getSelectedMonth()); renderCategorySettings(); renderCustomRulesList(); renderChart(); }
 
@@ -5240,7 +5244,7 @@ function resetDataState(){
   <script src="sheet.js?v=20260923-r1"></script>
   <script src="onboarding.js?v=20260908-r9"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
-  <script src="friends.js?v=20260918-r1"></script>
+  <script src="friends.js?v=20260923-r2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>(function(){
   /* === Auth email + mot de passe (Supabase) ===
