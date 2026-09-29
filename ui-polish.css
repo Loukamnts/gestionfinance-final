@@ -815,6 +815,34 @@ body[data-theme="glass"][data-mode="light"] :is(.objectives-panel,.objective-for
   .language-section[data-settings-panel] { display:grid; grid-template-columns:1fr; gap:14px; }
 }
 
+/* Compte : une carte à hauteur de contenu, centrée comme les préférences. */
+.settings-shell > .account-section[data-settings-panel] { min-height:0 !important; }
+.account-section .panel-title,
+.account-section .account-panel { width:min(100%,680px); max-width:680px; margin-inline:auto; }
+.account-section.is-connected .account-panel { max-width:680px; gap:18px; }
+.account-section .panel-title { margin-bottom:14px; }
+.account-section .panel-title h2 { font-size:clamp(1.2rem,2vw,1.55rem); }
+.account-section .account-user { min-width:0; }
+.account-section.is-connected .account-user { padding:0 0 16px; }
+@media (max-width:720px) {
+  .account-section .account-panel,.account-section .panel-title { width:100%; }
+  .account-section.is-connected .account-user { align-items:flex-start; }
+}
+
+/* Couleur indépendante du thème : trois choix compacts, sans grandes cartes vides. */
+.palette-choice { display:flex; align-items:center; justify-content:space-between; gap:16px 24px; margin-top:20px; padding:16px 0; border-block:1px solid var(--line); }
+.palette-choice-copy { min-width:0; }
+.palette-choice h3 { margin:0 0 4px; font:750 1rem/1.25 var(--font-heading); }
+.palette-choice p { margin:0; color:var(--muted); font:.83rem/1.45 var(--font-body); }
+.palette-options { display:flex; flex-wrap:wrap; gap:8px; flex:0 0 auto; }
+.palette-options button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; padding:8px 12px; border:1px solid var(--line); border-radius:min(9px,var(--control-radius)); background:var(--input-bg); color:var(--text); font:700 .82rem/1.2 var(--font-body); cursor:pointer; }
+.palette-options button:hover { border-color:var(--line-strong); background:var(--button-active-bg); }
+.palette-options button[aria-pressed="true"] { border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); background:var(--button-active-bg); }
+.palette-swatch { display:block; width:16px; height:16px; flex:0 0 16px; border-radius:50%; border:1px solid #0003; }
+.palette-violet { background:#895ab5; }.palette-bordeaux { background:#a83f62; }.palette-gold { background:#ad862c; }
+body[data-theme="brutal"] .palette-options button,body[data-theme="brutal"] .palette-swatch { border-radius:0; }
+@media (max-width:840px) { .palette-choice { align-items:flex-start; flex-direction:column; } .palette-options { width:100%; } .palette-options button { flex:1 1 80px; padding-inline:8px; } }
+
 /* Sur téléphone, les rubriques de réglages reviennent sous la forme des
    onglets compacts d'origine : une ligne lisible, défilable sans scrollbar. */
 @media (max-width:720px) {

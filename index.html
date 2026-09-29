@@ -1826,9 +1826,9 @@
   @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260923-r2">
-  <link rel="stylesheet" href="ui-polish.css?v=20260923-r6">
-  <link rel="stylesheet" href="theme-directions.css?v=20260929-r1">
-  <script src="i18n.js?v=20260923-r6"></script>
+  <link rel="stylesheet" href="ui-polish.css?v=20260929-r2">
+  <link rel="stylesheet" href="theme-directions.css?v=20260929-r2">
+  <script src="i18n.js?v=20260929-r2"></script>
   <script src="ui-controls.js?v=20260923-r10" defer></script>
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard" data-interface="classic">
@@ -2211,6 +2211,7 @@
             <button class="theme-card" type="button" data-theme-option="editorial" aria-label="Édition"><span class="theme-check" aria-hidden="true">✓</span><span class="theme-preview preview-editorial" aria-hidden="true"><span class="preview-title"></span><span class="preview-tabs"><i></i><i></i><i></i></span><span class="preview-cards"><i></i><i></i><i></i></span><span class="preview-chart"><i></i><i></i><i></i></span></span><span class="theme-name">Édition</span><span class="theme-tone">Papier et serif</span></button>
             <button class="theme-card" type="button" data-theme-option="brutal" aria-label="Contraste"><span class="theme-check" aria-hidden="true">✓</span><span class="theme-preview preview-brutal" aria-hidden="true"><span class="preview-title"></span><span class="preview-tabs"><i></i><i></i><i></i></span><span class="preview-cards"><i></i><i></i><i></i></span><span class="preview-chart"><i></i><i></i><i></i></span></span><span class="theme-name">Contraste</span><span class="theme-tone">Net et franc</span></button>
           </div>
+          <div class="palette-choice"><div class="palette-choice-copy"><h3>Couleur d’accent</h3><p>Choisis une couleur indépendamment du thème. Elle s’applique aussi aux graphiques.</p></div><div class="palette-options" role="group" aria-label="Couleur d’accent"><button type="button" data-palette-option="violet" aria-pressed="false"><span class="palette-swatch palette-violet" aria-hidden="true"></span>Violet</button><button type="button" data-palette-option="bordeaux" aria-pressed="false"><span class="palette-swatch palette-bordeaux" aria-hidden="true"></span>Bordeaux</button><button type="button" data-palette-option="gold" aria-pressed="false"><span class="palette-swatch palette-gold" aria-hidden="true"></span>Or</button></div></div>
           <div class="settings-section-head split" style="margin-top: 20px;"><div><h3>Mode d'affichage</h3><p>Clair ou sombre — garde la personnalité du thème.</p></div><div class="mode-segment" id="modeToggle" role="group" aria-label="Mode d'affichage"><button type="button" data-mode-option="light"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Clair</button><button type="button" data-mode-option="dark"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sombre</button></div></div>
           <div class="interface-choice"><div><span class="interface-choice-kicker">DISPOSITION</span><h3>Nouvelle interface</h3><p>Navigation latérale sur ordinateur, menu dédié sur mobile.</p></div><button id="interfaceLayoutToggle" class="interface-layout-toggle" type="button" role="switch" aria-checked="false" aria-label="Activer la nouvelle interface"><span class="interface-layout-thumb" aria-hidden="true"></span><span class="interface-layout-state">Désactivée</span></button></div>
         </section>
@@ -2392,6 +2393,7 @@
       categoryRules: "personalFinanceDashboard.categoryRules",
       customRules: "personalFinanceDashboard.customRules",
       theme: "personalFinanceDashboard.theme",
+      palette: "personalFinanceDashboard.palette",
       mode: "personalFinanceDashboard.mode",
       interface: "personalFinanceDashboard.interface",
       view: "personalFinanceDashboard.currentView",
@@ -2419,13 +2421,13 @@
       rawPages: [], months: [], detectedProperties: [], availableRules: SYSTEM_RULES.slice(),
       selectedMonthId: "", selectedYear: "", currentView: "pie", chart: null, isGlobal: false, page: "dashboard", source: "tableur",
       importedFile: null, importAnalysis: null,
-      appearance: { theme: "glass", mode: "dark", interface: "classic" }, pendingRename: { oldName: null, callback: null }
+      appearance: { theme: "glass", palette: "violet", mode: "dark", interface: "classic" }, pendingRename: { oldName: null, callback: null }
     };
 
     const elements = {
       dashboardPage: document.getElementById("dashboardPage"),
       settingsPage: document.getElementById("settingsPage"), sharingPage: document.getElementById("sharingPage"), sharingAccessPage: document.getElementById("sharingAccessPage"), updatesPage: document.getElementById("updatesPage"), personalPage: document.getElementById("personalPage"), objectivesPage: document.getElementById("objectivesPage"), sheetPage: document.getElementById("sheetPage"), settingsButton: document.getElementById("settingsButton"), sheetButton: document.getElementById("sheetButton"), homeButton: document.getElementById("homeButton"),
-      backDashboardButton: document.getElementById("backDashboardButton"), themeButtons: document.querySelectorAll("[data-theme-option]"),
+      backDashboardButton: document.getElementById("backDashboardButton"), themeButtons: document.querySelectorAll("[data-theme-option]"), paletteButtons: document.querySelectorAll("[data-palette-option]"),
       modeToggle: document.getElementById("modeToggle"), loader: document.getElementById("loader"),
       messageBox: document.getElementById("messageBox"), messageText: document.getElementById("messageText"),
       messageTimer: document.getElementById("messageTimer"), messageTimerProgress: document.getElementById("messageTimerProgress"),
@@ -2850,7 +2852,7 @@
     // ═══════════════════════════════════════════════════════════════════════
     // THÈMES & APPARENCE (avec persistance de la vue)
     // ═══════════════════════════════════════════════════════════════════════
-    function restoreAppearance(){ const savedTheme=safeStore.getItem(STORAGE_KEYS.theme); const savedMode=safeStore.getItem(STORAGE_KEYS.mode); const savedInterface=safeStore.getItem(STORAGE_KEYS.interface); state.appearance.theme=["glass","editorial","brutal"].includes(savedTheme)?savedTheme:"glass"; state.appearance.mode=["dark","light"].includes(savedMode)?savedMode:"dark"; state.appearance.interface=savedInterface==="studio"?"studio":"classic"; const savedView=safeStore.getItem(STORAGE_KEYS.view); if(["pie","grouped","stacked","line"].includes(savedView)) state.currentView=savedView; applyAppearance({persist:false,refreshChart:false}); if(elements.viewSelect){ elements.viewSelect.value=state.currentView; syncCustomDropdown(elements.viewSelect); } }
+    function restoreAppearance(){ const savedTheme=safeStore.getItem(STORAGE_KEYS.theme); const savedPalette=safeStore.getItem(STORAGE_KEYS.palette); const savedMode=safeStore.getItem(STORAGE_KEYS.mode); const savedInterface=safeStore.getItem(STORAGE_KEYS.interface); state.appearance.theme=["glass","editorial","brutal"].includes(savedTheme)?savedTheme:"glass"; const originalPalette={glass:"violet",editorial:"bordeaux",brutal:"gold"}; state.appearance.palette=["violet","bordeaux","gold"].includes(savedPalette)?savedPalette:originalPalette[state.appearance.theme]; state.appearance.mode=["dark","light"].includes(savedMode)?savedMode:"dark"; state.appearance.interface=savedInterface==="studio"?"studio":"classic"; const savedView=safeStore.getItem(STORAGE_KEYS.view); if(["pie","grouped","stacked","line"].includes(savedView)) state.currentView=savedView; applyAppearance({persist:false,refreshChart:false}); if(elements.viewSelect){ elements.viewSelect.value=state.currentView; syncCustomDropdown(elements.viewSelect); } }
     window.addEventListener("gf:languagechange",function(){
       updateInterface();
       const activeSettings=document.querySelector('[data-settings-view][aria-current="true"]')?.dataset.settingsView;
@@ -2859,11 +2861,12 @@
       requestAnimationFrame(function(){ if(window.GFI18n) window.GFI18n.apply(document.body); window.GFCustomSelect?.refreshAll?.(); });
     });
     function setTheme(theme){ if(!["glass","editorial","brutal"].includes(theme)) return; state.appearance.theme=theme; applyAppearance({persist:true,refreshChart:true}); }
+    function setPalette(palette){ if(!["violet","bordeaux","gold"].includes(palette)) return; state.appearance.palette=palette; applyAppearance({persist:true,refreshChart:true}); }
     function setMode(mode){ if(!["dark","light"].includes(mode)) return; state.appearance.mode=mode; applyAppearance({persist:true,refreshChart:true}); }
     function setInterfaceLayout(layout){ state.appearance.interface=layout==="studio"?"studio":"classic"; applyAppearance({persist:true,refreshChart:false}); }
     function placeProfileMenu(){ const menu=document.getElementById("profileMenu"), sidebarHost=document.getElementById("studioProfileHost"), headerHost=document.querySelector(".app-header .top-actions"); const target=state.appearance.interface==="studio"?sidebarHost:headerHost; if(menu && target && menu.parentElement!==target){ document.getElementById("profilePopover").hidden=true; document.getElementById("profileMenuButton").setAttribute("aria-expanded","false"); target.prepend(menu); } }
     function setStudioMobileMenu(open){ const sidebar=document.querySelector(".studio-sidebar"),scrim=document.getElementById("studioSidebarScrim"),button=document.getElementById("studioMobileMenuButton"),mobile=window.matchMedia("(max-width:999px)").matches; const active=!!open&&state.appearance.interface==="studio"&&mobile; sidebar?.classList.toggle("is-mobile-open",active); if(sidebar){ if(state.appearance.interface==="studio"&&mobile){sidebar.setAttribute("aria-hidden",String(!active));sidebar.inert=!active;}else{sidebar.removeAttribute("aria-hidden");sidebar.inert=false;} } document.body.classList.toggle("studio-mobile-menu-open",active); document.documentElement.classList.toggle("studio-mobile-menu-open",active); if(scrim)scrim.hidden=!active; if(button){const label=active?"Fermer la navigation":"Ouvrir la navigation";button.setAttribute("aria-expanded",String(active));button.setAttribute("aria-label",window.GFI18n?window.GFI18n.t(label):label);} window.GFUI?.syncModalLock?.(); }
-    function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.mode=state.appearance.mode; document.body.dataset.interface=state.appearance.interface; setStudioMobileMenu(false); elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); const interfaceToggle=document.getElementById("interfaceLayoutToggle"); if(interfaceToggle){ const active=state.appearance.interface==="studio"; interfaceToggle.setAttribute("aria-checked",String(active)); interfaceToggle.querySelector(".interface-layout-state").textContent=active?"Activée":"Désactivée"; } placeProfileMenu(); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); safeStore.setItem(STORAGE_KEYS.interface,state.appearance.interface); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
+    function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.palette=state.appearance.palette; document.body.dataset.mode=state.appearance.mode; document.body.dataset.interface=state.appearance.interface; setStudioMobileMenu(false); elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); elements.paletteButtons.forEach(btn=>{const active=btn.dataset.paletteOption===state.appearance.palette;btn.classList.toggle("is-active",active);btn.setAttribute("aria-pressed",String(active));}); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); const interfaceToggle=document.getElementById("interfaceLayoutToggle"); if(interfaceToggle){ const active=state.appearance.interface==="studio"; interfaceToggle.setAttribute("aria-checked",String(active)); interfaceToggle.querySelector(".interface-layout-state").textContent=active?"Activée":"Désactivée"; } placeProfileMenu(); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.palette,state.appearance.palette); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); safeStore.setItem(STORAGE_KEYS.interface,state.appearance.interface); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
     function updateChartColorTokens(){ const styles=getComputedStyle(document.body); COLORS.salary=readCssVar(styles,"--chart-salary",COLORS.salary); COLORS.expenses=readCssVar(styles,"--chart-expenses",COLORS.expenses); COLORS.savings=readCssVar(styles,"--chart-savings",COLORS.savings); COLORS.grid=readCssVar(styles,"--chart-grid",COLORS.grid); COLORS.tick=readCssVar(styles,"--chart-tick",COLORS.tick); COLORS.text=readCssVar(styles,"--chart-text",COLORS.text); }
     function readCssVar(styles,name,fallback){ return styles.getPropertyValue(name).trim()||fallback; }
 
@@ -2921,7 +2924,7 @@
       if(elements.personalPage) elements.personalPage.hidden=true;
       if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives";
       if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet";
-      document.querySelectorAll("[data-page]").forEach(function(button){ button.classList.toggle("is-active",button.dataset.page===state.page); });
+      document.querySelectorAll("button[data-page]").forEach(function(button){ button.classList.toggle("is-active",button.dataset.page===state.page); });
       document.querySelectorAll(".studio-sidebar-nav [data-page]").forEach(function(button){ button.setAttribute("aria-current",button.dataset.page===state.page?"page":"false"); });
       updatePageTitle(next);
       syncPersonalWorkspaceNavigation(next);
@@ -3196,10 +3199,11 @@ function resetDataState(){
       }
       // Événement pour vider l'état du dashboard (appelé par le bouton admin)
       window.addEventListener("financeClearData", () => { resetDataState(); updateInterface(); });
-      document.querySelectorAll("[data-page]").forEach(function(button){ button.addEventListener("click",function(){ setPage(button.dataset.page); }); });
+      document.querySelectorAll("button[data-page]").forEach(function(button){ button.addEventListener("click",function(){ setPage(button.dataset.page); }); });
       initPageRouting();
       var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileSettings=document.getElementById("profileSettingsButton"), profilePersonal=document.getElementById("profilePersonalButton"), profileNotes=document.getElementById("profileNotesButton");
-      window.addEventListener("resize",function(){placeProfileMenu();setStudioMobileMenu(false);});
+      let wasMobileLayout=window.matchMedia("(max-width:999px)").matches;
+      window.addEventListener("resize",function(){const isMobileLayout=window.matchMedia("(max-width:999px)").matches;if(isMobileLayout!==wasMobileLayout){wasMobileLayout=isMobileLayout;placeProfileMenu();setStudioMobileMenu(false);}});
       const studioMenuButton=document.getElementById("studioMobileMenuButton"),studioScrim=document.getElementById("studioSidebarScrim");
       studioMenuButton?.addEventListener("click",function(){setStudioMobileMenu(studioMenuButton.getAttribute("aria-expanded")!=="true");});
       studioScrim?.addEventListener("click",function(){setStudioMobileMenu(false);});
@@ -3219,6 +3223,7 @@ function resetDataState(){
       document.getElementById("startingBalanceEdit")?.addEventListener("click",function(){ if(window.FinanceSheet?.openStartingBalance) window.FinanceSheet.openStartingBalance(); });
       elements.backDashboardButton?.addEventListener("click",()=>setPage("dashboard"));
       elements.themeButtons.forEach(btn=>btn.addEventListener("click",()=>setTheme(btn.dataset.themeOption)));
+      elements.paletteButtons.forEach(btn=>btn.addEventListener("click",()=>setPalette(btn.dataset.paletteOption)));
       document.getElementById("interfaceLayoutToggle")?.addEventListener("click",function(){setInterfaceLayout(state.appearance.interface==="studio"?"classic":"studio");});
       Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.addEventListener("click",()=>setMode(btn.dataset.modeOption)));
       var accEyeBtn = document.getElementById("accountEyeButton");

@@ -92,6 +92,36 @@ body[data-theme="brutal"][data-mode="light"] {
   --pie-border-color:#fffefa;
 }
 
+/* La structure du thème et la couleur sont deux choix indépendants. */
+body[data-theme][data-mode][data-palette] {
+  --green:var(--accent);
+  --button-primary-bg:var(--accent);
+  --button-primary-text:var(--palette-on-accent);
+  --button-active-bg:color-mix(in srgb,var(--accent) 17%,var(--panel-solid));
+  --button-active-text:var(--text);
+  --chart-salary:var(--accent); --chart-expenses:var(--accent-2); --chart-savings:var(--accent-3);
+  --chart-1:var(--accent); --chart-2:var(--accent-2); --chart-3:var(--accent-3);
+  --chart-4:color-mix(in srgb,var(--accent) 72%,var(--accent-2));
+  --chart-5:color-mix(in srgb,var(--accent-2) 72%,var(--accent-3));
+  --chart-6:color-mix(in srgb,var(--accent-3) 72%,var(--accent));
+  --chart-7:color-mix(in srgb,var(--accent) 50%,var(--accent-3));
+  --chart-8:color-mix(in srgb,var(--accent-2) 50%,var(--accent));
+}
+body[data-mode="dark"][data-palette="violet"] { --accent:#b38bf2; --accent-2:#d88cab; --accent-3:#8980bc; --palette-on-accent:#1d112b; }
+body[data-mode="light"][data-palette="violet"] { --accent:#633594; --accent-2:#964769; --accent-3:#60527d; --palette-on-accent:#fff; }
+body[data-mode="dark"][data-palette="bordeaux"] { --accent:#e995ad; --accent-2:#c56d87; --accent-3:#c9a2ad; --palette-on-accent:#2a101a; }
+body[data-mode="light"][data-palette="bordeaux"] { --accent:#922b4b; --accent-2:#af536b; --accent-3:#67505e; --palette-on-accent:#fff; }
+body[data-mode="dark"][data-palette="gold"] { --accent:#d9b45d; --accent-2:#c98670; --accent-3:#c9baa0; --palette-on-accent:#221a09; }
+body[data-mode="light"][data-palette="gold"] { --accent:#806016; --accent-2:#965438; --accent-3:#685b42; --palette-on-accent:#fff; }
+body[data-theme="editorial"][data-palette] { --panel-top-border:2px solid var(--accent); }
+
+/* Les aperçus changent de couleur sans perdre la silhouette de chaque thème. */
+body[data-palette] .theme-preview .preview-title,
+body[data-palette] .theme-preview .preview-chart i:first-child { background:var(--accent); }
+body[data-palette] .theme-preview .preview-chart i:nth-child(2) { background:var(--accent-2); }
+body[data-palette] .theme-preview .preview-chart i:nth-child(3) { background:var(--accent-3); }
+body[data-palette] .preview-editorial .preview-cards i { border-top-color:var(--accent); }
+
 /* Les aperçus reflètent réellement la palette sélectionnée. */
 .preview-glass { color:#f5f3ff; background:#11121b; border-color:#5e6485; box-shadow:none; }
 .preview-glass .preview-title { background:#9b72e6; }
@@ -463,7 +493,18 @@ body[data-theme="brutal"] .custom-select-options { border-width:2px; box-shadow:
 /* Navigation mobile de la nouvelle interface : tiroir au premier plan,
    profil réellement cliquable et fond immobilisé pendant son ouverture. */
 @media (max-width:999px) {
-  body[data-interface="studio"] .studio-sidebar { z-index:22020; isolation:isolate; }
+  body[data-interface="studio"] .studio-sidebar { z-index:22020; isolation:isolate; flex-direction:column; align-items:stretch; gap:0; overflow-x:hidden; }
+  body[data-interface="studio"] .studio-sidebar-brand,
+  body[data-interface="studio"] .studio-sidebar-profile-host,
+  body[data-interface="studio"] .studio-sidebar-nav { width:100%; min-width:0; flex:0 0 auto; }
+  body[data-interface="studio"] .studio-sidebar-brand { display:grid; grid-template-columns:38px minmax(0,1fr); align-items:center; }
+  body[data-interface="studio"] .studio-sidebar-brand strong { min-width:0; color:var(--text); font:750 1.08rem/1.1 var(--font-heading); }
+  body[data-interface="studio"] .studio-sidebar-brand small { grid-column:2; color:var(--muted); font:700 .56rem/1.3 var(--font-body); letter-spacing:.1em; }
+  body[data-interface="studio"] .studio-sidebar-mark { display:grid; place-items:center; grid-row:1 / span 2; border:1px solid var(--accent); border-radius:var(--control-radius); color:var(--accent); font:800 1rem/1 var(--font-heading); }
+  body[data-interface="studio"] .studio-sidebar-profile-host .profile-trigger-label,
+  body[data-interface="studio"] .studio-sidebar-profile-host .profile-trigger > svg { display:block !important; }
+  body[data-interface="studio"] .studio-sidebar-nav { grid-auto-rows:minmax(45px,auto); }
+  body[data-interface="studio"] .studio-sidebar-nav button { min-height:45px; height:auto; }
   body[data-interface="studio"] .studio-sidebar-scrim:not([hidden]) { z-index:22010; }
   body[data-interface="studio"] .studio-sidebar-profile-host { position:relative; z-index:2; }
   body[data-interface="studio"] .studio-sidebar-profile-host .profile-menu { position:relative; z-index:3; width:100%; }
@@ -501,6 +542,7 @@ body[data-theme="brutal"] .custom-select-options { border-width:2px; box-shadow:
 html[data-app-modal-open="true"],body[data-app-modal-open="true"] { overflow:hidden !important; overscroll-behavior:none !important; }
 
 /* Le menu Profil est une surface flottante : aucun panneau ne peut le recouvrir. */
+body[data-interface="classic"] .app .app-header { position:relative; z-index:180; isolation:auto; overflow:visible; }
 .app-header { position:relative; z-index:2200; }
 .app-header .profile-menu { position:relative; z-index:2201; }
 .profile-popover { z-index:2210 !important; }

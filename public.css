@@ -83,3 +83,21 @@
 .swatch-glass{background:linear-gradient(135deg,#9b72e6,#c34f73)}
 .swatch-editorial{background:linear-gradient(135deg,#f5f0e8 50%,#8e2347 50%)}
 .swatch-brutal{border:2px solid #fffaf0;background:#d0a13f}
+
+/* Les mêmes trois accents sont disponibles sur chacune des silhouettes publiques. */
+html[data-theme][data-palette] { --green:var(--accent); --primary:var(--accent); --primary-text:var(--palette-on-accent); --title:linear-gradient(135deg,var(--text),var(--accent)); }
+html[data-theme="editorial"][data-palette="violet"] { --accent:#633594; --accent-2:#964769; --palette-on-accent:#fff; }
+html[data-theme="editorial"][data-palette="bordeaux"] { --accent:#922b4b; --accent-2:#af536b; --palette-on-accent:#fff; }
+html[data-theme="editorial"][data-palette="gold"] { --accent:#806016; --accent-2:#965438; --palette-on-accent:#fff; }
+html:is([data-theme="glass"],[data-theme="brutal"])[data-palette="violet"] { --accent:#b38bf2; --accent-2:#d88cab; --palette-on-accent:#1d112b; }
+html:is([data-theme="glass"],[data-theme="brutal"])[data-palette="bordeaux"] { --accent:#e995ad; --accent-2:#c56d87; --palette-on-accent:#2a101a; }
+html:is([data-theme="glass"],[data-theme="brutal"])[data-palette="gold"] { --accent:#d9b45d; --accent-2:#c98670; --palette-on-accent:#221a09; }
+.theme-strip { flex-wrap:wrap; }
+.public-palette-switcher { display:flex; gap:5px; padding:4px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); }
+.public-palette-switcher button { display:inline-flex; align-items:center; gap:7px; min-height:38px; padding:7px 10px; border:1px solid transparent; border-radius:var(--radius); background:transparent; color:var(--muted); cursor:pointer; font-weight:650; font-size:.8rem; }
+.public-palette-switcher button[aria-pressed="true"] { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 15%,var(--panel)); color:var(--text); }
+.public-palette-switcher i { width:12px; height:12px; border-radius:50%; background:#895ab5; }
+.public-palette-switcher [data-public-palette="bordeaux"] i { background:#a83f62; }
+.public-palette-switcher [data-public-palette="gold"] i { background:#ad862c; }
+html[data-theme="brutal"] .public-palette-switcher :is(button,i) { border-radius:0; }
+@media(max-width:680px) { .public-palette-switcher { width:100%; justify-content:space-between; } .public-palette-switcher button { flex:1; justify-content:center; } }
