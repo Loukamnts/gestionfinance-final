@@ -460,6 +460,44 @@ body[data-theme="brutal"] .custom-select-options { border-width:2px; box-shadow:
   body[data-theme="brutal"][data-interface="studio"] :is(.studio-mobile-menu-button,.studio-sidebar-nav button,.studio-sidebar-profile-host .profile-trigger) { border-radius:0; }
 }
 
+/* Navigation mobile de la nouvelle interface : tiroir au premier plan,
+   profil réellement cliquable et fond immobilisé pendant son ouverture. */
+@media (max-width:999px) {
+  body[data-interface="studio"] .studio-sidebar { z-index:22020; isolation:isolate; }
+  body[data-interface="studio"] .studio-sidebar-scrim:not([hidden]) { z-index:22010; }
+  body[data-interface="studio"] .studio-sidebar-profile-host { position:relative; z-index:2; }
+  body[data-interface="studio"] .studio-sidebar-profile-host .profile-menu { position:relative; z-index:3; width:100%; }
+  body[data-interface="studio"] .studio-sidebar-profile-host .profile-popover {
+    position:absolute; inset:calc(100% + 7px) 0 auto; z-index:22030;
+    width:100%; max-width:none; max-height:min(62dvh,500px); margin:0;
+    overflow:auto; overscroll-behavior:contain; background:var(--panel-solid) !important;
+    background-image:none !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+  }
+  html.studio-mobile-menu-open,
+  body[data-interface="studio"].studio-mobile-menu-open { overflow:hidden; overscroll-behavior:none; }
+}
+
+/* Sur téléphone, le tiroir remplace la barre de navigation basse en mode
+   nouvelle interface. L'ancienne interface garde sa navigation habituelle. */
+@media (max-width:720px) {
+  body[data-interface="studio"] .bottom-nav { display:none !important; }
+  body[data-interface="studio"] .app { padding-bottom:calc(18px + env(safe-area-inset-bottom,0px)) !important; }
+  body[data-interface="studio"] .studio-mobile-menu-button {
+    width:44px; height:44px; flex:0 0 44px; border-width:1px;
+    background:var(--panel-solid); color:var(--text); box-shadow:none;
+  }
+}
+
+/* Les pages de réglages restent centrées dans leur colonne et les panneaux
+   ne se décalent pas lorsque l'on change de rubrique ou de taille d'écran. */
+.settings-page { width:100%; min-width:0; justify-content:center; }
+.settings-page .settings-shell { width:100%; max-width:1240px !important; min-width:0; margin-inline:auto !important; box-sizing:border-box; }
+.settings-shell > [data-settings-panel] { min-width:0; justify-self:stretch; align-self:stretch; }
+@media (max-width:720px) {
+  .settings-page .settings-shell { width:100%; max-width:100%; gap:14px; }
+  .settings-shell > [data-settings-panel] { min-height:0 !important; margin-inline:0; }
+}
+
 html[data-app-modal-open="true"],body[data-app-modal-open="true"] { overflow:hidden !important; overscroll-behavior:none !important; }
 
 /* Le menu Profil est une surface flottante : aucun panneau ne peut le recouvrir. */
