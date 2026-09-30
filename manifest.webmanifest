@@ -10,12 +10,12 @@
   "theme_color": "#111114",
   "icons": [
     {
-      "src": "/app-icon-180.png",
+      "src": "/app-icon-180.png?v=20260930",
       "sizes": "180x180",
       "type": "image/png"
     },
     {
-      "src": "/app-icon-512.png",
+      "src": "/app-icon-512.png?v=20260930",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

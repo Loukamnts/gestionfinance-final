@@ -68,7 +68,7 @@ test('The public vulnerability contact is deployed in RFC 9116 format',()=>{
   const source=fs.readFileSync(path.join(root,'.well-known/security.txt'),'utf8');
   const published=fs.readFileSync(path.join(root,'dist/.well-known/security.txt'),'utf8');
   assert.equal(published,source);
-  assert.match(source,/^Contact: mailto:louka\.meunier1@gmail\.com$/m);
+  assert.match(source,/^Contact: https:\/\/gestion-finance-coral\.vercel\.app\/confidentialite$/m);
   assert.match(source,/^Expires: 2027-03-10T23:59:59Z$/m);
   assert.match(source,/^Canonical: https:\/\/gestion-finance-coral\.vercel\.app\/\.well-known\/security\.txt$/m);
 });

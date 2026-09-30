@@ -75,7 +75,7 @@
   .public-nav .btn{min-height:38px;padding:8px 12px;font-size:.74rem;gap:8px;white-space:nowrap}
 }
 
-.brand-m{width:1.24em;height:1.24em;margin:0 -.04em 0 -.08em;color:var(--accent);vertical-align:-.24em;flex:0 0 auto}.brand-m path{stroke-width:2.9}.brand-m circle{r:2.6}.public-brand>span,.preview-brand>span{display:inline-flex;align-items:center}
+.brand-m{width:1.24em;height:1.24em;margin:0 .16em 0 0;color:var(--text);vertical-align:-.24em;flex:0 0 auto}.brand-m rect{fill:var(--text)}.public-brand>span,.preview-brand>span{display:inline-flex;align-items:center}
 
 /* Les aperçus publics suivent les palettes actuelles de l'application. */
 .dashboard-preview{background:var(--panel-soft);-webkit-backdrop-filter:none;backdrop-filter:none}
@@ -101,3 +101,17 @@ html:is([data-theme="glass"],[data-theme="brutal"])[data-palette="gold"] { --acc
 .public-palette-switcher [data-public-palette="gold"] i { background:#ad862c; }
 html[data-theme="brutal"] .public-palette-switcher :is(button,i) { border-radius:0; }
 @media(max-width:680px) { .public-palette-switcher { width:100%; justify-content:space-between; } .public-palette-switcher button { flex:1; justify-content:center; } }
+
+/* Même séparation entre forme et couleur que dans l'application. */
+html[data-theme="glass"] { --neutral-bg:#121417; --neutral-panel:#1b1e22; --neutral-line:#34393f; --neutral-line-strong:#646d75; --neutral-text:#f4f5f3; --neutral-muted:#bec4c5; }
+html[data-theme="editorial"] { --neutral-bg:#f4f1eb; --neutral-panel:#fffdf9; --neutral-line:#dfd9cd; --neutral-line-strong:#aaa092; --neutral-text:#292723; --neutral-muted:#68635b; }
+html[data-theme="brutal"] { --neutral-bg:#111210; --neutral-panel:#1b1c19; --neutral-line:#565a51; --neutral-line-strong:#d2d2c8; --neutral-text:#f9f9f2; --neutral-muted:#d2d4ca; }
+html[data-theme][data-palette] {
+  --bg:var(--neutral-bg); --body-bg:var(--neutral-bg);
+  --panel:color-mix(in srgb,var(--accent) 2%,var(--neutral-panel)); --panel-soft:var(--panel);
+  --line:var(--neutral-line); --line-strong:var(--neutral-line-strong);
+  --text:var(--neutral-text); --muted:var(--neutral-muted); --quiet:var(--neutral-muted);
+}
+.swatch-glass { background:linear-gradient(135deg,#1b1e22 50%,#d9ddda 50%); }
+.swatch-editorial { background:linear-gradient(135deg,#fffdf9 50%,#292723 50%); }
+.swatch-brutal { border:2px solid #d2d2c8; background:#111210; }

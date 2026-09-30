@@ -5,9 +5,8 @@ body { --ui-radius: min(12px,var(--control-radius,12px)); }
 .app-header .brand-copy { min-width:0; }
 .app-header .brand-copy h1 { font-size:clamp(1.55rem,2.3vw,2rem);line-height:1.2;letter-spacing:0;margin:0;white-space:nowrap; }
 .brand-m { width:1.18em; height:1.18em; margin:0 .06em 0 -0.06em; color:var(--accent); vertical-align:-0.2em; flex:0 0 auto; }
-.brand-m path { stroke-width:2.6; }
-.brand-m circle { r:1.9; }
-.brand-word { font-size:.78em; font-weight:800; letter-spacing:.075em; }
+.brand-m rect { fill:var(--text); }
+.brand-word { font-size:.86em; font-weight:750; letter-spacing:-.035em; }
 
 .brand-copy h1 { display:inline-flex; align-items:center; }
 .app-header .top-actions { justify-self:end;margin:0; }
@@ -1369,4 +1368,29 @@ body[data-theme="editorial"] #dashboardPage .empty-dashboard { border-radius:3px
   #dashboardPage .empty-dashboard-steps { grid-template-columns:1fr; }
   #dashboardPage .empty-dashboard-actions { justify-content:stretch; }
   #dashboardPage .empty-dashboard-actions .empty-state-action { flex:1 1 100%; }
+}
+
+/* L'état vide contient plus qu'un graphique : il ne doit jamais être rogné
+   par la hauteur fixe du canevas. */
+#dashboardPage .chart-wrap:has(#emptyState.is-visible) { height:auto; min-height:0; }
+#dashboardPage .chart-panel:has(#emptyState.is-visible) { min-height:0; }
+#dashboardPage .chart-wrap:has(#emptyState.is-visible) canvas { display:none; }
+#dashboardPage .chart-scroll:not(.is-scrollable) { overflow:visible; }
+#dashboardPage .empty-dashboard { width:100%; box-sizing:border-box; }
+
+/* Le compte a sa propre largeur : pas de grand panneau vide autour du formulaire. */
+.settings-shell > .account-section[data-settings-panel] {
+  width:min(100%,820px); max-width:820px !important; justify-self:center;
+  padding:clamp(20px,3vw,32px);
+}
+.account-section .panel-title,.account-section .account-panel,
+.account-section.is-connected .account-panel { width:100%; max-width:none; }
+.account-section .account-panel { gap:18px; }
+.account-section #accountIntro { padding:0 0 15px; border-bottom:1px solid var(--line); }
+.account-section #accountIntro p { max-width:54ch; }
+.account-section .account-form { width:min(100%,530px); margin-inline:auto; }
+.account-section.is-connected #accountIntro { display:none !important; }
+@media (max-width:720px) {
+  .settings-shell > .account-section[data-settings-panel] { width:100%; max-width:none !important; }
+  #dashboardPage .chart-wrap:has(#emptyState.is-visible) { min-height:0; }
 }
