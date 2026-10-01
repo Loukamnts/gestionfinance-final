@@ -26,8 +26,10 @@ body { --ui-radius: min(12px,var(--control-radius,12px)); }
 .home-toolbar-actions { display:flex;align-items:center;gap:20px;flex-shrink:0; }
 .home-toolbar .sheet-status-bar { display:flex;align-items:center;gap:7px;margin:0;padding:0;min-height:0;border:0;border-radius:0;background:transparent;box-shadow:none; }
 .home-toolbar .sheet-status-label { font:500 .8125rem var(--font-body); }
-.home-filter-grid { display:grid;grid-template-columns:minmax(115px,.65fr) minmax(155px,1fr) minmax(185px,1.35fr);gap:14px;width:100%; }
+.home-filter-grid { display:grid;grid-template-columns:minmax(180px,1.35fr) minmax(120px,.8fr) minmax(140px,.9fr);gap:14px;width:100%; }
+.home-filter-grid:not(.is-pie) { grid-template-columns:minmax(220px,360px); }
 .home-filter { display:grid;gap:7px;min-width:0;margin:0; }
+.home-filter[hidden] { display:none !important; }
 .home-filter > span { font:500 .875rem var(--font-body);color:var(--muted);text-transform:none!important;letter-spacing:0; }
 .home-filter .custom-select-wrapper { width:100%;min-width:0; }
 .home-filter .custom-select-wrapper.is-open { z-index:110; }
@@ -116,7 +118,8 @@ body[data-theme="brutal"] .home-toolbar,body[data-theme="brutal"] .sd-chart-card
  .home-toolbar .gf-refresh { width:40px;min-height:40px;padding:9px; }
  .home-toolbar .gf-refresh > span { display:none; }
  .home-filter-grid { grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px; }
- .home-filter:last-child { grid-column:1/-1; }
+ .home-filter:first-child { grid-column:1/-1; }
+ .home-filter-grid:not(.is-pie) { grid-template-columns:minmax(0,1fr); }
  .home-filter > span { font-size:.8125rem; }
  .home-filter .custom-select-trigger { min-height:44px;font-size:1rem;padding:10px; }
  .sf-page-head { flex-wrap:wrap; }
