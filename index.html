@@ -1891,15 +1891,14 @@
       <nav class="desktop-nav" aria-label="Navigation principale">
         <button class="desktop-nav-link" id="desktopHomeButton" type="button" data-page="dashboard">Accueil</button>
         <button class="desktop-nav-link" id="desktopSheetButton" type="button" data-page="sheet">Tableur</button>
-        <button class="desktop-nav-link" id="desktopSettingsButton" type="button" data-page="settings">Paramètres</button>
       </nav>
       <div class="top-actions">
         <button class="studio-mobile-menu-button" id="studioMobileMenuButton" type="button" aria-label="Ouvrir la navigation" aria-controls="studioSidebar" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <div class="profile-menu" id="profileMenu">
           <button class="profile-trigger" id="profileMenuButton" type="button" aria-expanded="false" aria-controls="profilePopover"><span class="profile-avatar" id="profileAvatar">?</span><span class="profile-trigger-label" id="profileLabel">Profil</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <div class="profile-popover" id="profilePopover" hidden>
-            <div class="profile-popover-account"><span class="profile-popover-kicker">Compte</span><strong id="profileEmail">Non connecté</strong></div>
-            <div class="status-pill" id="connectionStatus"><span class="status-dot"></span><span id="connectionText">Non connecté</span></div>
+          <div class="profile-popover-account"><span class="profile-popover-kicker">Compte</span><strong id="profileEmail">Non connecté</strong></div>
+            <div class="status-pill" id="connectionStatus"><span class="status-dot is-empty"></span><span id="connectionText">Aucune donnée</span></div>
             <button class="profile-menu-link profile-menu-link-primary" id="profilePersonalButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 14.5c1.1-1.35 2.45-2.02 4-2.02s2.9.67 4 2.02M12 10a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Mon espace</span><small>Objectifs, amis, nouveautés</small></button>
             <button class="profile-menu-link" id="profileNotesButton" type="button" data-open-notes><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Notes</span></button>
             <button class="profile-menu-link" id="profileIdentityButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.7-3.4 3.1-5 7-5s6.3 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Profil</span></button>
@@ -1925,10 +1924,10 @@
               </span>
             </button>
           </div><button type="button" id="syncSheetButton" class="gf-button gf-refresh" title="Mettre à jour le tableau de bord depuis le tableur" aria-label="Synchroniser les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Actualiser</span></button></div></div>
-          <div class="home-filter-grid">
-            <label class="home-filter"><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
-            <label class="home-filter"><span>Mois</span><select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
-            <label class="home-filter"><span>Vue du graphique</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Répartition</option><option value="grouped">Comparatif annuel</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label>
+          <div class="home-filter-grid is-pie">
+            <label class="home-filter home-filter-view"><span>Vue du graphique</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Camembert</option><option value="grouped">Comparatif annuel</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label>
+            <label class="home-filter home-filter-year" id="yearFilter"><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
+            <label class="home-filter home-filter-month" id="monthFilter"><span>Mois</span><select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
           </div>
         </section>
         <section class="latest-update-banner" id="latestUpdateBanner" hidden aria-live="polite">
@@ -2142,9 +2141,8 @@
       <div class="settings-shell">
         <div class="settings-header panel"><div><span class="eyebrow" id="settingsKicker">Paramètres</span><h2 id="settingsTitle">Réglages</h2><p id="settingsSubtitle">Choisis ce que tu souhaites régler.</p></div></div>
         <nav class="settings-hub" id="settingsHub" aria-label="Rubriques des paramètres">
-          <span class="settings-hub-label">Compte</span>
-          <button class="settings-hub-item" type="button" data-settings-view="profile"><span><strong>Profil</strong><small>Pseudo et abonnement</small></span></button>
-          <button class="settings-hub-item" type="button" data-settings-view="account"><span><strong>Profil et connexion</strong><small>Adresse, accès et déconnexion</small></span></button>
+          <span class="settings-hub-label">Profil</span>
+          <button class="settings-hub-item" type="button" data-settings-view="account"><span><strong>Profil</strong><small>Pseudo, connexion et abonnement</small></span></button>
           <span class="settings-hub-label">Préférences</span>
           <button class="settings-hub-item" type="button" data-settings-view="appearance"><span><strong>Apparence</strong><small>Thème et mode d'affichage</small></span></button>
           <button class="settings-hub-item" type="button" data-settings-view="language"><span><strong>Langue</strong><small>Français ou English</small></span></button>
@@ -2156,9 +2154,17 @@
         </nav>
 
       <!-- Section Compte : connexion email + mot de passe (Supabase) -->
-      <section class="settings-section panel account-section" data-settings-panel="account" aria-label="Compte" hidden>
+      <section class="settings-section panel account-section" data-settings-panel="account" aria-label="Profil" hidden>
         <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
-        <div class="panel-title"><h2>Compte</h2></div>
+        <div class="panel-title"><h2>Profil</h2></div>
+        <section class="identity-section" id="identitySection" aria-label="Profil" hidden>
+          <div class="settings-section-head"><div><h3>Ton profil</h3><p>Un pseudo unique pour être retrouvé par tes amis.</p></div></div>
+          <div id="identityDetails">
+            <div class="identity-summary"><div class="identity-avatar" id="identityAvatar" aria-hidden="true">?</div><div><span class="identity-caption">Nom d’utilisateur</span><strong id="identityCurrentUsername" translate="no">À choisir</strong><span id="identityChangeDate">Tu peux choisir ton premier pseudo maintenant.</span></div></div>
+            <form id="identityForm" class="identity-form"><label for="identityUsername">Changer de pseudo</label><div class="identity-form-row"><span aria-hidden="true">@</span><input id="identityUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required><button type="submit" class="gf-button">Enregistrer</button></div><p class="identity-help">3 à 24 caractères : lettres sans accent, chiffres, points, tirets ou tirets bas. Un changement tous les 30 jours.</p><p id="identityFeedback" class="identity-feedback" role="status" aria-live="polite"></p></form>
+            <div class="identity-facts"><div><span>Abonnement</span><strong id="identityPlan">Gratuit</strong></div><div><span>Membre depuis</span><strong id="identityCreated">—</strong></div><div><span>Abonnement depuis</span><strong id="identitySubscriptionDate">Aucun abonnement payant</strong></div></div>
+          </div>
+        </section>
         <div class="account-panel">
           <div class="settings-intro" id="accountIntro">
             <strong>Ton espace synchronisé</strong>
@@ -2206,15 +2212,6 @@
           <p class="account-status" id="accountStatus">Non configuré</p>
         </div>
       </section>
-      <section class="settings-section panel identity-section" data-settings-panel="profile" hidden>
-        <div class="settings-section-head"><div><h3>Ton profil</h3><p>Un pseudo unique pour être retrouvé par tes amis.</p></div></div>
-        <div id="identitySignedOut" class="identity-intro" hidden>Connecte-toi pour choisir un pseudo et voir ton profil.</div>
-        <div id="identityDetails" hidden>
-          <div class="identity-summary"><div class="identity-avatar" id="identityAvatar" aria-hidden="true">?</div><div><span class="identity-caption">Nom d’utilisateur</span><strong id="identityCurrentUsername" translate="no">À choisir</strong><span id="identityChangeDate">Tu peux choisir ton premier pseudo maintenant.</span></div></div>
-          <form id="identityForm" class="identity-form"><label for="identityUsername">Changer de pseudo</label><div class="identity-form-row"><span aria-hidden="true">@</span><input id="identityUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required><button type="submit" class="gf-button">Enregistrer</button></div><p class="identity-help">3 à 24 caractères : lettres sans accent, chiffres, points, tirets ou tirets bas. Un changement tous les 30 jours.</p><p id="identityFeedback" class="identity-feedback" role="status" aria-live="polite"></p></form>
-          <div class="identity-facts"><div><span>Abonnement</span><strong id="identityPlan">Gratuit</strong></div><div><span>Membre depuis</span><strong id="identityCreated">—</strong></div><div><span>Abonnement depuis</span><strong id="identitySubscriptionDate">Aucun abonnement payant</strong></div></div>
-        </div>
-      </section>
         <section class="settings-section panel language-section" data-settings-panel="language" hidden>
           <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
           <div class="language-section-copy"><span class="language-kicker">Interface</span><h3>Langue</h3><p>Choisis la langue de l’interface. Tes données et les intitulés que tu as créés ne sont pas traduits.</p></div>
@@ -2260,7 +2257,7 @@
           <div class="legal-section"><strong>Ce qui est enregistré</strong><p>Ton adresse email et ton mot de passe (chiffré), le contenu de ton tableur (libellés, montants, dates), tes objectifs, tes réglages d'affichage et les partages que tu accordes. Aucune coordonnée bancaire n'est demandée ni stockée.</p></div>
           <div class="legal-section"><strong>Qui peut voir tes données</strong><p>Toi seul, et les personnes à qui tu donnes explicitement accès depuis la page Partage — jusqu'à ce que tu retires cet accès. Les règles de sécurité de la base de données empêchent tout autre compte de lire tes lignes.</p></div>
           <div class="legal-section"><strong>Durée de conservation</strong><p>Tes données sont conservées tant que ton compte existe. Après suppression du compte, elles sont effacées de la base ; les sauvegardes techniques expirent sous 30 jours.</p></div>
-          <div class="legal-section"><strong>Récupérer ou supprimer tes données</strong><p>Le bouton « Exporter » du tableur télécharge tout au format Excel. Pour effacer : « Données et synchronisation » réinitialise ton tableur, et « Profil et connexion » supprime définitivement ton compte.</p></div>
+          <div class="legal-section"><strong>Récupérer ou supprimer tes données</strong><p>Le bouton « Exporter » du tableur télécharge tout au format Excel. Pour effacer : « Données et synchronisation » permet de réinitialiser ton tableur ou de supprimer définitivement ton compte.</p></div>
           <div class="legal-section"><strong>Une question sur tes données ?</strong><p>Écris-nous depuis l'adresse email de ton compte. Tu peux aussi consulter la <a href="/confidentialite" target="_blank" rel="noopener">politique de confidentialité complète</a> et les <a href="/conditions" target="_blank" rel="noopener">conditions d'utilisation</a>.</p></div>
         </section>
         <section class="settings-section panel settings-reading-page" data-settings-panel="legal" hidden>
@@ -2334,7 +2331,29 @@
     <section class="chart-detail-card"><div class="chart-detail-head"><div><h2 id="chartDetailTitle">Détail du mois</h2><p id="chartDetailSubtitle"></p></div><button class="chart-detail-close" id="chartDetailClose" type="button" aria-label="Fermer">×</button></div><div class="chart-detail-grid" id="chartDetailGrid"></div></section>
   </div>
 
-  <!-- Barre de navigation inférieure (style app mobile : Accueil / Tableur / Paramètres) -->
+  <dialog class="welcome-dialog" id="accountWelcomeDialog" aria-labelledby="welcomeTitle">
+    <form method="dialog" class="welcome-dialog-close-wrap"><button class="welcome-dialog-close" value="close" aria-label="Fermer">×</button></form>
+    <section id="welcomeUsernameStep">
+      <span class="welcome-kicker">Bienvenue sur Meuniance</span>
+      <h2 id="welcomeTitle">Choisis ton pseudo</h2>
+      <p>Un pseudo unique permettra à tes amis de te retrouver. Tu pourras le modifier ensuite dans les paramètres, une fois tous les 30 jours.</p>
+      <form id="welcomeUsernameForm" class="welcome-username-form">
+        <label for="welcomeUsername">Ton nom d’utilisateur</label>
+        <div class="welcome-username-field"><span aria-hidden="true">@</span><input id="welcomeUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required></div>
+        <p class="welcome-error" id="welcomeUsernameError" role="status" aria-live="polite"></p>
+        <div class="welcome-actions"><button class="gf-button welcome-skip" id="welcomeSkipUsername" type="button">Plus tard</button><button class="gf-button welcome-continue" type="submit">Enregistrer mon pseudo</button></div>
+      </form>
+    </section>
+    <section id="welcomePlanStep" hidden>
+      <span class="welcome-kicker">Ton espace, à ton rythme</span>
+      <h2>Choisis ton abonnement</h2>
+      <p>Découvre les offres disponibles. Tu peux aussi continuer avec l’offre gratuite.</p>
+      <div id="welcomePlanOffer"></div>
+      <div class="welcome-actions"><button class="gf-button welcome-skip" id="welcomeSkipPlan" type="button">Non merci</button></div>
+    </section>
+  </dialog>
+
+  <!-- Barre de navigation inférieure (style app mobile : Accueil / Tableur / Mon espace) -->
   <nav class="bottom-nav" aria-label="Navigation principale">
     <button class="bottom-nav-btn" id="homeButton" type="button" data-page="dashboard" aria-label="Accueil" title="Accueil">
       <svg viewBox="0 0 24 24" fill="none"><path d="M3 11l9-8 9 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 21v-6h4v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -2344,9 +2363,9 @@
       <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18" stroke="currentColor" stroke-width="2"/></svg>
       <span class="bottom-nav-label">Tableur</span>
     </button>
-    <button class="bottom-nav-btn" id="settingsButton" type="button" data-page="settings" aria-label="Paramètres" title="Paramètres">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6l-.04.08a2 2 0 0 1-3.92 0L10 20a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1l-.08-.04a2 2 0 0 1 0-3.92L4 10a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6l.04-.08a2 2 0 0 1 3.92 0L14 4a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.36.7.6 1l.08.04a2 2 0 0 1 0 3.92L20 14c-.24.3-.46.64-.6 1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-      <span class="bottom-nav-label">Paramètres</span>
+    <button class="bottom-nav-btn" id="personalNavButton" type="button" data-page="sharing" aria-label="Mon espace" title="Mon espace">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.7-3.4 3.1-5 7-5s6.3 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span class="bottom-nav-label">Mon espace</span>
     </button>
   </nav>
 
@@ -2446,7 +2465,7 @@
 
     const elements = {
       dashboardPage: document.getElementById("dashboardPage"),
-      settingsPage: document.getElementById("settingsPage"), sharingPage: document.getElementById("sharingPage"), sharingAccessPage: document.getElementById("sharingAccessPage"), updatesPage: document.getElementById("updatesPage"), personalPage: document.getElementById("personalPage"), objectivesPage: document.getElementById("objectivesPage"), sheetPage: document.getElementById("sheetPage"), settingsButton: document.getElementById("settingsButton"), sheetButton: document.getElementById("sheetButton"), homeButton: document.getElementById("homeButton"),
+      settingsPage: document.getElementById("settingsPage"), sharingPage: document.getElementById("sharingPage"), sharingAccessPage: document.getElementById("sharingAccessPage"), updatesPage: document.getElementById("updatesPage"), personalPage: document.getElementById("personalPage"), objectivesPage: document.getElementById("objectivesPage"), sheetPage: document.getElementById("sheetPage"), sheetButton: document.getElementById("sheetButton"), homeButton: document.getElementById("homeButton"),
       backDashboardButton: document.getElementById("backDashboardButton"), themeButtons: document.querySelectorAll("[data-theme-option]"), paletteButtons: document.querySelectorAll("[data-palette-option]"),
       modeToggle: document.getElementById("modeToggle"), loader: document.getElementById("loader"),
       messageBox: document.getElementById("messageBox"), messageText: document.getElementById("messageText"),
@@ -2705,6 +2724,7 @@
       return list.includes(current)?current:list.sort(sortYearValues)[0]||"";
     }
     function getVisibleMonths(){
+      if(state.currentView!=="pie") return (state.months||[]).slice();
       const years=getAvailableYears();
       if(!years.length) return [];
       if(!state.selectedYear||!years.includes(state.selectedYear)) state.selectedYear=chooseDefaultYear(years,state.months,state.selectedYear,state.selectedMonthId);
@@ -2756,7 +2776,7 @@
       if(!elements.emptyState)return;
       const eyebrow=document.createElement("span"),title=document.createElement("h3"),copy=document.createElement("p"),steps=document.createElement("ol"),actions=document.createElement("div"),start=document.createElement("button"),importFile=document.createElement("button");
       eyebrow.className="empty-dashboard-kicker";eyebrow.textContent="POUR COMMENCER";
-      title.textContent=state.selectedYear?`Aucun mois renseigné pour ${getYearLabel(state.selectedYear)}.`:"Ton tableau de bord est prêt";
+      title.textContent=state.currentView==="pie"&&state.selectedYear?`Aucun mois renseigné pour ${getYearLabel(state.selectedYear)}.`:"Ton tableau de bord est prêt";
       copy.textContent="Ajoute quelques montants dans le tableur ou importe ton fichier : les graphiques et les indicateurs se mettront à jour automatiquement.";
       [["1","Configure ton solde de départ"],["2","Ajoute ou importe tes opérations"],["3","Découvre tes graphiques"]].forEach(function(item){const step=document.createElement("li"),number=document.createElement("span"),label=document.createElement("span");number.textContent=item[0];label.textContent=item[1];step.append(number,label);steps.append(step);});
       start.type="button";start.className="empty-state-action empty-state-primary";start.textContent="Configurer mon tableur";start.addEventListener("click",function(){setPage("sheet");});
@@ -2764,11 +2784,11 @@
       actions.className="empty-dashboard-actions";actions.append(start,importFile);
       steps.className="empty-dashboard-steps";elements.emptyState.className="empty-state is-visible empty-dashboard";elements.emptyState.replaceChildren(eyebrow,title,copy,steps,actions);
     }
-    function updateInterface(){ populateMonthSelect(); const hasData=getVisibleMonths().length>0; elements.emptyState.classList.toggle("is-visible",!hasData); if(!hasData) renderEmptyDashboardState(); if(elements.yearSelect) syncCustomDropdown(elements.yearSelect); syncCustomDropdown(elements.monthSelect); updateSummaryCards(); updateMonthDetails(getSelectedMonth()); renderCategorySettings(); renderCustomRulesList(); renderChart(); }
+    function updateInterface(){ const pieView=state.currentView==="pie",filterGrid=document.querySelector(".home-filter-grid"); if(filterGrid)filterGrid.classList.toggle("is-pie",pieView); const yearFilter=document.getElementById("yearFilter"),monthFilter=document.getElementById("monthFilter"); if(yearFilter)yearFilter.hidden=!pieView; if(monthFilter)monthFilter.hidden=!pieView; populateMonthSelect(); const hasData=getVisibleMonths().length>0; elements.emptyState.classList.toggle("is-visible",!hasData); if(!hasData) renderEmptyDashboardState(); if(elements.yearSelect) syncCustomDropdown(elements.yearSelect); syncCustomDropdown(elements.monthSelect); updateSummaryCards(); updateMonthDetails(getSelectedMonth()); renderCategorySettings(); renderCustomRulesList(); renderChart(); }
 
     function updateMonthDetails(selected){
       elements.savingsBreakdown.innerHTML="";
-      const visibleMonths=getVisibleMonths(); const items=!selected||state.isGlobal?visibleMonths.flatMap(m=>m.ruleBreakdown||[]):(selected.ruleBreakdown||[]);
+      const visibleMonths=getVisibleMonths(); const items=state.currentView!=="pie"||!selected||state.isGlobal?visibleMonths.flatMap(m=>m.ruleBreakdown||[]):(selected.ruleBreakdown||[]);
       const visible=items.filter(i=>i.value!==0);
       const rows=visible.length?visible:[{name:"-",value:0,color:COLORS.tick}];
       rows.forEach(i=>{ elements.savingsBreakdown.appendChild(createDetailRow(i.name,formatEuro(i.value),i.color||getRuleColor(i.name))); });
@@ -2830,9 +2850,9 @@
         chart:{ type:"doughnut", data:{ labels:["Salaire",...items.map(i=>i.name)], datasets:[{ data:[Math.abs(month?.salary||0),...items.map(i=>Math.abs(i.value))], backgroundColor:[COLORS.salary,...items.map(i=>i.color||getRuleColor(i.name))], borderColor: "#000000", borderWidth: 2, hoverOffset:12 }] }, options:baseChartOptions({ cutout:"60%", layout:{padding:{top:10,bottom:10}}, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, animation:{animateRotate:true,animateScale:true,duration:1000,easing:"easeOutQuart"} }) }
       };
     }
-    function getGroupedBarConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Comparatif mois par mois", subtitle:"Salaire et règles appliquées sur l’année sélectionnée.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:[createBarDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createBarDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
-    function getStackedRulesConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Répartition par règles", subtitle:"Vue empilée de l’année sélectionnée.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:rules.map(rule=>({ label:rule, data:months.map(m=>getMonthRuleValue(m,rule)), backgroundColor:getRuleColor(rule), borderColor:getRuleColor(rule), borderWidth:1, borderRadius:6, maxBarThickness:44 })) }, options:axisChartOptions({stacked:true,onMonthClick:context?.onMonthClick}) } }; }
-    function getLineConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Évolution annuelle", subtitle:"Salaire et règles appliquées sur l’année sélectionnée.", chart:{ type:"line", data:{ labels:months.map(m=>m.label), datasets:[createLineDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createLineDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
+    function getGroupedBarConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Comparatif mois par mois", subtitle:"Salaire et règles appliquées sur toutes les périodes disponibles.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:[createBarDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createBarDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
+    function getStackedRulesConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Répartition par règles", subtitle:"Vue empilée sur toutes les périodes disponibles.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:rules.map(rule=>({ label:rule, data:months.map(m=>getMonthRuleValue(m,rule)), backgroundColor:getRuleColor(rule), borderColor:getRuleColor(rule), borderWidth:1, borderRadius:6, maxBarThickness:44 })) }, options:axisChartOptions({stacked:true,onMonthClick:context?.onMonthClick}) } }; }
+    function getLineConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Évolution", subtitle:"Salaire et règles appliquées sur toutes les périodes disponibles.", chart:{ type:"line", data:{ labels:months.map(m=>m.label), datasets:[createLineDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createLineDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
     function createBarDataset(l,c,d){ return{label:l,data:d,backgroundColor:c,borderColor:c,borderWidth:1,borderRadius:6,maxBarThickness:36}; }
     function createLineDataset(l,c,d){ return{label:l,data:d,borderColor:c,backgroundColor:c,pointBackgroundColor:c,pointBorderColor:"#0d1422",pointBorderWidth:2,pointRadius:4,pointHoverRadius:6,borderWidth:3,tension:0.35}; }
     function axisChartOptions({stacked,onMonthClick}){ return baseChartOptions({ maintainAspectRatio:false, interaction:{mode:"index",intersect:false}, onClick:function(event,active,chart){ const point=(active&&active[0])||chart.getElementsAtEventForMode(event,"nearest",{intersect:true},true)[0]; if(onMonthClick){ if(point) onMonthClick(point.index); return; } const month=getVisibleMonths()[point?.index]; if(month) openChartMonthDetail(month); }, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, scales:{ x:{ stacked, grid:{color:"rgba(255,255,255,0.04)"}, ticks:{color:COLORS.tick,maxRotation:0,autoSkip:true} }, y:{ stacked, beginAtZero:true, grid:{color:COLORS.grid}, ticks:{color:COLORS.tick,callback:v=>compactEuroFormatter.format(v)} } }, animation:{duration:1000,easing:"easeOutQuart"} }); }
@@ -2982,7 +3002,7 @@
       dialog.addEventListener("close",function(){ trigger.setAttribute("aria-expanded","false"); });
     }
     initSheetStatusHelp();
-    const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],profile:["Paramètres","Profil","Ton pseudo, ton compte et ton abonnement."],account:["Paramètres","Compte","Connexion, protection de l'accès et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."]};
+    const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],account:["Paramètres","Profil","Pseudo, connexion et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."]};
     function showSettingsView(view){ const next=view!=="home"&&Object.prototype.hasOwnProperty.call(SETTINGS_VIEW_COPY,view)?view:"account",copy=SETTINGS_VIEW_COPY[next],translate=window.GFI18n?window.GFI18n.t:function(value){return value;}; document.querySelectorAll("[data-settings-panel]").forEach(function(panel){ panel.hidden=panel.dataset.settingsPanel!==next; }); const kicker=document.getElementById("settingsKicker"),title=document.getElementById("settingsTitle"),subtitle=document.getElementById("settingsSubtitle"); if(kicker) kicker.textContent=translate(copy[0]); if(title) title.textContent=translate(copy[1]); if(subtitle) subtitle.textContent=translate(copy[2]); document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.setAttribute("aria-current",String(button.dataset.settingsView===next)); }); }
     function renderPersonalSpace(){ const profileEmail=document.getElementById("profileEmail"),profileAvatar=document.getElementById("profileAvatar"),email=document.getElementById("personalEmail"),avatar=document.getElementById("personalAvatar"),meta=document.getElementById("personalObjectivesMeta"); if(email){ const value=String(profileEmail?.textContent||"").trim(); email.textContent=value&&value!=="Non connecté"?value:"Un espace privé pour organiser tes projets et tes accès."; } if(avatar) avatar.textContent=String(profileAvatar?.textContent||"?").trim().slice(0,2)||"?"; if(meta){ let goals=[]; try{ const profile=JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile")||"{}"); goals=Array.isArray(profile?.objectives)?profile.objectives.filter(Boolean):[]; }catch(e){} meta.textContent=goals.length?goals.length+" objectif"+(goals.length>1?"s":"")+" en cours.":"Crée et suis tes projets financiers."; } }
     window.setPage = setPage;
@@ -3246,7 +3266,7 @@ function resetDataState(){
       if(profileSettings){ profileSettings.addEventListener("click",function(){ setPage("settings"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); }); }
       if(profilePersonal){ profilePersonal.addEventListener("click",function(){ setPage("sharing"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); }); }
       if(profileNotes){ profileNotes.addEventListener("click",function(){ if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); window.GFObjectives?.setNotesOpen?.(true); setStudioMobileMenu(false); }); }
-      document.getElementById("profileIdentityButton")?.addEventListener("click",function(){ setPage("settings"); showSettingsView("profile"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); });
+      document.getElementById("profileIdentityButton")?.addEventListener("click",function(){ setPage("settings"); showSettingsView("account"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); requestAnimationFrame(function(){ document.getElementById("identitySection")?.scrollIntoView({block:"start",behavior:"smooth"}); }); });
       document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView(button.dataset.settingsView); }); });
       document.querySelectorAll("[data-settings-back]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView("account"); }); });
       document.addEventListener("click",function(event){ const viewButton=event.target.closest("[data-settings-view]"); if(viewButton){ showSettingsView(viewButton.dataset.settingsView); return; } const backButton=event.target.closest("[data-settings-back]"); if(backButton) showSettingsView("account"); });
@@ -5190,7 +5210,6 @@ function resetDataState(){
     // === Indicateur de statut du tableur ===
     function updateSheetStatus(){
       var dot = document.getElementById("sheetStatusDot");
-      if(!dot) return;
       var hasData = false;
       try{
         if(typeof window.FinanceSheet !== "undefined" && window.FinanceSheet.getSnapshot){
@@ -5198,14 +5217,15 @@ function resetDataState(){
           hasData = snap && snap.sheets && snap.sheets.some(function(sh){ return sh.cells && Object.keys(sh.cells).length > 0; });
         }
       }catch(e){}
-      dot.className = "sheet-status-dot";
-      if(!hasData){
-        dot.classList.add("not-loaded");
-      } else if(navigator.onLine){
-        dot.classList.add("online");
-      } else {
-        dot.classList.add("connected-offline");
-      }
+      var user=window.__account&&window.__account.user;
+      var sync=window.__gfSyncState||{};
+      var state=!hasData?"empty":!user?"local":!navigator.onLine?"offline":sync.pushing?"syncing":sync.dirty?"pending":sync.lastSync?"synced":"pending";
+      var english=window.GFI18n?.getLanguage?.()==="en";
+      var copy={empty:["is-empty",english?"No data":"Aucune donnée"],local:["is-local",english?"On this device":"Sur cet appareil"],offline:["is-offline",english?"Offline":"Hors ligne"],syncing:["is-syncing",english?"Syncing…":"Synchronisation…"],pending:["is-pending",english?"Waiting to sync":"À synchroniser"],synced:["is-synced",english?"Spreadsheet synced":"Tableur synchronisé"]}[state];
+      if(dot){dot.className="sheet-status-dot "+({empty:"not-loaded",local:"is-local",offline:"connected-offline",syncing:"is-syncing",pending:"is-pending",synced:"online"}[state]);}
+      var pill=document.getElementById("connectionStatus"),label=document.getElementById("connectionText");
+      if(pill){pill.dataset.sheetState=state;pill.classList.remove("is-online");var statusDot=pill.querySelector(".status-dot");if(statusDot)statusDot.className="status-dot "+copy[0];}
+      if(label)label.textContent=copy[1];
     }
     window.updateSheetStatus = updateSheetStatus;
     // Update on load and when online/offline changes
@@ -5736,6 +5756,8 @@ function resetDataState(){
   }
 
   function updateSyncStatus(){
+    window.__gfSyncState=syncState;
+    if(typeof window.updateSheetStatus==="function") window.updateSheetStatus();
     var el = document.getElementById("syncStatusText");
     if(!el) return;
     el.dataset.syncState=syncState.pushing?"syncing":syncState.dirty?"pending":"ready";
@@ -5798,6 +5820,7 @@ function resetDataState(){
   function initSync(){
     window.addEventListener("authStateChanged", function(event){
       var detail = event && event.detail ? event.detail : {};
+      updateSyncStatus();
       if(detail.user) scheduleAccountSync(detail.user, detail.event === "SIGNED_IN" ? 350 : 650);
       else if(detail.event === "SIGNED_OUT") clearAccountSync();
     });
