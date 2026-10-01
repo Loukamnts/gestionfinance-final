@@ -1902,6 +1902,7 @@
             <div class="status-pill" id="connectionStatus"><span class="status-dot"></span><span id="connectionText">Non connecté</span></div>
             <button class="profile-menu-link profile-menu-link-primary" id="profilePersonalButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 14.5c1.1-1.35 2.45-2.02 4-2.02s2.9.67 4 2.02M12 10a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Mon espace</span><small>Objectifs, amis, nouveautés</small></button>
             <button class="profile-menu-link" id="profileNotesButton" type="button" data-open-notes><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Notes</span></button>
+            <button class="profile-menu-link" id="profileIdentityButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.7-3.4 3.1-5 7-5s6.3 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Profil</span></button>
             <button class="profile-menu-link" id="profileSettingsButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6l-.04.08a2 2 0 0 1-3.92 0L10 20a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1l-.08-.04a2 2 0 0 1 0-3.92L4 10a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6l.04-.08a2 2 0 0 1 3.92 0L14 4a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.36.7.6 1l.08.04a2 2 0 0 1 0 3.92L20 14c-.24.3-.46.64-.6 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>Paramètres</span></button>
             <button class="profile-menu-link profile-menu-link-danger" id="accountLogoutBtn" data-account-logout type="button" hidden><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5M14 16l4-4-4-4M18 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Se déconnecter</span></button>
           </div>
@@ -2142,6 +2143,7 @@
         <div class="settings-header panel"><div><span class="eyebrow" id="settingsKicker">Paramètres</span><h2 id="settingsTitle">Réglages</h2><p id="settingsSubtitle">Choisis ce que tu souhaites régler.</p></div></div>
         <nav class="settings-hub" id="settingsHub" aria-label="Rubriques des paramètres">
           <span class="settings-hub-label">Compte</span>
+          <button class="settings-hub-item" type="button" data-settings-view="profile"><span><strong>Profil</strong><small>Pseudo et abonnement</small></span></button>
           <button class="settings-hub-item" type="button" data-settings-view="account"><span><strong>Profil et connexion</strong><small>Adresse, accès et déconnexion</small></span></button>
           <span class="settings-hub-label">Préférences</span>
           <button class="settings-hub-item" type="button" data-settings-view="appearance"><span><strong>Apparence</strong><small>Thème et mode d'affichage</small></span></button>
@@ -2202,6 +2204,15 @@
           </div>
           <div class="account-sync-detail" id="accountSyncDetail" hidden><div class="account-sync-head"><div><span>Sauvegarde du compte</span><p>Les modifications sont enregistrées automatiquement lorsque tu es connecté.</p></div><strong id="syncStatusText" role="status">Prêt à synchroniser</strong></div><ul class="account-sync-list"><li><b>Tableur, objectifs et notes</b> : sauvegardés dans ton compte.</li><li><b>Actualiser sur l’accueil</b> : recalcule uniquement les graphiques.</li><li><b>Partage</b> : rien n’est visible par défaut ; tu autorises chaque accès.</li></ul></div>
           <p class="account-status" id="accountStatus">Non configuré</p>
+        </div>
+      </section>
+      <section class="settings-section panel identity-section" data-settings-panel="profile" hidden>
+        <div class="settings-section-head"><div><h3>Ton profil</h3><p>Un pseudo unique pour être retrouvé par tes amis.</p></div></div>
+        <div id="identitySignedOut" class="identity-intro" hidden>Connecte-toi pour choisir un pseudo et voir ton profil.</div>
+        <div id="identityDetails" hidden>
+          <div class="identity-summary"><div class="identity-avatar" id="identityAvatar" aria-hidden="true">?</div><div><span class="identity-caption">Nom d’utilisateur</span><strong id="identityCurrentUsername" translate="no">À choisir</strong><span id="identityChangeDate">Tu peux choisir ton premier pseudo maintenant.</span></div></div>
+          <form id="identityForm" class="identity-form"><label for="identityUsername">Changer de pseudo</label><div class="identity-form-row"><span aria-hidden="true">@</span><input id="identityUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required><button type="submit" class="gf-button">Enregistrer</button></div><p class="identity-help">3 à 24 caractères : lettres sans accent, chiffres, points, tirets ou tirets bas. Un changement tous les 30 jours.</p><p id="identityFeedback" class="identity-feedback" role="status" aria-live="polite"></p></form>
+          <div class="identity-facts"><div><span>Abonnement</span><strong id="identityPlan">Gratuit</strong></div><div><span>Membre depuis</span><strong id="identityCreated">—</strong></div><div><span>Abonnement depuis</span><strong id="identitySubscriptionDate">Aucun abonnement payant</strong></div></div>
         </div>
       </section>
         <section class="settings-section panel language-section" data-settings-panel="language" hidden>
@@ -2879,7 +2890,14 @@
       if(button){ const label=collapsed?"Développer la navigation":"Réduire la navigation"; button.setAttribute("aria-expanded",String(!collapsed)); button.setAttribute("aria-label",label); button.title=label; }
       if(persist) safeStore.setItem(STORAGE_KEYS.sidebarCollapsed,String(!!collapsed));
     }
-    function placeProfileMenu(){ const menu=document.getElementById("profileMenu"), sidebarHost=document.getElementById("studioProfileHost"), headerHost=document.querySelector(".app-header .top-actions"); const target=state.appearance.interface==="studio"?sidebarHost:headerHost; if(menu && target && menu.parentElement!==target){ document.getElementById("profilePopover").hidden=true; document.getElementById("profileMenuButton").setAttribute("aria-expanded","false"); target.prepend(menu); } }
+    function placeProfileMenu(){
+      const menu=document.getElementById("profileMenu"), popover=document.getElementById("profilePopover"), sidebarHost=document.getElementById("studioProfileHost"), headerHost=document.querySelector(".app-header .top-actions");
+      const status=document.getElementById("sheetStatusBar"), statusHome=document.querySelector("#dashboardPage .home-toolbar-actions"), refresh=document.getElementById("syncSheetButton");
+      const studio=state.appearance.interface==="studio", target=studio?sidebarHost:headerHost;
+      if(menu && target && menu.parentElement!==target){ popover.hidden=true; document.getElementById("profileMenuButton").setAttribute("aria-expanded","false"); target.prepend(menu); }
+      if(studio && status && popover && status.parentElement!==popover) popover.insertBefore(status,document.getElementById("profileNotesButton"));
+      if(!studio && status && statusHome && status.parentElement!==statusHome) statusHome.insertBefore(status,refresh);
+    }
     function setStudioMobileMenu(open){ const sidebar=document.querySelector(".studio-sidebar"),scrim=document.getElementById("studioSidebarScrim"),button=document.getElementById("studioMobileMenuButton"),mobile=window.matchMedia("(max-width:999px)").matches; const active=!!open&&state.appearance.interface==="studio"&&mobile; sidebar?.classList.toggle("is-mobile-open",active); if(sidebar){ if(state.appearance.interface==="studio"&&mobile){sidebar.setAttribute("aria-hidden",String(!active));sidebar.inert=!active;}else{sidebar.removeAttribute("aria-hidden");sidebar.inert=false;} } document.body.classList.toggle("studio-mobile-menu-open",active); document.documentElement.classList.toggle("studio-mobile-menu-open",active); if(scrim)scrim.hidden=!active; if(button){const label=active?"Fermer la navigation":"Ouvrir la navigation";button.setAttribute("aria-expanded",String(active));button.setAttribute("aria-label",window.GFI18n?window.GFI18n.t(label):label);} window.GFUI?.syncModalLock?.(); }
     function applyAppearance({persist,refreshChart}){ document.body.dataset.theme=state.appearance.theme; document.body.dataset.palette=state.appearance.palette; document.body.dataset.mode=state.appearance.mode; document.body.dataset.interface=state.appearance.interface; setStudioMobileMenu(false); elements.themeButtons.forEach(btn=>btn.classList.toggle("is-active",btn.dataset.themeOption===state.appearance.theme)); elements.paletteButtons.forEach(btn=>{const active=btn.dataset.paletteOption===state.appearance.palette;btn.classList.toggle("is-active",active);btn.setAttribute("aria-pressed",String(active));}); Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.classList.toggle("is-active",btn.dataset.modeOption===state.appearance.mode)); const interfaceToggle=document.getElementById("interfaceLayoutToggle"); if(interfaceToggle){ const active=state.appearance.interface==="studio"; interfaceToggle.setAttribute("aria-checked",String(active)); interfaceToggle.querySelector(".interface-layout-state").textContent=active?"Activée":"Désactivée"; } placeProfileMenu(); updateChartColorTokens(); if(persist){ safeStore.setItem(STORAGE_KEYS.theme,state.appearance.theme); safeStore.setItem(STORAGE_KEYS.palette,state.appearance.palette); safeStore.setItem(STORAGE_KEYS.mode,state.appearance.mode); safeStore.setItem(STORAGE_KEYS.interface,state.appearance.interface); } if(refreshChart){ if(state.rawPages.length) rebuildDashboardFromCurrentPages(); else renderChart(); } }
     function updateChartColorTokens(){ const styles=getComputedStyle(document.body); COLORS.salary=readCssVar(styles,"--chart-salary",COLORS.salary); COLORS.expenses=readCssVar(styles,"--chart-expenses",COLORS.expenses); COLORS.savings=readCssVar(styles,"--chart-savings",COLORS.savings); COLORS.grid=readCssVar(styles,"--chart-grid",COLORS.grid); COLORS.tick=readCssVar(styles,"--chart-tick",COLORS.tick); COLORS.text=readCssVar(styles,"--chart-text",COLORS.text); }
@@ -2917,7 +2935,7 @@
       document.querySelectorAll(".personal-workspace-nav").forEach(function(nav){
         const active=nav.querySelector('[data-page="'+page+'"]');
         nav.querySelectorAll("[data-page]").forEach(function(button){ button.setAttribute("aria-current",button===active?"page":"false"); });
-        if(active&&window.matchMedia&&window.matchMedia("(max-width:720px)").matches){
+        if(active&&state.appearance.interface!=="studio"&&window.matchMedia&&window.matchMedia("(max-width:720px)").matches){
           requestAnimationFrame(function(){ active.scrollIntoView({block:"nearest",inline:"center",behavior:"auto"}); });
         }
       });
@@ -2964,7 +2982,7 @@
       dialog.addEventListener("close",function(){ trigger.setAttribute("aria-expanded","false"); });
     }
     initSheetStatusHelp();
-    const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],account:["Paramètres","Compte","Connexion, protection de l'accès et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."]};
+    const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],profile:["Paramètres","Profil","Ton pseudo, ton compte et ton abonnement."],account:["Paramètres","Compte","Connexion, protection de l'accès et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."]};
     function showSettingsView(view){ const next=view!=="home"&&Object.prototype.hasOwnProperty.call(SETTINGS_VIEW_COPY,view)?view:"account",copy=SETTINGS_VIEW_COPY[next],translate=window.GFI18n?window.GFI18n.t:function(value){return value;}; document.querySelectorAll("[data-settings-panel]").forEach(function(panel){ panel.hidden=panel.dataset.settingsPanel!==next; }); const kicker=document.getElementById("settingsKicker"),title=document.getElementById("settingsTitle"),subtitle=document.getElementById("settingsSubtitle"); if(kicker) kicker.textContent=translate(copy[0]); if(title) title.textContent=translate(copy[1]); if(subtitle) subtitle.textContent=translate(copy[2]); document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.setAttribute("aria-current",String(button.dataset.settingsView===next)); }); }
     function renderPersonalSpace(){ const profileEmail=document.getElementById("profileEmail"),profileAvatar=document.getElementById("profileAvatar"),email=document.getElementById("personalEmail"),avatar=document.getElementById("personalAvatar"),meta=document.getElementById("personalObjectivesMeta"); if(email){ const value=String(profileEmail?.textContent||"").trim(); email.textContent=value&&value!=="Non connecté"?value:"Un espace privé pour organiser tes projets et tes accès."; } if(avatar) avatar.textContent=String(profileAvatar?.textContent||"?").trim().slice(0,2)||"?"; if(meta){ let goals=[]; try{ const profile=JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile")||"{}"); goals=Array.isArray(profile?.objectives)?profile.objectives.filter(Boolean):[]; }catch(e){} meta.textContent=goals.length?goals.length+" objectif"+(goals.length>1?"s":"")+" en cours.":"Crée et suis tes projets financiers."; } }
     window.setPage = setPage;
@@ -3228,6 +3246,7 @@ function resetDataState(){
       if(profileSettings){ profileSettings.addEventListener("click",function(){ setPage("settings"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); }); }
       if(profilePersonal){ profilePersonal.addEventListener("click",function(){ setPage("sharing"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); }); }
       if(profileNotes){ profileNotes.addEventListener("click",function(){ if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); window.GFObjectives?.setNotesOpen?.(true); setStudioMobileMenu(false); }); }
+      document.getElementById("profileIdentityButton")?.addEventListener("click",function(){ setPage("settings"); showSettingsView("profile"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); });
       document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView(button.dataset.settingsView); }); });
       document.querySelectorAll("[data-settings-back]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView("account"); }); });
       document.addEventListener("click",function(event){ const viewButton=event.target.closest("[data-settings-view]"); if(viewButton){ showSettingsView(viewButton.dataset.settingsView); return; } const backButton=event.target.closest("[data-settings-back]"); if(backButton) showSettingsView("account"); });
@@ -5376,10 +5395,13 @@ function resetDataState(){
   async function ensureProfile(user){
     if(!sb.client || !user || !user.id) return;
     try{
-      var result = await sb.client.from("profiles").upsert(
-        { id: user.id, email: user.email || null },
-        { onConflict: "id", ignoreDuplicates: true }
-      );
+      var result = await sb.client.rpc("get_my_profile");
+      if(result?.error && (/PGRST202|could not find the function/i.test(String(result.error.code||"")+" "+String(result.error.message||"")))){
+        result = await sb.client.from("profiles").upsert(
+          { id: user.id, email: user.email || null },
+          { onConflict: "id", ignoreDuplicates: true }
+        );
+      }
       if(result && result.error) console.warn("Profile repair skipped:", result.error.message || result.error);
     }catch(e){ console.warn("Profile repair skipped:", e); }
   }
@@ -5577,6 +5599,7 @@ function resetDataState(){
   window.__account = sb;
 })();
 </script>
+<script src="profile.js?v=20261001-r1"></script>
 <script>(function(){
   /* === Sync Supabase (offline-first, multi-device) ===
      Sauvegarde locale immediate + sync cloud des qu'on est en ligne.
