@@ -2,6 +2,21 @@
 (function(){
 "use strict";
 const dictionary=Object.freeze({
+  "2 octobre 2026": "2 October 2026",
+  "Une copie locale séparée par compte permet le mode hors ligne. Elle n'est pas chiffrée par un mot de passe personnel. Supabase chiffre les données stockées dans sa base.": "An account-separated local copy enables offline use. It is not encrypted with a personal password. Supabase encrypts data stored in its database.",
+  "Du nouveau depuis le 20 septembre": "What's new since 20 September",
+  "Une nouvelle disposition, plus de choix pour l’apparence et un profil plus utile. Plusieurs écrans ont aussi été revus pour faciliter la navigation.": "A new layout, more appearance options and a more useful profile. Several screens have also been revised to make navigation easier.",
+  "La nouvelle disposition propose une navigation latérale que tu peux réduire sur ordinateur et ouvrir sur téléphone. Tu peux choisir la couleur d’accent indépendamment du thème. Ton profil accueille un pseudo unique pour recevoir des demandes d’amis. Si tu ouvres un lien qui n’existe plus, une page te ramène à l’application.": "The new layout has side navigation you can collapse on desktop and open on your phone. You can choose an accent color independently of the theme. Your profile has a unique username for friend requests. If you open a link that no longer exists, a page takes you back to the app.",
+  "Les palettes, le logo et la navigation mobile ont été retravaillés. La barre du tableur reste plus lisible pendant le défilement, les fenêtres bloquent le défilement en arrière-plan et les menus passent au premier plan. Le partage et l’accueil vide guident mieux l’utilisateur. Le résumé global évite de répéter les catégories, le profil est plus clair et les données locales sont désormais séparées par compte. Sur la page de présentation, les chiffres d’exemple sont indiqués comme fictifs.": "Color palettes, the logo and mobile navigation have been refined. The spreadsheet toolbar remains easier to read while scrolling, dialogs stop the page from scrolling behind them, and menus stay in front. Sharing and the empty dashboard offer clearer guidance. The global summary no longer repeats categories, the profile is clearer, and local data is now separated by account. Sample figures on the presentation page are clearly labelled as fictitious.",
+  "Pseudo": "Username",
+  "Modifier mon pseudo": "Change my username",
+  "Tes amis voient ce pseudo après acceptation. Une personne qui le connaît peut aussi t’envoyer une demande.": "Friends see this username after acceptance. Someone who knows it can also send you a request.",
+  "3 à 24 caractères, sans espace ni accent. Un changement tous les 30 jours.": "3 to 24 characters, without spaces or accents. One change every 30 days.",
+  "Adresse de connexion": "Sign-in email",
+  "Répartition par catégorie": "Breakdown by category",
+  "Aucune dépense importante renseignée.": "No key expense entered.",
+  "Une copie non chiffrée par mot de passe reste dans ce navigateur pour le mode hors ligne. Elle est séparée par compte. Sur un appareil partagé, protège ta session et efface les données du navigateur après usage.": "An unencrypted local copy stays in this browser for offline use. It is separated by account. On a shared device, protect your session and clear browser data after use.",
+  "Ton adresse email, le contenu de ton tableur (libellés, montants, dates), tes objectifs et les partages accordés. Supabase Auth hache ton mot de passe. La base Supabase est chiffrée au repos. Aucune coordonnée bancaire n'est demandée ni stockée.": "Your email address, spreadsheet content (labels, amounts, dates), goals and sharing permissions. Supabase Auth hashes your password. The Supabase database is encrypted at rest. No bank details are requested or stored.",
   "TON ESPACE FINANCIER": "YOUR FINANCIAL SPACE",
   "Une vue plus claire de tes finances.": "A clearer view of your finances.",
   "VUE D’ENSEMBLE": "OVERVIEW",

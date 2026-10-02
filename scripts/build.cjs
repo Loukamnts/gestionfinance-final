@@ -98,7 +98,7 @@ html = html.replace(/<script\b([^>]*?)\bsrc="([^"?#]+)([^" ]*)"([^>]*)><\/script
   return `<script ${before}src="${src}${query}"${after} integrity="${integrity(code)}" crossorigin="anonymous"></script>`;
 });
 put('app.html',html);
-for (const page of ['presentation.html','confidentialite.html','conditions.html']) {
+for (const page of ['presentation.html','confidentialite.html','conditions.html','404.html']) {
   if (fs.existsSync(path.join(root,page))) copy(page);
 }
 copy('presentation.html','index.html');

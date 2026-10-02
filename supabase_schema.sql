@@ -321,6 +321,12 @@ language sql security definer set search_path = public as $$
     from public.friendships f
     join public.profiles p on p.id = f.owner_id
     where f.friend_id = auth.uid() and f.status = 'accepted'
+      and exists (
+        select 1 from public.share_permissions access
+        where access.owner_id = f.owner_id and access.friend_id = auth.uid()
+          and access.year is null and access.month is null and access.row_key is null
+          and access.can_view_sheet = true
+      )
   )
   select r.owner_id, a.oemail, r.year, r.row_key, r.row_label, r.row_order, r.rule, c.month, c.value
   from accepted a
@@ -337,4 +343,5 @@ language sql security definer set search_path = public as $$
   order by a.oemail, r.year, r.row_order, c.month;
 $$;
 
+revoke all on function public.shared_rows_for_me(int) from public, anon;
 grant execute on function public.shared_rows_for_me(int) to authenticated;

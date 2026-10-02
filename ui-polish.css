@@ -1402,3 +1402,39 @@ body[data-theme="editorial"] #dashboardPage .empty-dashboard { border-radius:3px
   .settings-shell > .account-section[data-settings-panel] { width:100%; max-width:none !important; }
   #dashboardPage .chart-wrap:has(#emptyState.is-visible) { min-height:0; }
 }
+
+/* Profil : même largeur que les autres rubriques et une hiérarchie stable. */
+.settings-shell { width:100%; max-width:none !important; }
+.settings-shell > .account-section[data-settings-panel] {
+  display:grid; grid-template-columns:minmax(0,1.1fr) minmax(290px,.9fr);
+  align-items:start; gap:clamp(18px,2.5vw,30px); width:100%; max-width:none !important;
+}
+.account-section > .panel-title { grid-column:1/-1; width:100%; max-width:none; margin:0; padding-bottom:16px; border-bottom:1px solid var(--line); }
+.account-section .identity-section { grid-column:1; margin:0; padding:0; border:0; min-width:0; }
+.account-section #identityDetails { display:grid; gap:18px; }
+.account-section .identity-section > .settings-section-head { margin-bottom:15px; }
+.account-section .identity-summary { padding:18px 20px; background:var(--panel-solid); }
+.account-section .identity-form { margin:0; padding:19px 20px; border:1px solid var(--line); border-radius:var(--control-radius); background:var(--panel-solid); }
+.account-section .identity-form-intro { margin:0 0 2px; color:var(--muted); font-size:.85rem; line-height:1.5; }
+.account-section .identity-form-row { max-width:none; }
+.account-section .identity-facts { margin:0; gap:8px; }
+.account-section .identity-facts > div { min-height:70px; background:var(--panel-solid); }
+.account-section .account-panel { grid-column:2; width:100%; max-width:none; margin:0; gap:16px; }
+.account-section.is-connected .account-panel { max-width:none; }
+.account-section.is-connected .account-user { display:grid; gap:15px; padding:19px 20px; border:1px solid var(--line); border-radius:var(--control-radius); background:var(--panel-solid); }
+.account-section.is-connected .account-user-info { gap:0; }
+.account-section.is-connected .account-user-avatar { display:none; }
+.account-section.is-connected .account-user-actions { width:auto; justify-self:start; }
+.account-section.is-connected .account-user-actions .account-logout-button { width:auto; min-height:38px; padding:7px 12px; border:1px solid var(--line-strong); background:var(--input-bg); color:var(--text); }
+.account-section.is-connected .account-user-actions .account-logout-button:hover { border-color:var(--accent); color:var(--accent); }
+.account-section:not(.is-connected) .account-panel { grid-column:1/-1; width:min(100%,630px); justify-self:center; }
+body[data-theme="brutal"] .account-section :is(.identity-summary,.identity-form,.identity-facts > div,.account-user,.account-logout-button) { border-radius:0; }
+@media(max-width:900px){
+  .settings-shell > .account-section[data-settings-panel] { grid-template-columns:minmax(0,1fr); }
+  .account-section .identity-section,.account-section .account-panel,.account-section:not(.is-connected) .account-panel { grid-column:1; width:100%; }
+}
+@media(max-width:560px){ .account-section .identity-facts { grid-template-columns:minmax(0,1fr); } }
+
+/* Les données et les libellés de mois restent lisibles dans tous les thèmes. */
+#dashboardPage :is(.metric-value,.mobile-finance-summary-value,.detail-row strong,.chart-panel .legend-item) { font-family:var(--font-body); font-variant-numeric:tabular-nums lining-nums; letter-spacing:0; }
+#dashboardPage :is(#maxExpenseMonth,#minExpenseMonth) { font-weight:700; }

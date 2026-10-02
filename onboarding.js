@@ -897,17 +897,24 @@
     // Affiche une modal de confirmation
     showConfirmModal(
       "Réinitialiser le compte ?",
-      "Attention : tu seras déconnecté, toutes les données locales (tableur, catégories, règles) seront effacées. La configuration et le tutoriel vont recommencer. Cette action est irréversible.",
+      "Tu seras déconnecté et la copie locale de cet espace sera effacée sur cet appareil. Les données déjà synchronisées dans ton compte restent disponibles. Le tutoriel recommencera.",
       "Réinitialiser le compte",
       async function() {
-        // Tente de supprimer le compte Supabase si connecté
-        try {
-          var sb = window.__account && window.__account.client;
-          if (sb && window.__account.user) {
-            // Sign out d'abord
-            try { await sb.auth.signOut(); window.__account.user = null; window.dispatchEvent(new CustomEvent("authStateChanged", { detail: { user: null, event: "SIGNED_OUT" } })); } catch(e) {}
+        // Le compte distant reste intact. Seule sa copie sur cet appareil est effacée.
+        var previousOwner = window.__account && window.__account.user && window.__account.user.id;
+        var sb = window.__account && window.__account.client;
+        if (previousOwner && sb) {
+          try {
+            var result = await sb.auth.signOut();
+            if (result && result.error) throw result.error;
+          } catch(e) {
+            alert("La déconnexion a échoué. Tes données locales n'ont pas été effacées.");
+            return;
           }
-        } catch(e) {}
+          window.__account.user = null;
+          window.dispatchEvent(new CustomEvent("authStateChanged", { detail: { user: null, event: "SIGNED_OUT" } }));
+          if (safeStore.clearFinancialOwnerData) safeStore.clearFinancialOwnerData(previousOwner);
+        }
         // Nettoie tout
         del(STORAGE.onboarding);
         del(STORAGE.tutorial);

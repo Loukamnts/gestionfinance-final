@@ -1973,7 +1973,7 @@
           <div id="customLegend" class="custom-legend"></div>
         </section>
         <section class="month-details month-summary" aria-label="Résumé global">
-          <article class="detail-panel detail-panel-global"><h3>Résumé global</h3><div class="global-summary-grid"><section><h4>Épargne</h4><div class="detail-list" id="savingsBreakdown"><div class="detail-row"><span>-</span><strong>-</strong></div></div></section><section><h4>Dépenses importantes</h4><p class="expense-note" id="bigExpenses">-</p></section></div></article>
+          <article class="detail-panel detail-panel-global"><h3>Résumé global</h3><div class="global-summary-grid"><section><h4>Répartition par catégorie</h4><div class="detail-list" id="savingsBreakdown"><div class="detail-row"><span>-</span><strong>-</strong></div></div></section><section><h4>Dépenses importantes</h4><p class="expense-note" id="bigExpenses">-</p></section></div></article>
         </section>
       </section>
     </section>
@@ -2160,8 +2160,8 @@
         <section class="identity-section" id="identitySection" aria-label="Profil" hidden>
           <div class="settings-section-head"><div><h3>Ton profil</h3><p>Un pseudo unique pour être retrouvé par tes amis.</p></div></div>
           <div id="identityDetails">
-            <div class="identity-summary"><div class="identity-avatar" id="identityAvatar" aria-hidden="true">?</div><div><span class="identity-caption">Nom d’utilisateur</span><strong id="identityCurrentUsername" translate="no">À choisir</strong><span id="identityChangeDate">Tu peux choisir ton premier pseudo maintenant.</span></div></div>
-            <form id="identityForm" class="identity-form"><label for="identityUsername">Changer de pseudo</label><div class="identity-form-row"><span aria-hidden="true">@</span><input id="identityUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required><button type="submit" class="gf-button">Enregistrer</button></div><p class="identity-help">3 à 24 caractères : lettres sans accent, chiffres, points, tirets ou tirets bas. Un changement tous les 30 jours.</p><p id="identityFeedback" class="identity-feedback" role="status" aria-live="polite"></p></form>
+            <div class="identity-summary"><div class="identity-avatar" id="identityAvatar" aria-hidden="true">?</div><div><span class="identity-caption">Pseudo</span><strong id="identityCurrentUsername" translate="no">À choisir</strong><span id="identityChangeDate">Tu peux choisir ton premier pseudo maintenant.</span></div></div>
+            <form id="identityForm" class="identity-form"><label for="identityUsername">Modifier mon pseudo</label><p class="identity-form-intro">Tes amis voient ce pseudo après acceptation. Une personne qui le connaît peut aussi t’envoyer une demande.</p><div class="identity-form-row"><span aria-hidden="true">@</span><input id="identityUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required><button type="submit" class="gf-button">Enregistrer</button></div><p class="identity-help">3 à 24 caractères, sans espace ni accent. Un changement tous les 30 jours.</p><p id="identityFeedback" class="identity-feedback" role="status" aria-live="polite"></p></form>
             <div class="identity-facts"><div><span>Abonnement</span><strong id="identityPlan">Gratuit</strong></div><div><span>Membre depuis</span><strong id="identityCreated">—</strong></div><div><span>Abonnement depuis</span><strong id="identitySubscriptionDate">Aucun abonnement payant</strong></div></div>
           </div>
         </section>
@@ -2201,7 +2201,7 @@
             <div class="account-user-info">
               <div class="account-user-avatar" id="accountUserAvatar" translate="no"></div>
               <div>
-                <p class="account-connected-label">Compte connecté</p>
+                <p class="account-connected-label">Adresse de connexion</p>
                 <strong id="accountEmailDisplay" translate="no"></strong>
                 <p class="account-connected-note">Ton espace personnel, sur tous tes appareils.</p>
               </div>
@@ -2250,11 +2250,11 @@
         <section class="settings-section panel settings-reading-page" data-settings-panel="privacy" hidden>
           <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
           <div class="settings-section-head"><div><h3>Confidentialité &amp; sécurité</h3><p>Les protections utiles, expliquées simplement.</p></div></div>
-          <div class="legal-section"><strong>Stockage local</strong><p>Tes données restent dans ton navigateur. Elles ne sont synchronisées avec ton compte Supabase que lorsque tu te connectes.</p></div>
+          <div class="legal-section"><strong>Stockage local</strong><p>Une copie non chiffrée par mot de passe reste dans ce navigateur pour le mode hors ligne. Elle est séparée par compte. Sur un appareil partagé, protège ta session et efface les données du navigateur après usage.</p></div>
           <div class="legal-section"><strong>Connexion HTTPS</strong><p>Le site est servi via HTTPS pour garantir le chiffrement des données en transit.</p></div>
           <div class="legal-section"><strong>Synchronisation de compte (optionnelle)</strong><p>Lorsque tu te connectes, ton tableur est synchronisé avec ton compte Supabase via une connexion chiffrée.</p></div>
           <div class="legal-section"><strong>Pas de tracking publicitaire</strong><p>Ce site ne contient aucun tracker, cookie publicitaire ni script d'analyse tierce. Aucune donnée n'est vendue ou partagée avec des tiers.</p></div>
-          <div class="legal-section"><strong>Ce qui est enregistré</strong><p>Ton adresse email et ton mot de passe (chiffré), le contenu de ton tableur (libellés, montants, dates), tes objectifs, tes réglages d'affichage et les partages que tu accordes. Aucune coordonnée bancaire n'est demandée ni stockée.</p></div>
+          <div class="legal-section"><strong>Ce qui est enregistré</strong><p>Ton adresse email, le contenu de ton tableur (libellés, montants, dates), tes objectifs et les partages accordés. Supabase Auth hache ton mot de passe. La base Supabase est chiffrée au repos. Aucune coordonnée bancaire n'est demandée ni stockée.</p></div>
           <div class="legal-section"><strong>Qui peut voir tes données</strong><p>Toi seul, et les personnes à qui tu donnes explicitement accès depuis la page Partage — jusqu'à ce que tu retires cet accès. Les règles de sécurité de la base de données empêchent tout autre compte de lire tes lignes.</p></div>
           <div class="legal-section"><strong>Durée de conservation</strong><p>Tes données sont conservées tant que ton compte existe. Après suppression du compte, elles sont effacées de la base ; les sauvegardes techniques expirent sous 30 jours.</p></div>
           <div class="legal-section"><strong>Récupérer ou supprimer tes données</strong><p>Le bouton « Exporter » du tableur télécharge tout au format Excel. Pour effacer : « Données et synchronisation » permet de réinitialiser ton tableur ou de supprimer définitivement ton compte.</p></div>
@@ -2279,7 +2279,7 @@
         <h3>Confidentialité &amp; sécurité</h3>
         <div class="legal-section">
           <strong>Stockage local</strong>
-          <p>Tes données restent dans ton navigateur. Elles ne sont synchronisées avec ton compte Supabase que lorsque tu te connectes.</p>
+          <p>Une copie locale séparée par compte permet le mode hors ligne. Elle n'est pas chiffrée par un mot de passe personnel. Supabase chiffre les données stockées dans sa base.</p>
         </div>
         <div class="legal-section">
           <strong>Connexion HTTPS</strong>
@@ -2789,11 +2789,12 @@
     function updateMonthDetails(selected){
       elements.savingsBreakdown.innerHTML="";
       const visibleMonths=getVisibleMonths(); const items=state.currentView!=="pie"||!selected||state.isGlobal?visibleMonths.flatMap(m=>m.ruleBreakdown||[]):(selected.ruleBreakdown||[]);
-      const visible=items.filter(i=>i.value!==0);
-      const rows=visible.length?visible:[{name:"-",value:0,color:COLORS.tick}];
+      const grouped=new Map();
+      items.filter(i=>i&&i.value!==0).forEach(function(item){ const key=String(item.name||"").trim(); if(!key)return; const previous=grouped.get(key); grouped.set(key,{name:key,value:Number(item.value||0)+(previous?.value||0),color:item.color||previous?.color}); });
+      const nonZeroRows=Array.from(grouped.values()).filter(item=>item.value!==0);
+      const rows=nonZeroRows.length?nonZeroRows:[{name:"-",value:0,color:COLORS.tick}];
       rows.forEach(i=>{ elements.savingsBreakdown.appendChild(createDetailRow(i.name,formatEuro(i.value),i.color||getRuleColor(i.name))); });
-      const allRules=visibleMonths.length?formatRuleLines(visibleMonths.flatMap(m=>m.ruleBreakdown||[])):"-";
-      elements.bigExpenses.textContent=selected&&selected.bigExpenses!=="-"?`${selected.bigExpenses}`:allRules;
+      elements.bigExpenses.textContent=selected&&selected.bigExpenses&&selected.bigExpenses!=="-"?String(selected.bigExpenses):"Aucune dépense importante renseignée.";
     }
     function formatRuleLines(items){ const m=new Map(); items.forEach(i=>{ if(i&&i.name) m.set(i.name,(m.get(i.name)||0)+Number(i.value||0)); }); return Array.from(m.entries()).filter(([,v])=>v!==0).map(([name,val])=>`${window.GFI18n?window.GFI18n.t(name):name}: ${formatEuro(val)}`).join("\n")||"-"; }
     function createDetailRow(lbl,val,col){ const row=document.createElement("div"); row.className="detail-row"; const name=document.createElement("span"); name.textContent=["Salaire","Dépense","Épargne"].includes(lbl)&&window.GFI18n?window.GFI18n.t(lbl):lbl; name.style.color=col; const amount=document.createElement("strong"); amount.textContent=val; row.append(name,amount); return row; }
@@ -2855,7 +2856,7 @@
     function getLineConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Évolution", subtitle:"Salaire et règles appliquées sur toutes les périodes disponibles.", chart:{ type:"line", data:{ labels:months.map(m=>m.label), datasets:[createLineDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createLineDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
     function createBarDataset(l,c,d){ return{label:l,data:d,backgroundColor:c,borderColor:c,borderWidth:1,borderRadius:6,maxBarThickness:36}; }
     function createLineDataset(l,c,d){ return{label:l,data:d,borderColor:c,backgroundColor:c,pointBackgroundColor:c,pointBorderColor:"#0d1422",pointBorderWidth:2,pointRadius:4,pointHoverRadius:6,borderWidth:3,tension:0.35}; }
-    function axisChartOptions({stacked,onMonthClick}){ return baseChartOptions({ maintainAspectRatio:false, interaction:{mode:"index",intersect:false}, onClick:function(event,active,chart){ const point=(active&&active[0])||chart.getElementsAtEventForMode(event,"nearest",{intersect:true},true)[0]; if(onMonthClick){ if(point) onMonthClick(point.index); return; } const month=getVisibleMonths()[point?.index]; if(month) openChartMonthDetail(month); }, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, scales:{ x:{ stacked, grid:{color:"rgba(255,255,255,0.04)"}, ticks:{color:COLORS.tick,maxRotation:0,autoSkip:true} }, y:{ stacked, beginAtZero:true, grid:{color:COLORS.grid}, ticks:{color:COLORS.tick,callback:v=>compactEuroFormatter.format(v)} } }, animation:{duration:1000,easing:"easeOutQuart"} }); }
+    function axisChartOptions({stacked,onMonthClick}){ const axisFont={family:"Space Grotesk",size:12,weight:"600"}; return baseChartOptions({ maintainAspectRatio:false, interaction:{mode:"index",intersect:false}, onClick:function(event,active,chart){ const point=(active&&active[0])||chart.getElementsAtEventForMode(event,"nearest",{intersect:true},true)[0]; if(onMonthClick){ if(point) onMonthClick(point.index); return; } const month=getVisibleMonths()[point?.index]; if(month) openChartMonthDetail(month); }, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, scales:{ x:{ stacked, grid:{color:"rgba(255,255,255,0.04)"}, ticks:{color:COLORS.tick,font:axisFont,maxRotation:0,autoSkip:true} }, y:{ stacked, beginAtZero:true, grid:{color:COLORS.grid}, ticks:{color:COLORS.tick,font:axisFont,callback:v=>compactEuroFormatter.format(v)} } }, animation:{duration:1000,easing:"easeOutQuart"} }); }
     function baseChartOptions(extra){ return deepMerge({ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:tooltipOptions()}, transitions:{ active:{animation:{duration:300,easing:"easeOutCubic"}}, show:{animations:{x:{from:0,duration:1000,easing:"easeOutQuart"},y:{from:0,duration:1000,easing:"easeOutQuart"},r:{from:0,duration:1000,easing:"easeOutQuart"},borderWidth:{from:0,duration:500,easing:"linear"}}}, hide:{animations:{x:{to:0,duration:600,easing:"easeInCubic"},y:{to:0,duration:600,easing:"easeInCubic"}}} } },extra); }
     function tooltipOptions(){ const styles=getComputedStyle(document.body),theme=document.body.dataset.theme; return{ backgroundColor:readCssVar(styles,"--panel-solid","#222026"), borderColor:readCssVar(styles,"--line-strong","#5d5361"), borderWidth:1, titleColor:readCssVar(styles,"--text","#f2edf2"), bodyColor:readCssVar(styles,"--text","#f2edf2"), padding:12, cornerRadius:theme==="brutal"?0:8, callbacks:{ label:ctx=>{ const lbl=ctx.dataset.label||ctx.label||""; return`${lbl}: ${formatEuro(ctx.parsed?.y??ctx.parsed??0)}`; } } }; }
     function openChartMonthDetail(month,options={}){ const modal=document.getElementById("chartDetailModal"), title=document.getElementById("chartDetailTitle"), subtitle=document.getElementById("chartDetailSubtitle"), grid=document.getElementById("chartDetailGrid"); if(!modal||!grid) return; title.textContent=`Détail — ${month.label||"Mois"}`; subtitle.textContent="Clique sur un autre point pour consulter un autre mois."; const lines=[{label:"Salaire",value:month.salary||0},{label:"Dépenses",value:Math.abs(month.expenses||0)},{label:"Épargne",value:month.savingsTotal||0},...(month.ruleBreakdown||[]).filter(item=>item.name!=="Dépense"&&item.name!=="Épargne").map(item=>({label:item.name,value:Math.abs(item.value||0)}))]; grid.replaceChildren(...lines.filter(item=>!options.shared||(item.label==="Salaire"?month.hasIncome:item.label==="Dépenses"?month.hasExpenses:item.label==="Épargne"?month.hasSavings:true)).map(item=>{ const el=document.createElement("div"),label=document.createElement("span"),value=document.createElement("strong"); label.textContent=item.label; value.textContent=formatEuro(item.value); el.append(label,value); return el; })); modal.hidden=false; }
@@ -3182,7 +3183,7 @@ function rowsToImportedPages(rows, fileName, sheetName){
   return buildPagesFromAnalysis(analysis, fileName, sheetName);
 }
 
-function resetDataState(){
+    function resetDataState(){
   if(state.chart){ state.chart.destroy(); state.chart = null; }
   state.rawPages = [];
   state.months = [];
@@ -3212,8 +3213,9 @@ function resetDataState(){
     function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-09-18-polish-and-language";
+    const RELEASE_NOTES_VERSION="2026-10-02-account-and-interface";
     const RELEASE_NOTES=[
+      {date:"2 octobre 2026",title:"Du nouveau depuis le 20 septembre",text:"Une nouvelle disposition, plus de choix pour l’apparence et un profil plus utile. Plusieurs écrans ont aussi été revus pour faciliter la navigation.",sections:[{type:"new",text:"La nouvelle disposition propose une navigation latérale que tu peux réduire sur ordinateur et ouvrir sur téléphone. Tu peux choisir la couleur d’accent indépendamment du thème. Ton profil accueille un pseudo unique pour recevoir des demandes d’amis. Si tu ouvres un lien qui n’existe plus, une page te ramène à l’application."},{type:"improvement",text:"Les palettes, le logo et la navigation mobile ont été retravaillés. La barre du tableur reste plus lisible pendant le défilement, les fenêtres bloquent le défilement en arrière-plan et les menus passent au premier plan. Le partage et l’accueil vide guident mieux l’utilisateur. Le résumé global évite de répéter les catégories, le profil est plus clair et les données locales sont désormais séparées par compte. Sur la page de présentation, les chiffres d’exemple sont indiqués comme fictifs."}]},
       {date:"20 septembre 2026",title:"Objectifs et tableur passent un cap",sections:[{type:"new",text:"Les objectifs disposent maintenant d’un résumé global, d’un suivi actif ou archivé, d’une mise en pause et d’une liaison facultative avec une ligne du tableur."},{type:"improvement",text:"Tu peux supprimer une ligne du tableur directement depuis la barre d’outils. Les règles reconnues automatiquement sont désormais bien indiquées comme utilisées."}]},
       {date:"18 septembre 2026",title:"Un espace plus clair et plus complet",sections:[{type:"new",text:"Mon espace accueille les objectifs et les notes privées. Tu peux créer un objectif d’épargne, d’investissement, de dépense ou un projet personnel, suivre son avancement et conserver tes idées dans un bloc-notes synchronisé lorsque tu es connecté. Le partage entre amis reste privé par défaut : tu choisis précisément les lignes, les mois et les vues que chacun peut consulter."},{type:"improvement",text:"Le tableur est plus confortable avec une barre d’outils suivie, des sélections plus lisibles et des explications de solde plus claires. L’accueil, les réglages, le partage et les tableaux de bord s’adaptent mieux aux petits écrans. Le français et l’anglais couvrent aussi les contenus recréés, les réglages et les nouveautés, sans modifier tes données."}]},
       {date:"17 septembre 2026",title:"Partage et réglages simplifiés",sections:[{type:"new",text:"Tu peux maintenant consulter le tableur ou le tableau de bord partagé depuis la fiche d’un ami, sans lui donner le droit de modifier tes données."},{type:"improvement",text:"Les accès se configurent ligne par ligne et mois par mois, uniquement en lecture. Les réglages et les pages de partage sont mieux organisés sur téléphone comme sur ordinateur."}]},
@@ -3238,7 +3240,7 @@ function resetDataState(){
     let updatesPageNumber=1;
     function renderUpdatesPage(page){ const list=document.getElementById("updatesPageList"),pagination=document.getElementById("updatesPagination"); if(!list) return; const perPage=6,totalPages=Math.max(1,Math.ceil(RELEASE_NOTES.length/perPage)); updatesPageNumber=Math.min(totalPages,Math.max(1,Number(page)||updatesPageNumber)); const start=(updatesPageNumber-1)*perPage,notes=RELEASE_NOTES.slice(start,start+perPage); list.replaceChildren(...notes.map(function(note){ const entry=document.createElement("article"),date=document.createElement("time"),title=document.createElement("h3"); entry.className="update-entry"; date.textContent=note.date; title.textContent=note.title; entry.append(date,title); if(Array.isArray(note.sections)){ const summaries=document.createElement("div"); summaries.className="update-summaries"; note.sections.forEach(function(section){ const row=document.createElement("div"),badge=document.createElement("span"),text=document.createElement("p"); row.className="update-summary update-summary-"+section.type; badge.className="update-type-badge"; badge.textContent=section.type==="new"?"Nouveau":"Amélioré"; text.textContent=section.text; row.append(badge,text); summaries.append(row); }); entry.append(summaries); }else { const description=document.createElement("p"); description.textContent=note.text; entry.append(description); } return entry; })); if(window.GFI18n) window.GFI18n.apply(list); if(!pagination) return; pagination.replaceChildren(); if(totalPages<2) { pagination.hidden=true; return; } pagination.hidden=false; for(let number=1;number<=totalPages;number++){ const button=document.createElement("button"); button.type="button"; button.className="updates-page-button"+(number===updatesPageNumber?" is-active":""); button.textContent=String(number); button.setAttribute("aria-label","Page "+number+" des nouveautés"); button.setAttribute("aria-current",number===updatesPageNumber?"page":"false"); button.addEventListener("click",function(){ renderUpdatesPage(number); document.getElementById("updatesPageList")?.scrollIntoView({block:"start",behavior:"smooth"}); }); pagination.append(button); } if(window.GFI18n) window.GFI18n.apply(pagination); }
     function dismissLatestUpdate(){ const banner=document.getElementById("latestUpdateBanner"); if(banner) banner.hidden=true; try{safeStore.setItem("personalFinanceDashboard.lastSeenRelease",RELEASE_NOTES_VERSION);}catch(e){} }
-    function showLatestUpdate(){ try{ if(document.body.classList.contains("tutorial-active")||!safeStore.getItem("personalFinanceDashboard.onboardingCompleted")||safeStore.getItem("personalFinanceDashboard.lastSeenRelease")===RELEASE_NOTES_VERSION) return; const latest=RELEASE_NOTES[0],banner=document.getElementById("latestUpdateBanner"),title=document.getElementById("latestUpdateTitle"),text=document.getElementById("latestUpdateText"); if(!latest||!banner||!title||!text) return; title.textContent=latest.title; text.textContent=latest.text; banner.hidden=false; }catch(e){} }
+    function showLatestUpdate(){ try{ if(document.body.classList.contains("tutorial-active")||!safeStore.getItem("personalFinanceDashboard.onboardingCompleted")||safeStore.getItem("personalFinanceDashboard.lastSeenRelease")===RELEASE_NOTES_VERSION) return; const latest=RELEASE_NOTES[0],banner=document.getElementById("latestUpdateBanner"),title=document.getElementById("latestUpdateTitle"),text=document.getElementById("latestUpdateText"); if(!latest||!banner||!title||!text) return; title.textContent=latest.title; text.textContent=latest.text||latest.sections?.map(section=>section.text).join(" ")||""; banner.hidden=false; }catch(e){} }
     window.showLatestUpdate=showLatestUpdate;
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -5226,6 +5228,7 @@ function resetDataState(){
       if(pill){pill.dataset.sheetState=state;pill.classList.remove("is-online");var statusDot=pill.querySelector(".status-dot");if(statusDot)statusDot.className="status-dot "+copy[0];}
       if(label)label.textContent=copy[1];
     }
+    window.clearDashboardForAccountSwitch = function(){ resetDataState(); updateInterface(); };
     window.updateSheetStatus = updateSheetStatus;
     // Update on load and when online/offline changes
     window.addEventListener("online", updateSheetStatus);
@@ -5625,7 +5628,7 @@ function resetDataState(){
      Utilise une table finance_snapshots pour stocker le snapshot complet
      (toutes les feuilles, formules, headers, etc.).
      Hors ligne : sauvegarde locale, sync au retour du reseau. */
-  var syncState = { dirty: false, lastSync: 0, pulling: false, pushing: false, suppressPush: false, userId: "", remoteUpdatedAt: "", scheduledPull: null };
+  var syncState = { dirty: false, revision: 0, lastSync: 0, pulling: false, pushing: false, suppressPush: false, userId: "", remoteUpdatedAt: "", scheduledPull: null, generation: 0 };
 
   function getSupabase(){ try{ return window.__account && window.__account.client ? window.__account.client : null; }catch(e){ return null; } }
   function getUser(){ try{ return window.__account && window.__account.user ? window.__account.user : null; }catch(e){ return null; } }
@@ -5636,8 +5639,10 @@ function resetDataState(){
     var sb = getSupabase();
     var user = getUser();
     var fs = getFinanceSheet();
-    if(!sb || !user || !fs){ return false; }
+    if(!sb || !user || !fs || syncState.userId !== user.id){ return false; }
     if(syncState.pushing || syncState.suppressPush) return false;
+    var generation = syncState.generation;
+    var revision = syncState.revision;
     syncState.pushing = true;
     updateSyncStatus();
     try{
@@ -5658,7 +5663,8 @@ function resetDataState(){
         updated_at: cloudUpdatedAt
       }, { onConflict: "owner_id" });
       
-      if(res.error){ console.warn("Sync push error:", res.error.message); syncState.pushing = false; return false; }
+      if(generation !== syncState.generation || getUser()?.id !== user.id) return false;
+      if(res.error){ console.warn("Sync push error:", res.error.message); return false; }
       // Le dashboard est stocké séparément du tableur complet : autoriser le
       // dashboard ne donne donc jamais accès aux cellules ni aux formules.
       var dashboardPayload = window.getDashboardSharingSnapshot ? window.getDashboardSharingSnapshot() : { v: "dashboard-1", updatedAt: Date.now(), months: [] };
@@ -5667,12 +5673,16 @@ function resetDataState(){
         payload: dashboardPayload,
         updated_at: new Date().toISOString()
       }, { onConflict: "owner_id" });
+      if(generation !== syncState.generation || getUser()?.id !== user.id) return false;
       if(dashboardRes.error) console.warn("Dashboard sharing sync error:", dashboardRes.error.message);
       // Les copies partagées sont recalculées après chaque sauvegarde : elles
       // ne contiennent que les mois et lignes explicitement choisis.
       try { if(window.FriendsSystem && window.FriendsSystem.refreshMySharedSnapshots) await window.FriendsSystem.refreshMySharedSnapshots(); } catch(e) { console.warn("Granular sharing sync error:", e); }
       
-      syncState.dirty = false;
+      if(revision === syncState.revision){
+        syncState.dirty = false;
+        safeStore.setFinancialSyncPending(false);
+      }
       syncState.lastSync = Date.now();
       syncState.remoteUpdatedAt = cloudUpdatedAt;
       updateSyncStatus();
@@ -5681,8 +5691,14 @@ function resetDataState(){
       console.warn("Sync push error:", e);
       return false;
     }finally{
-      syncState.pushing = false;
-      updateSyncStatus();
+      if(generation === syncState.generation){
+        syncState.pushing = false;
+        updateSyncStatus();
+        if(syncState.dirty && navigator.onLine){
+          if(window.__gf_syncTimer) clearTimeout(window.__gf_syncTimer);
+          window.__gf_syncTimer=setTimeout(function(){ if(generation===syncState.generation && syncState.dirty) pushToCloud(); },2000);
+        }
+      }
     }
   }
 
@@ -5691,12 +5707,14 @@ function resetDataState(){
     var sb = getSupabase();
     var user = getUser();
     var fs = getFinanceSheet();
-    if(!sb || !user || !fs){ return false; }
+    if(!sb || !user || !fs || syncState.userId !== user.id){ return false; }
     if(syncState.pulling || syncState.pushing || syncState.dirty) return false;
+    var generation = syncState.generation;
     syncState.pulling = true;
     syncState.suppressPush = true; // Eviter la boucle pull -> save -> push
     try{
       var res = await sb.from("finance_snapshots").select("payload,updated_at").eq("owner_id", user.id).maybeSingle();
+      if(generation !== syncState.generation || getUser()?.id !== user.id) return false;
       if(res.error){ console.warn("Sync pull error:", res.error.message); return false; }
       // Aucun snapshot : premier appareil de ce compte. Le démarrage pourra
       // alors envoyer ses données locales au lieu de les considérer perdues.
@@ -5712,7 +5730,7 @@ function resetDataState(){
       if(!snap || !snap.sheets || !snap.sheets.length){ syncState.pulling = false; syncState.suppressPush = false; return false; }
       if(snap.profile && typeof snap.profile === "object" && !Array.isArray(snap.profile)){
         try { safeStore.setItem("personalFinanceDashboard.setupProfile", JSON.stringify(snap.profile)); window.dispatchEvent(new CustomEvent("gfprofilechange")); } catch(e) {}
-      }
+      } else { safeStore.removeItem("personalFinanceDashboard.setupProfile"); window.dispatchEvent(new CustomEvent("gfprofilechange")); }
       
       if(fs.loadSnapshot){
         // loadSnapshot sauvegarde aussi le cache local après 400 ms. Ce verrou
@@ -5720,7 +5738,7 @@ function resetDataState(){
         // push inutile qui pourrait masquer une modification d'un autre appareil.
         window.__gfSuppressSync = true;
         fs.loadSnapshot({ v: snap.v || "cloud", sheets: snap.sheets, activeSheetId: snap.activeSheetId });
-        setTimeout(function(){ window.__gfSuppressSync = false; }, 800);
+        setTimeout(function(){ if(generation === syncState.generation) window.__gfSuppressSync = false; }, 800);
         if(typeof window.syncDashboardFromFinanceSheet === "function"){
           try{ window.syncDashboardFromFinanceSheet({ silent: true }); }catch(e){}
         }
@@ -5735,21 +5753,23 @@ function resetDataState(){
       console.warn("Sync pull error:", e);
       return false;
     }finally{
-      syncState.pulling = false;
-      syncState.suppressPush = false;
+      if(generation === syncState.generation){ syncState.pulling = false; syncState.suppressPush = false; }
     }
   }
 
   // === Marquer comme dirty (a synchroniser) ===
   function markDirty(){
-    if(!getUser()) return;
+    if(!getUser() || syncState.userId !== getUser().id) return;
     if(syncState.suppressPush) return; // Ne pas marquer dirty pendant un pull
     syncState.dirty = true;
+    syncState.revision++;
+    safeStore.setFinancialSyncPending(true);
     updateSyncStatus();
     if(navigator.onLine){
       if(window.__gf_syncTimer) clearTimeout(window.__gf_syncTimer);
+      var generation = syncState.generation;
       window.__gf_syncTimer = setTimeout(function(){
-        if(syncState.dirty && !syncState.pushing && !syncState.suppressPush) pushToCloud();
+        if(generation === syncState.generation && syncState.dirty && !syncState.pushing && !syncState.suppressPush) pushToCloud();
       }, 2000);
     }
   }
@@ -5782,31 +5802,55 @@ function resetDataState(){
   function scheduleAccountSync(user, delay){
     if(!user || !user.id) return;
     var changedAccount = syncState.userId !== user.id;
+    if(changedAccount){
+      syncState.generation++;
+      if(window.__gf_syncTimer) clearTimeout(window.__gf_syncTimer);
+      window.__gfSuppressSync = false;
+      syncState.pushing = false; syncState.pulling = false; syncState.suppressPush = false;
+      var sheet = getFinanceSheet();
+      if(sheet && sheet.switchFinancialOwner) sheet.switchFinancialOwner(user.id);
+      else safeStore.setFinancialOwner(user.id);
+    }
     syncState.userId = user.id;
-    if(changedAccount){ syncState.remoteUpdatedAt = ""; syncState.lastSync = 0; syncState.dirty = false; }
+    if(changedAccount){ syncState.remoteUpdatedAt = ""; syncState.lastSync = 0; syncState.revision = 0; syncState.dirty = safeStore.getFinancialSyncPending(); }
     if(syncState.scheduledPull) clearTimeout(syncState.scheduledPull);
     syncState.scheduledPull = setTimeout(async function(){
       syncState.scheduledPull = null;
       var current = getUser();
       if(!current || current.id !== user.id || !navigator.onLine) return;
+      if(syncState.dirty){ await pushToCloud(); return; }
       var pulled = await pullFromCloud();
       if(pulled === null){
-        // Nouveau compte sans snapshot : on conserve et envoie le contenu
-        // présent sur l'appareil (tableur, objectifs et notes).
+        // Seules les données anonymes créées depuis l'isolation des comptes
+        // peuvent être reprises automatiquement pour un tout premier compte.
+        if(safeStore.claimAnonymousFor(user.id)){
+          var sheet = getFinanceSheet();
+          if(sheet && sheet.switchFinancialOwner) sheet.switchFinancialOwner(user.id,{discardCurrent:true});
+        }
         syncState.dirty = true;
+        syncState.revision++;
+        safeStore.setFinancialSyncPending(true);
         updateSyncStatus();
         await pushToCloud();
-      }else if(pulled === false){ updateSyncStatus(); }
+      }else { safeStore.discardAnonymousClaim(); if(pulled === false) updateSyncStatus(); }
     }, typeof delay === "number" ? delay : 500);
   }
 
   function clearAccountSync(){
     if(syncState.scheduledPull) clearTimeout(syncState.scheduledPull);
     syncState.scheduledPull = null;
+    syncState.generation++;
+    if(window.__gf_syncTimer) clearTimeout(window.__gf_syncTimer);
+    window.__gfSuppressSync = false;
+    syncState.pushing = false; syncState.pulling = false; syncState.suppressPush = false;
+    var sheet = getFinanceSheet();
+    if(sheet && sheet.switchFinancialOwner) sheet.switchFinancialOwner(null);
+    else safeStore.setFinancialOwner(null);
     syncState.userId = "";
     syncState.remoteUpdatedAt = "";
     syncState.dirty = false;
     syncState.lastSync = 0;
+    safeStore.discardAnonymousClaim();
     updateSyncStatus();
   }
 

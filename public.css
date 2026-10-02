@@ -79,6 +79,16 @@
 
 /* Les aperçus publics suivent les palettes actuelles de l'application. */
 .dashboard-preview{background:var(--panel-soft);-webkit-backdrop-filter:none;backdrop-filter:none}
+.preview-demo-label{display:block;width:max-content;max-width:100%;margin:0 0 8px auto;color:var(--quiet);font:600 .65rem/1.35 var(--font-body);text-align:right}
+.section-heading{grid-template-columns:minmax(0,1fr) minmax(260px,.7fr)}
+@media(max-width:680px){.section-heading{grid-template-columns:1fr}.section-heading>p{grid-column:1}}
+.error-shell{min-height:100svh;display:flex;flex-direction:column}
+.error-brand-mark{display:block;width:28px;height:28px;margin-right:9px}
+.error-main{display:grid;grid-template-columns:minmax(180px,.5fr) minmax(0,1fr);align-items:center;gap:clamp(28px,7vw,110px);flex:1;padding:clamp(55px,9vw,120px) 0}
+.error-number{max-width:100%;color:var(--accent);font:800 clamp(5.5rem,8vw,8.5rem)/.9 var(--font-heading);letter-spacing:-.08em;opacity:.56;white-space:nowrap;user-select:none}
+.error-copy{max-width:630px}.error-copy .eyebrow{margin-bottom:16px}.error-copy h1{margin:0;font:800 clamp(2.25rem,4.4vw,4.7rem)/1.04 var(--font-heading);letter-spacing:-.035em}.error-copy>p:not(.eyebrow){max-width:54ch;margin:24px 0 30px;color:var(--muted);font-size:1.05rem}
+.error-actions{display:flex;align-items:center;flex-wrap:wrap;gap:18px 24px}.error-footer{display:flex;justify-content:space-between;gap:16px;padding:22px 0;border-top:1px solid var(--line);color:var(--quiet);font-size:.78rem}.error-footer a{text-decoration:none}.error-footer a:hover{color:var(--accent)}
+@media(max-width:680px){.error-main{grid-template-columns:1fr;align-content:center;gap:22px}.error-number{font-size:clamp(5.5rem,23vw,9rem)}.error-actions{align-items:stretch;flex-direction:column}.error-actions .btn{width:100%}.error-footer{flex-wrap:wrap}}
 .preview-metrics>div,.preview-chart{background:var(--panel)}
 .swatch-glass{background:linear-gradient(135deg,#9b72e6,#c34f73)}
 .swatch-editorial{background:linear-gradient(135deg,#f5f0e8 50%,#8e2347 50%)}
