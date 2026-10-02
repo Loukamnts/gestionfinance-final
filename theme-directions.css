@@ -709,10 +709,11 @@ body[data-interface="studio"] :is(#sharingPage,#sharingAccessPage,#updatesPage,#
   grid-row:auto;
 }
 
-/* Dans Studio, le profil sert uniquement aux notes et à l'état du tableur. */
-body[data-interface="studio"] .profile-popover :is(.profile-popover-account,#connectionStatus,#profilePersonalButton,#profileIdentityButton,#profileSettingsButton,#accountLogoutBtn) {
+/* Dans Studio, le menu du profil contient Profil, Notes et l'état du tableur. */
+body[data-interface="studio"] .profile-popover :is(.profile-popover-account,#connectionStatus,#profilePersonalButton,#accountLogoutBtn) {
   display:none !important;
 }
+body[data-interface="studio"] .mobile-settings-button { display:none !important; }
 body[data-interface="studio"] .profile-popover #sheetStatusBar {
   display:flex;
   align-items:center;
