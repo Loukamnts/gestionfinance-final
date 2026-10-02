@@ -29,19 +29,27 @@
   function render(){
     const user=account().user,connected=!!user;
     byId("identitySection").hidden=!connected;
-    if(!connected){profile=null;byId("identityUsername").value="";feedback("",true);return;}
+    if(!connected){profile=null;byId("identityUsername").value="";byId("identityForm").hidden=true;feedback("",true);return;}
     const name=profile?.username||"";
     byId("identityCurrentUsername").textContent=name?"@"+name:tr("À choisir","Not set yet");
+    byId("identityEmail").textContent=user.email||"";
+    byId("identityFactEmail").textContent=user.email||"—";
     byId("identityAvatar").textContent=(name||user.email||"?").charAt(0).toUpperCase();
     byId("identityCreated").textContent=date(profile?.created_at||user.created_at);
     byId("identityPlan").textContent=profile?.plan==="premium"?"Premium":profile?.plan==="plus"?"Plus":tr("Gratuit","Free");
-    byId("identitySubscriptionDate").textContent=profile?.subscription_started_at?date(profile.subscription_started_at):tr("Aucun abonnement payant","No paid subscription");
+    byId("identitySubscriptionDate").textContent=profile?.subscription_started_at?date(profile.subscription_started_at):"—";
+    byId("identitySubscriptionRow").hidden=!profile?.subscription_started_at;
     const changed=profile?.username_changed_at?new Date(profile.username_changed_at):null;
     const next=changed?new Date(changed.getTime()+30*86400000):null;
     const waiting=next&&next>Date.now();
     byId("identityUsername").disabled=!!waiting;
     byId("identityForm").querySelector("button[type=submit]").disabled=!!waiting;
-    byId("identityChangeDate").textContent=waiting?tr("Prochain changement possible le ","Next change available on ")+date(next):name?tr("Tu peux modifier ton pseudo maintenant.","You can change your username now."):tr("Tu peux choisir ton premier pseudo maintenant.","You can choose your first username now.");
+    byId("identityEditButton").disabled=!!waiting;
+    byId("identityEditButton").title=waiting?tr("Prochain changement possible le ","Next change available on ")+date(next):tr("Modifier le pseudo","Edit username");
+    byId("identityEditButton").setAttribute("aria-label",byId("identityEditButton").title);
+    byId("identityChangeDate").hidden=!waiting;
+    byId("identityChangeDate").textContent=waiting?tr("Prochain changement possible le ","Next change available on ")+date(next):"";
+    if(waiting)byId("identityForm").hidden=true;
     const menuAvatar=byId("profileAvatar");if(menuAvatar&&name)menuAvatar.textContent=name.charAt(0).toUpperCase();
   }
   async function load(){
@@ -71,6 +79,7 @@
       if(result.error)throw result.error;
       await load();
       byId("identityUsername").value="";
+      byId("identityForm").hidden=true;
       feedback(tr("Pseudo enregistré. Tes amis le verront dans leur liste.","Username saved. Your friends will see it in their list."),true);
       window.FriendsSystem?.loadFriends?.({force:true});
       return true;
@@ -95,6 +104,8 @@
   }
   function start(){
     byId("identityForm")?.addEventListener("submit",save);
+    byId("identityEditButton")?.addEventListener("click",()=>{const form=byId("identityForm");if(!form||byId("identityEditButton").disabled)return;form.hidden=false;byId("identityUsername").value=profile?.username||"";byId("identityUsername").focus();feedback("",true);});
+    byId("identityCancelButton")?.addEventListener("click",()=>{byId("identityForm").hidden=true;feedback("",true);});
     byId("welcomeUsernameForm")?.addEventListener("submit",saveWelcome);
     byId("welcomeSkipUsername")?.addEventListener("click",()=>showPlanStep(account().user));
     byId("welcomeSkipPlan")?.addEventListener("click",()=>closeWelcome(account().user?.id));
