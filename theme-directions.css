@@ -863,3 +863,46 @@ body[data-theme="brutal"] .welcome-dialog :is(.welcome-dialog-close,.welcome-use
   body[data-interface="studio"][data-sidebar-collapsed="true"] .studio-sidebar { width:74px; }
   body[data-interface="studio"][data-sidebar-collapsed="true"] .studio-sidebar-brand { display:flex; flex-direction:column; align-items:center; gap:10px; padding:2px 0 18px; }
 }
+
+/* Le nom complet reste visible dans le rail Studio, même avec la police Contraste. */
+@media (min-width:781px) {
+  body[data-interface="studio"] .studio-sidebar-brand {
+    grid-template-columns:34px minmax(0,1fr) 30px;
+    column-gap:5px;
+    padding-left:2px;
+    padding-right:2px;
+  }
+  body[data-interface="studio"] .studio-sidebar-brand strong {
+    overflow:visible;
+    text-overflow:clip;
+    font-size:.88rem;
+    letter-spacing:-.045em;
+  }
+  body[data-interface="studio"] .studio-sidebar-collapse { width:30px; height:30px; }
+}
+
+/* Les cartes du profil reposent directement sur le fond de la page. */
+body[data-theme] .settings-shell > .account-section[data-settings-panel] {
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+.account-section #identityDetails { gap:12px; }
+.account-section .identity-section { margin:0; padding:0; border:0; }
+.account-section .account-sync-detail { margin:0; }
+.account-section .account-sync-content { padding:0 19px 17px; }
+.account-section .account-sync-content p { margin:0; color:var(--muted); font-size:.85rem; line-height:1.55; }
+.account-section .account-sync-content p + p { margin-top:10px; }
+#syncStatusText[data-sync-state="synced"] { color:var(--green,#32b87b); }
+#syncStatusText[data-sync-state="offline"],#syncStatusText[data-sync-state="pending"] { color:var(--accent); }
+#syncStatusText[data-sync-state="syncing"] { color:var(--accent); }
+
+/* Un tour complet par clic, indépendamment de la durée du recalcul. */
+.home-toolbar .gf-refresh.is-refreshing > svg { animation:gf-home-refresh-once .42s linear 1 both; transform-origin:center; }
+@keyframes gf-home-refresh-once { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce) { .home-toolbar .gf-refresh.is-refreshing > svg { animation:none; } }
+
+/* Les deux flèches d'actualisation disposent d'une vraie surface lisible. */
+.sf-toolbar-actions > .sf-button.sf-refresh { min-width:46px; min-height:46px; padding:9px 12px; }
+.sf-toolbar-actions > .sf-button.sf-refresh .sf-icon { width:21px; height:21px; flex-basis:21px; overflow:visible; }
+.sf-toolbar-actions > .sf-button.sf-refresh .sf-icon svg { display:block; width:21px; height:21px; overflow:visible; }
