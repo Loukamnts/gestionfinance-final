@@ -1900,10 +1900,10 @@
           <button class="profile-trigger" id="profileMenuButton" type="button" aria-expanded="false" aria-controls="profilePopover"><span class="profile-avatar" id="profileAvatar">?</span><span class="profile-trigger-label" id="profileLabel">Profil</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <div class="profile-popover" id="profilePopover" hidden>
             <div class="profile-popover-account"><span class="profile-popover-kicker">Compte</span><strong id="profileEmail">Non connecté</strong></div>
-            <div class="status-pill" id="connectionStatus"><span class="status-dot is-empty"></span><span id="connectionText">Aucune donnée</span></div>
-            <button class="profile-menu-link" id="profileIdentityButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.7-3.4 3.1-5 7-5s6.3 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Profil</span></button>
-            <button class="profile-menu-link profile-menu-link-primary" id="profilePersonalButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 14.5c1.1-1.35 2.45-2.02 4-2.02s2.9.67 4 2.02M12 10a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Mon espace</span><small>Objectifs, amis, nouveautés</small></button>
-            <button class="profile-menu-link" id="profileNotesButton" type="button" data-open-notes><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Notes</span></button>
+            <div class="status-pill" id="connectionStatus" title="État de tes données et de leur connexion au compte"><span class="status-dot is-empty"></span><span id="connectionText">Aucune donnée</span></div>
+            <button class="profile-menu-link" id="profileIdentityButton" type="button" title="Voir ton pseudo, ton abonnement et ton compte"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.7-3.4 3.1-5 7-5s6.3 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Profil</span></button>
+            <button class="profile-menu-link profile-menu-link-primary" id="profilePersonalButton" type="button" title="Ouvrir tes objectifs, tes amis et les nouveautés"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 14.5c1.1-1.35 2.45-2.02 4-2.02s2.9.67 4 2.02M12 10a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Mon espace</span><small>Objectifs, amis, nouveautés</small></button>
+            <button class="profile-menu-link" id="profileNotesButton" type="button" data-open-notes title="Ouvrir tes notes privées"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Notes</span></button>
           </div>
         </div>
         <div class="server-control" id="serverControl" style="display:none"><button class="server-control-toggle" id="serverControlButton" type="button" title="Serveur local" aria-label="Contrôle du serveur" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6.8 6.8a7.35 7.35 0 1 0 10.4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><button class="server-stop-button" id="stopServerButton" type="button">Arrêter</button></div>
@@ -2163,6 +2163,7 @@
             <form id="identityForm" class="identity-form" hidden><label for="identityUsername">Pseudo</label><div class="identity-form-row"><span aria-hidden="true">@</span><input id="identityUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required><button type="submit" class="gf-button">Enregistrer</button><button id="identityCancelButton" type="button" class="gf-button gf-button-secondary">Annuler</button></div><p class="identity-help">3 à 24 caractères. Une modification tous les 30 jours.</p></form>
             <p id="identityChangeDate" class="identity-change-date"></p><p id="identityFeedback" class="identity-feedback" role="status" aria-live="polite"></p>
             <div class="identity-facts"><div><span>Email</span><strong id="identityFactEmail" translate="no">—</strong></div><div><span>Membre depuis</span><strong id="identityCreated">—</strong></div><div><span>Abonnement</span><strong id="identityPlan">Gratuit</strong></div><div id="identitySubscriptionRow" hidden><span>Abonnement depuis</span><strong id="identitySubscriptionDate">—</strong></div></div>
+            <details class="account-sync-detail" id="accountSyncDetail" hidden><summary>Sauvegarde et partage <strong id="syncStatusText" role="status">Prêt à synchroniser</strong></summary><div class="account-sync-content"><p>Tes changements sont enregistrés automatiquement dans ton compte lorsque la synchronisation est disponible. En cas de coupure, ils restent sur cet appareil jusqu’au retour de la connexion.</p><p>Le partage est désactivé par défaut. Chaque ami ne peut consulter que les mois et les lignes que tu lui autorises dans « Partage et amis ».</p></div></details>
           </div>
         </section>
         <div class="account-panel">
@@ -2208,7 +2209,6 @@
             </div>
             <div class="account-user-actions"><button class="account-btn-secondary account-logout-button" id="accountSettingsLogoutBtn" data-account-logout type="button" hidden><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5M14 16l4-4-4-4M18 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Se déconnecter</span></button></div>
           </div>
-          <details class="account-sync-detail" id="accountSyncDetail" hidden><summary>Sauvegarde et partage <strong id="syncStatusText" role="status">Prêt à synchroniser</strong></summary><p>Les modifications du tableur, des objectifs et des notes sont sauvegardées dans ton compte. Tes amis ne voient que les éléments autorisés dans Partage et amis.</p></details>
           <p class="account-status" id="accountStatus">Non configuré</p>
         </div>
       </section>
@@ -3016,7 +3016,7 @@
       if(!trigger||!dialog)return;
       const closeDialog=function(){ if(dialog.open)dialog.close(); };
       trigger.addEventListener("click",function(){
-        if(window.matchMedia&&window.matchMedia("(max-width:560px)").matches&&!dialog.open){ dialog.showModal(); trigger.setAttribute("aria-expanded","true"); }
+        if((document.body.dataset.interface==="studio" || (window.matchMedia&&window.matchMedia("(max-width:560px)").matches))&&!dialog.open){ dialog.showModal(); trigger.setAttribute("aria-expanded","true"); }
       });
       if(close)close.addEventListener("click",closeDialog);
       dialog.addEventListener("click",function(event){ if(event.target===dialog)closeDialog(); });
@@ -5849,7 +5849,7 @@ function rowsToImportedPages(rows, fileName, sheetName){
     if(typeof window.updateSheetStatus==="function") window.updateSheetStatus();
     var el = document.getElementById("syncStatusText");
     if(!el) return;
-    el.dataset.syncState=syncState.pushing?"syncing":syncState.dirty?"pending":"ready";
+    el.dataset.syncState=!navigator.onLine?"offline":syncState.pushing?"syncing":syncState.dirty?"pending":syncState.lastSync?"synced":"idle";
     if(!getUser()){ el.textContent = ""; return; }
     if(!navigator.onLine){ el.textContent = "Hors ligne — sync en attente"; return; }
     if(syncState.pushing){ el.textContent = "Synchronisation..."; return; }
