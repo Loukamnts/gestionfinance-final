@@ -613,7 +613,7 @@
     {
       title: "Cartes de synthèse",
       text: "Voici tes statistiques : salaire moyen, total épargné et mois les plus/moins dépensiers.",
-      target: ".metrics",
+      target: ".metrics, .mobile-finance-summary",
       action: "Suivant",
     },
     {
@@ -631,7 +631,7 @@
     {
       title: "Onglet Tableur",
       text: "Clique sur Tableur pour accéder à ton tableur et saisir tes données.",
-      target: "[data-page='sheet'], #sheetButton, .nav-item:nth-child(2)",
+      target: ".studio-sidebar-nav [data-page='sheet'], .desktop-nav [data-page='sheet'], .bottom-nav [data-page='sheet']",
       action: "Aller au Tableur",
       navigateTo: "sheet",
     },
@@ -645,7 +645,7 @@
     {
       title: "Profil et réglages",
       text: "Retrouve ici le thème, ton compte, l’aide et les réglages de l’application.",
-      target: ".profile-trigger, [data-page='settings'], #settingsButton, .nav-item:nth-child(3)",
+      target: ".profile-trigger, .studio-mobile-menu-button, .desktop-nav [data-page='settings']",
       action: "Terminer",
       isLast: true,
     },
@@ -719,23 +719,17 @@
 
     // Find target element — support multiple selectors, pick the first VISIBLE one with meaningful size
     var target = null;
-    var selectors = step.target.split(",");
+    var studioMobile = document.body.dataset.interface === "studio" && window.innerWidth <= 780;
+    var selectors = (studioMobile && step.navigateTo === "sheet" ? ".studio-mobile-menu-button" : studioMobile && step.isLast ? ".studio-mobile-menu-button" : step.target).split(",");
     for (var i = 0; i < selectors.length; i++) {
       var el = document.querySelector(selectors[i].trim());
       if (!el) continue;
       var r = el.getBoundingClientRect();
       var style = getComputedStyle(el);
-      // Prefer elements with real dimensions and not hidden
-      if (r.width > 80 && r.height > 40 && style.display !== "none" && style.visibility !== "hidden") {
+      // Ne jamais guider vers un bouton masqué, inerte ou sorti de l'écran.
+      if (r.width > 20 && r.height > 20 && r.right > 0 && r.left < window.innerWidth && style.display !== "none" && style.visibility !== "hidden" && !el.closest("[hidden], [inert]")) {
         target = el;
         break;
-      }
-    }
-    // Fallback: first element that exists at all
-    if (!target) {
-      for (var j = 0; j < selectors.length; j++) {
-        target = document.querySelector(selectors[j].trim());
-        if (target) break;
       }
     }
     if (!target) {
@@ -797,25 +791,7 @@
     }
 
     var tooltipWidth = Math.min(340, window.innerWidth - 40);
-    var tooltipHeight = 180; // estimation
     var tooltipX = (window.innerWidth - tooltipWidth) / 2;
-    var tooltipY;
-
-    // Si la cible est dans la moitié supérieure, on met le tooltip en-dessous
-    if (rect.top < window.innerHeight / 2) {
-      tooltipY = rect.bottom + padding + 16;
-      // Si dépasse en bas, on met au-dessus
-      if (tooltipY + tooltipHeight > window.innerHeight - 20) {
-        tooltipY = Math.max(20, rect.top - tooltipHeight - padding - 16);
-      }
-    } else {
-      // Sinon on met au-dessus
-      tooltipY = rect.top - tooltipHeight - padding - 16;
-      // Si dépasse en haut, on met en-dessous
-      if (tooltipY < 20) {
-        tooltipY = rect.bottom + padding + 16;
-      }
-    }
 
     // Mobile : centrer horizontalement avec marges
     if (window.innerWidth <= 480) {
@@ -824,7 +800,6 @@
 
     tooltip.style.width = tooltipWidth + "px";
     tooltip.style.left = tooltipX + "px";
-    tooltip.style.top = tooltipY + "px";
     tooltip.style.animation = "tooltipIn 0.3s ease";
 
     // Progress dots
@@ -838,9 +813,15 @@
     tooltip.innerHTML =
       '<div class="tutorial-progress">' + dotsHtml + '</div>' +
       '<h4>' + step.title + '</h4>' +
-      '<p>' + step.text + '</p>' +
+      '<p>' + (document.body.dataset.interface === "studio" && window.innerWidth <= 780 && step.isLast ? "Ouvre la navigation pour retrouver ton profil et les réglages." : step.text) + '</p>' +
       '<button class="tutorial-btn" id="tutorialNext">' + step.action + '</button>' +
       '<button class="tutorial-skip" id="tutorialSkip">Passer</button>';
+
+    var tooltipHeight = tooltip.offsetHeight;
+    var below = rect.bottom + padding + 16;
+    var above = rect.top - tooltipHeight - padding - 16;
+    var tooltipY = below + tooltipHeight <= window.innerHeight - 16 ? below : above >= 16 ? above : Math.max(16, Math.min(window.innerHeight - tooltipHeight - 16, (window.innerHeight - tooltipHeight) / 2));
+    tooltip.style.top = tooltipY + "px";
 
     // Wire buttons
     var nextBtn = $("tutorialNext");
