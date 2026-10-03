@@ -141,3 +141,21 @@ html[data-theme][data-palette] {
 .doc~.public-footer{grid-template-columns:1fr auto;align-items:center;padding:22px 0 32px}
 .doc~.public-footer p{margin:0}
 @media(max-width:680px){.doc{padding-bottom:60px}.doc-toc{gap:7px}.doc-toc a{padding:7px 9px;font-size:.78rem}.doc~.public-footer{grid-template-columns:1fr auto;gap:12px}}
+
+/* Le titre ne déborde pas sur l'aperçu entre les formats ordinateur et tablette. */
+@media (min-width:981px) and (max-width:1180px) {
+  .hero-copy { min-width:0; }
+  .hero h1 { font-size:clamp(3rem,5.15vw,3.8rem); }
+}
+
+/* Sommaire des documents : navigation sobre et exhaustive. */
+.doc-toc { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 28px; margin:30px 0 42px; padding:8px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.doc-toc a { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:48px; padding:10px 2px; border:0; border-bottom:1px solid var(--line); border-radius:0; background:transparent; font-weight:600; }
+.doc-toc a:nth-last-child(-n+2) { border-bottom:0; }
+.doc-toc a::after { content:"↗"; color:var(--accent); font-size:.9rem; }
+.doc-toc a:hover,.doc-toc a:focus-visible { border-color:var(--line); color:var(--accent); }
+@media (max-width:680px) {
+  .doc-toc { grid-template-columns:1fr; gap:0; }
+  .doc-toc a { min-height:44px; padding:9px 2px; font-size:.86rem; }
+  .doc-toc a:nth-last-child(2) { border-bottom:1px solid var(--line); }
+}
