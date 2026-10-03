@@ -24,11 +24,7 @@
   var initialTheme=read();
   apply(initialTheme,false);
   applyPalette(readPalette(initialTheme),true);
-  var revealKey="meuniance.presentationRevealSeen";
-  var alreadySeen=false;
-  try{alreadySeen=sessionStorage.getItem(revealKey)==="1";sessionStorage.setItem(revealKey,"1");}catch(error){}
-  if(alreadySeen){document.querySelectorAll(".reveal").forEach(function(element){element.classList.add("is-visible");});}
-  else if("IntersectionObserver" in window){
+  if("IntersectionObserver" in window){
     var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.add("is-visible");observer.unobserve(entry.target);}});},{threshold:.13});
     document.querySelectorAll(".reveal").forEach(function(element){observer.observe(element);});
   }else document.querySelectorAll(".reveal").forEach(function(element){element.classList.add("is-visible");});
