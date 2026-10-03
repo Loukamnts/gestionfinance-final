@@ -5676,7 +5676,7 @@ function rowsToImportedPages(rows, fileName, sheetName){
     setLoading(true); clearMsg();
     try{
       var res = await sb.client.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + "/"
+        redirectTo: window.location.origin + window.location.pathname
       });
       if(res.error){ msg(translateAuthError(res.error)); return; }
       msg("Si un compte existe pour cette adresse, un lien de réinitialisation sera envoyé. Vérifie aussi les spams.", "ok");
