@@ -1438,3 +1438,22 @@ body[data-theme="brutal"] .account-section :is(.identity-summary,.identity-form,
 /* Les données et les libellés de mois restent lisibles dans tous les thèmes. */
 #dashboardPage :is(.metric-value,.mobile-finance-summary-value,.detail-row strong,.chart-panel .legend-item) { font-family:var(--font-body); font-variant-numeric:tabular-nums lining-nums; letter-spacing:0; }
 #dashboardPage :is(#maxExpenseMonth,#minExpenseMonth) { font-weight:700; }
+
+/* La récupération du compte garde le site en arrière-plan et reste lisible sur mobile. */
+.password-recovery-dialog { position:fixed; inset:0; margin:auto; width:min(480px,calc(100vw - 28px)); max-width:none; max-height:calc(100dvh - 28px); overflow:auto; padding:clamp(22px,4vw,32px); border:1px solid var(--line-strong); border-radius:var(--control-radius,var(--radius)); background:var(--panel-solid); color:var(--text); box-shadow:0 28px 80px #0009; }
+.password-recovery-dialog::backdrop { background:#09090dcc; backdrop-filter:blur(4px); }
+.password-recovery-dialog form { display:grid; gap:15px; }
+.password-recovery-dialog .eyebrow { margin:0; }
+.password-recovery-dialog h2 { margin:0; font:750 clamp(1.35rem,4vw,1.75rem)/1.2 var(--font-heading); }
+.password-recovery-dialog p { margin:0; color:var(--muted); line-height:1.55; }
+#passwordRecoveryFields { display:grid; gap:8px; }
+#passwordRecoveryFields label:not(:first-child) { margin-top:8px; }
+#passwordRecoveryFields label { font-size:.86rem; font-weight:700; }
+#passwordRecoveryFields input { width:100%; }
+.password-recovery-dialog [hidden] { display:none !important; }
+.password-recovery-message[data-kind="error"] { color:var(--danger,var(--error,#ed7474)); }
+.password-recovery-message[data-kind="success"] { color:var(--success,var(--accent)); }
+.password-recovery-actions { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:10px; }
+.password-recovery-actions button { min-width:130px; }
+.password-recovery-actions button:disabled { opacity:.55; cursor:wait; }
+@media(max-width:520px) { .password-recovery-actions button { flex:1 1 100%; } }
