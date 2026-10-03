@@ -2,6 +2,19 @@
 (function(){
 "use strict";
 const dictionary=Object.freeze({
+  "Sécurité du compte": "Account security",
+  "Choisir un nouveau mot de passe": "Choose a new password",
+  "Ton lien est validé. Choisis un mot de passe d’au moins 8 caractères.": "Your link is valid. Choose a password of at least 8 characters.",
+  "Nouveau mot de passe": "New password",
+  "Confirmer le mot de passe": "Confirm password",
+  "Enregistrer le mot de passe": "Save password",
+  "Terminer": "Done",
+  "Le mot de passe doit contenir au moins 8 caractères.": "The password must be at least 8 characters long.",
+  "Les deux mots de passe ne correspondent pas.": "The passwords do not match.",
+  "Enregistrement en cours…": "Saving…",
+  "Mot de passe modifié. Tu peux maintenant te connecter à la console locale.": "Password changed. You can now sign in to the local console.",
+  "Mot de passe modifié, mais la déconnexion a échoué. Clique sur Terminer pour réessayer.": "Password changed, but sign-out failed. Select Done to retry.",
+  "Si un compte existe pour cette adresse, un lien de réinitialisation sera envoyé. Vérifie aussi les spams.": "If an account exists for this address, a reset link will be sent. Check your spam folder too.",
   "2 octobre 2026": "2 October 2026",
   "Une copie locale séparée par compte permet le mode hors ligne. Elle n'est pas chiffrée par un mot de passe personnel. Supabase chiffre les données stockées dans sa base.": "An account-separated local copy enables offline use. It is not encrypted with a personal password. Supabase encrypts data stored in its database.",
   "Du nouveau depuis le 20 septembre": "What's new since 20 September",
