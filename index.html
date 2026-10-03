@@ -1827,9 +1827,9 @@
   @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260923-r2">
-  <link rel="stylesheet" href="ui-polish.css?v=20260930-r1">
+  <link rel="stylesheet" href="ui-polish.css?v=20261003-r1">
   <link rel="stylesheet" href="theme-directions.css?v=20261002-r2">
-  <script src="i18n.js?v=20261002-r2"></script>
+  <script src="i18n.js?v=20261003-r1"></script>
   <script src="ui-controls.js?v=20260923-r10" defer></script>
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard" data-interface="classic">
@@ -2351,6 +2351,26 @@
       <div id="welcomePlanOffer"></div>
       <div class="welcome-actions"><button class="gf-button welcome-skip" id="welcomeSkipPlan" type="button">Non merci</button></div>
     </section>
+  </dialog>
+
+  <dialog class="password-recovery-dialog" id="passwordRecoveryDialog" aria-labelledby="passwordRecoveryTitle" aria-describedby="passwordRecoveryDescription">
+    <form id="passwordRecoveryForm">
+      <span class="eyebrow">Sécurité du compte</span>
+      <h2 id="passwordRecoveryTitle">Choisir un nouveau mot de passe</h2>
+      <p id="passwordRecoveryDescription">Ton lien est validé. Choisis un mot de passe d’au moins 8 caractères.</p>
+      <div id="passwordRecoveryFields">
+        <label for="passwordRecoveryNew">Nouveau mot de passe</label>
+        <input id="passwordRecoveryNew" type="password" minlength="8" autocomplete="new-password" required>
+        <label for="passwordRecoveryConfirm">Confirmer le mot de passe</label>
+        <input id="passwordRecoveryConfirm" type="password" minlength="8" autocomplete="new-password" required>
+      </div>
+      <p id="passwordRecoveryMessage" class="password-recovery-message" role="status" aria-live="polite"></p>
+      <div class="password-recovery-actions">
+        <button id="passwordRecoveryCancel" type="button" class="button button-ghost">Annuler</button>
+        <button id="passwordRecoverySubmit" type="submit" class="button button-primary">Enregistrer le mot de passe</button>
+        <button id="passwordRecoveryDone" type="button" class="button button-primary" hidden>Terminer</button>
+      </div>
+    </form>
   </dialog>
 
   <!-- Barre de navigation inférieure (style app mobile : Accueil / Tableur / Mon espace) -->
@@ -5363,7 +5383,7 @@ function rowsToImportedPages(rows, fileName, sheetName){
   /* === Auth email + mot de passe (Supabase) ===
      Pas de serveur à gérer : le SDK charge la config depuis supabase_config.json.
      La clé anon est publique par conception (protégée par les RLS Supabase). */
-  var sb = { config: null, client: null, user: null };
+  var sb = { config: null, client: null, user: null, recoveryPending: false };
   function el(id){ return document.getElementById(id); }
   function translateAuthError(error){
     var raw = String((error && error.message) || error || "").trim();
@@ -5439,6 +5459,7 @@ function rowsToImportedPages(rows, fileName, sheetName){
       var arrivedFromEmail = /([?&]code=|#access_token=)/.test(location.href);
       sb.client.auth.onAuthStateChange(function(evt, session){
         sb.user = (session && session.user) ? session.user : null;
+        if(evt === "PASSWORD_RECOVERY") sb.recoveryPending = true;
         if(sb.user) ensureProfile(sb.user);
         renderAuth();
         // Notifie les autres modules (amis, sync) du changement d'état
@@ -5446,7 +5467,7 @@ function rowsToImportedPages(rows, fileName, sheetName){
         if(evt === "SIGNED_IN" && arrivedFromEmail){ msg("Email confirmé — vous êtes connecté.", "ok"); }
         if(evt === "SIGNED_IN" && !arrivedFromEmail && sb.lastWasSignup){ msg("Connexion réussie.", "ok"); }
         if(evt === "SIGNED_OUT"){ sb.user = null; renderAuth(); msg("Déconnecté."); }
-        if(evt === "PASSWORD_RECOVERY"){ msg("Réinitialisation du mot de passe — choisissez un nouveau mot de passe."); }
+        if(evt === "PASSWORD_RECOVERY") openPasswordRecovery();
         arrivedFromEmail = false;
       });
       // Restaure la session existante au chargement
@@ -5520,6 +5541,51 @@ function rowsToImportedPages(rows, fileName, sheetName){
   function msg(t, kind){ var m = el("accountMsg"); if(m){ m.textContent = t; m.className = "account-msg " + (kind||""); } }
   function clearMsg(){ msg(""); }
   function setLoading(v){ ["accountLoginBtn","accountRegisterBtn","accountResendBtn","accountConfirmCheckBtn","accountChangeEmailBtn"].forEach(function(id){var button=el(id);if(button)button.disabled=v;}); }
+  function recoveryMessage(text,kind){ var node=el("passwordRecoveryMessage"); if(node){ node.textContent=window.GFI18n?window.GFI18n.t(text||""):text||""; node.dataset.kind=kind||""; } }
+  function openPasswordRecovery(){
+    var dialog=el("passwordRecoveryDialog");
+    if(!dialog||!sb.user)return;
+    var welcome=el("accountWelcomeDialog");if(welcome&&welcome.open)welcome.close();
+    el("passwordRecoveryFields").hidden=false;
+    el("passwordRecoverySubmit").hidden=false;
+    el("passwordRecoveryCancel").hidden=false;
+    el("passwordRecoveryDone").hidden=true;
+    el("passwordRecoveryNew").value="";
+    el("passwordRecoveryConfirm").value="";
+    recoveryMessage("");
+    if(window.GFI18n)window.GFI18n.apply(dialog);
+    if(!dialog.open)dialog.showModal();
+    el("passwordRecoveryNew").focus();
+  }
+  async function finishPasswordRecovery(){
+    var cancel=el("passwordRecoveryCancel");if(cancel)cancel.disabled=true;
+    try{if(sb.client){var result=await sb.client.auth.signOut({ scope:"local" });if(result.error)throw result.error;}}
+    catch(error){recoveryMessage(translateAuthError(error),"error");if(cancel)cancel.disabled=false;return;}
+    sb.recoveryPending=false;
+    var dialog=el("passwordRecoveryDialog");if(dialog&&dialog.open)dialog.close();
+  }
+  async function saveRecoveryPassword(event){
+    event.preventDefault();
+    var password=el("passwordRecoveryNew").value,confirm=el("passwordRecoveryConfirm").value;
+    if(password.length<8){recoveryMessage("Le mot de passe doit contenir au moins 8 caractères.","error");return;}
+    if(password!==confirm){recoveryMessage("Les deux mots de passe ne correspondent pas.","error");return;}
+    var submit=el("passwordRecoverySubmit"),cancel=el("passwordRecoveryCancel");
+    submit.disabled=true;cancel.disabled=true;recoveryMessage("Enregistrement en cours…");
+    var passwordChanged=false;
+    try{
+      var result=await sb.client.auth.updateUser({ password:password });
+      if(result.error)throw result.error;
+      passwordChanged=true;
+      sb.recoveryPending=false;
+      el("passwordRecoveryNew").value="";el("passwordRecoveryConfirm").value="";
+      el("passwordRecoveryFields").hidden=true;submit.hidden=true;cancel.hidden=true;
+      el("passwordRecoveryDone").hidden=false;
+      var signedOut=await sb.client.auth.signOut({ scope:"local" });
+      if(signedOut.error)throw signedOut.error;
+      recoveryMessage("Mot de passe modifié. Tu peux maintenant te connecter à la console locale.","success");
+    }catch(error){recoveryMessage(passwordChanged?"Mot de passe modifié, mais la déconnexion a échoué. Clique sur Terminer pour réessayer.":translateAuthError(error),"error");}
+    finally{submit.disabled=false;cancel.disabled=false;}
+  }
   function accountPane(name){var loginPane=el("accountLoginPane"),registerPane=el("accountRegisterPane"),confirmPane=el("accountEmailConfirmStep"),loginTab=el("accountLoginTab"),registerTab=el("accountRegisterTab"),loginActive=name==="login",registerActive=name==="register"||name==="confirm";if(loginPane)loginPane.hidden=!loginActive;if(registerPane)registerPane.hidden=name!=="register";if(confirmPane)confirmPane.hidden=name!=="confirm";if(loginTab){loginTab.classList.toggle("is-active",loginActive);loginTab.setAttribute("aria-selected",String(loginActive));loginTab.setAttribute("aria-current",loginActive?"step":"false");}if(registerTab){registerTab.classList.toggle("is-active",registerActive);registerTab.setAttribute("aria-selected",String(registerActive));registerTab.setAttribute("aria-current",registerActive?"step":"false");}}
   function accountEmail(kind){var id=kind==="register"?"accountRegisterEmail":"accountLoginEmail";return String(el(id)&&el(id).value||"").trim();}
   function showEmailConfirmation(email){sb.pendingSignupEmail=email;accountPane("confirm");var description=el("accountConfirmDescription");if(description)description.textContent="Nous avons envoyé un lien sécurisé à "+email+".";}
@@ -5589,6 +5655,10 @@ function rowsToImportedPages(rows, fileName, sheetName){
   async function logout(){ try{ await sb.client.auth.signOut(); sb.lastWasSignup = false; sb.pendingSignupEmail=""; }catch(e){} }
 
   function wire(){
+    var recoveryForm=el("passwordRecoveryForm");if(recoveryForm)recoveryForm.addEventListener("submit",saveRecoveryPassword);
+    var recoveryCancel=el("passwordRecoveryCancel");if(recoveryCancel)recoveryCancel.addEventListener("click",finishPasswordRecovery);
+    var recoveryDone=el("passwordRecoveryDone");if(recoveryDone)recoveryDone.addEventListener("click",finishPasswordRecovery);
+    var recoveryDialog=el("passwordRecoveryDialog");if(recoveryDialog)recoveryDialog.addEventListener("cancel",function(event){event.preventDefault();if(!el("passwordRecoverySubmit").disabled)finishPasswordRecovery();});
     var a = el("accountLoginBtn"); if(a) a.addEventListener("click", function(e){ e.preventDefault(); login(); });
     var b = el("accountRegisterBtn"); if(b) b.addEventListener("click", function(e){ e.preventDefault(); register(); });
     var rd = el("accountResendBtn"); if(rd) rd.addEventListener("click", function(e){ e.preventDefault(); resend(); });
@@ -5606,10 +5676,10 @@ function rowsToImportedPages(rows, fileName, sheetName){
     setLoading(true); clearMsg();
     try{
       var res = await sb.client.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + window.location.pathname
+        redirectTo: window.location.origin + "/"
       });
       if(res.error){ msg(translateAuthError(res.error)); return; }
-      msg("Email de réinitialisation envoyé. Vérifie ta boîte de réception (et les spams).", "ok");
+      msg("Si un compte existe pour cette adresse, un lien de réinitialisation sera envoyé. Vérifie aussi les spams.", "ok");
     }catch(e){ msg(translateAuthError(e)); }
     finally{ setLoading(false); }
   }
@@ -5621,7 +5691,7 @@ function rowsToImportedPages(rows, fileName, sheetName){
   window.__account = sb;
 })();
 </script>
-<script src="profile.js?v=20261002-r2"></script>
+<script src="profile.js?v=20261003-r1"></script>
 <script>(function(){
   /* === Sync Supabase (offline-first, multi-device) ===
      Sauvegarde locale immediate + sync cloud des qu'on est en ligne.
