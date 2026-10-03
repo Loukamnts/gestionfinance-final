@@ -8,7 +8,7 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const profile = fs.readFileSync(path.join(root, 'profile.js'), 'utf8');
 
 test('A recovery email returns to the app and opens a password form', () => {
-  assert.match(html, /resetPasswordForEmail\(email,\s*\{\s*redirectTo:\s*window\.location\.origin\s*\+\s*"\/"/);
+  assert.match(html, /resetPasswordForEmail\(email,\s*\{\s*redirectTo:\s*window\.location\.origin\s*\+\s*window\.location\.pathname/);
   assert.match(html, /evt === "PASSWORD_RECOVERY"\) openPasswordRecovery\(\)/);
   assert.match(html, /<dialog class="password-recovery-dialog"[^>]+id="passwordRecoveryDialog"/);
   assert.match(html, /id="passwordRecoveryNew"[^>]+autocomplete="new-password"[^>]+required/);
