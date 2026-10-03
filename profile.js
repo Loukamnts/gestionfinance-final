@@ -16,7 +16,7 @@
     if(!dialog.open)dialog.showModal();
   }
   function maybeWelcome(user){
-    if(!user||!profile)return;
+    if(!user||!profile||account().recoveryPending)return;
     const created=Date.parse(user.created_at||"");
     if(!Number.isFinite(created)||Date.now()-created>72*60*60*1000||profile.username)return;
     try{if(localStorage.getItem(welcomeKey(user.id)))return;}catch(e){}
