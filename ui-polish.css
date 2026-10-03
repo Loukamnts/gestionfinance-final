@@ -1308,7 +1308,6 @@ body[data-theme="editorial"] .sheet-status-mobile-dialog { border-radius:3px; }
 body[data-theme="editorial"] .sheet-status-mobile-close { border-radius:2px; }
 body[data-theme="brutal"] .sheet-status-mobile-dialog,
 body[data-theme="brutal"] .sheet-status-mobile-close { border-radius:0; }
-@media (min-width:561px) { .sheet-status-mobile-dialog { display:none !important; } }
 @media (max-width:560px) {
   #dashboardPage .sheet-status-info { cursor:pointer; }
   #dashboardPage .sheet-status-tooltip { display:none !important; }
