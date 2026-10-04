@@ -145,7 +145,7 @@ html[data-theme][data-palette] {
 /* Le titre ne déborde pas sur l'aperçu entre les formats ordinateur et tablette. */
 @media (min-width:981px) and (max-width:1180px) {
   .hero-copy { min-width:0; }
-  .hero h1 { font-size:clamp(3rem,5.15vw,3.8rem); }
+  .hero h1 { font-size:clamp(3rem,calc(11.5vw - 62px),6.15rem); }
 }
 
 /* Sommaire des documents : navigation sobre et exhaustive. */
