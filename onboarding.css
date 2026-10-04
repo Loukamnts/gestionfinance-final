@@ -436,7 +436,7 @@ body.onboarding-active, body.tutorial-active { overflow: hidden !important; over
   .wizard-card { padding: 18px 16px 16px; }
   .wizard-mini-list { grid-template-columns: 1fr; }
   .wizard-mini-list span { min-height: 32px; }
-  .tutorial-tooltip { width: calc(100vw - 28px) !important; max-width: none; left: 14px !important; top: auto !important; bottom: max(14px, env(safe-area-inset-bottom, 0px)); }
+  .tutorial-tooltip { width: calc(100vw - 28px) !important; max-width: none; left: 14px !important; bottom:auto; max-height:calc(100dvh - 32px); overflow:auto; }
 }
 body[data-theme="brutal"] .onboarding-overlay,
 body[data-theme="brutal"] .wizard-card,

@@ -142,6 +142,93 @@ drop policy if exists dashboard_snapshots_authorized_friend_select on public.fin
 
 -- Même ordre de verrouillage partout : relation, puis permissions.
 -- Une synchronisation concurrente ne peut pas remettre des copies après le retrait.
+create or replace function public.valid_shared_sheet_payload(p_payload jsonb)
+returns boolean language plpgsql immutable set search_path = '' as $$
+declare
+  item jsonb;
+  total_cells integer := 0;
+  row_count integer;
+  col_count integer;
+begin
+  if p_payload is null or jsonb_typeof(p_payload) <> 'object'
+    or octet_length(p_payload::text) > 524288
+    or jsonb_typeof(p_payload->'sheets') <> 'array' then return false; end if;
+  if jsonb_array_length(p_payload->'sheets') not between 1 and 20 then return false; end if;
+  for item in select value from jsonb_array_elements(p_payload->'sheets') loop
+    if jsonb_typeof(item) <> 'object'
+      or coalesce(item->>'rows','') !~ '^[0-9]{1,3}$'
+      or coalesce(item->>'cols','') !~ '^[0-9]{1,2}$'
+      or jsonb_typeof(item->'headers') <> 'array'
+      or jsonb_typeof(item->'rowHeaders') <> 'array'
+      or jsonb_typeof(item->'cells') <> 'object' then return false; end if;
+    row_count := (item->>'rows')::integer;
+    col_count := (item->>'cols')::integer;
+    if row_count > 500 or col_count < 1 or col_count > 12
+      or jsonb_array_length(item->'headers') > 12
+      or jsonb_array_length(item->'rowHeaders') > 500 then return false; end if;
+    total_cells := total_cells + row_count * col_count;
+    if total_cells > 6000 then return false; end if;
+  end loop;
+  return true;
+exception when others then return false;
+end;
+$$;
+revoke all on function public.valid_shared_sheet_payload(jsonb) from public, anon;
+grant execute on function public.valid_shared_sheet_payload(jsonb) to authenticated;
+
+create or replace function public.valid_shared_dashboard_payload(p_payload jsonb)
+returns boolean language plpgsql immutable set search_path = '' as $$
+declare
+  item jsonb;
+  total_details integer := 0;
+begin
+  if p_payload is null or jsonb_typeof(p_payload) <> 'object'
+    or octet_length(p_payload::text) > 524288
+    or jsonb_typeof(p_payload->'months') <> 'array' then return false; end if;
+  if jsonb_array_length(p_payload->'months') > 240 then return false; end if;
+  for item in select value from jsonb_array_elements(p_payload->'months') loop
+    if jsonb_typeof(item) <> 'object' then return false; end if;
+    if item ? 'details' then
+      if jsonb_typeof(item->'details') <> 'array' then return false; end if;
+      total_details := total_details + jsonb_array_length(item->'details');
+      if total_details > 6000 then return false; end if;
+    end if;
+  end loop;
+  return true;
+exception when others then return false;
+end;
+$$;
+revoke all on function public.valid_shared_dashboard_payload(jsonb) from public, anon;
+grant execute on function public.valid_shared_dashboard_payload(jsonb) to authenticated;
+
+-- L'ancien RPC de cellules doit suivre la même autorisation globale que les copies filtrées.
+create or replace function public.shared_rows_for_me(p_year int default null)
+returns table (owner_id uuid, owner_email text, year int, row_key text, row_label text,
+  row_order int, rule text, month int, value numeric)
+language sql security definer set search_path = '' as $$
+  with accepted as (
+    select f.owner_id as oid, p.email as oemail
+    from public.friendships f join public.profiles p on p.id = f.owner_id
+    where f.friend_id = auth.uid() and f.status = 'accepted'
+      and exists (select 1 from public.share_permissions access
+        where access.owner_id=f.owner_id and access.friend_id=auth.uid()
+          and access.year is null and access.month is null and access.row_key is null
+          and access.can_view_sheet=true)
+  )
+  select r.owner_id,a.oemail,r.year,r.row_key,r.row_label,r.row_order,r.rule,c.month,c.value
+  from accepted a join public.finance_rows r on r.owner_id=a.oid
+    join public.finance_cells c on c.row_id=r.id
+  where (p_year is null or r.year=p_year)
+    and exists (select 1 from public.share_permissions sp
+      where sp.owner_id=r.owner_id and sp.friend_id=auth.uid() and sp.allowed=true
+        and (sp.year is null or sp.year=r.year)
+        and (sp.month is null or sp.month=c.month)
+        and (sp.row_key is null or sp.row_key=r.row_key))
+  order by a.oemail,r.year,r.row_order,c.month;
+$$;
+revoke all on function public.shared_rows_for_me(int) from public, anon;
+grant execute on function public.shared_rows_for_me(int) to authenticated;
+
 create or replace function public.save_friend_share_config(
   p_friend_id uuid,
   p_can_view_dashboard boolean,
@@ -199,8 +286,14 @@ begin
   if p_can_view_sheet and p_sheet_payload is null then
     raise exception 'missing_sheet_payload';
   end if;
+  if p_can_view_sheet and not public.valid_shared_sheet_payload(p_sheet_payload) then
+    raise exception 'invalid_sheet_payload';
+  end if;
   if p_can_view_dashboard and p_dashboard_payload is null then
     raise exception 'missing_dashboard_payload';
+  end if;
+  if p_can_view_dashboard and not public.valid_shared_dashboard_payload(p_dashboard_payload) then
+    raise exception 'invalid_dashboard_payload';
   end if;
 
   delete from public.share_permissions
@@ -265,6 +358,8 @@ begin
   if jsonb_array_length(p_rules)=0 then return false; end if;
   if (rights.can_view_sheet and p_sheet_payload is null)
     or (rights.can_view_dashboard and p_dashboard_payload is null) then return false; end if;
+  if rights.can_view_sheet and not public.valid_shared_sheet_payload(p_sheet_payload) then return false; end if;
+  if rights.can_view_dashboard and not public.valid_shared_dashboard_payload(p_dashboard_payload) then return false; end if;
   -- Refuse un instantané calculé à partir d'une ancienne sélection.
   if exists (
     (select year,month,row_key from public.share_permissions

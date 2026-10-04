@@ -122,7 +122,29 @@
     })();
     try{return await syncPending;}finally{syncPending=null;}
   }
-  async function loadShared(friendId,kind){var client=sb(),me=user();if(!client||!me)return{error:"Non connecté"};var table=kind==="dashboard"?"finance_shared_dashboard_snapshots":"finance_shared_sheet_snapshots";try{var result=await client.from(table).select("payload").eq("owner_id",friendId).eq("friend_id",me.id).maybeSingle();if(result.error)return{error:"Le chargement a échoué. Vérifie ta connexion puis réessaie."};if(!result.data||!result.data.payload)return{error:"Cet accès a peut-être été retiré, ou ton ami doit enregistrer à nouveau son partage."};return{payload:typeof result.data.payload==="string"?JSON.parse(result.data.payload):result.data.payload};}catch(e){return{error:errorText(e)};}}
+  function safeSharedSheet(data){
+    if(!data||!Array.isArray(data.sheets)||data.sheets.length<1||data.sheets.length>20)return false;
+    var total=0;
+    return data.sheets.every(function(sheet){
+      var rows=sheet&&sheet.rows,cols=sheet&&sheet.cols;
+      if(!Number.isInteger(rows)||rows<0||rows>500||!Number.isInteger(cols)||cols<1||cols>12
+        ||!Array.isArray(sheet.headers)||sheet.headers.length>12
+        ||!Array.isArray(sheet.rowHeaders)||sheet.rowHeaders.length>500
+        ||!sheet.cells||typeof sheet.cells!=="object"||Array.isArray(sheet.cells))return false;
+      total+=rows*cols;
+      return total<=6000;
+    });
+  }
+  function safeSharedDashboard(data){
+    if(!data||!Array.isArray(data.months)||data.months.length>240)return false;
+    var total=0;
+    return data.months.every(function(month){
+      if(!month||typeof month!=="object"||Array.isArray(month))return false;
+      if(month.details!==undefined){if(!Array.isArray(month.details))return false;total+=month.details.length;}
+      return total<=6000;
+    });
+  }
+  async function loadShared(friendId,kind){var client=sb(),me=user();if(!client||!me)return{error:"Non connecté"};var table=kind==="dashboard"?"finance_shared_dashboard_snapshots":"finance_shared_sheet_snapshots";try{var result=await client.from(table).select("payload").eq("owner_id",friendId).eq("friend_id",me.id).maybeSingle();if(result.error)return{error:"Le chargement a échoué. Vérifie ta connexion puis réessaie."};if(!result.data||!result.data.payload)return{error:"Cet accès a peut-être été retiré, ou ton ami doit enregistrer à nouveau son partage."};var payload=typeof result.data.payload==="string"?JSON.parse(result.data.payload):result.data.payload;if(kind==="dashboard"?!safeSharedDashboard(payload):!safeSharedSheet(payload))return{error:"Ce partage est trop volumineux ou invalide. Demande à ton ami de l’enregistrer à nouveau."};return{payload:payload};}catch(e){return{error:errorText(e)};}}
   // Interface de partage : aucune écriture tant que l'accès n'est pas enregistré.
   var renderVersion=0,viewVersion=0,selectedTab="friends",nextMessage="",sharedDashboardDispose=null;
   function disposeSharedDashboard(){if(sharedDashboardDispose){sharedDashboardDispose();sharedDashboardDispose=null;}}

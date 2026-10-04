@@ -58,9 +58,15 @@ test('Fonts, Chart.js and Supabase are served locally',()=>{
   assert(!/fonts\.googleapis|fonts\.gstatic|cdn\.jsdelivr/.test(published));
   for(const file of ['vendor/fonts.css','vendor/chart.js','vendor/supabase.js'])assert(published.includes(file),file);
 });
+test('The branded 404 page is included with a working route back to the app',()=>{
+  const page=fs.readFileSync(path.join(root,'dist/404.html'),'utf8');
+  assert.match(page,/<title>Page introuvable \| Meuniance<\/title>/);
+  assert.match(page,/href="\/accueil"/);
+  assert.match(page,/href="\/"/);
+});
 test('SQL, tests, package sources and credentials are absent from public output',()=>{
-  for(const name of ['supabase_schema.sql','supabase_security_hardening.sql','.git','.env',
-    'tests','scripts','node_modules','package.json','package-lock.json','AUDIT_SECURITE.md']){
+  for(const name of ['supabase_schema.sql','supabase_security_hardening.sql','supabase_stripe_billing.sql','.git','.env',
+    'api','server','tests','scripts','node_modules','package.json','package-lock.json','AUDIT_SECURITE.md']){
     assert(!fs.existsSync(path.join(root,'dist',name)),name);
   }
 });

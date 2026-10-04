@@ -24,6 +24,7 @@ const copy = (from, to = from) => put(to, fs.readFileSync(path.join(root, from))
 const integrity = content => 'sha384-' + crypto.createHash('sha384').update(content).digest('base64');
 const publicFiles = ['sheet.js','sheet.css','onboarding.js','onboarding.css','friends.js','profile.js',
   'i18n.js','shared-dashboard.js','sharing.css','ui-controls.js','ui-polish.css','theme-directions.css','objectives.js',
+  'subscriptions.js','subscriptions.css',
   'store-shim.js','favicon.ico','brand-mark.svg','app-icon-180.png','app-icon-512.png','manifest.webmanifest','supabase_config.json',
   'robots.txt','sitemap.xml','public.css','public.js','share-card.png'];
 for (const file of publicFiles) copy(file);
@@ -98,7 +99,7 @@ html = html.replace(/<script\b([^>]*?)\bsrc="([^"?#]+)([^" ]*)"([^>]*)><\/script
   return `<script ${before}src="${src}${query}"${after} integrity="${integrity(code)}" crossorigin="anonymous"></script>`;
 });
 put('app.html',html);
-for (const page of ['presentation.html','confidentialite.html','conditions.html']) {
+for (const page of ['presentation.html','confidentialite.html','conditions.html','404.html']) {
   if (fs.existsSync(path.join(root,page))) copy(page);
 }
 copy('presentation.html','index.html');

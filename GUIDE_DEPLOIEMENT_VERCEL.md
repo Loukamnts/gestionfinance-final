@@ -1,5 +1,8 @@
 # Déployer Gestion Finance sur Vercel
 
+Pour activer les offres payantes, suivre aussi `STRIPE_SETUP.md`. Les paiements
+restent volontairement désactivés tant que cette configuration n'est pas complète.
+
 Mise à jour du 9 septembre 2026. Le site reste statique et les sources restent à la racine. Un build prépare désormais un dossier public `dist`. Ne publie plus directement la racine : elle contient les migrations SQL et les outils de test.
 
 ## Projet existant

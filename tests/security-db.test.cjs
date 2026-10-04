@@ -9,7 +9,7 @@ const B='10000000-0000-4000-8000-000000000002';
 const C='10000000-0000-4000-8000-000000000003';
 let db;
 const rules=[{year:2026,month:1,row_key:'2026:0'}];
-const sheet={v:'shared-sheet-v2',sheets:[{rows:1,cols:1,cells:{'0,0':{raw:'120'}}}]};
+const sheet={v:'shared-sheet-v2',sheets:[{name:'2026',headers:['Janvier'],rowHeaders:['Salaire'],rows:1,cols:1,cells:{'0,0':{raw:'120'}}}]};
 const dashboard={v:'shared-dashboard-v2',months:[{salary:120}]};
 const query=(sql,params=[])=>db.query(sql,params);
 async function as(id,role='authenticated'){
@@ -123,6 +123,43 @@ test('Invalid save leaves the existing share intact',async()=>{
   await denied('select public.save_friend_share_config($1,true,true,$2,$3,$4)',
     [B,JSON.stringify([{...rules[0],month:13}]),JSON.stringify(sheet),JSON.stringify(dashboard)],/invalid_share_rules/);
   await as(B);assert.equal(await value('select count(*)::int from public.finance_shared_sheet_snapshots'),1);
+});
+test('Oversized shared sheets are rejected on save and refresh',async()=>{
+  await friendship();await share(A,B);
+  const oversized={...sheet,sheets:[{...sheet.sheets[0],rows:501}]};
+  await denied('select public.save_friend_share_config($1,true,true,$2,$3,$4)',
+    [B,JSON.stringify(rules),JSON.stringify(oversized),JSON.stringify(dashboard)],/invalid_sheet_payload/);
+  assert.equal(await value('select public.refresh_friend_share_snapshots($1,$2,$3,$4)',
+    [B,JSON.stringify(rules),JSON.stringify(oversized),JSON.stringify(dashboard)]),false);
+  await as(B);
+  assert.equal((await value('select payload from public.finance_shared_sheet_snapshots')).sheets[0].cells['0,0'].raw,'120');
+});
+test('Oversized shared dashboards are rejected on save and refresh',async()=>{
+  await friendship();await share(A,B);
+  const oversized={v:'shared-dashboard-v3',months:Array.from({length:241},(_,index)=>({label:String(index),details:[]}))};
+  await denied('select public.save_friend_share_config($1,true,true,$2,$3,$4)',
+    [B,JSON.stringify(rules),JSON.stringify(sheet),JSON.stringify(oversized)],/invalid_dashboard_payload/);
+  assert.equal(await value('select public.refresh_friend_share_snapshots($1,$2,$3,$4)',
+    [B,JSON.stringify(rules),JSON.stringify(sheet),JSON.stringify(oversized)]),false);
+  await as(B);
+  assert.equal((await value('select payload from public.finance_shared_dashboard_snapshots')).months[0].salary,120);
+});
+test('Legacy cell RPC respects the global sheet permission',async()=>{
+  await friendship();await db.exec('reset role');
+  const rowId=await value('insert into public.finance_rows(owner_id,year,row_key,row_label) values($1,2026,$2,$3) returning id',
+    [A,'2026:0','Salaire']);
+  await query('insert into public.finance_cells(row_id,month,value) values($1,1,120)',[rowId]);
+  await as(A);
+  await query('select public.save_friend_share_config($1,true,false,$2,$3,$4)',
+    [B,JSON.stringify(rules),JSON.stringify(sheet),JSON.stringify(dashboard)]);
+  await as(B);
+  assert.equal(await value('select count(*)::int from public.shared_rows_for_me(null)'),0);
+  await as(A);await share(A,B);
+  await as(B);
+  assert.equal(await value('select count(*)::int from public.shared_rows_for_me(null)'),1);
+  await as(A);await share(A,B,false);
+  await as(B);
+  assert.equal(await value('select count(*)::int from public.shared_rows_for_me(null)'),0);
 });
 test('A third person cannot remove an existing relationship',async()=>{
   const id=await friendship();await as(C);await denied('select public.remove_friendship($1)',[id]);

@@ -1827,9 +1827,10 @@
   @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260923-r2">
-  <link rel="stylesheet" href="ui-polish.css?v=20260930-r1">
-  <link rel="stylesheet" href="theme-directions.css?v=20260930-r1">
-  <script src="i18n.js?v=20260929-r2"></script>
+  <link rel="stylesheet" href="subscriptions.css?v=20261004-r1">
+  <link rel="stylesheet" href="ui-polish.css?v=20261003-r1">
+  <link rel="stylesheet" href="theme-directions.css?v=20261002-r2">
+  <script src="i18n.js?v=20261003-r1"></script>
   <script src="ui-controls.js?v=20260923-r10" defer></script>
 </head>
 <body data-theme="glass" data-mode="dark" data-page="dashboard" data-interface="classic">
@@ -1895,16 +1896,16 @@
       </nav>
       <div class="top-actions">
         <button class="studio-mobile-menu-button" id="studioMobileMenuButton" type="button" aria-label="Ouvrir la navigation" aria-controls="studioSidebar" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="mobile-settings-button" type="button" data-page="settings" aria-label="Paramètres" title="Paramètres"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6l-.04.08a2 2 0 0 1-3.92 0L10 20a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1l-.08-.04a2 2 0 0 1 0-3.92L4 10a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6l.04-.08a2 2 0 0 1 3.92 0L14 4a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.36.7.6 1l.08.04a2 2 0 0 1 0 3.92L20 14c-.24.3-.46.64-.6 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></button>
         <div class="profile-menu" id="profileMenu">
           <button class="profile-trigger" id="profileMenuButton" type="button" aria-expanded="false" aria-controls="profilePopover"><span class="profile-avatar" id="profileAvatar">?</span><span class="profile-trigger-label" id="profileLabel">Profil</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <div class="profile-popover" id="profilePopover" hidden>
             <div class="profile-popover-account"><span class="profile-popover-kicker">Compte</span><strong id="profileEmail">Non connecté</strong></div>
-            <div class="status-pill" id="connectionStatus"><span class="status-dot"></span><span id="connectionText">Non connecté</span></div>
-            <button class="profile-menu-link profile-menu-link-primary" id="profilePersonalButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 14.5c1.1-1.35 2.45-2.02 4-2.02s2.9.67 4 2.02M12 10a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Mon espace</span><small>Objectifs, amis, nouveautés</small></button>
-            <button class="profile-menu-link" id="profileNotesButton" type="button" data-open-notes><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Notes</span></button>
-            <button class="profile-menu-link" id="profileIdentityButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.7-3.4 3.1-5 7-5s6.3 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Profil</span></button>
-            <button class="profile-menu-link" id="profileSettingsButton" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6l-.04.08a2 2 0 0 1-3.92 0L10 20a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1l-.08-.04a2 2 0 0 1 0-3.92L4 10a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6l.04-.08a2 2 0 0 1 3.92 0L14 4a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.36.7.6 1l.08.04a2 2 0 0 1 0 3.92L20 14c-.24.3-.46.64-.6 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>Paramètres</span></button>
-            <button class="profile-menu-link profile-menu-link-danger" id="accountLogoutBtn" data-account-logout type="button" hidden><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5M14 16l4-4-4-4M18 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Se déconnecter</span></button>
+            <div class="status-pill" id="connectionStatus" title="État de tes données et de leur connexion au compte"><span class="status-dot is-empty"></span><span id="connectionText">Aucune donnée</span></div>
+            <button class="profile-menu-link" id="profileIdentityButton" type="button" title="Voir ton pseudo, ton abonnement et ton compte"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.7-3.4 3.1-5 7-5s6.3 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Profil</span></button>
+            <button class="profile-menu-link profile-menu-link-primary" id="profilePersonalButton" type="button" title="Ouvrir tes objectifs, tes amis et les nouveautés"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 14.5c1.1-1.35 2.45-2.02 4-2.02s2.9.67 4 2.02M12 10a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Mon espace</span><small>Objectifs, amis, nouveautés</small></button>
+            <button class="profile-menu-link" id="profileNotesButton" type="button" data-open-notes title="Ouvrir tes notes privées"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Notes</span></button>
+            <button class="profile-menu-link" id="profileSubscriptionButton" type="button" title="Voir les formules et gérer ton abonnement"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 9h18M7 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>S’abonner</span></button>
           </div>
         </div>
         <div class="server-control" id="serverControl" style="display:none"><button class="server-control-toggle" id="serverControlButton" type="button" title="Serveur local" aria-label="Contrôle du serveur" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6.8 6.8a7.35 7.35 0 1 0 10.4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><button class="server-stop-button" id="stopServerButton" type="button">Arrêter</button></div>
@@ -1925,10 +1926,10 @@
               </span>
             </button>
           </div><button type="button" id="syncSheetButton" class="gf-button gf-refresh" title="Mettre à jour le tableau de bord depuis le tableur" aria-label="Synchroniser les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Actualiser</span></button></div></div>
-          <div class="home-filter-grid">
-            <label class="home-filter"><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
-            <label class="home-filter"><span>Mois</span><select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
-            <label class="home-filter"><span>Vue du graphique</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Répartition</option><option value="grouped">Comparatif annuel</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label>
+          <div class="home-filter-grid is-pie">
+            <label class="home-filter home-filter-view"><span>Vue du graphique</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Camembert</option><option value="grouped">Comparatif annuel</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label>
+            <label class="home-filter home-filter-year" id="yearFilter"><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
+            <label class="home-filter home-filter-month" id="monthFilter"><span>Mois</span><select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
           </div>
         </section>
         <section class="latest-update-banner" id="latestUpdateBanner" hidden aria-live="polite">
@@ -1974,7 +1975,7 @@
           <div id="customLegend" class="custom-legend"></div>
         </section>
         <section class="month-details month-summary" aria-label="Résumé global">
-          <article class="detail-panel detail-panel-global"><h3>Résumé global</h3><div class="global-summary-grid"><section><h4>Épargne</h4><div class="detail-list" id="savingsBreakdown"><div class="detail-row"><span>-</span><strong>-</strong></div></div></section><section><h4>Dépenses importantes</h4><p class="expense-note" id="bigExpenses">-</p></section></div></article>
+          <article class="detail-panel detail-panel-global"><h3>Résumé global</h3><div class="global-summary-grid"><section><h4>Répartition par catégorie</h4><div class="detail-list" id="savingsBreakdown"><div class="detail-row"><span>-</span><strong>-</strong></div></div></section><section><h4>Dépenses importantes</h4><p class="expense-note" id="bigExpenses">-</p></section></div></article>
         </section>
       </section>
     </section>
@@ -2138,13 +2139,56 @@
       <section class="settings-section panel category-settings sheet-rules-section" id="categorySettings" hidden><div class="settings-section-head category-settings-title"><div><h3>Catégories détectées</h3><p>Associe les catégories détectées à la bonne règle.</p></div></div><div class="category-settings-list" id="categorySettingsList"></div></section>
       <section class="settings-section panel custom-rules-section sheet-rules-section"><div class="settings-section-head"><div><h3>Gestion des règles</h3><p>Crée, modifie ou supprime tes propres règles de catégorisation.</p></div></div><div class="custom-rule-inputs"><input type="text" id="customRuleName" placeholder="Ex : Bourse, Crypto, Immobilier" /><button id="btnAddCustomRule" type="button">Ajouter la règle</button></div><div id="customRulesList"></div><p class="hint" style="margin-top: 12px;">Les règles système (Dépense, Épargne, Ignorer) sont toujours disponibles. Une règle utilisée par une catégorie ne peut pas être supprimée.</p></section>
     </section>
+    <section class="app-page subscriptions-page" id="subscriptionsPage" hidden>
+      <section class="subscription-shell" aria-labelledby="subscriptionTitle">
+        <header class="subscription-hero">
+          <span class="subscription-kicker">Abonnements</span>
+          <h2 id="subscriptionTitle">Choisis ta formule. <em>Garde ta vie privée.</em></h2>
+          <p>Commence gratuitement. Passe à Plus ou Pro lorsque les fonctions supplémentaires te sont utiles.</p>
+          <div class="subscription-trust"><span>Paiement géré par Stripe</span><span>Aucune carte stockée par Meuniance</span><span>Résiliation en ligne</span></div>
+        </header>
+        <div class="subscription-notice" id="subscriptionNotice" role="status" aria-live="polite">Vérification de la disponibilité des paiements…</div>
+        <section class="subscription-current" id="subscriptionCurrent" hidden>
+          <div><span>Formule actuelle</span><strong id="subscriptionCurrentPlan">Gratuit</strong><p id="subscriptionCurrentDetail">Aucun prélèvement.</p></div>
+          <button class="subscription-manage" id="subscriptionManageButton" type="button">Gérer ou résilier</button>
+        </section>
+        <section class="subscription-plans" aria-label="Formules Meuniance">
+          <article class="subscription-card" data-subscription-card="free">
+            <h3>Gratuit</h3><p class="subscription-pitch">Les outils essentiels pour suivre ton budget.</p>
+            <div class="subscription-price"><strong data-subscription-price="free">0 €</strong><span>sans limite de durée</span></div>
+            <ul><li>Tableau de bord et tableur</li><li>Synchronisation de ton compte</li><li>Un objectif financier</li><li>Export de tes données</li><li>Thèmes dans leur version d’origine</li></ul>
+            <button class="subscription-choice" type="button" data-subscription-plan="free">Continuer gratuitement</button>
+          </article>
+          <article class="subscription-card is-featured" data-subscription-card="plus">
+            <span class="subscription-tag">Le plus choisi</span>
+            <h3>Plus</h3><p class="subscription-pitch">Plus de liberté pour organiser et personnaliser ton espace.</p>
+            <div class="subscription-price"><strong data-subscription-price="plus">4,99 €</strong><span>par mois, prix total</span></div>
+            <ul><li>Tout ce qui est inclus dans Gratuit</li><li>Import Excel et objectifs illimités</li><li>Nouvelle interface et couleurs d’accent</li><li>Partage avec une personne</li><li>Évolution mensuelle complète</li></ul>
+            <button class="subscription-choice subscription-choice-primary" type="button" data-subscription-plan="plus">S’abonner et payer 4,99 € par mois</button>
+          </article>
+          <article class="subscription-card" data-subscription-card="pro">
+            <h3>Pro</h3><p class="subscription-pitch">Pour partager plus largement et préparer les usages avancés.</p>
+            <div class="subscription-price"><strong data-subscription-price="pro">7,99 €</strong><span>par mois, prix total</span></div>
+            <ul><li>Tout ce qui est inclus dans Plus</li><li>Partage avec plusieurs personnes</li><li>Autorisations distinctes pour chaque ami</li><li>Choix précis des mois et des lignes partagés</li><li>Vues Tableur et Tableau de bord partagées</li></ul>
+            <button class="subscription-choice" type="button" data-subscription-plan="pro">S’abonner et payer 7,99 € par mois</button>
+          </article>
+        </section>
+        <section class="subscription-terms" aria-label="Informations avant paiement">
+          <h3>Avant de t’abonner</h3>
+          <p>Les formules payantes sont renouvelées chaque mois jusqu’à leur résiliation. La résiliation reste accessible depuis « Gérer ou résilier » et prend effet selon les conditions affichées avant le paiement.</p>
+          <p>Stripe collecte et protège les données nécessaires au paiement. Meuniance conserve seulement les identifiants techniques et l’état de l’abonnement. Les numéros de carte et cryptogrammes ne transitent jamais par nos serveurs.</p>
+          <p id="subscriptionMerchant" hidden></p>
+          <nav><a href="/conditions" target="_blank" rel="noopener">Conditions de vente et d’utilisation</a><a href="/confidentialite" target="_blank" rel="noopener">Confidentialité</a></nav>
+        </section>
+      </section>
+    </section>
     <section class="settings-page app-page" id="settingsPage" hidden>
       <div class="settings-shell">
         <div class="settings-header panel"><div><span class="eyebrow" id="settingsKicker">Paramètres</span><h2 id="settingsTitle">Réglages</h2><p id="settingsSubtitle">Choisis ce que tu souhaites régler.</p></div></div>
         <nav class="settings-hub" id="settingsHub" aria-label="Rubriques des paramètres">
-          <span class="settings-hub-label">Compte</span>
-          <button class="settings-hub-item" type="button" data-settings-view="profile"><span><strong>Profil</strong><small>Pseudo et abonnement</small></span></button>
-          <button class="settings-hub-item" type="button" data-settings-view="account"><span><strong>Profil et connexion</strong><small>Adresse, accès et déconnexion</small></span></button>
+          <span class="settings-hub-label">Profil</span>
+          <button class="settings-hub-item" type="button" data-settings-view="account"><span><strong>Profil</strong><small>Pseudo, connexion et abonnement</small></span></button>
+          <button class="settings-hub-item" type="button" data-settings-view="billing"><span><strong>Abonnement</strong><small>Formule, factures et moyen de paiement</small></span></button>
           <span class="settings-hub-label">Préférences</span>
           <button class="settings-hub-item" type="button" data-settings-view="appearance"><span><strong>Apparence</strong><small>Thème et mode d'affichage</small></span></button>
           <button class="settings-hub-item" type="button" data-settings-view="language"><span><strong>Langue</strong><small>Français ou English</small></span></button>
@@ -2156,9 +2200,18 @@
         </nav>
 
       <!-- Section Compte : connexion email + mot de passe (Supabase) -->
-      <section class="settings-section panel account-section" data-settings-panel="account" aria-label="Compte" hidden>
+      <section class="settings-section panel account-section" data-settings-panel="account" aria-label="Profil" hidden>
         <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
-        <div class="panel-title"><h2>Compte</h2></div>
+        <div class="panel-title"><h2>Profil</h2></div>
+        <section class="identity-section" id="identitySection" aria-label="Profil" hidden>
+          <div id="identityDetails">
+            <div class="identity-summary"><div class="identity-avatar" id="identityAvatar" aria-hidden="true">?</div><div class="identity-summary-copy"><div class="identity-name-row"><strong id="identityCurrentUsername" translate="no">À choisir</strong><button id="identityEditButton" class="identity-edit-button" type="button" aria-label="Modifier le pseudo" title="Modifier le pseudo"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m4 20 4.2-.9L19 8.3a2.1 2.1 0 0 0-3-3L5.2 16.1 4 20Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m14.4 6.9 2.7 2.7" stroke="currentColor" stroke-width="1.8"/></svg></button></div><span id="identityEmail" class="identity-email" translate="no"></span></div></div>
+            <form id="identityForm" class="identity-form" hidden><label for="identityUsername">Pseudo</label><div class="identity-form-row"><span aria-hidden="true">@</span><input id="identityUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required><button type="submit" class="gf-button">Enregistrer</button><button id="identityCancelButton" type="button" class="gf-button gf-button-secondary">Annuler</button></div><p class="identity-help">3 à 24 caractères. Une modification tous les 30 jours.</p></form>
+            <p id="identityChangeDate" class="identity-change-date"></p><p id="identityFeedback" class="identity-feedback" role="status" aria-live="polite"></p>
+            <div class="identity-facts"><div><span>Email</span><strong id="identityFactEmail" translate="no">—</strong></div><div><span>Membre depuis</span><strong id="identityCreated">—</strong></div><div><span>Abonnement</span><strong id="identityPlan">Gratuit</strong></div><div id="identitySubscriptionRow" hidden><span>Abonnement depuis</span><strong id="identitySubscriptionDate">—</strong></div></div>
+            <details class="account-sync-detail" id="accountSyncDetail" hidden><summary>Sauvegarde et partage <strong id="syncStatusText" role="status">Prêt à synchroniser</strong></summary><div class="account-sync-content"><p>Tes changements sont enregistrés automatiquement dans ton compte lorsque la synchronisation est disponible. En cas de coupure, ils restent sur cet appareil jusqu’au retour de la connexion.</p><p>Le partage est désactivé par défaut. Chaque ami ne peut consulter que les mois et les lignes que tu lui autorises dans « Partage et amis ».</p></div></details>
+          </div>
+        </section>
         <div class="account-panel">
           <div class="settings-intro" id="accountIntro">
             <strong>Ton espace synchronisé</strong>
@@ -2195,26 +2248,22 @@
             <div class="account-user-info">
               <div class="account-user-avatar" id="accountUserAvatar" translate="no"></div>
               <div>
-                <p class="account-connected-label">Compte connecté</p>
+                <p class="account-connected-label">Adresse de connexion</p>
                 <strong id="accountEmailDisplay" translate="no"></strong>
                 <p class="account-connected-note">Ton espace personnel, sur tous tes appareils.</p>
               </div>
             </div>
             <div class="account-user-actions"><button class="account-btn-secondary account-logout-button" id="accountSettingsLogoutBtn" data-account-logout type="button" hidden><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5M14 16l4-4-4-4M18 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Se déconnecter</span></button></div>
           </div>
-          <div class="account-sync-detail" id="accountSyncDetail" hidden><div class="account-sync-head"><div><span>Sauvegarde du compte</span><p>Les modifications sont enregistrées automatiquement lorsque tu es connecté.</p></div><strong id="syncStatusText" role="status">Prêt à synchroniser</strong></div><ul class="account-sync-list"><li><b>Tableur, objectifs et notes</b> : sauvegardés dans ton compte.</li><li><b>Actualiser sur l’accueil</b> : recalcule uniquement les graphiques.</li><li><b>Partage</b> : rien n’est visible par défaut ; tu autorises chaque accès.</li></ul></div>
           <p class="account-status" id="accountStatus">Non configuré</p>
         </div>
       </section>
-      <section class="settings-section panel identity-section" data-settings-panel="profile" hidden>
-        <div class="settings-section-head"><div><h3>Ton profil</h3><p>Un pseudo unique pour être retrouvé par tes amis.</p></div></div>
-        <div id="identitySignedOut" class="identity-intro" hidden>Connecte-toi pour choisir un pseudo et voir ton profil.</div>
-        <div id="identityDetails" hidden>
-          <div class="identity-summary"><div class="identity-avatar" id="identityAvatar" aria-hidden="true">?</div><div><span class="identity-caption">Nom d’utilisateur</span><strong id="identityCurrentUsername" translate="no">À choisir</strong><span id="identityChangeDate">Tu peux choisir ton premier pseudo maintenant.</span></div></div>
-          <form id="identityForm" class="identity-form"><label for="identityUsername">Changer de pseudo</label><div class="identity-form-row"><span aria-hidden="true">@</span><input id="identityUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required><button type="submit" class="gf-button">Enregistrer</button></div><p class="identity-help">3 à 24 caractères : lettres sans accent, chiffres, points, tirets ou tirets bas. Un changement tous les 30 jours.</p><p id="identityFeedback" class="identity-feedback" role="status" aria-live="polite"></p></form>
-          <div class="identity-facts"><div><span>Abonnement</span><strong id="identityPlan">Gratuit</strong></div><div><span>Membre depuis</span><strong id="identityCreated">—</strong></div><div><span>Abonnement depuis</span><strong id="identitySubscriptionDate">Aucun abonnement payant</strong></div></div>
-        </div>
-      </section>
+        <section class="settings-section panel billing-settings-section" data-settings-panel="billing" hidden>
+          <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
+          <div class="settings-section-head"><div><h3>Abonnement</h3><p>Consulte ta formule et ouvre l’espace sécurisé Stripe pour tes factures, ton moyen de paiement ou ta résiliation.</p></div></div>
+          <div class="billing-settings-state"><div><span>Formule actuelle</span><strong id="billingSettingsPlan">Gratuit</strong><p id="billingSettingsDetail">Aucun prélèvement.</p></div><button class="gf-button" id="billingSettingsOpenPlans" type="button">Voir les formules</button></div>
+          <div class="billing-settings-actions"><button class="gf-button gf-button-secondary" id="billingSettingsManage" type="button" hidden>Gérer les paiements et résilier</button><p>Le portail Stripe permet de mettre à jour ou retirer un moyen de paiement lorsque l’état de l’abonnement le permet. Les factures légalement conservées ne sont pas supprimées avec la carte.</p></div>
+        </section>
         <section class="settings-section panel language-section" data-settings-panel="language" hidden>
           <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
           <div class="language-section-copy"><span class="language-kicker">Interface</span><h3>Langue</h3><p>Choisis la langue de l’interface. Tes données et les intitulés que tu as créés ne sont pas traduits.</p></div>
@@ -2253,21 +2302,21 @@
         <section class="settings-section panel settings-reading-page" data-settings-panel="privacy" hidden>
           <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
           <div class="settings-section-head"><div><h3>Confidentialité &amp; sécurité</h3><p>Les protections utiles, expliquées simplement.</p></div></div>
-          <div class="legal-section"><strong>Stockage local</strong><p>Tes données restent dans ton navigateur. Elles ne sont synchronisées avec ton compte Supabase que lorsque tu te connectes.</p></div>
+          <div class="legal-section"><strong>Stockage local</strong><p>Une copie non chiffrée par mot de passe reste dans ce navigateur pour le mode hors ligne. Elle est séparée par compte. Sur un appareil partagé, protège ta session et efface les données du navigateur après usage.</p></div>
           <div class="legal-section"><strong>Connexion HTTPS</strong><p>Le site est servi via HTTPS pour garantir le chiffrement des données en transit.</p></div>
           <div class="legal-section"><strong>Synchronisation de compte (optionnelle)</strong><p>Lorsque tu te connectes, ton tableur est synchronisé avec ton compte Supabase via une connexion chiffrée.</p></div>
-          <div class="legal-section"><strong>Pas de tracking publicitaire</strong><p>Ce site ne contient aucun tracker, cookie publicitaire ni script d'analyse tierce. Aucune donnée n'est vendue ou partagée avec des tiers.</p></div>
-          <div class="legal-section"><strong>Ce qui est enregistré</strong><p>Ton adresse email et ton mot de passe (chiffré), le contenu de ton tableur (libellés, montants, dates), tes objectifs, tes réglages d'affichage et les partages que tu accordes. Aucune coordonnée bancaire n'est demandée ni stockée.</p></div>
+          <div class="legal-section"><strong>Pas de tracking publicitaire</strong><p>L'application n'intègre aucun cookie publicitaire ni outil de statistiques tiers. La page de paiement Stripe applique ses propres mécanismes de sécurité et de prévention de la fraude.</p></div>
+          <div class="legal-section"><strong>Ce qui est enregistré</strong><p>Ton adresse email, le contenu de ton tableur, tes objectifs et les partages accordés. Si tu t'abonnes, Meuniance conserve la formule, l'état du paiement et les identifiants techniques Stripe. Les numéros complets de carte et cryptogrammes restent chez Stripe.</p></div>
           <div class="legal-section"><strong>Qui peut voir tes données</strong><p>Toi seul, et les personnes à qui tu donnes explicitement accès depuis la page Partage — jusqu'à ce que tu retires cet accès. Les règles de sécurité de la base de données empêchent tout autre compte de lire tes lignes.</p></div>
-          <div class="legal-section"><strong>Durée de conservation</strong><p>Tes données sont conservées tant que ton compte existe. Après suppression du compte, elles sont effacées de la base ; les sauvegardes techniques expirent sous 30 jours.</p></div>
-          <div class="legal-section"><strong>Récupérer ou supprimer tes données</strong><p>Le bouton « Exporter » du tableur télécharge tout au format Excel. Pour effacer : « Données et synchronisation » réinitialise ton tableur, et « Profil et connexion » supprime définitivement ton compte.</p></div>
+          <div class="legal-section"><strong>Durée de conservation</strong><p>Tes données applicatives sont conservées tant que ton compte existe. Certaines factures et écritures restent conservées pendant la durée imposée par la loi. Les sauvegardes techniques suivent les délais des prestataires.</p></div>
+          <div class="legal-section"><strong>Récupérer ou supprimer tes données</strong><p>Le bouton « Exporter » du tableur télécharge tout au format Excel. Pour effacer : « Données et synchronisation » permet de réinitialiser ton tableur ou de supprimer définitivement ton compte.</p></div>
           <div class="legal-section"><strong>Une question sur tes données ?</strong><p>Écris-nous depuis l'adresse email de ton compte. Tu peux aussi consulter la <a href="/confidentialite" target="_blank" rel="noopener">politique de confidentialité complète</a> et les <a href="/conditions" target="_blank" rel="noopener">conditions d'utilisation</a>.</p></div>
         </section>
         <section class="settings-section panel settings-reading-page" data-settings-panel="legal" hidden>
           <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
           <div class="settings-section-head"><div><h3>Mentions légales</h3><p>Les informations importantes sur Meuniance.</p></div></div>
           <div class="legal-section"><strong>Éditeur du site</strong><p>Meuniance est un outil personnel de gestion budgétaire. Le contact de l’éditeur figure dans la <a href="/confidentialite">page Confidentialité et contact</a>. Les informations saisies relèvent de l'utilisateur et demeurent sous sa responsabilité.</p></div>
-          <div class="legal-section"><strong>Nature du service</strong><p>Application de tableur et de tableau de bord financiers. Aucune donnée bancaire n'est collectée : les saisies sont manuelles et restent locales, avec synchronisation de compte optionnelle.</p></div>
+          <div class="legal-section"><strong>Nature du service</strong><p>Application de tableur et de tableau de bord financiers avec une formule gratuite et, après activation, des abonnements mensuels. Les données de paiement sont traitées sur la page sécurisée de Stripe.</p></div>
           <div class="legal-section"><strong>Propriété intellectuelle &amp; responsabilité</strong><p>Les données saisies sont les tiennes. Le site est fourni « en l'état », sans garantie de résultat. Il ne constitue pas un conseil financier, fiscal ou juridique.</p></div>
           <div class="legal-section"><strong>Suspension de compte</strong><p>Un compte qui tente d'accéder aux données d'autrui ou de perturber le service peut être suspendu. Le détail figure dans les <a href="/conditions" target="_blank" rel="noopener">conditions d'utilisation</a>.</p></div>
           <div class="legal-section"><strong>Pages publiques</strong><p><a href="/" target="_blank" rel="noopener">Présentation du service</a> · <a href="/confidentialite" target="_blank" rel="noopener">Confidentialité</a> · <a href="/conditions" target="_blank" rel="noopener">Conditions d'utilisation</a></p></div>
@@ -2282,7 +2331,7 @@
         <h3>Confidentialité &amp; sécurité</h3>
         <div class="legal-section">
           <strong>Stockage local</strong>
-          <p>Tes données restent dans ton navigateur. Elles ne sont synchronisées avec ton compte Supabase que lorsque tu te connectes.</p>
+          <p>Une copie locale séparée par compte permet le mode hors ligne. Elle n'est pas chiffrée par un mot de passe personnel. Supabase chiffre les données stockées dans sa base.</p>
         </div>
         <div class="legal-section">
           <strong>Connexion HTTPS</strong>
@@ -2334,7 +2383,49 @@
     <section class="chart-detail-card"><div class="chart-detail-head"><div><h2 id="chartDetailTitle">Détail du mois</h2><p id="chartDetailSubtitle"></p></div><button class="chart-detail-close" id="chartDetailClose" type="button" aria-label="Fermer">×</button></div><div class="chart-detail-grid" id="chartDetailGrid"></div></section>
   </div>
 
-  <!-- Barre de navigation inférieure (style app mobile : Accueil / Tableur / Paramètres) -->
+  <dialog class="welcome-dialog" id="accountWelcomeDialog" aria-labelledby="welcomeTitle">
+    <form method="dialog" class="welcome-dialog-close-wrap"><button class="welcome-dialog-close" value="close" aria-label="Fermer">×</button></form>
+    <section id="welcomeUsernameStep">
+      <span class="welcome-kicker">Bienvenue sur Meuniance</span>
+      <h2 id="welcomeTitle">Choisis ton pseudo</h2>
+      <p>Un pseudo unique permettra à tes amis de te retrouver. Tu pourras le modifier ensuite dans les paramètres, une fois tous les 30 jours.</p>
+      <form id="welcomeUsernameForm" class="welcome-username-form">
+        <label for="welcomeUsername">Ton nom d’utilisateur</label>
+        <div class="welcome-username-field"><span aria-hidden="true">@</span><input id="welcomeUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required></div>
+        <p class="welcome-error" id="welcomeUsernameError" role="status" aria-live="polite"></p>
+        <div class="welcome-actions"><button class="gf-button welcome-skip" id="welcomeSkipUsername" type="button">Plus tard</button><button class="gf-button welcome-continue" type="submit">Enregistrer mon pseudo</button></div>
+      </form>
+    </section>
+    <section id="welcomePlanStep" hidden>
+      <span class="welcome-kicker">Ton espace, à ton rythme</span>
+      <h2>Choisis ton abonnement</h2>
+      <p>Découvre les offres disponibles. Tu peux aussi continuer avec l’offre gratuite.</p>
+      <div id="welcomePlanOffer"></div>
+      <div class="welcome-actions"><button class="gf-button welcome-skip" id="welcomeSkipPlan" type="button">Non merci</button></div>
+    </section>
+  </dialog>
+
+  <dialog class="password-recovery-dialog" id="passwordRecoveryDialog" aria-labelledby="passwordRecoveryTitle" aria-describedby="passwordRecoveryDescription">
+    <form id="passwordRecoveryForm">
+      <span class="eyebrow">Sécurité du compte</span>
+      <h2 id="passwordRecoveryTitle">Choisir un nouveau mot de passe</h2>
+      <p id="passwordRecoveryDescription">Ton lien est validé. Choisis un mot de passe d’au moins 8 caractères.</p>
+      <div id="passwordRecoveryFields">
+        <label for="passwordRecoveryNew">Nouveau mot de passe</label>
+        <input id="passwordRecoveryNew" type="password" minlength="8" autocomplete="new-password" required>
+        <label for="passwordRecoveryConfirm">Confirmer le mot de passe</label>
+        <input id="passwordRecoveryConfirm" type="password" minlength="8" autocomplete="new-password" required>
+      </div>
+      <p id="passwordRecoveryMessage" class="password-recovery-message" role="status" aria-live="polite"></p>
+      <div class="password-recovery-actions">
+        <button id="passwordRecoveryCancel" type="button" class="button button-ghost">Annuler</button>
+        <button id="passwordRecoverySubmit" type="submit" class="button button-primary">Enregistrer le mot de passe</button>
+        <button id="passwordRecoveryDone" type="button" class="button button-primary" hidden>Terminer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Barre de navigation inférieure (style app mobile : Accueil / Tableur / Mon espace) -->
   <nav class="bottom-nav" aria-label="Navigation principale">
     <button class="bottom-nav-btn" id="homeButton" type="button" data-page="dashboard" aria-label="Accueil" title="Accueil">
       <svg viewBox="0 0 24 24" fill="none"><path d="M3 11l9-8 9 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 21v-6h4v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -2344,9 +2435,9 @@
       <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18" stroke="currentColor" stroke-width="2"/></svg>
       <span class="bottom-nav-label">Tableur</span>
     </button>
-    <button class="bottom-nav-btn" id="settingsButton" type="button" data-page="settings" aria-label="Paramètres" title="Paramètres">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6l-.04.08a2 2 0 0 1-3.92 0L10 20a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1l-.08-.04a2 2 0 0 1 0-3.92L4 10a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6l.04-.08a2 2 0 0 1 3.92 0L14 4a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.36.7.6 1l.08.04a2 2 0 0 1 0 3.92L20 14c-.24.3-.46.64-.6 1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-      <span class="bottom-nav-label">Paramètres</span>
+    <button class="bottom-nav-btn" id="personalNavButton" type="button" data-page="sharing" aria-label="Mon espace" title="Mon espace">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.7-3.4 3.1-5 7-5s6.3 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span class="bottom-nav-label">Mon espace</span>
     </button>
   </nav>
 
@@ -2446,7 +2537,7 @@
 
     const elements = {
       dashboardPage: document.getElementById("dashboardPage"),
-      settingsPage: document.getElementById("settingsPage"), sharingPage: document.getElementById("sharingPage"), sharingAccessPage: document.getElementById("sharingAccessPage"), updatesPage: document.getElementById("updatesPage"), personalPage: document.getElementById("personalPage"), objectivesPage: document.getElementById("objectivesPage"), sheetPage: document.getElementById("sheetPage"), settingsButton: document.getElementById("settingsButton"), sheetButton: document.getElementById("sheetButton"), homeButton: document.getElementById("homeButton"),
+      settingsPage: document.getElementById("settingsPage"), subscriptionsPage: document.getElementById("subscriptionsPage"), sharingPage: document.getElementById("sharingPage"), sharingAccessPage: document.getElementById("sharingAccessPage"), updatesPage: document.getElementById("updatesPage"), personalPage: document.getElementById("personalPage"), objectivesPage: document.getElementById("objectivesPage"), sheetPage: document.getElementById("sheetPage"), sheetButton: document.getElementById("sheetButton"), homeButton: document.getElementById("homeButton"),
       backDashboardButton: document.getElementById("backDashboardButton"), themeButtons: document.querySelectorAll("[data-theme-option]"), paletteButtons: document.querySelectorAll("[data-palette-option]"),
       modeToggle: document.getElementById("modeToggle"), loader: document.getElementById("loader"),
       messageBox: document.getElementById("messageBox"), messageText: document.getElementById("messageText"),
@@ -2705,6 +2796,7 @@
       return list.includes(current)?current:list.sort(sortYearValues)[0]||"";
     }
     function getVisibleMonths(){
+      if(state.currentView!=="pie") return (state.months||[]).slice();
       const years=getAvailableYears();
       if(!years.length) return [];
       if(!state.selectedYear||!years.includes(state.selectedYear)) state.selectedYear=chooseDefaultYear(years,state.months,state.selectedYear,state.selectedMonthId);
@@ -2756,7 +2848,7 @@
       if(!elements.emptyState)return;
       const eyebrow=document.createElement("span"),title=document.createElement("h3"),copy=document.createElement("p"),steps=document.createElement("ol"),actions=document.createElement("div"),start=document.createElement("button"),importFile=document.createElement("button");
       eyebrow.className="empty-dashboard-kicker";eyebrow.textContent="POUR COMMENCER";
-      title.textContent=state.selectedYear?`Aucun mois renseigné pour ${getYearLabel(state.selectedYear)}.`:"Ton tableau de bord est prêt";
+      title.textContent=state.currentView==="pie"&&state.selectedYear?`Aucun mois renseigné pour ${getYearLabel(state.selectedYear)}.`:"Ton tableau de bord est prêt";
       copy.textContent="Ajoute quelques montants dans le tableur ou importe ton fichier : les graphiques et les indicateurs se mettront à jour automatiquement.";
       [["1","Configure ton solde de départ"],["2","Ajoute ou importe tes opérations"],["3","Découvre tes graphiques"]].forEach(function(item){const step=document.createElement("li"),number=document.createElement("span"),label=document.createElement("span");number.textContent=item[0];label.textContent=item[1];step.append(number,label);steps.append(step);});
       start.type="button";start.className="empty-state-action empty-state-primary";start.textContent="Configurer mon tableur";start.addEventListener("click",function(){setPage("sheet");});
@@ -2764,16 +2856,17 @@
       actions.className="empty-dashboard-actions";actions.append(start,importFile);
       steps.className="empty-dashboard-steps";elements.emptyState.className="empty-state is-visible empty-dashboard";elements.emptyState.replaceChildren(eyebrow,title,copy,steps,actions);
     }
-    function updateInterface(){ populateMonthSelect(); const hasData=getVisibleMonths().length>0; elements.emptyState.classList.toggle("is-visible",!hasData); if(!hasData) renderEmptyDashboardState(); if(elements.yearSelect) syncCustomDropdown(elements.yearSelect); syncCustomDropdown(elements.monthSelect); updateSummaryCards(); updateMonthDetails(getSelectedMonth()); renderCategorySettings(); renderCustomRulesList(); renderChart(); }
+    function updateInterface(){ const pieView=state.currentView==="pie",filterGrid=document.querySelector(".home-filter-grid"); if(filterGrid)filterGrid.classList.toggle("is-pie",pieView); const yearFilter=document.getElementById("yearFilter"),monthFilter=document.getElementById("monthFilter"); if(yearFilter)yearFilter.hidden=!pieView; if(monthFilter)monthFilter.hidden=!pieView; populateMonthSelect(); const hasData=getVisibleMonths().length>0; elements.emptyState.classList.toggle("is-visible",!hasData); if(!hasData) renderEmptyDashboardState(); if(elements.yearSelect) syncCustomDropdown(elements.yearSelect); syncCustomDropdown(elements.monthSelect); updateSummaryCards(); updateMonthDetails(getSelectedMonth()); renderCategorySettings(); renderCustomRulesList(); renderChart(); }
 
     function updateMonthDetails(selected){
       elements.savingsBreakdown.innerHTML="";
-      const visibleMonths=getVisibleMonths(); const items=!selected||state.isGlobal?visibleMonths.flatMap(m=>m.ruleBreakdown||[]):(selected.ruleBreakdown||[]);
-      const visible=items.filter(i=>i.value!==0);
-      const rows=visible.length?visible:[{name:"-",value:0,color:COLORS.tick}];
+      const visibleMonths=getVisibleMonths(); const items=state.currentView!=="pie"||!selected||state.isGlobal?visibleMonths.flatMap(m=>m.ruleBreakdown||[]):(selected.ruleBreakdown||[]);
+      const grouped=new Map();
+      items.filter(i=>i&&i.value!==0).forEach(function(item){ const key=String(item.name||"").trim(); if(!key)return; const previous=grouped.get(key); grouped.set(key,{name:key,value:Number(item.value||0)+(previous?.value||0),color:item.color||previous?.color}); });
+      const nonZeroRows=Array.from(grouped.values()).filter(item=>item.value!==0);
+      const rows=nonZeroRows.length?nonZeroRows:[{name:"-",value:0,color:COLORS.tick}];
       rows.forEach(i=>{ elements.savingsBreakdown.appendChild(createDetailRow(i.name,formatEuro(i.value),i.color||getRuleColor(i.name))); });
-      const allRules=visibleMonths.length?formatRuleLines(visibleMonths.flatMap(m=>m.ruleBreakdown||[])):"-";
-      elements.bigExpenses.textContent=selected&&selected.bigExpenses!=="-"?`${selected.bigExpenses}`:allRules;
+      elements.bigExpenses.textContent=selected&&selected.bigExpenses&&selected.bigExpenses!=="-"?String(selected.bigExpenses):"Aucune dépense importante renseignée.";
     }
     function formatRuleLines(items){ const m=new Map(); items.forEach(i=>{ if(i&&i.name) m.set(i.name,(m.get(i.name)||0)+Number(i.value||0)); }); return Array.from(m.entries()).filter(([,v])=>v!==0).map(([name,val])=>`${window.GFI18n?window.GFI18n.t(name):name}: ${formatEuro(val)}`).join("\n")||"-"; }
     function createDetailRow(lbl,val,col){ const row=document.createElement("div"); row.className="detail-row"; const name=document.createElement("span"); name.textContent=["Salaire","Dépense","Épargne"].includes(lbl)&&window.GFI18n?window.GFI18n.t(lbl):lbl; name.style.color=col; const amount=document.createElement("strong"); amount.textContent=val; row.append(name,amount); return row; }
@@ -2830,12 +2923,12 @@
         chart:{ type:"doughnut", data:{ labels:["Salaire",...items.map(i=>i.name)], datasets:[{ data:[Math.abs(month?.salary||0),...items.map(i=>Math.abs(i.value))], backgroundColor:[COLORS.salary,...items.map(i=>i.color||getRuleColor(i.name))], borderColor: "#000000", borderWidth: 2, hoverOffset:12 }] }, options:baseChartOptions({ cutout:"60%", layout:{padding:{top:10,bottom:10}}, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, animation:{animateRotate:true,animateScale:true,duration:1000,easing:"easeOutQuart"} }) }
       };
     }
-    function getGroupedBarConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Comparatif mois par mois", subtitle:"Salaire et règles appliquées sur l’année sélectionnée.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:[createBarDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createBarDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
-    function getStackedRulesConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Répartition par règles", subtitle:"Vue empilée de l’année sélectionnée.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:rules.map(rule=>({ label:rule, data:months.map(m=>getMonthRuleValue(m,rule)), backgroundColor:getRuleColor(rule), borderColor:getRuleColor(rule), borderWidth:1, borderRadius:6, maxBarThickness:44 })) }, options:axisChartOptions({stacked:true,onMonthClick:context?.onMonthClick}) } }; }
-    function getLineConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Évolution annuelle", subtitle:"Salaire et règles appliquées sur l’année sélectionnée.", chart:{ type:"line", data:{ labels:months.map(m=>m.label), datasets:[createLineDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createLineDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
+    function getGroupedBarConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Comparatif mois par mois", subtitle:"Salaire et règles appliquées sur toutes les périodes disponibles.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:[createBarDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createBarDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
+    function getStackedRulesConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Répartition par règles", subtitle:"Vue empilée sur toutes les périodes disponibles.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:rules.map(rule=>({ label:rule, data:months.map(m=>getMonthRuleValue(m,rule)), backgroundColor:getRuleColor(rule), borderColor:getRuleColor(rule), borderWidth:1, borderRadius:6, maxBarThickness:44 })) }, options:axisChartOptions({stacked:true,onMonthClick:context?.onMonthClick}) } }; }
+    function getLineConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Évolution", subtitle:"Salaire et règles appliquées sur toutes les périodes disponibles.", chart:{ type:"line", data:{ labels:months.map(m=>m.label), datasets:[createLineDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createLineDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
     function createBarDataset(l,c,d){ return{label:l,data:d,backgroundColor:c,borderColor:c,borderWidth:1,borderRadius:6,maxBarThickness:36}; }
     function createLineDataset(l,c,d){ return{label:l,data:d,borderColor:c,backgroundColor:c,pointBackgroundColor:c,pointBorderColor:"#0d1422",pointBorderWidth:2,pointRadius:4,pointHoverRadius:6,borderWidth:3,tension:0.35}; }
-    function axisChartOptions({stacked,onMonthClick}){ return baseChartOptions({ maintainAspectRatio:false, interaction:{mode:"index",intersect:false}, onClick:function(event,active,chart){ const point=(active&&active[0])||chart.getElementsAtEventForMode(event,"nearest",{intersect:true},true)[0]; if(onMonthClick){ if(point) onMonthClick(point.index); return; } const month=getVisibleMonths()[point?.index]; if(month) openChartMonthDetail(month); }, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, scales:{ x:{ stacked, grid:{color:"rgba(255,255,255,0.04)"}, ticks:{color:COLORS.tick,maxRotation:0,autoSkip:true} }, y:{ stacked, beginAtZero:true, grid:{color:COLORS.grid}, ticks:{color:COLORS.tick,callback:v=>compactEuroFormatter.format(v)} } }, animation:{duration:1000,easing:"easeOutQuart"} }); }
+    function axisChartOptions({stacked,onMonthClick}){ const axisFont={family:"Space Grotesk",size:12,weight:"600"}; return baseChartOptions({ maintainAspectRatio:false, interaction:{mode:"index",intersect:false}, onClick:function(event,active,chart){ const point=(active&&active[0])||chart.getElementsAtEventForMode(event,"nearest",{intersect:true},true)[0]; if(onMonthClick){ if(point) onMonthClick(point.index); return; } const month=getVisibleMonths()[point?.index]; if(month) openChartMonthDetail(month); }, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, scales:{ x:{ stacked, grid:{color:"rgba(255,255,255,0.04)"}, ticks:{color:COLORS.tick,font:axisFont,maxRotation:0,autoSkip:true} }, y:{ stacked, beginAtZero:true, grid:{color:COLORS.grid}, ticks:{color:COLORS.tick,font:axisFont,callback:v=>compactEuroFormatter.format(v)} } }, animation:{duration:1000,easing:"easeOutQuart"} }); }
     function baseChartOptions(extra){ return deepMerge({ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:tooltipOptions()}, transitions:{ active:{animation:{duration:300,easing:"easeOutCubic"}}, show:{animations:{x:{from:0,duration:1000,easing:"easeOutQuart"},y:{from:0,duration:1000,easing:"easeOutQuart"},r:{from:0,duration:1000,easing:"easeOutQuart"},borderWidth:{from:0,duration:500,easing:"linear"}}}, hide:{animations:{x:{to:0,duration:600,easing:"easeInCubic"},y:{to:0,duration:600,easing:"easeInCubic"}}} } },extra); }
     function tooltipOptions(){ const styles=getComputedStyle(document.body),theme=document.body.dataset.theme; return{ backgroundColor:readCssVar(styles,"--panel-solid","#222026"), borderColor:readCssVar(styles,"--line-strong","#5d5361"), borderWidth:1, titleColor:readCssVar(styles,"--text","#f2edf2"), bodyColor:readCssVar(styles,"--text","#f2edf2"), padding:12, cornerRadius:theme==="brutal"?0:8, callbacks:{ label:ctx=>{ const lbl=ctx.dataset.label||ctx.label||""; return`${lbl}: ${formatEuro(ctx.parsed?.y??ctx.parsed??0)}`; } } }; }
     function openChartMonthDetail(month,options={}){ const modal=document.getElementById("chartDetailModal"), title=document.getElementById("chartDetailTitle"), subtitle=document.getElementById("chartDetailSubtitle"), grid=document.getElementById("chartDetailGrid"); if(!modal||!grid) return; title.textContent=`Détail — ${month.label||"Mois"}`; subtitle.textContent="Clique sur un autre point pour consulter un autre mois."; const lines=[{label:"Salaire",value:month.salary||0},{label:"Dépenses",value:Math.abs(month.expenses||0)},{label:"Épargne",value:month.savingsTotal||0},...(month.ruleBreakdown||[]).filter(item=>item.name!=="Dépense"&&item.name!=="Épargne").map(item=>({label:item.name,value:Math.abs(item.value||0)}))]; grid.replaceChildren(...lines.filter(item=>!options.shared||(item.label==="Salaire"?month.hasIncome:item.label==="Dépenses"?month.hasExpenses:item.label==="Épargne"?month.hasSavings:true)).map(item=>{ const el=document.createElement("div"),label=document.createElement("span"),value=document.createElement("strong"); label.textContent=item.label; value.textContent=formatEuro(item.value); el.append(label,value); return el; })); modal.hidden=false; }
@@ -2895,7 +2988,7 @@
       const status=document.getElementById("sheetStatusBar"), statusHome=document.querySelector("#dashboardPage .home-toolbar-actions"), refresh=document.getElementById("syncSheetButton");
       const studio=state.appearance.interface==="studio", target=studio?sidebarHost:headerHost;
       if(menu && target && menu.parentElement!==target){ popover.hidden=true; document.getElementById("profileMenuButton").setAttribute("aria-expanded","false"); target.prepend(menu); }
-      if(studio && status && popover && status.parentElement!==popover) popover.insertBefore(status,document.getElementById("profileNotesButton"));
+      if(studio && status && popover && status.parentElement!==popover) popover.appendChild(status);
       if(!studio && status && statusHome && status.parentElement!==statusHome) statusHome.insertBefore(status,refresh);
     }
     function setStudioMobileMenu(open){ const sidebar=document.querySelector(".studio-sidebar"),scrim=document.getElementById("studioSidebarScrim"),button=document.getElementById("studioMobileMenuButton"),mobile=window.matchMedia("(max-width:999px)").matches; const active=!!open&&state.appearance.interface==="studio"&&mobile; sidebar?.classList.toggle("is-mobile-open",active); if(sidebar){ if(state.appearance.interface==="studio"&&mobile){sidebar.setAttribute("aria-hidden",String(!active));sidebar.inert=!active;}else{sidebar.removeAttribute("aria-hidden");sidebar.inert=false;} } document.body.classList.toggle("studio-mobile-menu-open",active); document.documentElement.classList.toggle("studio-mobile-menu-open",active); if(scrim)scrim.hidden=!active; if(button){const label=active?"Fermer la navigation":"Ouvrir la navigation";button.setAttribute("aria-expanded",String(active));button.setAttribute("aria-label",window.GFI18n?window.GFI18n.t(label):label);} window.GFUI?.syncModalLock?.(); }
@@ -2907,8 +3000,8 @@
        Chaque écran a sa propre adresse (/tableur, /objectifs, …) : on peut
        l'ouvrir directement, la mettre en favori, et les boutons Précédent /
        Suivant du navigateur fonctionnent comme sur un site classique. */
-    const PAGE_PATHS={dashboard:"/accueil",sheet:"/tableur",objectives:"/objectifs",sharing:"/partage",updates:"/nouveautes",settings:"/parametres"};
-    const PAGE_TITLES={dashboard:"Meuniance — Tableau de bord",sheet:"Meuniance — Tableur",objectives:"Meuniance — Objectifs",sharing:"Meuniance — Partage et amis",sharingAccess:"Meuniance — Accès partagé",updates:"Meuniance — Nouveautés",settings:"Meuniance — Paramètres"};
+    const PAGE_PATHS={dashboard:"/accueil",sheet:"/tableur",objectives:"/objectifs",sharing:"/partage",updates:"/nouveautes",settings:"/parametres",subscription:"/abonnement"};
+    const PAGE_TITLES={dashboard:"Meuniance — Tableau de bord",sheet:"Meuniance — Tableur",objectives:"Meuniance — Objectifs",sharing:"Meuniance — Partage et amis",sharingAccess:"Meuniance — Accès partagé",updates:"Meuniance — Nouveautés",settings:"Meuniance — Paramètres",subscription:"Meuniance — Abonnements"};
     const PATH_PAGES=Object.keys(PAGE_PATHS).reduce(function(acc,key){ acc[PAGE_PATHS[key]]=key; return acc; },{});
     function pageFromLocation(){
       const path=(window.location.pathname||"/").replace(/\/+$/,"")||"/";
@@ -2944,13 +3037,14 @@
       options=options||{};
       const requested=page==="personal"?"sharing":page;
       const previous=state.page;
-      const next=(requested==="settings"||requested==="sheet"||requested==="sharing"||requested==="sharingAccess"||requested==="updates"||requested==="objectives")?requested:"dashboard";
+      const next=(requested==="settings"||requested==="subscription"||requested==="sheet"||requested==="sharing"||requested==="sharingAccess"||requested==="updates"||requested==="objectives")?requested:"dashboard";
       setStudioMobileMenu(false);
       if(next===previous){ updatePageTitle(next); syncPersonalWorkspaceNavigation(next); if(!options.fromHistory) syncPageUrl(next,options); return; }
       state.page=next;
       document.body.dataset.page=state.page;
       elements.dashboardPage.hidden=state.page!=="dashboard";
       elements.settingsPage.hidden=state.page!=="settings";
+      if(elements.subscriptionsPage) elements.subscriptionsPage.hidden=state.page!=="subscription";
       if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing";
       if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess";
       if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates";
@@ -2967,6 +3061,7 @@
       if(state.page==="sharing"&&window.FriendsSystem){ window.FriendsSystem.renderSharing(document.getElementById("sharingContainer")); }
       if(state.page==="updates") renderUpdatesPage();
       if(state.page==="objectives"&&window.GFObjectives) window.GFObjectives.render();
+      if(state.page==="subscription"&&window.GFSubscriptions) window.GFSubscriptions.refresh();
       if(!options.fromHistory) syncPageUrl(next,options);
       window.scrollTo({top:0,behavior:"instant"});
     }
@@ -2975,14 +3070,14 @@
       if(!trigger||!dialog)return;
       const closeDialog=function(){ if(dialog.open)dialog.close(); };
       trigger.addEventListener("click",function(){
-        if(window.matchMedia&&window.matchMedia("(max-width:560px)").matches&&!dialog.open){ dialog.showModal(); trigger.setAttribute("aria-expanded","true"); }
+        if((document.body.dataset.interface==="studio" || (window.matchMedia&&window.matchMedia("(max-width:560px)").matches))&&!dialog.open){ dialog.showModal(); trigger.setAttribute("aria-expanded","true"); }
       });
       if(close)close.addEventListener("click",closeDialog);
       dialog.addEventListener("click",function(event){ if(event.target===dialog)closeDialog(); });
       dialog.addEventListener("close",function(){ trigger.setAttribute("aria-expanded","false"); });
     }
     initSheetStatusHelp();
-    const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],profile:["Paramètres","Profil","Ton pseudo, ton compte et ton abonnement."],account:["Paramètres","Compte","Connexion, protection de l'accès et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."]};
+    const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],account:["Paramètres","Profil","Pseudo, connexion et synchronisation de ton espace."],billing:["Paramètres","Abonnement","Formule, factures et moyen de paiement."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."]};
     function showSettingsView(view){ const next=view!=="home"&&Object.prototype.hasOwnProperty.call(SETTINGS_VIEW_COPY,view)?view:"account",copy=SETTINGS_VIEW_COPY[next],translate=window.GFI18n?window.GFI18n.t:function(value){return value;}; document.querySelectorAll("[data-settings-panel]").forEach(function(panel){ panel.hidden=panel.dataset.settingsPanel!==next; }); const kicker=document.getElementById("settingsKicker"),title=document.getElementById("settingsTitle"),subtitle=document.getElementById("settingsSubtitle"); if(kicker) kicker.textContent=translate(copy[0]); if(title) title.textContent=translate(copy[1]); if(subtitle) subtitle.textContent=translate(copy[2]); document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.setAttribute("aria-current",String(button.dataset.settingsView===next)); }); }
     function renderPersonalSpace(){ const profileEmail=document.getElementById("profileEmail"),profileAvatar=document.getElementById("profileAvatar"),email=document.getElementById("personalEmail"),avatar=document.getElementById("personalAvatar"),meta=document.getElementById("personalObjectivesMeta"); if(email){ const value=String(profileEmail?.textContent||"").trim(); email.textContent=value&&value!=="Non connecté"?value:"Un espace privé pour organiser tes projets et tes accès."; } if(avatar) avatar.textContent=String(profileAvatar?.textContent||"?").trim().slice(0,2)||"?"; if(meta){ let goals=[]; try{ const profile=JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile")||"{}"); goals=Array.isArray(profile?.objectives)?profile.objectives.filter(Boolean):[]; }catch(e){} meta.textContent=goals.length?goals.length+" objectif"+(goals.length>1?"s":"")+" en cours.":"Crée et suis tes projets financiers."; } }
     window.setPage = setPage;
@@ -3162,7 +3257,7 @@ function rowsToImportedPages(rows, fileName, sheetName){
   return buildPagesFromAnalysis(analysis, fileName, sheetName);
 }
 
-function resetDataState(){
+    function resetDataState(){
   if(state.chart){ state.chart.destroy(); state.chart = null; }
   state.rawPages = [];
   state.months = [];
@@ -3192,8 +3287,9 @@ function resetDataState(){
     function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-09-18-polish-and-language";
+    const RELEASE_NOTES_VERSION="2026-10-02-account-and-interface";
     const RELEASE_NOTES=[
+      {date:"2 octobre 2026",title:"Du nouveau depuis le 20 septembre",text:"Une nouvelle disposition, plus de choix pour l’apparence et un profil plus utile. Plusieurs écrans ont aussi été revus pour faciliter la navigation.",sections:[{type:"new",text:"La nouvelle disposition propose une navigation latérale que tu peux réduire sur ordinateur et ouvrir sur téléphone. Tu peux choisir la couleur d’accent indépendamment du thème. Ton profil accueille un pseudo unique pour recevoir des demandes d’amis. Si tu ouvres un lien qui n’existe plus, une page te ramène à l’application."},{type:"improvement",text:"Les palettes, le logo et la navigation mobile ont été retravaillés. La barre du tableur reste plus lisible pendant le défilement, les fenêtres bloquent le défilement en arrière-plan et les menus passent au premier plan. Le partage et l’accueil vide guident mieux l’utilisateur. Le résumé global évite de répéter les catégories, le profil est plus clair et les données locales sont désormais séparées par compte. Sur la page de présentation, les chiffres d’exemple sont indiqués comme fictifs."}]},
       {date:"20 septembre 2026",title:"Objectifs et tableur passent un cap",sections:[{type:"new",text:"Les objectifs disposent maintenant d’un résumé global, d’un suivi actif ou archivé, d’une mise en pause et d’une liaison facultative avec une ligne du tableur."},{type:"improvement",text:"Tu peux supprimer une ligne du tableur directement depuis la barre d’outils. Les règles reconnues automatiquement sont désormais bien indiquées comme utilisées."}]},
       {date:"18 septembre 2026",title:"Un espace plus clair et plus complet",sections:[{type:"new",text:"Mon espace accueille les objectifs et les notes privées. Tu peux créer un objectif d’épargne, d’investissement, de dépense ou un projet personnel, suivre son avancement et conserver tes idées dans un bloc-notes synchronisé lorsque tu es connecté. Le partage entre amis reste privé par défaut : tu choisis précisément les lignes, les mois et les vues que chacun peut consulter."},{type:"improvement",text:"Le tableur est plus confortable avec une barre d’outils suivie, des sélections plus lisibles et des explications de solde plus claires. L’accueil, les réglages, le partage et les tableaux de bord s’adaptent mieux aux petits écrans. Le français et l’anglais couvrent aussi les contenus recréés, les réglages et les nouveautés, sans modifier tes données."}]},
       {date:"17 septembre 2026",title:"Partage et réglages simplifiés",sections:[{type:"new",text:"Tu peux maintenant consulter le tableur ou le tableau de bord partagé depuis la fiche d’un ami, sans lui donner le droit de modifier tes données."},{type:"improvement",text:"Les accès se configurent ligne par ligne et mois par mois, uniquement en lecture. Les réglages et les pages de partage sont mieux organisés sur téléphone comme sur ordinateur."}]},
@@ -3218,7 +3314,7 @@ function resetDataState(){
     let updatesPageNumber=1;
     function renderUpdatesPage(page){ const list=document.getElementById("updatesPageList"),pagination=document.getElementById("updatesPagination"); if(!list) return; const perPage=6,totalPages=Math.max(1,Math.ceil(RELEASE_NOTES.length/perPage)); updatesPageNumber=Math.min(totalPages,Math.max(1,Number(page)||updatesPageNumber)); const start=(updatesPageNumber-1)*perPage,notes=RELEASE_NOTES.slice(start,start+perPage); list.replaceChildren(...notes.map(function(note){ const entry=document.createElement("article"),date=document.createElement("time"),title=document.createElement("h3"); entry.className="update-entry"; date.textContent=note.date; title.textContent=note.title; entry.append(date,title); if(Array.isArray(note.sections)){ const summaries=document.createElement("div"); summaries.className="update-summaries"; note.sections.forEach(function(section){ const row=document.createElement("div"),badge=document.createElement("span"),text=document.createElement("p"); row.className="update-summary update-summary-"+section.type; badge.className="update-type-badge"; badge.textContent=section.type==="new"?"Nouveau":"Amélioré"; text.textContent=section.text; row.append(badge,text); summaries.append(row); }); entry.append(summaries); }else { const description=document.createElement("p"); description.textContent=note.text; entry.append(description); } return entry; })); if(window.GFI18n) window.GFI18n.apply(list); if(!pagination) return; pagination.replaceChildren(); if(totalPages<2) { pagination.hidden=true; return; } pagination.hidden=false; for(let number=1;number<=totalPages;number++){ const button=document.createElement("button"); button.type="button"; button.className="updates-page-button"+(number===updatesPageNumber?" is-active":""); button.textContent=String(number); button.setAttribute("aria-label","Page "+number+" des nouveautés"); button.setAttribute("aria-current",number===updatesPageNumber?"page":"false"); button.addEventListener("click",function(){ renderUpdatesPage(number); document.getElementById("updatesPageList")?.scrollIntoView({block:"start",behavior:"smooth"}); }); pagination.append(button); } if(window.GFI18n) window.GFI18n.apply(pagination); }
     function dismissLatestUpdate(){ const banner=document.getElementById("latestUpdateBanner"); if(banner) banner.hidden=true; try{safeStore.setItem("personalFinanceDashboard.lastSeenRelease",RELEASE_NOTES_VERSION);}catch(e){} }
-    function showLatestUpdate(){ try{ if(document.body.classList.contains("tutorial-active")||!safeStore.getItem("personalFinanceDashboard.onboardingCompleted")||safeStore.getItem("personalFinanceDashboard.lastSeenRelease")===RELEASE_NOTES_VERSION) return; const latest=RELEASE_NOTES[0],banner=document.getElementById("latestUpdateBanner"),title=document.getElementById("latestUpdateTitle"),text=document.getElementById("latestUpdateText"); if(!latest||!banner||!title||!text) return; title.textContent=latest.title; text.textContent=latest.text; banner.hidden=false; }catch(e){} }
+    function showLatestUpdate(){ try{ if(document.body.classList.contains("tutorial-active")||!safeStore.getItem("personalFinanceDashboard.onboardingCompleted")||safeStore.getItem("personalFinanceDashboard.lastSeenRelease")===RELEASE_NOTES_VERSION) return; const latest=RELEASE_NOTES[0],banner=document.getElementById("latestUpdateBanner"),title=document.getElementById("latestUpdateTitle"),text=document.getElementById("latestUpdateText"); if(!latest||!banner||!title||!text) return; title.textContent=latest.title; text.textContent=latest.text||latest.sections?.map(section=>section.text).join(" ")||""; banner.hidden=false; }catch(e){} }
     window.showLatestUpdate=showLatestUpdate;
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -3234,7 +3330,7 @@ function resetDataState(){
       window.addEventListener("financeClearData", () => { resetDataState(); updateInterface(); });
       document.querySelectorAll("button[data-page]").forEach(function(button){ button.addEventListener("click",function(){ setPage(button.dataset.page); }); });
       initPageRouting();
-      var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileSettings=document.getElementById("profileSettingsButton"), profilePersonal=document.getElementById("profilePersonalButton"), profileNotes=document.getElementById("profileNotesButton");
+      var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profilePersonal=document.getElementById("profilePersonalButton"), profileNotes=document.getElementById("profileNotesButton");
       let wasMobileLayout=window.matchMedia("(max-width:999px)").matches;
       window.addEventListener("resize",function(){const isMobileLayout=window.matchMedia("(max-width:999px)").matches;if(isMobileLayout!==wasMobileLayout){wasMobileLayout=isMobileLayout;placeProfileMenu();setStudioMobileMenu(false);}});
       const studioMenuButton=document.getElementById("studioMobileMenuButton"),studioScrim=document.getElementById("studioSidebarScrim");
@@ -3243,10 +3339,9 @@ function resetDataState(){
       studioScrim?.addEventListener("click",function(){setStudioMobileMenu(false);});
       document.querySelectorAll(".studio-sidebar-nav [data-page]").forEach(function(button){button.addEventListener("click",function(){setStudioMobileMenu(false);});});
       if(profileButton && profilePopover){ profileButton.addEventListener("click",function(){ var open=profilePopover.hidden; profilePopover.hidden=!open; profileButton.setAttribute("aria-expanded",String(open)); }); document.addEventListener("click",function(event){ if(profileMenu && !profileMenu.contains(event.target)){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); document.addEventListener("keydown",function(event){ if(event.key==="Escape"){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); }
-      if(profileSettings){ profileSettings.addEventListener("click",function(){ setPage("settings"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); }); }
       if(profilePersonal){ profilePersonal.addEventListener("click",function(){ setPage("sharing"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); }); }
       if(profileNotes){ profileNotes.addEventListener("click",function(){ if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); window.GFObjectives?.setNotesOpen?.(true); setStudioMobileMenu(false); }); }
-      document.getElementById("profileIdentityButton")?.addEventListener("click",function(){ setPage("settings"); showSettingsView("profile"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); });
+      document.getElementById("profileIdentityButton")?.addEventListener("click",function(){ setPage("settings"); showSettingsView("account"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); requestAnimationFrame(function(){ document.getElementById("identitySection")?.scrollIntoView({block:"start",behavior:"smooth"}); }); });
       document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView(button.dataset.settingsView); }); });
       document.querySelectorAll("[data-settings-back]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView("account"); }); });
       document.addEventListener("click",function(event){ const viewButton=event.target.closest("[data-settings-view]"); if(viewButton){ showSettingsView(viewButton.dataset.settingsView); return; } const backButton=event.target.closest("[data-settings-back]"); if(backButton) showSettingsView("account"); });
@@ -5190,7 +5285,6 @@ function resetDataState(){
     // === Indicateur de statut du tableur ===
     function updateSheetStatus(){
       var dot = document.getElementById("sheetStatusDot");
-      if(!dot) return;
       var hasData = false;
       try{
         if(typeof window.FinanceSheet !== "undefined" && window.FinanceSheet.getSnapshot){
@@ -5198,15 +5292,17 @@ function resetDataState(){
           hasData = snap && snap.sheets && snap.sheets.some(function(sh){ return sh.cells && Object.keys(sh.cells).length > 0; });
         }
       }catch(e){}
-      dot.className = "sheet-status-dot";
-      if(!hasData){
-        dot.classList.add("not-loaded");
-      } else if(navigator.onLine){
-        dot.classList.add("online");
-      } else {
-        dot.classList.add("connected-offline");
-      }
+      var user=window.__account&&window.__account.user;
+      var sync=window.__gfSyncState||{};
+      var state=!hasData?"empty":!user?"local":!navigator.onLine?"offline":sync.pushing?"syncing":sync.dirty?"pending":sync.lastSync?"synced":"pending";
+      var english=window.GFI18n?.getLanguage?.()==="en";
+      var copy={empty:["is-empty",english?"No data":"Aucune donnée"],local:["is-local",english?"On this device":"Sur cet appareil"],offline:["is-offline",english?"Offline":"Hors ligne"],syncing:["is-syncing",english?"Syncing…":"Synchronisation…"],pending:["is-pending",english?"Waiting to sync":"À synchroniser"],synced:["is-synced",english?"Spreadsheet synced":"Tableur synchronisé"]}[state];
+      if(dot){dot.className="sheet-status-dot "+({empty:"not-loaded",local:"is-local",offline:"connected-offline",syncing:"is-syncing",pending:"is-pending",synced:"online"}[state]);}
+      var pill=document.getElementById("connectionStatus"),label=document.getElementById("connectionText");
+      if(pill){pill.dataset.sheetState=state;pill.classList.remove("is-online");var statusDot=pill.querySelector(".status-dot");if(statusDot)statusDot.className="status-dot "+copy[0];}
+      if(label)label.textContent=copy[1];
     }
+    window.clearDashboardForAccountSwitch = function(){ resetDataState(); updateInterface(); };
     window.updateSheetStatus = updateSheetStatus;
     // Update on load and when online/offline changes
     window.addEventListener("online", updateSheetStatus);
@@ -5341,7 +5437,7 @@ function resetDataState(){
   /* === Auth email + mot de passe (Supabase) ===
      Pas de serveur à gérer : le SDK charge la config depuis supabase_config.json.
      La clé anon est publique par conception (protégée par les RLS Supabase). */
-  var sb = { config: null, client: null, user: null };
+  var sb = { config: null, client: null, user: null, recoveryPending: false };
   function el(id){ return document.getElementById(id); }
   function translateAuthError(error){
     var raw = String((error && error.message) || error || "").trim();
@@ -5417,6 +5513,7 @@ function resetDataState(){
       var arrivedFromEmail = /([?&]code=|#access_token=)/.test(location.href);
       sb.client.auth.onAuthStateChange(function(evt, session){
         sb.user = (session && session.user) ? session.user : null;
+        if(evt === "PASSWORD_RECOVERY") sb.recoveryPending = true;
         if(sb.user) ensureProfile(sb.user);
         renderAuth();
         // Notifie les autres modules (amis, sync) du changement d'état
@@ -5424,7 +5521,7 @@ function resetDataState(){
         if(evt === "SIGNED_IN" && arrivedFromEmail){ msg("Email confirmé — vous êtes connecté.", "ok"); }
         if(evt === "SIGNED_IN" && !arrivedFromEmail && sb.lastWasSignup){ msg("Connexion réussie.", "ok"); }
         if(evt === "SIGNED_OUT"){ sb.user = null; renderAuth(); msg("Déconnecté."); }
-        if(evt === "PASSWORD_RECOVERY"){ msg("Réinitialisation du mot de passe — choisissez un nouveau mot de passe."); }
+        if(evt === "PASSWORD_RECOVERY") openPasswordRecovery();
         arrivedFromEmail = false;
       });
       // Restaure la session existante au chargement
@@ -5498,6 +5595,51 @@ function resetDataState(){
   function msg(t, kind){ var m = el("accountMsg"); if(m){ m.textContent = t; m.className = "account-msg " + (kind||""); } }
   function clearMsg(){ msg(""); }
   function setLoading(v){ ["accountLoginBtn","accountRegisterBtn","accountResendBtn","accountConfirmCheckBtn","accountChangeEmailBtn"].forEach(function(id){var button=el(id);if(button)button.disabled=v;}); }
+  function recoveryMessage(text,kind){ var node=el("passwordRecoveryMessage"); if(node){ node.textContent=window.GFI18n?window.GFI18n.t(text||""):text||""; node.dataset.kind=kind||""; } }
+  function openPasswordRecovery(){
+    var dialog=el("passwordRecoveryDialog");
+    if(!dialog||!sb.user)return;
+    var welcome=el("accountWelcomeDialog");if(welcome&&welcome.open)welcome.close();
+    el("passwordRecoveryFields").hidden=false;
+    el("passwordRecoverySubmit").hidden=false;
+    el("passwordRecoveryCancel").hidden=false;
+    el("passwordRecoveryDone").hidden=true;
+    el("passwordRecoveryNew").value="";
+    el("passwordRecoveryConfirm").value="";
+    recoveryMessage("");
+    if(window.GFI18n)window.GFI18n.apply(dialog);
+    if(!dialog.open)dialog.showModal();
+    el("passwordRecoveryNew").focus();
+  }
+  async function finishPasswordRecovery(){
+    var cancel=el("passwordRecoveryCancel");if(cancel)cancel.disabled=true;
+    try{if(sb.client){var result=await sb.client.auth.signOut({ scope:"local" });if(result.error)throw result.error;}}
+    catch(error){recoveryMessage(translateAuthError(error),"error");if(cancel)cancel.disabled=false;return;}
+    sb.recoveryPending=false;
+    var dialog=el("passwordRecoveryDialog");if(dialog&&dialog.open)dialog.close();
+  }
+  async function saveRecoveryPassword(event){
+    event.preventDefault();
+    var password=el("passwordRecoveryNew").value,confirm=el("passwordRecoveryConfirm").value;
+    if(password.length<8){recoveryMessage("Le mot de passe doit contenir au moins 8 caractères.","error");return;}
+    if(password!==confirm){recoveryMessage("Les deux mots de passe ne correspondent pas.","error");return;}
+    var submit=el("passwordRecoverySubmit"),cancel=el("passwordRecoveryCancel");
+    submit.disabled=true;cancel.disabled=true;recoveryMessage("Enregistrement en cours…");
+    var passwordChanged=false;
+    try{
+      var result=await sb.client.auth.updateUser({ password:password });
+      if(result.error)throw result.error;
+      passwordChanged=true;
+      sb.recoveryPending=false;
+      el("passwordRecoveryNew").value="";el("passwordRecoveryConfirm").value="";
+      el("passwordRecoveryFields").hidden=true;submit.hidden=true;cancel.hidden=true;
+      el("passwordRecoveryDone").hidden=false;
+      var signedOut=await sb.client.auth.signOut({ scope:"local" });
+      if(signedOut.error)throw signedOut.error;
+      recoveryMessage("Mot de passe modifié. Tu peux maintenant te connecter à la console locale.","success");
+    }catch(error){recoveryMessage(passwordChanged?"Mot de passe modifié, mais la déconnexion a échoué. Clique sur Terminer pour réessayer.":translateAuthError(error),"error");}
+    finally{submit.disabled=false;cancel.disabled=false;}
+  }
   function accountPane(name){var loginPane=el("accountLoginPane"),registerPane=el("accountRegisterPane"),confirmPane=el("accountEmailConfirmStep"),loginTab=el("accountLoginTab"),registerTab=el("accountRegisterTab"),loginActive=name==="login",registerActive=name==="register"||name==="confirm";if(loginPane)loginPane.hidden=!loginActive;if(registerPane)registerPane.hidden=name!=="register";if(confirmPane)confirmPane.hidden=name!=="confirm";if(loginTab){loginTab.classList.toggle("is-active",loginActive);loginTab.setAttribute("aria-selected",String(loginActive));loginTab.setAttribute("aria-current",loginActive?"step":"false");}if(registerTab){registerTab.classList.toggle("is-active",registerActive);registerTab.setAttribute("aria-selected",String(registerActive));registerTab.setAttribute("aria-current",registerActive?"step":"false");}}
   function accountEmail(kind){var id=kind==="register"?"accountRegisterEmail":"accountLoginEmail";return String(el(id)&&el(id).value||"").trim();}
   function showEmailConfirmation(email){sb.pendingSignupEmail=email;accountPane("confirm");var description=el("accountConfirmDescription");if(description)description.textContent="Nous avons envoyé un lien sécurisé à "+email+".";}
@@ -5567,6 +5709,10 @@ function resetDataState(){
   async function logout(){ try{ await sb.client.auth.signOut(); sb.lastWasSignup = false; sb.pendingSignupEmail=""; }catch(e){} }
 
   function wire(){
+    var recoveryForm=el("passwordRecoveryForm");if(recoveryForm)recoveryForm.addEventListener("submit",saveRecoveryPassword);
+    var recoveryCancel=el("passwordRecoveryCancel");if(recoveryCancel)recoveryCancel.addEventListener("click",finishPasswordRecovery);
+    var recoveryDone=el("passwordRecoveryDone");if(recoveryDone)recoveryDone.addEventListener("click",finishPasswordRecovery);
+    var recoveryDialog=el("passwordRecoveryDialog");if(recoveryDialog)recoveryDialog.addEventListener("cancel",function(event){event.preventDefault();if(!el("passwordRecoverySubmit").disabled)finishPasswordRecovery();});
     var a = el("accountLoginBtn"); if(a) a.addEventListener("click", function(e){ e.preventDefault(); login(); });
     var b = el("accountRegisterBtn"); if(b) b.addEventListener("click", function(e){ e.preventDefault(); register(); });
     var rd = el("accountResendBtn"); if(rd) rd.addEventListener("click", function(e){ e.preventDefault(); resend(); });
@@ -5587,7 +5733,7 @@ function resetDataState(){
         redirectTo: window.location.origin + window.location.pathname
       });
       if(res.error){ msg(translateAuthError(res.error)); return; }
-      msg("Email de réinitialisation envoyé. Vérifie ta boîte de réception (et les spams).", "ok");
+      msg("Si un compte existe pour cette adresse, un lien de réinitialisation sera envoyé. Vérifie aussi les spams.", "ok");
     }catch(e){ msg(translateAuthError(e)); }
     finally{ setLoading(false); }
   }
@@ -5599,14 +5745,15 @@ function resetDataState(){
   window.__account = sb;
 })();
 </script>
-<script src="profile.js?v=20261001-r1"></script>
+<script src="profile.js?v=20261003-r1"></script>
+<script src="subscriptions.js?v=20261004-r1"></script>
 <script>(function(){
   /* === Sync Supabase (offline-first, multi-device) ===
      Sauvegarde locale immediate + sync cloud des qu'on est en ligne.
      Utilise une table finance_snapshots pour stocker le snapshot complet
      (toutes les feuilles, formules, headers, etc.).
      Hors ligne : sauvegarde locale, sync au retour du reseau. */
-  var syncState = { dirty: false, lastSync: 0, pulling: false, pushing: false, suppressPush: false, userId: "", remoteUpdatedAt: "", scheduledPull: null };
+  var syncState = { dirty: false, revision: 0, lastSync: 0, pulling: false, pushing: false, suppressPush: false, userId: "", remoteUpdatedAt: "", scheduledPull: null, generation: 0 };
 
   function getSupabase(){ try{ return window.__account && window.__account.client ? window.__account.client : null; }catch(e){ return null; } }
   function getUser(){ try{ return window.__account && window.__account.user ? window.__account.user : null; }catch(e){ return null; } }
@@ -5617,8 +5764,10 @@ function resetDataState(){
     var sb = getSupabase();
     var user = getUser();
     var fs = getFinanceSheet();
-    if(!sb || !user || !fs){ return false; }
+    if(!sb || !user || !fs || syncState.userId !== user.id){ return false; }
     if(syncState.pushing || syncState.suppressPush) return false;
+    var generation = syncState.generation;
+    var revision = syncState.revision;
     syncState.pushing = true;
     updateSyncStatus();
     try{
@@ -5639,7 +5788,8 @@ function resetDataState(){
         updated_at: cloudUpdatedAt
       }, { onConflict: "owner_id" });
       
-      if(res.error){ console.warn("Sync push error:", res.error.message); syncState.pushing = false; return false; }
+      if(generation !== syncState.generation || getUser()?.id !== user.id) return false;
+      if(res.error){ console.warn("Sync push error:", res.error.message); return false; }
       // Le dashboard est stocké séparément du tableur complet : autoriser le
       // dashboard ne donne donc jamais accès aux cellules ni aux formules.
       var dashboardPayload = window.getDashboardSharingSnapshot ? window.getDashboardSharingSnapshot() : { v: "dashboard-1", updatedAt: Date.now(), months: [] };
@@ -5648,12 +5798,16 @@ function resetDataState(){
         payload: dashboardPayload,
         updated_at: new Date().toISOString()
       }, { onConflict: "owner_id" });
+      if(generation !== syncState.generation || getUser()?.id !== user.id) return false;
       if(dashboardRes.error) console.warn("Dashboard sharing sync error:", dashboardRes.error.message);
       // Les copies partagées sont recalculées après chaque sauvegarde : elles
       // ne contiennent que les mois et lignes explicitement choisis.
       try { if(window.FriendsSystem && window.FriendsSystem.refreshMySharedSnapshots) await window.FriendsSystem.refreshMySharedSnapshots(); } catch(e) { console.warn("Granular sharing sync error:", e); }
       
-      syncState.dirty = false;
+      if(revision === syncState.revision){
+        syncState.dirty = false;
+        safeStore.setFinancialSyncPending(false);
+      }
       syncState.lastSync = Date.now();
       syncState.remoteUpdatedAt = cloudUpdatedAt;
       updateSyncStatus();
@@ -5662,8 +5816,14 @@ function resetDataState(){
       console.warn("Sync push error:", e);
       return false;
     }finally{
-      syncState.pushing = false;
-      updateSyncStatus();
+      if(generation === syncState.generation){
+        syncState.pushing = false;
+        updateSyncStatus();
+        if(syncState.dirty && navigator.onLine){
+          if(window.__gf_syncTimer) clearTimeout(window.__gf_syncTimer);
+          window.__gf_syncTimer=setTimeout(function(){ if(generation===syncState.generation && syncState.dirty) pushToCloud(); },2000);
+        }
+      }
     }
   }
 
@@ -5672,12 +5832,14 @@ function resetDataState(){
     var sb = getSupabase();
     var user = getUser();
     var fs = getFinanceSheet();
-    if(!sb || !user || !fs){ return false; }
+    if(!sb || !user || !fs || syncState.userId !== user.id){ return false; }
     if(syncState.pulling || syncState.pushing || syncState.dirty) return false;
+    var generation = syncState.generation;
     syncState.pulling = true;
     syncState.suppressPush = true; // Eviter la boucle pull -> save -> push
     try{
       var res = await sb.from("finance_snapshots").select("payload,updated_at").eq("owner_id", user.id).maybeSingle();
+      if(generation !== syncState.generation || getUser()?.id !== user.id) return false;
       if(res.error){ console.warn("Sync pull error:", res.error.message); return false; }
       // Aucun snapshot : premier appareil de ce compte. Le démarrage pourra
       // alors envoyer ses données locales au lieu de les considérer perdues.
@@ -5693,7 +5855,7 @@ function resetDataState(){
       if(!snap || !snap.sheets || !snap.sheets.length){ syncState.pulling = false; syncState.suppressPush = false; return false; }
       if(snap.profile && typeof snap.profile === "object" && !Array.isArray(snap.profile)){
         try { safeStore.setItem("personalFinanceDashboard.setupProfile", JSON.stringify(snap.profile)); window.dispatchEvent(new CustomEvent("gfprofilechange")); } catch(e) {}
-      }
+      } else { safeStore.removeItem("personalFinanceDashboard.setupProfile"); window.dispatchEvent(new CustomEvent("gfprofilechange")); }
       
       if(fs.loadSnapshot){
         // loadSnapshot sauvegarde aussi le cache local après 400 ms. Ce verrou
@@ -5701,7 +5863,7 @@ function resetDataState(){
         // push inutile qui pourrait masquer une modification d'un autre appareil.
         window.__gfSuppressSync = true;
         fs.loadSnapshot({ v: snap.v || "cloud", sheets: snap.sheets, activeSheetId: snap.activeSheetId });
-        setTimeout(function(){ window.__gfSuppressSync = false; }, 800);
+        setTimeout(function(){ if(generation === syncState.generation) window.__gfSuppressSync = false; }, 800);
         if(typeof window.syncDashboardFromFinanceSheet === "function"){
           try{ window.syncDashboardFromFinanceSheet({ silent: true }); }catch(e){}
         }
@@ -5716,29 +5878,33 @@ function resetDataState(){
       console.warn("Sync pull error:", e);
       return false;
     }finally{
-      syncState.pulling = false;
-      syncState.suppressPush = false;
+      if(generation === syncState.generation){ syncState.pulling = false; syncState.suppressPush = false; }
     }
   }
 
   // === Marquer comme dirty (a synchroniser) ===
   function markDirty(){
-    if(!getUser()) return;
+    if(!getUser() || syncState.userId !== getUser().id) return;
     if(syncState.suppressPush) return; // Ne pas marquer dirty pendant un pull
     syncState.dirty = true;
+    syncState.revision++;
+    safeStore.setFinancialSyncPending(true);
     updateSyncStatus();
     if(navigator.onLine){
       if(window.__gf_syncTimer) clearTimeout(window.__gf_syncTimer);
+      var generation = syncState.generation;
       window.__gf_syncTimer = setTimeout(function(){
-        if(syncState.dirty && !syncState.pushing && !syncState.suppressPush) pushToCloud();
+        if(generation === syncState.generation && syncState.dirty && !syncState.pushing && !syncState.suppressPush) pushToCloud();
       }, 2000);
     }
   }
 
   function updateSyncStatus(){
+    window.__gfSyncState=syncState;
+    if(typeof window.updateSheetStatus==="function") window.updateSheetStatus();
     var el = document.getElementById("syncStatusText");
     if(!el) return;
-    el.dataset.syncState=syncState.pushing?"syncing":syncState.dirty?"pending":"ready";
+    el.dataset.syncState=!navigator.onLine?"offline":syncState.pushing?"syncing":syncState.dirty?"pending":syncState.lastSync?"synced":"idle";
     if(!getUser()){ el.textContent = ""; return; }
     if(!navigator.onLine){ el.textContent = "Hors ligne — sync en attente"; return; }
     if(syncState.pushing){ el.textContent = "Synchronisation..."; return; }
@@ -5761,31 +5927,55 @@ function resetDataState(){
   function scheduleAccountSync(user, delay){
     if(!user || !user.id) return;
     var changedAccount = syncState.userId !== user.id;
+    if(changedAccount){
+      syncState.generation++;
+      if(window.__gf_syncTimer) clearTimeout(window.__gf_syncTimer);
+      window.__gfSuppressSync = false;
+      syncState.pushing = false; syncState.pulling = false; syncState.suppressPush = false;
+      var sheet = getFinanceSheet();
+      if(sheet && sheet.switchFinancialOwner) sheet.switchFinancialOwner(user.id);
+      else safeStore.setFinancialOwner(user.id);
+    }
     syncState.userId = user.id;
-    if(changedAccount){ syncState.remoteUpdatedAt = ""; syncState.lastSync = 0; syncState.dirty = false; }
+    if(changedAccount){ syncState.remoteUpdatedAt = ""; syncState.lastSync = 0; syncState.revision = 0; syncState.dirty = safeStore.getFinancialSyncPending(); }
     if(syncState.scheduledPull) clearTimeout(syncState.scheduledPull);
     syncState.scheduledPull = setTimeout(async function(){
       syncState.scheduledPull = null;
       var current = getUser();
       if(!current || current.id !== user.id || !navigator.onLine) return;
+      if(syncState.dirty){ await pushToCloud(); return; }
       var pulled = await pullFromCloud();
       if(pulled === null){
-        // Nouveau compte sans snapshot : on conserve et envoie le contenu
-        // présent sur l'appareil (tableur, objectifs et notes).
+        // Seules les données anonymes créées depuis l'isolation des comptes
+        // peuvent être reprises automatiquement pour un tout premier compte.
+        if(safeStore.claimAnonymousFor(user.id)){
+          var sheet = getFinanceSheet();
+          if(sheet && sheet.switchFinancialOwner) sheet.switchFinancialOwner(user.id,{discardCurrent:true});
+        }
         syncState.dirty = true;
+        syncState.revision++;
+        safeStore.setFinancialSyncPending(true);
         updateSyncStatus();
         await pushToCloud();
-      }else if(pulled === false){ updateSyncStatus(); }
+      }else { safeStore.discardAnonymousClaim(); if(pulled === false) updateSyncStatus(); }
     }, typeof delay === "number" ? delay : 500);
   }
 
   function clearAccountSync(){
     if(syncState.scheduledPull) clearTimeout(syncState.scheduledPull);
     syncState.scheduledPull = null;
+    syncState.generation++;
+    if(window.__gf_syncTimer) clearTimeout(window.__gf_syncTimer);
+    window.__gfSuppressSync = false;
+    syncState.pushing = false; syncState.pulling = false; syncState.suppressPush = false;
+    var sheet = getFinanceSheet();
+    if(sheet && sheet.switchFinancialOwner) sheet.switchFinancialOwner(null);
+    else safeStore.setFinancialOwner(null);
     syncState.userId = "";
     syncState.remoteUpdatedAt = "";
     syncState.dirty = false;
     syncState.lastSync = 0;
+    safeStore.discardAnonymousClaim();
     updateSyncStatus();
   }
 
@@ -5798,6 +5988,7 @@ function resetDataState(){
   function initSync(){
     window.addEventListener("authStateChanged", function(event){
       var detail = event && event.detail ? event.detail : {};
+      updateSyncStatus();
       if(detail.user) scheduleAccountSync(detail.user, detail.event === "SIGNED_IN" ? 350 : 650);
       else if(detail.event === "SIGNED_OUT") clearAccountSync();
     });

@@ -77,6 +77,10 @@
     {
       "source": "/parametres",
       "destination": "/app"
+    },
+    {
+      "source": "/abonnement",
+      "destination": "/app"
     }
   ]
 }

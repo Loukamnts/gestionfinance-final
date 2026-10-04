@@ -1488,6 +1488,27 @@
     return true;
   }
 
+  // Change de coffre local avant toute lecture ou écriture liée au compte.
+  // Une sauvegarde en attente reste dans le coffre de son propriétaire initial.
+  function switchFinancialOwner(ownerId, options) {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    if (!(options && options.discardCurrent) && state.sheets.length) {
+      Store.setItem(STORAGE_KEY, JSON.stringify({ v: VERSION, sheets: serializeSheets(), activeSheetId: state.activeSheetId, savedAt: Date.now() }));
+    }
+    safeStore.setFinancialOwner(ownerId);
+    state.sheets = [];
+    state.activeSheetId = null;
+    undoHistory.length = 0;
+    redoHistory.length = 0;
+    if (!load()) resetToDefaultSheets({ silent: true });
+    state.active = { r: 0, c: 0 };
+    state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
+    if (typeof window.clearDashboardForAccountSwitch === "function") window.clearDashboardForAccountSwitch();
+    buildTable(); renderValues(); renderTabs(); recordHistory(); updateStatus();
+    notifyDashboard();
+    window.dispatchEvent(new CustomEvent("gfprofilechange"));
+  }
+
   // ═══════════════════════════ Init ═══════════════════════════════
   function init() {
     container = document.getElementById("sheetApp"); if (!container) return;
@@ -1559,7 +1580,7 @@
     var prevYear = currentYear - 1;
     return [String(prevYear), String(currentYear)];
   }
-  function resetToDefaultSheets() {
+  function resetToDefaultSheets(options) {
     state.sheets = [];
     var yearNames = getDefaultYearNames();
     yearNames.forEach(function(name) {
@@ -1568,7 +1589,7 @@
     if (state.sheets.length) state.activeSheetId = state.sheets[0].id;
     state.active = { r: 0, c: 0 };
     state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
-    buildTable(); renderValues(); renderTabs(); scheduleSave(); notifyDashboard();
+    buildTable(); renderValues(); renderTabs(); if (!(options && options.silent)) scheduleSave(); notifyDashboard();
   }
 
   // Vide les données démo
@@ -1753,7 +1774,7 @@
     }
   }
 
-  window.FinanceSheet = { init, recompute, saveNow, openCalculator, openStartingBalance, getSnapshot, loadSnapshot, buildWorkbook, importXlsx, exportXlsx, loadDemoData, clearDemoDataFS, updateSheetBalanceCards, getObjectiveSources, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
+  window.FinanceSheet = { init, recompute, saveNow, openCalculator, openStartingBalance, getSnapshot, loadSnapshot, switchFinancialOwner, buildWorkbook, importXlsx, exportXlsx, loadDemoData, clearDemoDataFS, updateSheetBalanceCards, getObjectiveSources, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
   // Hook appelé après import / édition / création de feuille pour rafraîchir le dashboard.
   let dashTimer = null;
   function notifyDashboard() {
