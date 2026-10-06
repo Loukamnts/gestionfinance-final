@@ -101,7 +101,19 @@ put('app.html',html);
 for (const page of ['presentation.html','confidentialite.html','conditions.html','404.html']) {
   if (fs.existsSync(path.join(root,page))) copy(page);
 }
-copy('presentation.html','index.html');
+// La page de présentation charge les modules publics : les scripts reçoivent leur empreinte SRI.
+let publicPage=fs.readFileSync(path.join(root,'presentation.html'),'utf8');
+publicPage=publicPage.replace(/<script\b([^>]*?)\bsrc="([^"]+)"([^>]*)><\/script>/g,(tag,before,src,after)=>{
+  if (/^https:/.test(src)) return tag;
+  const clean = src.split('?')[0];
+  if (fs.existsSync(path.join(output,clean))) {
+    const code = fs.readFileSync(path.join(output,clean));
+    return `<script ${before}src="${src}"${after} integrity="${integrity(code)}" crossorigin="anonymous"></script>`;
+  }
+  return tag;
+});
+put('presentation.html',publicPage);
+put('index.html',publicPage);
 // Contact facultatif tant que le propriétaire n'a pas choisi son adresse publique.
 if (fs.existsSync(path.join(root,'.well-known/security.txt'))) copy('.well-known/security.txt');
 console.log(`Build sécurisé : ${publicFiles.length} fichiers applicatifs, ${inlineCount} scripts séparés, aucun SQL publié.`);

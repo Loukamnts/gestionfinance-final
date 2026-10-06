@@ -144,30 +144,18 @@
     return langMap[currentLang] || langMap[DEFAULT_LANG];
   }
 
-  // Applique les traductions à un élément DOM
+  // Applique les traductions à un élément DOM et à sa descendance
   function applyToElement(element) {
     if (!element) return;
     
-    // Traduit les attributs data-i18n
-    const translateAttr = (attr) => {
-      const key = element.getAttribute(attr);
-      if (key) {
-        element.setAttribute(attr, translate(key));
-      }
-    };
+    // L'élément lui-même peut porter data-i18n
+    if (element.matches && element.matches("[data-i18n]")) {
+      element.textContent = translate(element.getAttribute("data-i18n"));
+    }
     
-    translateAttr("data-i18n");
-    translateAttr("aria-label");
-    translateAttr("title");
-    translateAttr("placeholder");
-    
-    // Traduit le texte des enfants
-    const children = element.querySelectorAll("[data-i18n]");
-    children.forEach(child => {
-      const key = child.getAttribute("data-i18n");
-      if (key) {
-        child.textContent = translate(key);
-      }
+    // Les descendants portant data-i18n
+    element.querySelectorAll("[data-i18n]").forEach(child => {
+      child.textContent = translate(child.getAttribute("data-i18n"));
     });
   }
 
@@ -182,14 +170,14 @@
     const selector = document.createElement("div");
     selector.id = "language-selector";
     selector.className = "language-selector";
-    selector.setAttribute("aria-label", translate("common.language"));
+    selector.setAttribute("aria-label", translate("presentation.languageLabel"));
     
-    // Style du sélecteur
+    // Style du sélecteur : discret, aligné avec les liens existants du footer
     selector.style.cssText = `
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      margin-left: 16px;
+      gap: 6px;
+      margin-top: 2px;
     `;
     
     // Crée les boutons de langue
@@ -205,12 +193,14 @@
         background: none;
         border: 1px solid var(--line);
         color: var(--muted);
-        padding: 4px 8px;
+        padding: 3px 8px;
         border-radius: var(--radius);
         cursor: pointer;
-        font-size: 0.78rem;
+        font-size: 0.72rem;
         font-weight: 600;
-        transition: all 0.2s ease;
+        font-family: inherit;
+        line-height: 1.3;
+        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
       `;
       
       if (lang === currentLang) {
@@ -258,9 +248,9 @@
     });
   }
 
-  // Applique les traductions à tous les éléments
+  // Applique les traductions à tous les éléments marqués data-i18n
   function applyToAllElements() {
-    document.querySelectorAll("[data-i18n], [aria-label], [title], [placeholder]").forEach(applyToElement);
+    document.querySelectorAll("[data-i18n]").forEach(applyToElement);
   }
 
   // Initialise le gestionnaire
@@ -299,13 +289,9 @@
     applyToAllElements
   };
 
-  // Étend le système existant (i18n.js)
+  // Étend le système existant (i18n.js) sans écraser ses méthodes déjà en place
   if (window.GFI18n) {
-    window.GFI18n.getLanguage = getLanguage;
-    window.GFI18n.setLanguage = setCurrentLanguage;
-    window.GFI18n.locale = locale;
-    window.GFI18n.translate = translateWithFallback;
-    window.GFI18n.t = translateWithFallback;
+    window.GFI18n.setLanguage = window.GFI18n.setLanguage || setCurrentLanguage;
   } else {
     window.GFI18n = {
       getLanguage,

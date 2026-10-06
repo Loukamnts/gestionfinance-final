@@ -104,5 +104,27 @@
     "privacy": "Confidentialité",
     "terms": "Conditions d'utilisation",
     "contact": "Contact"
+  },
+  "presentation": {
+    "navFeatures": "Fonctionnalités",
+    "navPrivacy": "Confidentialité",
+    "openApp": "Ouvrir l'application",
+    "kicker": "Le contrôle, sans la complexité",
+    "heroTitle": "Tes finances.",
+    "heroTitleEm": "Enfin lisibles.",
+    "lead": "Meuniance transforme tes chiffres en décisions simples. Un tableau de bord personnel, un vrai tableur et tes objectifs réunis au même endroit.",
+    "ctaStart": "Commencer maintenant",
+    "ctaDiscover": "Découvrir l'outil",
+    "trustNoAds": "Sans publicité",
+    "trustPrivate": "Données privées",
+    "trustFree": "Gratuit",
+    "footerTagline": "La finance personnelle, rendue claire.",
+    "footerPrivacy": "Confidentialité et contact",
+    "footerTerms": "Conditions",
+    "languageLabel": "Langue",
+    "finalTitle": "Fais de tes chiffres",
+    "finalTitleEm": "un vrai plan.",
+    "ctaOpen": "Ouvrir Meuniance",
+    "kickerReady": "Prêt quand tu l’es"
   }
 }

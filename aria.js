@@ -11,10 +11,10 @@
     const header = document.querySelector(".public-header");
     if (!header) return;
     
-    // Logo
+    // Logo : conserve le libellé existant, n'ajoute que s'il est absent
     const logo = header.querySelector(".public-brand");
     if (logo && !logo.getAttribute("aria-label")) {
-      logo.setAttribute("aria-label", "Meuniance, retour à l'accueil");
+      logo.setAttribute("aria-label", "Meuniance, accueil");
     }
     
     // Navigation
@@ -23,13 +23,7 @@
       nav.setAttribute("aria-label", "Navigation principale");
     }
     
-    // Boutons de navigation
-    nav?.querySelectorAll("a:not([aria-label])").forEach(link => {
-      const text = link.textContent.trim();
-      if (text) {
-        link.setAttribute("aria-label", text);
-      }
-    });
+
   }
 
   // Initialise les attributs ARIA pour le hero
@@ -126,13 +120,7 @@
       footer.setAttribute("aria-label", "Pied de page");
     }
     
-    // Liens du footer
-    footer.querySelectorAll("a:not([aria-label])").forEach(link => {
-      const text = link.textContent.trim();
-      if (text) {
-        link.setAttribute("aria-label", text);
-      }
-    });
+
   }
 
   // Initialise les attributs ARIA pour les formulaires
@@ -355,15 +343,6 @@
     initKeyboardNavigation();
     updateDynamicARIA();
     
-    // Écoute les changements dynamiques
-    const observer = new MutationObserver(updateDynamicARIA);
-    observer.observe(document.body, { 
-      childList: true, 
-      subtree: true, 
-      attributes: true 
-    });
-    
-    console.log("ARIA attributes initialized");
   }
 
   // Expose les fonctions globalement

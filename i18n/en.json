@@ -104,5 +104,27 @@
     "privacy": "Privacy",
     "terms": "Terms of Service",
     "contact": "Contact"
+  },
+  "presentation": {
+    "navFeatures": "Features",
+    "navPrivacy": "Privacy",
+    "openApp": "Open the app",
+    "kicker": "Control, without the complexity",
+    "heroTitle": "Your finances.",
+    "heroTitleEm": "Finally readable.",
+    "lead": "Meuniance turns your numbers into simple decisions. A personal dashboard, a real spreadsheet and your goals in one place.",
+    "ctaStart": "Start now",
+    "ctaDiscover": "Discover the tool",
+    "trustNoAds": "No ads",
+    "trustPrivate": "Private data",
+    "trustFree": "Free",
+    "footerTagline": "Personal finance, made clear.",
+    "footerPrivacy": "Privacy & contact",
+    "footerTerms": "Terms",
+    "languageLabel": "Language",
+    "finalTitle": "Turn your numbers into",
+    "finalTitleEm": "a real plan.",
+    "ctaOpen": "Open Meuniance",
+    "kickerReady": "Ready when you are"
   }
 }
