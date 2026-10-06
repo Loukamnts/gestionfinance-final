@@ -97,6 +97,7 @@ const dictionary=Object.freeze({
   "Connecté": "Signed in",
   "Déconnecté": "Signed out",
   "Partage et amis": "Sharing & friends",
+  "Objectifs": "Goals",
   "Nouveautés": "What's new",
   "Se déconnecter": "Sign out",
   "Arrêter": "Stop",
