@@ -164,7 +164,7 @@
     const existingSelector = document.getElementById("language-selector");
     if (existingSelector) return;
     
-    const footer = document.querySelector(".public-footer");
+    const footer = document.querySelector(".public-footer") || document.querySelector(".legal-section p");
     if (!footer) return;
     
     const selector = document.createElement("div");
