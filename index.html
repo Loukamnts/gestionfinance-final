@@ -2974,7 +2974,7 @@
     function updatePageTitle(page){ document.title=PAGE_TITLES[page]||"Meuniance"; }
     function syncPersonalWorkspaceNavigation(page){
       var workspaceTitles={sharing:"Partage et amis",sharingAccess:"Partage et amis",updates:"Nouveautés",objectives:"Objectifs"};
-      var activeTitle=workspaceTitles[page];
+      var activeTitle=state.appearance.interface==="studio"?workspaceTitles[page]:null;
       if(activeTitle){
         var host=document.getElementById(page+"Page");
         var title=host?host.querySelector(".personal-workspace-title"):null;
