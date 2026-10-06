@@ -2973,6 +2973,13 @@
     }
     function updatePageTitle(page){ document.title=PAGE_TITLES[page]||"Meuniance"; }
     function syncPersonalWorkspaceNavigation(page){
+      var workspaceTitles={sharing:"Partage et amis",sharingAccess:"Partage et amis",updates:"Nouveautés",objectives:"Objectifs"};
+      var activeTitle=workspaceTitles[page];
+      if(activeTitle){
+        var host=document.getElementById(page+"Page");
+        var title=host?host.querySelector(".personal-workspace-title"):null;
+        if(title) title.textContent=window.GFI18n?window.GFI18n.t(activeTitle):activeTitle;
+      }
       document.querySelectorAll(".personal-workspace-nav").forEach(function(nav){
         const active=nav.querySelector('[data-page="'+page+'"]');
         nav.querySelectorAll("[data-page]").forEach(function(button){ button.setAttribute("aria-current",button===active?"page":"false"); });
