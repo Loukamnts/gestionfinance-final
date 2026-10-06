@@ -9,7 +9,7 @@
   // Langue par défaut et disponible
   const DEFAULT_LANG = "fr";
   const AVAILABLE_LANGS = ["fr", "en"];
-  const STORAGE_KEY = "meuniance.language";
+  const STORAGE_KEY = "personalFinanceDashboard.language";
 
   // Dictionnaires chargés
   let dictionaries = {};
@@ -164,7 +164,7 @@
     const existingSelector = document.getElementById("language-selector");
     if (existingSelector) return;
     
-    const footer = document.querySelector(".public-footer") || document.querySelector(".legal-section p");
+    const footer = document.querySelector(".public-footer");
     if (!footer) return;
     
     const selector = document.createElement("div");
