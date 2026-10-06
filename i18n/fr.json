@@ -1,0 +1,108 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "share": "Partager",
+    "close": "Fermer",
+    "back": "Retour"
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "signOut": "Se déconnecter",
+    "email": "Email",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "confirmPassword": "Confirmer le mot de passe",
+    "error": {
+      "invalidEmail": "Email invalide",
+      "invalidPassword": "Mot de passe invalide (min 6 caractères)",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "userNotFound": "Utilisateur non trouvé",
+      "wrongPassword": "Mot de passe incorrect",
+      "networkError": "Erreur réseau. Vérifiez votre connexion.",
+      "unknownError": "Une erreur est survenue. Veuillez réessayer."
+    },
+    "loading": {
+      "signingIn": "Connexion en cours...",
+      "signingUp": "Inscription en cours...",
+      "signingOut": "Déconnexion en cours..."
+    }
+  },
+  "sharing": {
+    "title": "Partager",
+    "shareWith": "Partager avec",
+    "addFriend": "Ajouter un ami",
+    "friendEmail": "Email de l'ami",
+    "selectMonths": "Sélectionner les mois",
+    "selectLines": "Sélectionner les lignes",
+    "permissions": "Permissions",
+    "readOnly": "Lecture seule",
+    "canEdit": "Peut éditer",
+    "error": {
+      "invalidEmail": "Email invalide",
+      "alreadyShared": "Déjà partagé avec cet utilisateur",
+      "notFound": "Utilisateur non trouvé",
+      "networkError": "Erreur réseau. Veuillez réessayer.",
+      "unknownError": "Une erreur est survenue lors du partage."
+    },
+    "loading": {
+      "sharing": "Partage en cours...",
+      "revoking": "Révocation en cours..."
+    },
+    "success": {
+      "shared": "Partagé avec succès !",
+      "revoked": "Accès révoqué avec succès."
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "balance": "Solde",
+    "income": "Revenus",
+    "expenses": "Dépenses",
+    "savings": "Épargne",
+    "month": "Mois",
+    "year": "Année",
+    "total": "Total",
+    "noData": "Aucune donnée disponible",
+    "addEntry": "Ajouter une entrée",
+    "editEntry": "Modifier l'entrée",
+    "deleteEntry": "Supprimer l'entrée",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette entrée ?",
+    "error": {
+      "invalidAmount": "Montant invalide",
+      "invalidDate": "Date invalide",
+      "networkError": "Erreur réseau. Veuillez réessayer."
+    }
+  },
+  "objectives": {
+    "title": "Objectifs",
+    "addObjective": "Ajouter un objectif",
+    "objectiveName": "Nom de l'objectif",
+    "targetAmount": "Montant cible",
+    "currentAmount": "Montant actuel",
+    "targetDate": "Date cible",
+    "progress": "Progression",
+    "completed": "Terminé",
+    "error": {
+      "invalidName": "Nom invalide",
+      "invalidAmount": "Montant invalide",
+      "invalidDate": "Date invalide"
+    }
+  },
+  "theme": {
+    "title": "Thème",
+    "glass": "Verre",
+    "editorial": "Éditorial",
+    "brutal": "Brutal"
+  },
+  "footer": {
+    "privacy": "Confidentialité",
+    "terms": "Conditions d'utilisation",
+    "contact": "Contact"
+  }
+}
