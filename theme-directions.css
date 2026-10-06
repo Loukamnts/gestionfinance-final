@@ -698,6 +698,9 @@ body[data-interface="studio"] :is(#sharingPage,#sharingAccessPage,#updatesPage,#
   flex-direction:column;
   gap:18px;
 }
+body[data-interface="studio"] :is(#sharingPage,#sharingAccessPage,#updatesPage,#objectivesPage) .personal-workspace-title {
+  display:none;
+}
 body[data-interface="studio"] :is(#sharingPage,#sharingAccessPage,#updatesPage,#objectivesPage) .personal-workspace-nav {
   display:none !important;
 }

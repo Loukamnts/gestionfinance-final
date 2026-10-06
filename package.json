@@ -17,6 +17,9 @@
     "chart.js": "4.5.1"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "0.5.8"
+    "@electric-sql/pglite": "0.5.8",
+    "cssnano": "9.3.2",
+    "sharp": "0.35.5",
+    "terser": "5.51.2"
   }
 }

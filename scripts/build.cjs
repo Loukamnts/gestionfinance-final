@@ -23,9 +23,9 @@ const put = (name, contents) => {
 const copy = (from, to = from) => put(to, fs.readFileSync(path.join(root, from)));
 const integrity = content => 'sha384-' + crypto.createHash('sha384').update(content).digest('base64');
 const publicFiles = ['sheet.js','sheet.css','onboarding.js','onboarding.css','friends.js','profile.js',
-  'i18n.js','shared-dashboard.js','sharing.css','ui-controls.js','ui-polish.css','theme-directions.css','objectives.js',
-  'store-shim.js','favicon.ico','brand-mark.svg','app-icon-180.png','app-icon-512.png','manifest.webmanifest','supabase_config.json',
-  'robots.txt','sitemap.xml','public.css','public.js','share-card.png'];
+  'i18n.js','i18n/fr.json','i18n/en.json','aria.js','storage-encryption.js','ios-fix.js','feedback.js','i18n-manager.js','shared-dashboard.js','sharing.css','ui-controls.js','ui-polish.css','theme-directions.css','objectives.js',
+  'store-shim.js','favicon.ico','brand-mark.svg','app-icon-180.png','app-icon-180.webp','app-icon-512.png','app-icon-512.webp','manifest.webmanifest','supabase_config.json',
+  'robots.txt','sitemap.xml','public.css','public.js','share-card.png','share-card.webp'];
 for (const file of publicFiles) copy(file);
 const config = JSON.parse(fs.readFileSync(path.join(root,'supabase_config.json'),'utf8'));
 require('./public-config.cjs')(config);
@@ -101,7 +101,19 @@ put('app.html',html);
 for (const page of ['presentation.html','confidentialite.html','conditions.html','404.html']) {
   if (fs.existsSync(path.join(root,page))) copy(page);
 }
-copy('presentation.html','index.html');
+// La page de présentation charge les modules publics : les scripts reçoivent leur empreinte SRI.
+let publicPage=fs.readFileSync(path.join(root,'presentation.html'),'utf8');
+publicPage=publicPage.replace(/<script\b([^>]*?)\bsrc="([^"]+)"([^>]*)><\/script>/g,(tag,before,src,after)=>{
+  if (/^https:/.test(src)) return tag;
+  const clean = src.split('?')[0];
+  if (fs.existsSync(path.join(output,clean))) {
+    const code = fs.readFileSync(path.join(output,clean));
+    return `<script ${before}src="${src}"${after} integrity="${integrity(code)}" crossorigin="anonymous"></script>`;
+  }
+  return tag;
+});
+put('presentation.html',publicPage);
+put('index.html',publicPage);
 // Contact facultatif tant que le propriétaire n'a pas choisi son adresse publique.
 if (fs.existsSync(path.join(root,'.well-known/security.txt'))) copy('.well-known/security.txt');
 console.log(`Build sécurisé : ${publicFiles.length} fichiers applicatifs, ${inlineCount} scripts séparés, aucun SQL publié.`);

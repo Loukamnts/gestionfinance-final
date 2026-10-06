@@ -1,0 +1,130 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "share": "Share",
+    "close": "Close",
+    "back": "Back"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "confirmPassword": "Confirm password",
+    "error": {
+      "invalidEmail": "Invalid email",
+      "invalidPassword": "Invalid password (min 6 characters)",
+      "passwordMismatch": "Passwords do not match",
+      "userNotFound": "User not found",
+      "wrongPassword": "Wrong password",
+      "networkError": "Network error. Please check your connection.",
+      "unknownError": "An error occurred. Please try again."
+    },
+    "loading": {
+      "signingIn": "Signing in...",
+      "signingUp": "Signing up...",
+      "signingOut": "Signing out..."
+    }
+  },
+  "sharing": {
+    "title": "Share",
+    "shareWith": "Share with",
+    "addFriend": "Add friend",
+    "friendEmail": "Friend's email",
+    "selectMonths": "Select months",
+    "selectLines": "Select lines",
+    "permissions": "Permissions",
+    "readOnly": "Read only",
+    "canEdit": "Can edit",
+    "error": {
+      "invalidEmail": "Invalid email",
+      "alreadyShared": "Already shared with this user",
+      "notFound": "User not found",
+      "networkError": "Network error. Please try again.",
+      "unknownError": "An error occurred while sharing."
+    },
+    "loading": {
+      "sharing": "Sharing...",
+      "revoking": "Revoking..."
+    },
+    "success": {
+      "shared": "Shared successfully!",
+      "revoked": "Access revoked successfully."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "balance": "Balance",
+    "income": "Income",
+    "expenses": "Expenses",
+    "savings": "Savings",
+    "month": "Month",
+    "year": "Year",
+    "total": "Total",
+    "noData": "No data available",
+    "addEntry": "Add entry",
+    "editEntry": "Edit entry",
+    "deleteEntry": "Delete entry",
+    "confirmDelete": "Are you sure you want to delete this entry?",
+    "error": {
+      "invalidAmount": "Invalid amount",
+      "invalidDate": "Invalid date",
+      "networkError": "Network error. Please try again."
+    }
+  },
+  "objectives": {
+    "title": "Objectives",
+    "addObjective": "Add objective",
+    "objectiveName": "Objective name",
+    "targetAmount": "Target amount",
+    "currentAmount": "Current amount",
+    "targetDate": "Target date",
+    "progress": "Progress",
+    "completed": "Completed",
+    "error": {
+      "invalidName": "Invalid name",
+      "invalidAmount": "Invalid amount",
+      "invalidDate": "Invalid date"
+    }
+  },
+  "theme": {
+    "title": "Theme",
+    "glass": "Glass",
+    "editorial": "Editorial",
+    "brutal": "Brutal"
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms of Service",
+    "contact": "Contact"
+  },
+  "presentation": {
+    "navFeatures": "Features",
+    "navPrivacy": "Privacy",
+    "openApp": "Open the app",
+    "kicker": "Control, without the complexity",
+    "heroTitle": "Your finances.",
+    "heroTitleEm": "Finally readable.",
+    "lead": "Meuniance turns your numbers into simple decisions. A personal dashboard, a real spreadsheet and your goals in one place.",
+    "ctaStart": "Start now",
+    "ctaDiscover": "Discover the tool",
+    "trustNoAds": "No ads",
+    "trustPrivate": "Private data",
+    "trustFree": "Free",
+    "footerTagline": "Personal finance, made clear.",
+    "footerPrivacy": "Privacy & contact",
+    "footerTerms": "Terms",
+    "languageLabel": "Language",
+    "finalTitle": "Turn your numbers into",
+    "finalTitleEm": "a real plan.",
+    "ctaOpen": "Open Meuniance",
+    "kickerReady": "Ready when you are"
+  }
+}

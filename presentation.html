@@ -24,29 +24,31 @@
   <link rel="stylesheet" href="vendor/fonts.css" />
   <link rel="stylesheet" href="public.css?v=20260930-r1" />
   <script src="public.js?v=20260929-r2" defer></script>
+<script src="i18n-manager.js?v=20261006-r1" defer></script>
+<script src="aria.js?v=20261006-r1" defer></script>
 </head>
 <body>
   <div class="public-shell">
     <header class="public-header">
       <a class="public-brand" href="/" aria-label="Meuniance, accueil"><span><svg class="brand-m" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="12" y="38" width="10" height="15" rx="2"/><rect x="27" y="29" width="10" height="24" rx="2"/><rect x="42" y="20" width="10" height="33" rx="2"/><path d="M12 24 24 11 34 20 51 5m-7 0h7v7" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 57h40" fill="none" stroke="var(--text)" stroke-width="2.7" stroke-linecap="round"/></svg><span class="brand-word">Meuniance</span></span></a>
       <nav class="public-nav" aria-label="Navigation principale">
-        <a href="#fonctionnalites">Fonctionnalités</a>
-        <a href="#confiance">Confidentialité</a>
-        <a class="btn btn-primary" href="/accueil">Ouvrir l’application <span aria-hidden="true">→</span></a>
+        <a href="#fonctionnalites" data-i18n="presentation.navFeatures">Fonctionnalités</a>
+        <a href="#confiance" data-i18n="presentation.navPrivacy">Confidentialité</a>
+        <a class="btn btn-primary" href="/accueil"><span data-i18n="presentation.openApp">Ouvrir l’application</span> <span aria-hidden="true">→</span></a>
       </nav>
     </header>
 
     <main>
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy reveal">
-          <p class="kicker"><span></span> Le contrôle, sans la complexité</p>
-          <h1 id="hero-title">Tes finances.<br><em>Enfin lisibles.</em></h1>
-          <p class="lead">Meuniance transforme tes chiffres en décisions simples. Un tableau de bord personnel, un vrai tableur et tes objectifs réunis au même endroit.</p>
+          <p class="kicker"><span></span> <span data-i18n="presentation.kicker">Le contrôle, sans la complexité</span></p>
+          <h1 id="hero-title"><span data-i18n="presentation.heroTitle">Tes finances.</span><br><em data-i18n="presentation.heroTitleEm">Enfin lisibles.</em></h1>
+          <p class="lead" data-i18n="presentation.lead">Meuniance transforme tes chiffres en décisions simples. Un tableau de bord personnel, un vrai tableur et tes objectifs réunis au même endroit.</p>
           <div class="hero-actions">
-            <a class="btn btn-primary btn-large" href="/accueil">Commencer maintenant <span aria-hidden="true">→</span></a>
-            <a class="text-link" href="#fonctionnalites">Découvrir l’outil <span aria-hidden="true">↓</span></a>
+            <a class="btn btn-primary btn-large" href="/accueil"><span data-i18n="presentation.ctaStart">Commencer maintenant</span> <span aria-hidden="true">→</span></a>
+            <a class="text-link" href="#fonctionnalites"><span data-i18n="presentation.ctaDiscover">Découvrir l’outil</span> <span aria-hidden="true">↓</span></a>
           </div>
-          <div class="trust-row" aria-label="Avantages"><span>Sans publicité</span><span>Données privées</span><span>Gratuit</span></div>
+          <div class="trust-row" aria-label="Avantages"><span data-i18n="presentation.trustNoAds">Sans publicité</span><span data-i18n="presentation.trustPrivate">Données privées</span><span data-i18n="presentation.trustFree">Gratuit</span></div>
         </div>
 
         <div class="product-stage reveal" aria-label="Aperçu fictif de Meuniance">
@@ -95,15 +97,15 @@
 
 
       <section class="final-cta reveal">
-        <p class="kicker"><span></span> Prêt quand tu l’es</p>
-        <h2>Fais de tes chiffres<br><em>un vrai plan.</em></h2>
-        <a class="btn btn-primary btn-large" href="/accueil">Ouvrir Meuniance <span aria-hidden="true">→</span></a>
+        <p class="kicker"><span></span> <span data-i18n="presentation.kickerReady">Prêt quand tu l’es</span></p>
+        <h2><span data-i18n="presentation.finalTitle">Fais de tes chiffres</span><br><em data-i18n="presentation.finalTitleEm">un vrai plan.</em></h2>
+        <a class="btn btn-primary btn-large" href="/accueil"><span data-i18n="presentation.ctaOpen">Ouvrir Meuniance</span> <span aria-hidden="true">→</span></a>
       </section>
     </main>
 
     <footer class="public-footer">
-      <div><a class="public-brand" href="/"><span><svg class="brand-m" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="12" y="38" width="10" height="15" rx="2"/><rect x="27" y="29" width="10" height="24" rx="2"/><rect x="42" y="20" width="10" height="33" rx="2"/><path d="M12 24 24 11 34 20 51 5m-7 0h7v7" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 57h40" fill="none" stroke="var(--text)" stroke-width="2.7" stroke-linecap="round"/></svg><span class="brand-word">Meuniance</span></span></a><p>La finance personnelle, rendue claire.</p></div>
-      <nav><a href="/confidentialite">Confidentialité et contact</a><a href="/conditions">Conditions</a></nav>
+      <div><a class="public-brand" href="/"><span><svg class="brand-m" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="12" y="38" width="10" height="15" rx="2"/><rect x="27" y="29" width="10" height="24" rx="2"/><rect x="42" y="20" width="10" height="33" rx="2"/><path d="M12 24 24 11 34 20 51 5m-7 0h7v7" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 57h40" fill="none" stroke="var(--text)" stroke-width="2.7" stroke-linecap="round"/></svg><span class="brand-word">Meuniance</span></span></a><p data-i18n="presentation.footerTagline">La finance personnelle, rendue claire.</p></div>
+      <nav><a href="/confidentialite" data-i18n="presentation.footerPrivacy">Confidentialité et contact</a><a href="/conditions" data-i18n="presentation.footerTerms">Conditions</a></nav>
       <p>© 2026 Meuniance</p>
     </footer>
   </div>
