@@ -153,6 +153,14 @@
       element.textContent = translate(element.getAttribute("data-i18n"));
     }
     
+    // Traduction des attributs aria-label
+    if (element.matches && element.matches("[data-i18n-aria]")) {
+      element.setAttribute("aria-label", translate(element.getAttribute("data-i18n-aria")));
+    }
+    element.querySelectorAll("[data-i18n-aria]").forEach(child => {
+      child.setAttribute("aria-label", translate(child.getAttribute("data-i18n-aria")));
+    });
+    
     // Les descendants portant data-i18n
     element.querySelectorAll("[data-i18n]").forEach(child => {
       child.textContent = translate(child.getAttribute("data-i18n"));
