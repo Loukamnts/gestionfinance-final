@@ -154,6 +154,20 @@
     "privacyEyebrow": "Trust first",
     "privacyTitle": "Your financial data is not a product.",
     "privacyText": "No ads, no commercial tracking and no resale. You stay in control of your data and can export or delete it.",
-    "privacyLink": "Read the privacy policy"
+    "privacyLink": "Read the privacy policy",
+    "previewGoalCard": "Travel goal",
+    "previewMonth": "This month",
+    "previewNetSavings": "Net savings",
+    "previewDemoLabel": "Fictional example, amounts and percentages are illustrative",
+    "previewDate": "September 2026⌄",
+    "paletteViolet": "Violet",
+    "paletteBordeaux": "Bordeaux",
+    "paletteGold": "Gold",
+    "footerCopyright": "© 2026 Meuniance",
+    "trustRowLabel": "Benefits",
+    "previewStageLabel": "Fictional preview of Meuniance",
+    "themeStripLabel": "Choose the look",
+    "themeGroupLabel": "Choose a theme",
+    "paletteGroupLabel": "Choose a colour"
   }
 }
