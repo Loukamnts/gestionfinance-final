@@ -34,10 +34,16 @@ body[data-theme="moulin"] #dashboardPage #latestUpdateBanner.latest-update-banne
   .gfd-close{grid-area:close}
 }
 
-/* Mise en lumière de la fonction ouverte par « Essayer » */
-.gfd-spot{animation:gfdSpot 2.4s ease-out;border-radius:16px}
-@keyframes gfdSpot{0%,40%{box-shadow:0 0 0 3px var(--accent-fill,var(--accent))}100%{box-shadow:0 0 0 3px transparent}}
-@media(prefers-reduced-motion:reduce){.gfd-arc,.gfd-seed{transition:none}.gfd-spot{animation:none;box-shadow:0 0 0 3px var(--accent-fill,var(--accent))}}
+/* Repère ouvert par « Essayer » : voile, anneau autour de l'élément exact et bulle d'explication */
+.gfd-coach{position:fixed;inset:0;z-index:3000;cursor:pointer}
+.gfd-coach-hole{position:fixed;border-radius:16px;box-shadow:0 0 0 2px var(--accent-fill,#E3A82B),0 0 0 6px color-mix(in srgb,var(--accent-fill,#E3A82B) 35%,transparent),0 0 0 200vmax rgba(10,18,14,.55);pointer-events:none;animation:gfdHole .35s cubic-bezier(.2,.8,.2,1)}
+.gfd-coach-tip{position:fixed;display:grid;gap:12px;padding:16px;border-radius:18px;background:var(--panel-solid,#FBF8F1);color:var(--text);box-shadow:0 18px 44px rgba(0,0,0,.28);cursor:default;animation:gfdTip .3s ease-out}
+.gfd-coach-tip p{margin:0;font:500 15px/1.45 var(--font-body);color:var(--text)}
+.gfd-coach-ok{justify-self:end;height:44px;padding:0 18px;border:0;border-radius:14px;background:var(--accent-fill,#E3A82B);color:var(--on-accent-fill,#17261F);font:600 15px var(--font-body);cursor:pointer}
+.gfd-coach-ok:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+@keyframes gfdHole{from{opacity:0;transform:scale(1.06)}to{opacity:1;transform:none}}
+@keyframes gfdTip{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.gfd-arc,.gfd-seed{transition:none}.gfd-coach-hole,.gfd-coach-tip{animation:none}}
 
 /* ── Page Nouveautés : bloc plein pour la dernière version, puis un fil à filets ── */
 body[data-theme="moulin"] #updatesPage .updates-list{display:block}

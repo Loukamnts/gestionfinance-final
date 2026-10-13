@@ -163,30 +163,10 @@
     });
   }
 
-  // Problème 4: Les boutons ont besoin d'une zone de touch plus grande sur iOS
-  function fixTouchTargets() {
-    if (!isIOS()) return;
-    
-    const style = document.createElement('style');
-    style.textContent = `
-      button,
-      [role="button"],
-      .btn,
-      a {
-        min-height: 44px;
-        min-width: 44px;
-        padding: 12px !important;
-      }
-      
-      /* Pour les petits boutons */
-      button:not([class*="btn-"]),
-      [role="button"]:not([class*="btn-"]) {
-        min-height: 36px;
-        min-width: 36px;
-      }
-    `;
-    document.head.appendChild(style);
-  }
+  // Problème 4 : zones tactiles. Chaque composant fixe déjà sa propre taille (44 px minimum) ;
+  // une règle globale forcée (min-width + padding !important) déformait les barres, les onglets
+  // et les icônes, et élargissait la page au-delà de l'écran (zoom arrière de Safari).
+  function fixTouchTargets() {}
 
   // Problème 5: Les inputs ont besoin d'un meilleur focus sur iOS
   function fixInputFocus() {
@@ -197,9 +177,9 @@
       input:focus,
       textarea:focus,
       select:focus {
-        outline: 2px solid var(--accent, #9b72e6) !important;
+        outline: 2px solid var(--text, #17261F) !important;
         outline-offset: -2px !important;
-        box-shadow: 0 0 0 3px rgba(155, 114, 230, 0.2) !important;
+        box-shadow: none !important;
       }
       
       /* Supprime le focus par défaut d'iOS */

@@ -132,3 +132,10 @@ body[data-theme="moulin"] #updatesPage .updates-list > article.update-entry{padd
 .gfo-field select:disabled{opacity:.5}
 .gfo-field select option{background:var(--panel-solid,#fff);color:var(--text)}
 #objectivesPage label.gfo-auto input{opacity:.5}
+
+/* iPhone : pas de grossissement automatique du texte (rotation, petits écrans) */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* Téléphone : la barre d’outils du tableur tient sur une ligne, la Calculatrice garde son icône (nom lu par les lecteurs d’écran) */
+@media(max-width:560px){body[data-theme="moulin"] #sheetPage #btnSheetCalc{width:38px!important;min-width:38px!important;padding:0!important;justify-content:center}body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;display:block!important}}
+/* Vues du graphique sur petit écran : deux colonnes lisibles plutôt que quatre mots tronqués */
+@media(max-width:400px){.gfc-views{display:grid;grid-template-columns:1fr 1fr;border-radius:20px}.gfc-views button{font-size:14px;padding:0 6px}}
