@@ -118,10 +118,10 @@ body[data-theme="moulin"] #objectivesPage .objective-rhythm > strong{color:var(-
 
 /* Partage et Nouveautés : même famille de panneaux */
 body[data-theme="moulin"] #sharingPage .personal-workspace-content > *:first-child,
-body[data-theme="moulin"] #updatesPage .updates-list > article{border:1px solid var(--line)!important;border-radius:22px!important;background:transparent!important;box-shadow:none!important}
+body[data-theme="moulin"] #updatesPage .updates-list > article.update-entry{border:1px solid var(--line)!important;border-radius:22px!important;background:transparent!important;box-shadow:none!important}
 body[data-theme="moulin"] #sharingPage :is(.sharing-action.primary,.sf-button.primary,button.primary){border-radius:14px!important;box-shadow:none!important}
 body[data-theme="moulin"] #updatesPage .updates-list{display:grid;gap:12px}
-body[data-theme="moulin"] #updatesPage .updates-list > article{padding:18px 20px!important}
+body[data-theme="moulin"] #updatesPage .updates-list > article.update-entry{padding:18px 20px!important}
 
 .gfo-link{margin:4px 0 0;padding:16px;border:1px solid var(--line);border-radius:16px;grid-column:1/-1}
 .gfo-link legend{padding:0 6px;font:600 15px var(--font-body);color:var(--text)}

@@ -16,10 +16,15 @@ body.gfh-ready #dashboardPage .latest-update-banner{order:-2}
 body.gfh-ready[data-theme] #dashboardPage .home-toolbar .home-filter-grid{grid-template-columns:minmax(0,1fr)!important}
 @media(min-width:700px){body.gfh-ready[data-theme] #dashboardPage .home-toolbar .home-filter-grid{grid-template-columns:minmax(0,320px)!important}}
 .gfh-home{color:var(--text);font-family:var(--font-body)}
-.gfh-yrs{display:flex;gap:8px;margin:0 0 10px;overflow-x:auto;scrollbar-width:none}
+.gfh-yrs{display:flex;gap:8px;margin:0 0 10px}
+.gfh-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* Année : pastille unique, ou menu compact quand il y en a plusieurs */
+.gfh-yr-only,.gfh-yrs .gfs-dd-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px;border-radius:22px;border:1px solid var(--accent-fill,var(--accent));background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font:600 15px var(--font-body);font-variant-numeric:tabular-nums}
+.gfh-yrs .gfs-dd{width:auto}
+.gfh-yrs .gfs-dd-btn{width:auto;padding:0 14px 0 18px}
+.gfh-yrs .gfs-dd-btn[aria-expanded="true"]{border-color:var(--text)}
+.gfh-yrs .gfs-dd-menu{min-width:220px}
 .gfh-yrs::-webkit-scrollbar{display:none}
-.gfh-yrs button{flex:none;min-width:44px;height:44px;padding:0 18px;border-radius:22px;border:1px solid var(--line);background:transparent;color:var(--text);font:500 15px var(--font-body);cursor:pointer}
-.gfh-yrs button[aria-pressed="true"]{background:var(--accent-fill,var(--accent));border-color:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font-weight:600}
 .gfh-mon{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:16px;margin-bottom:8px}
 .gfh-mon button{width:44px;height:44px;border:0;background:transparent;color:var(--text);font-size:24px;line-height:1;cursor:pointer;border-radius:14px}
 .gfh-mon button:disabled{opacity:.25;cursor:default}
@@ -139,7 +144,7 @@ body.gfh-ready.gfh-nocharts #dashboardPage .month-details{display:none!important
 .gfh-add svg{width:20px;height:20px}
 .gfh-add:hover{filter:brightness(1.05)}
 .gfh-add:focus-visible{outline:2px solid var(--text);outline-offset:2px}
-@media(max-width:560px){.gfh-add{width:46px;padding:0;margin-left:0;flex:none}.gfh-add span{display:none}.gfh-topbar .gfh-yrs.is-multi{flex:1 1 100%}.gfh-topbar .gfh-yrs:not(.is-multi){flex:none}.gfh-topbar .gfh-mon{flex:1 1 0;max-width:none;min-width:0}}
+@media(max-width:560px){.gfh-add{width:46px;padding:0;margin-left:0;flex:none}.gfh-add span{display:none}.gfh-topbar .gfh-yrs{flex:none}.gfh-topbar .gfh-mon{flex:1 1 0;max-width:none;min-width:0}}
 .gfh-bilan{max-width:60ch;line-height:1.45}
 /* Fenêtres */
 .gfh-dialog{width:min(460px,calc(100vw - 24px));padding:24px;border:1px solid var(--line);border-radius:24px;background:var(--panel-solid,var(--bg));color:var(--text);box-shadow:0 24px 60px rgba(0,0,0,.28)}

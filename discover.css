@@ -1,0 +1,73 @@
+/* ═══════════════════════════════════════════════
+   Nouveautés « Le Moulin » : anneau à remplir sur l'accueil,
+   mise en lumière de la fonction ouverte et fil chronologique de la page Nouveautés.
+   ═══════════════════════════════════════════════ */
+
+/* Le bloc remplace l'ancienne ligne « Du nouveau depuis… » */
+body[data-theme="moulin"] #dashboardPage #latestUpdateBanner.latest-update-banner{display:none!important}
+
+.gfd{display:grid;grid-template-columns:56px minmax(0,1fr) 44px;align-items:center;gap:4px 16px;margin:4px 0 0;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
+.gfd-ring{width:56px;height:56px;flex:none}
+.gfd-track{fill:none;stroke:var(--line);stroke-width:2.4}
+.gfd-arc{fill:none;stroke:var(--accent-fill,var(--accent));stroke-width:2.4;stroke-linecap:round;transition:stroke-dasharray .7s cubic-bezier(.2,.8,.2,1)}
+.gfd-seed{fill:var(--muted);transition:fill .4s}
+.gfd-ring.is-complete .gfd-seed{fill:var(--accent-fill,var(--accent))}
+.gfd-main{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;min-width:0}
+.gfd-copy{min-width:0;flex:1 1 260px}
+.gfd-kicker{margin:0 0 2px;font:500 13px var(--font-body);color:var(--muted);font-variant-numeric:tabular-nums}
+.gfd-title{margin:0;font:600 16px/1.3 var(--font-body)!important;letter-spacing:0!important;color:var(--text)}
+.gfd-text{margin:2px 0 0;font-size:14px;line-height:1.45;color:var(--muted)}
+.gfd-actions{display:flex;align-items:center;gap:6px;flex:none}
+.gfd-try{height:44px;padding:0 18px;border:1px solid var(--accent-fill,var(--accent));border-radius:14px;background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font:600 15px var(--font-body);cursor:pointer}
+.gfd-try:hover{filter:brightness(1.05)}
+.gfd-next{height:44px;padding:0 12px;border:0;border-radius:14px;background:transparent;color:var(--text);font:600 14px var(--font-body);text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.gfd-next:hover{background:var(--line)}
+.gfd-close{width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--muted);font:400 22px/1 var(--font-body);cursor:pointer;align-self:start}
+.gfd-close:hover{background:var(--line);color:var(--text)}
+.gfd button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+@media(max-width:560px){
+  .gfd{grid-template-columns:44px minmax(0,1fr) 44px;grid-template-areas:"ring copy close" ". actions actions";gap:4px 12px}
+  .gfd-ring{grid-area:ring;width:44px;height:44px;align-self:start}
+  .gfd-main{display:contents}
+  .gfd-copy{grid-area:copy}
+  .gfd-actions{grid-area:actions;margin-top:8px}
+  .gfd-close{grid-area:close}
+}
+
+/* Mise en lumière de la fonction ouverte par « Essayer » */
+.gfd-spot{animation:gfdSpot 2.4s ease-out;border-radius:16px}
+@keyframes gfdSpot{0%,40%{box-shadow:0 0 0 3px var(--accent-fill,var(--accent))}100%{box-shadow:0 0 0 3px transparent}}
+@media(prefers-reduced-motion:reduce){.gfd-arc,.gfd-seed{transition:none}.gfd-spot{animation:none;box-shadow:0 0 0 3px var(--accent-fill,var(--accent))}}
+
+/* ── Page Nouveautés : bloc plein pour la dernière version, puis un fil à filets ── */
+body[data-theme="moulin"] #updatesPage .updates-list{display:block}
+.update-hero{padding:24px;border-radius:24px;background:var(--block-bg);color:var(--block-text)}
+.update-hero-top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:12px}
+.update-hero-tag{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:13px;background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font:600 12px var(--font-body)}
+.update-hero time{font-size:13px;color:var(--block-muted)}
+.update-hero h3{margin:0;font:700 clamp(24px,4vw,32px)/1.1 var(--font-heading)!important;letter-spacing:-.025em;color:var(--block-text)}
+.update-hero > p{margin:10px 0 0;max-width:62ch;font-size:15px;line-height:1.5;color:var(--block-muted)}
+.update-hero-list{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:0}
+.update-hero-list li{padding:10px 0;border-top:1px solid var(--block-line);font-size:15px;line-height:1.45;color:var(--block-text)}
+.update-hero-cta{margin-top:16px;height:48px;padding:0 20px;border:0;border-radius:14px;background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font:600 15px var(--font-body);cursor:pointer}
+.update-hero-cta:focus-visible{outline:2px solid var(--block-text);outline-offset:2px}
+.update-feed{margin-top:28px}
+.update-month{margin:28px 0 0;padding-bottom:10px;border-bottom:1px solid var(--line);font:600 12px var(--font-body)!important;letter-spacing:.1em!important;text-transform:uppercase;color:var(--muted)}
+.update-month:first-child{margin-top:0}
+.update-row{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:16px 0;border-bottom:1px solid var(--line)}
+.update-day{font:700 20px/1.2 var(--font-heading);letter-spacing:-.02em;color:var(--text);font-variant-numeric:tabular-nums}
+.update-row-body h4{margin:0;font:600 16px/1.35 var(--font-body);color:var(--text)}
+.update-row-body > p{margin:4px 0 0;max-width:68ch;font-size:14px;line-height:1.5;color:var(--muted)}
+.update-details{margin-top:8px}
+.update-details summary{display:inline-flex;align-items:center;min-height:44px;font:600 14px var(--font-body);color:var(--text);text-decoration:underline;text-underline-offset:4px;cursor:pointer;list-style:none}
+.update-details summary::-webkit-details-marker{display:none}
+.update-details summary::after{content:"";width:6px;height:6px;margin-left:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+.update-details[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+.update-detail{display:flex;gap:10px;align-items:baseline;margin:6px 0 0;max-width:68ch;font-size:14px;line-height:1.5;color:var(--muted)}
+.update-detail .update-type-badge{flex:none;padding:1px 8px;border:1px solid var(--line);border-radius:10px;font:600 11px/1.6 var(--font-body);text-transform:uppercase;letter-spacing:.04em;color:var(--text);background:transparent}
+.update-detail .update-type-new{border-color:var(--accent-fill,var(--accent))}
+.update-more{display:block;margin:24px auto 0;height:48px;padding:0 24px;border:1px solid var(--line);border-radius:14px;background:transparent;color:var(--text);font:600 15px var(--font-body);cursor:pointer}
+.update-more:hover{border-color:var(--text)}
+.update-more:focus-visible,.update-details summary:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+body[data-theme="moulin"] #updatesPagination{display:none!important}
+.gfd-actions .gfd-next:first-child{padding-left:0}.gfd-actions .gfd-next:first-child:hover{background:transparent}

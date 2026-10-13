@@ -323,13 +323,19 @@
 
     if(!root){root=el("section","gfh-home");root.id="gfhHome";root.setAttribute("aria-label",t2("Accueil","Home"));content.insertBefore(root,content.firstChild);}
 
-    // Années
-    var yrs=el("div","gfh-yrs");yrs.setAttribute("role","group");yrs.setAttribute("aria-label",t2("Année","Year"));
-    Array.from(new Set(all.map(function(m){return m.year;}))).forEach(function(y){
-      var b=el("button","",String(y));b.type="button";b.setAttribute("aria-pressed",String(y===sel.year));
-      b.addEventListener("click",function(){if(y===sel.year)return;var ms=all.filter(function(m){return m.year===y;});select(ms[ms.length-1]);});
-      yrs.append(b);
-    });
+    // Années : un seul menu compact (2026 ▾), qui reste lisible avec 2 comme avec 20 années
+    var years=Array.from(new Set(all.map(function(m){return m.year;}))).sort(function(a,b){return b-a;});
+    var yrs=el("div","gfh-yrs");
+    if(years.length<2){yrs.append(el("span","gfh-yr-only",String(sel.year)));}
+    else{
+      var ylab=el("label","gfh-yr"),ysel=document.createElement("select");
+      ylab.append(el("span","gfh-sr",t2("Année","Year")),ysel);
+      years.forEach(function(y){var last=all.filter(function(m){return m.year===y;}).pop(),o=new Option(String(y)+(last&&bal[last.id]!=null?" · "+eur(bal[last.id]):""),String(y));o.selected=y===sel.year;ysel.append(o);});
+      // Changer d'année garde le même mois quand il existe
+      ysel.addEventListener("change",function(){var y=Number(ysel.value);if(y===sel.year)return;var ms=all.filter(function(m){return m.year===y;}),same=ms.filter(function(m){return m.mi===sel.mi;})[0];select(same||ms[ms.length-1]);});
+      yrs.append(ylab);
+      if(window.GFSelect)window.GFSelect.enhance(ysel);
+    }
     // Mois ‹ ›
     var mon=el("div","gfh-mon"),pb=el("button","","‹"),nb=el("button","","›");
     pb.type=nb.type="button";pb.setAttribute("aria-label",t2("Mois précédent","Previous month"));nb.setAttribute("aria-label",t2("Mois suivant","Next month"));
@@ -423,7 +429,7 @@
     var top=[];
     if(demo)top.push(exampleBar("home"));
     var bar=el("div","gfh-topbar");
-    if(yrs.childNodes.length>1)yrs.classList.add("is-multi");bar.append(yrs);
+    bar.append(yrs);
     bar.append(mon);
     var plus=el("button","gfh-add");plus.type="button";plus.setAttribute("aria-label",t2("Ajouter une dépense ou un revenu","Add an expense or income"));
     plus.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>'+t2("Ajouter","Add")+'</span>';
