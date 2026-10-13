@@ -24,7 +24,7 @@ const copy = (from, to = from) => put(to, fs.readFileSync(path.join(root, from))
 const integrity = content => 'sha384-' + crypto.createHash('sha384').update(content).digest('base64');
 const publicFiles = ['sheet.js','sheet.css','onboarding.js','onboarding.css','friends.js','profile.js',
   'i18n.js','i18n/fr.json','i18n/en.json','aria.js','storage-encryption.js','ios-fix.js','feedback.js','i18n-manager.js','shared-dashboard.js','sharing.css','ui-controls.js','ui-polish.css','theme-directions.css','objectives.js',
-  'store-shim.js','favicon.ico','brand-mark.svg','app-icon-180.png','app-icon-180.webp','app-icon-512.png','app-icon-512.webp','manifest.webmanifest','supabase_config.json',
+  'store-shim.js','meuni-loader.js','plans.js','plans.css','home.js','home.css','sheet-balances.css','finishing.js','finishing.css','home-news.css','menus.js','menus.css','discover.js','discover.css','favicon.ico','brand-mark.svg','app-icon-180.png','app-icon-180.webp','app-icon-512.png','app-icon-512.webp','manifest.webmanifest','supabase_config.json',
   'robots.txt','sitemap.xml','public.css','public.js','share-card.png','share-card.webp'];
 for (const file of publicFiles) copy(file);
 const config = JSON.parse(fs.readFileSync(path.join(root,'supabase_config.json'),'utf8'));
@@ -42,7 +42,9 @@ let fonts = '';
 for (const [family,weights,styles] of [
   ['playfair-display',[400,900],['normal','italic']],
   ['space-grotesk',[400,500,600,700],['normal']],
-  ['syne',[700,800],['normal']]
+  ['syne',[700,800],['normal']],
+  ['bricolage-grotesque',[500,700],['normal']],
+  ['instrument-sans',[400,500,600],['normal']]
 ]) {
   for (const weight of weights) for (const style of styles) {
     const filename = `latin-${weight}${style==='italic'?'-italic':''}.css`;

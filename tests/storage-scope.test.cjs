@@ -65,3 +65,18 @@ test('Reset removes only the selected account cache and leaves cloud-independent
   assert.equal(safe.getItem('finance_sheet_v3'),null);
   assert.equal(safe.clearFinancialOwnerData('anonymous'),false);
 });
+test('Home sample backup, budgets and home preferences stay with the account that created them',()=>{
+  const keys=['personalFinanceDashboard.exampleBackup','personalFinanceDashboard.homeDemo','personalFinanceDashboard.homeBlocks','personalFinanceDashboard.budgets','personalFinanceDashboard.fixedDismissed'];
+  const {safe,values}=store();
+  safe.setFinancialOwner(A);
+  for(const key of keys)safe.setItem(key,'A '+key);
+  for(const key of keys)assert.equal(values.has(key),false,key+' must not be stored unscoped');
+  safe.setFinancialOwner(B);
+  for(const key of keys)assert.equal(safe.getItem(key),null,key+' leaked to another account');
+  safe.setFinancialOwner(A);
+  assert.equal(safe.getItem('personalFinanceDashboard.exampleBackup'),'A personalFinanceDashboard.exampleBackup');
+});
+test('Home module never touches the raw browser storage directly',()=>{
+  const home=fs.readFileSync(path.join(__dirname,'..','home.js'),'utf8');
+  assert.doesNotMatch(home,/localStorage/);
+});

@@ -6,16 +6,16 @@
   "start_url": "/accueil",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#111114",
-  "theme_color": "#111114",
+  "background_color": "#F6F2E8",
+  "theme_color": "#17261F",
   "icons": [
     {
-      "src": "/app-icon-180.png?v=20260930",
+      "src": "/app-icon-180.png?v=20261013",
       "sizes": "180x180",
       "type": "image/png"
     },
     {
-      "src": "/app-icon-512.png?v=20260930",
+      "src": "/app-icon-512.png?v=20261013",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

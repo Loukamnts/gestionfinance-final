@@ -7,7 +7,12 @@
     finance_sheet_v2: true,
     "personalFinanceDashboard.setupProfile": true,
     "personalFinanceDashboard.categoryRules": true,
-    "personalFinanceDashboard.customRules": true
+    "personalFinanceDashboard.customRules": true,
+    "personalFinanceDashboard.exampleBackup": true,
+    "personalFinanceDashboard.homeDemo": true,
+    "personalFinanceDashboard.homeBlocks": true,
+    "personalFinanceDashboard.budgets": true,
+    "personalFinanceDashboard.fixedDismissed": true
   };
   var financialOwner = "anonymous";
   var firstAccount = null;

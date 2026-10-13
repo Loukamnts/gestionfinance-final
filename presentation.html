@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr" data-theme="glass">
+<html lang="fr" data-theme="moulin">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -7,10 +7,11 @@
   <meta name="description" content="Meuniance réunit ton budget, ton tableur, tes objectifs et tes graphiques dans un espace financier clair, privé et sans publicité." />
   <link rel="canonical" href="https://gestion-finance-coral.vercel.app/" />
   <meta name="robots" content="index, follow" />
-  <meta name="theme-color" content="#111114" />
-  <link rel="icon" href="favicon.ico?v=20260930" sizes="any" />
-  <link rel="icon" href="brand-mark.svg?v=20260930" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="app-icon-180.png?v=20260930" />
+  <meta name="theme-color" content="#F6F2E8" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0E1713" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="favicon.ico?v=20261013" sizes="any" />
+  <link rel="icon" href="brand-mark.svg?v=20261013" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="app-icon-180.png?v=20261013" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Meuniance" />
   <meta property="og:url" content="https://gestion-finance-coral.vercel.app/" />
@@ -22,92 +23,75 @@
   <meta name="twitter:description" content="Un espace financier personnel pour comprendre ton budget, suivre tes objectifs et garder le contrôle." />
   <meta name="twitter:image" content="https://gestion-finance-coral.vercel.app/share-card.png?v=20260930" />
   <link rel="stylesheet" href="vendor/fonts.css" />
-  <link rel="stylesheet" href="public.css?v=20261009-r1" />
-  <script src="public.js?v=20260929-r2" defer></script>
-<script src="i18n-manager.js?v=20261006-r1" defer></script>
-<script src="aria.js?v=20261006-r1" defer></script>
+  <link rel="stylesheet" href="public.css?v=20261013-r1" />
+  <script src="public.js?v=20261013-r1"></script>
+  <script src="i18n-manager.js?v=20261006-r1" defer></script>
+  <script src="aria.js?v=20261006-r1" defer></script>
 </head>
 <body>
   <div class="public-shell">
     <header class="public-header">
-      <a class="public-brand" href="/" aria-label="Meuniance, accueil"><span><svg class="brand-m" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="12" y="38" width="10" height="15" rx="2"/><rect x="27" y="29" width="10" height="24" rx="2"/><rect x="42" y="20" width="10" height="33" rx="2"/><path d="M12 24 24 11 34 20 51 5m-7 0h7v7" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 57h40" fill="none" stroke="var(--text)" stroke-width="2.7" stroke-linecap="round"/></svg><span class="brand-word">Meuniance</span></span></a>
+      <a class="public-brand" href="/" aria-label="Meuniance, accueil"><span><svg class="brand-m mk" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect class="lg-sq" width="28" height="28" rx="7.5"/><circle class="lg-t" cx="14" cy="14" r="9.4"/><circle class="lg-a" cx="14" cy="14" r="9.4" transform="rotate(-90 14 14)"/><g transform="rotate(30 14 14)"><path class="lg-s" d="M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z"/><path class="lg-c" d="M14 9.6c-.4 2.8-.4 5.8 0 8.6"/></g></svg><span class="brand-word">Meuniance</span></span></a>
       <nav class="public-nav" aria-label="Navigation principale">
-        <a href="#fonctionnalites" data-i18n="presentation.navFeatures">Fonctionnalités</a>
-        <a href="#confiance" data-i18n="presentation.navPrivacy">Confidentialité</a>
-        <a class="btn btn-primary" href="/accueil"><span data-i18n="presentation.openApp">Ouvrir l’application</span> <span aria-hidden="true">→</span></a>
+        <a class="hide-s" href="#fonctionnalites" data-i18n="presentation.navFeatures">Fonctionnalités</a>
+        <a class="hide-s" href="#tarifs" data-i18n="presentation.navPricing">Tarifs</a>
+        <a class="hide-s" href="#confiance" data-i18n="presentation.navPrivacy">Confidentialité</a>
+        <a class="btn btn-primary" href="/accueil"><span data-i18n="presentation.openApp">Ouvrir l’application</span></a>
       </nav>
     </header>
 
     <main>
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-copy reveal">
-          <p class="kicker"><span></span> <span data-i18n="presentation.kicker">Le contrôle, sans la complexité</span></p>
-          <h1 id="hero-title"><span data-i18n="presentation.heroTitle">Tes finances.</span><br><em data-i18n="presentation.heroTitleEm">Enfin lisibles.</em></h1>
+        <div class="hero-copy">
+          <h1 id="hero-title"><span data-i18n="presentation.heroTitle">Tes finances.</span> <span data-i18n="presentation.heroTitleEm">Enfin lisibles.</span></h1>
           <p class="lead" data-i18n="presentation.lead">Meuniance transforme tes chiffres en décisions simples. Un tableau de bord personnel, un vrai tableur et tes objectifs réunis au même endroit.</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary btn-large" href="/accueil"><span data-i18n="presentation.ctaStart">Commencer maintenant</span> <span aria-hidden="true">→</span></a>
-            <a class="text-link" href="#fonctionnalites"><span data-i18n="presentation.ctaDiscover">Découvrir l’outil</span> <span aria-hidden="true">↓</span></a>
-          </div>
+          <div class="hero-actions"><a class="btn btn-primary btn-large" href="/accueil" data-i18n="presentation.ctaOpen">Ouvrir Meuniance</a></div>
           <div class="trust-row" aria-label="Avantages" data-i18n-aria="presentation.trustRowLabel"><span data-i18n="presentation.trustNoAds">Sans publicité</span><span data-i18n="presentation.trustPrivate">Données privées</span><span data-i18n="presentation.trustFree">Gratuit</span></div>
         </div>
-
-        <div class="product-stage reveal" aria-label="Aperçu fictif de Meuniance" data-i18n-aria="presentation.previewStageLabel">
-          <div class="stage-glow" aria-hidden="true"></div>
-          <div class="mini-card mini-card-left" aria-hidden="true"><span data-i18n="presentation.previewGoalCard">Objectif voyage</span><strong>72%</strong><i><b></b></i></div>
-          <div class="mini-card mini-card-right" aria-hidden="true"><span data-i18n="presentation.previewMonth">Ce mois</span><strong>+ 384 €</strong><small data-i18n="presentation.previewNetSavings">Épargne nette</small></div>
+        <div class="product-stage" aria-label="Aperçu fictif de Meuniance" data-i18n-aria="presentation.previewStageLabel">
           <div class="dashboard-preview">
-            <span class="preview-demo-label" data-i18n="presentation.previewDemoLabel">Exemple fictif, montants et pourcentages illustratifs</span>
-            <div class="preview-top"><span class="preview-brand"><span><svg class="brand-m" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="12" y="38" width="10" height="15" rx="2"/><rect x="27" y="29" width="10" height="24" rx="2"/><rect x="42" y="20" width="10" height="33" rx="2"/><path d="M12 24 24 11 34 20 51 5m-7 0h7v7" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 57h40" fill="none" stroke="var(--text)" stroke-width="2.7" stroke-linecap="round"/></svg><span class="brand-word">Meuniance</span></span></span><span class="preview-avatar">LM</span></div>
-            <div class="preview-heading"><div><small data-i18n="presentation.previewHello">Bonjour Louka</small><strong data-i18n="presentation.previewOverview">Vue d’ensemble</strong></div><span data-i18n="presentation.previewDate">Septembre 2026⌄</span></div>
-            <div class="preview-metrics">
-              <div><small data-i18n="presentation.previewBalance">Solde disponible</small><strong>3 842 €</strong><em>+8,4%</em></div>
-              <div><small data-i18n="presentation.previewSavings">Épargne</small><strong>780 €</strong><em data-i18n="presentation.previewGoal">Objectif 65%</em></div>
-              <div><small data-i18n="presentation.previewExpenses">Dépenses</small><strong>1 426 €</strong><em class="down">−4,2%</em></div>
+            <div class="pv-row"><span data-i18n="presentation.previewBalance">Solde disponible</span><span data-i18n="presentation.previewDate">Septembre 2026</span></div>
+            <div class="pv-big">3 842 €</div>
+            <div class="pv-delta"><b>+8,4%</b></div>
+            <div class="bars" aria-hidden="true"><i style="--h:39%;--i:0"></i><i style="--h:53%;--i:1"></i><i style="--h:44%;--i:2"></i><i style="--h:69%;--i:3"></i><i style="--h:58%;--i:4"></i><i style="--h:78%;--i:5"></i><i style="--h:100%;--i:6"></i></div>
+            <div class="pv-two">
+              <div><small data-i18n="presentation.previewSavings">Épargne</small><strong>780 €</strong><div class="pv-prog"><b></b></div><em data-i18n="presentation.previewGoal">Objectif 65%</em></div>
+              <div><small data-i18n="presentation.previewExpenses">Dépenses</small><strong>1 426 €</strong><em>−4,2%</em></div>
             </div>
-            <div class="preview-chart"><div class="chart-copy"><small data-i18n="presentation.previewChart">Évolution mensuelle</small><strong data-i18n="presentation.previewChartTitle">Une trajectoire qui se précise</strong></div><div class="bars" aria-hidden="true"><i style="--h:42%"></i><i style="--h:56%"></i><i style="--h:48%"></i><i style="--h:70%"></i><i style="--h:63%"></i><i style="--h:82%"></i><i class="active" style="--h:91%"></i></div></div>
           </div>
+          <span class="preview-demo-label" data-i18n="presentation.previewDemoLabel">Exemple fictif, montants et pourcentages illustratifs</span>
         </div>
       </section>
 
-      <section class="theme-strip reveal" aria-label="Choisir l’apparence" data-i18n-aria="presentation.themeStripLabel">
-        <div><div><strong data-i18n="presentation.themeTitle">Ton espace, ton style</strong><small data-i18n="presentation.themeHint">Le choix s’applique aussi dans l’application.</small></div></div>
-        <div class="theme-switcher" role="group" aria-label="Choisir un thème" data-i18n-aria="presentation.themeGroupLabel">
-          <button type="button" data-public-theme="glass" aria-pressed="true"><i class="swatch swatch-glass"></i><span data-i18n="presentation.themeGlass">Ardoise</span></button>
-          <button type="button" data-public-theme="editorial" aria-pressed="false"><i class="swatch swatch-editorial"></i><span data-i18n="presentation.themeEditorial">Édition</span></button>
-          <button type="button" data-public-theme="brutal" aria-pressed="false"><i class="swatch swatch-brutal"></i><span data-i18n="presentation.themeBrutal">Contraste</span></button>
-        </div>
-        <div class="public-palette-switcher" role="group" aria-label="Choisir une couleur" data-i18n-aria="presentation.paletteGroupLabel"><button type="button" data-public-palette="violet" aria-pressed="false"><i></i><span data-i18n="presentation.paletteViolet">Violet</span></button><button type="button" data-public-palette="bordeaux" aria-pressed="false"><i></i><span data-i18n="presentation.paletteBordeaux">Bordeaux</span></button><button type="button" data-public-palette="gold" aria-pressed="false"><i></i><span data-i18n="presentation.paletteGold">Or</span></button></div>
-      </section>
-
-      <section class="section feature-section" id="fonctionnalites">
-        <div class="section-heading reveal"><div><p class="eyebrow" data-i18n="presentation.featuresEyebrow">Pensé pour le quotidien</p><h2><span data-i18n="presentation.featuresTitle1">Moins de saisie.</span><br><span data-i18n="presentation.featuresTitle2">Plus de visibilité.</span></h2></div><p data-i18n="presentation.featuresLead">Chaque outil répond à une question simple : où part ton argent, combien tu gardes et vers quoi tu avances.</p></div>
+      <section class="section" id="fonctionnalites">
+        <div class="section-heading"><h2><span data-i18n="presentation.featuresTitle1">Moins de saisie.</span> <span data-i18n="presentation.featuresTitle2">Plus de visibilité.</span></h2><p data-i18n="presentation.featuresLead">Chaque outil répond à une question simple.</p></div>
         <div class="feature-grid">
-          <article class="feature feature-wide reveal"><div><h3 data-i18n="presentation.feature1Title">Tout comprendre en un regard</h3><p data-i18n="presentation.feature1Text">Revenus, dépenses et épargne sont résumés clairement, avec les mois qui comptent vraiment.</p></div><div class="feature-visual chart-lines" aria-hidden="true"><svg viewBox="0 0 500 150" preserveAspectRatio="none"><path d="M0 122 C70 95,90 112,145 79 S235 92,280 55 S370 68,500 18"/><path d="M0 138 C80 128,110 132,175 112 S260 121,320 89 S410 105,500 72"/></svg></div></article>
-          <article class="feature reveal"><div class="feature-icon" aria-hidden="true">⌗</div><h3 data-i18n="presentation.feature2Title">Ton tableur, sans compromis</h3><p data-i18n="presentation.feature2Text">Saisie directe, formules, import et export Excel. Sur téléphone, tu avances mois par mois sans lutter contre douze colonnes.</p></article>
-          <article class="feature reveal"><div class="feature-icon" aria-hidden="true">◎</div><h3 data-i18n="presentation.feature3Title">Des objectifs concrets</h3><p data-i18n="presentation.feature3Text">Fixe un montant, une échéance et suis ta progression sans refaire les calculs.</p></article>
-          <article class="feature reveal"><div class="feature-icon" aria-hidden="true">↗</div><h3 data-i18n="presentation.feature4Title">Partager, sans tout montrer</h3><p data-i18n="presentation.feature4Text">Tu choisis la personne, les mois et les lignes visibles. L’accès se retire à tout moment.</p></article>
+          <article class="feature"><h3 data-i18n="presentation.feature1Title">Tout comprendre en un regard</h3><p data-i18n="presentation.feature1Text">Revenus, dépenses et épargne sont résumés clairement.</p></article>
+          <article class="feature"><h3 data-i18n="presentation.feature2Title">Ton tableur, sans compromis</h3><p data-i18n="presentation.feature2Text">Saisie directe, formules, import et export Excel.</p></article>
+          <article class="feature"><h3 data-i18n="presentation.feature3Title">Des objectifs concrets</h3><p data-i18n="presentation.feature3Text">Fixe un montant, une échéance et suis ta progression.</p></article>
+          <article class="feature"><h3 data-i18n="presentation.feature4Title">Partager, sans tout montrer</h3><p data-i18n="presentation.feature4Text">Tu choisis la personne, les mois et les lignes visibles.</p></article>
         </div>
       </section>
 
-      <section class="privacy-band reveal" id="confiance">
-        <div><p class="eyebrow" data-i18n="presentation.privacyEyebrow">La confiance d’abord</p><h2 data-i18n="presentation.privacyTitle">Tes données financières ne sont pas un produit.</h2></div>
-        <div><p data-i18n="presentation.privacyText">Aucune publicité, aucun suivi commercial et aucune revente. Tu gardes la maîtrise de tes données et peux les exporter ou les supprimer.</p><a class="text-link" href="/confidentialite"><span data-i18n="presentation.privacyLink">Lire la politique de confidentialité</span> <span aria-hidden="true">→</span></a></div>
+      <section class="section" id="tarifs" aria-labelledby="tarifs-title">
+        <div class="section-heading"><h2 id="tarifs-title" data-i18n="presentation.pricingTitle">Choisis ta formule. Garde ta vie privée.</h2><p data-i18n="presentation.pricingLead">Commence gratuitement. Passe à Plus ou Pro quand tu veux partager ou aller plus loin.</p></div>
+        <div class="pricing-grid">
+          <article class="plan"><h3>Free</h3><p class="plan-pitch" data-i18n="presentation.freePitch">Tout ce qu’il faut pour y voir clair.</p><div class="plan-price"><b>0 €</b><small data-i18n="presentation.freePeriod">pour toujours</small></div><ul><li data-i18n="presentation.free1">Tableau de bord et sélecteur de mois</li><li data-i18n="presentation.free2">Tableur avec formules</li><li data-i18n="presentation.free3">1 objectif</li><li data-i18n="presentation.free4">Mode clair et sombre</li><li data-i18n="presentation.free5">Export et suppression de tes données</li><li class="is-dim" data-i18n="presentation.free6">Pas de partage</li></ul><a class="plan-cta" href="/accueil" data-i18n="presentation.freeCta">Commencer gratuitement</a></article>
+          <article class="plan is-featured"><span class="plan-tag" data-i18n="presentation.plusTag">Le plus choisi</span><h3>Plus</h3><p class="plan-pitch" data-i18n="presentation.plusPitch">Ton budget, à ton image, et à deux.</p><div class="plan-price"><b>4,99 €</b><small data-i18n="presentation.perMonth">par mois</small></div><ul><li data-i18n="presentation.plus1">Import et export Excel</li><li data-i18n="presentation.plus2">Objectifs illimités</li><li data-i18n="presentation.plus3">Partage avec 1 personne : tu choisis les mois et les lignes visibles</li><li data-i18n="presentation.plus4">Évolution mensuelle complète</li><li data-i18n="presentation.plus5">Tout ce qui est dans Free</li></ul><a class="plan-cta is-primary" href="/accueil#abonnement" data-i18n="presentation.plusCta">Passer à Plus</a></article>
+          <article class="plan"><h3>Pro</h3><p class="plan-pitch" data-i18n="presentation.proPitch">Pour partager sans limite et aller plus loin.</p><div class="plan-price"><b>7,99 €</b><small data-i18n="presentation.perMonth">par mois</small></div><ul><li data-i18n="presentation.pro1">Tout ce qui est dans Plus</li><li data-i18n="presentation.pro2">Partage avec plusieurs personnes</li><li data-i18n="presentation.pro3">Droits par personne : lecture seule ou modification</li><li data-i18n="presentation.pro4">Accès temporaire qui expire tout seul</li><li data-i18n="presentation.pro5">Historique de progression des objectifs</li></ul><a class="plan-cta" href="/accueil#abonnement" data-i18n="presentation.proCta">Passer à Pro</a></article>
+        </div>
+        <p class="pricing-note" data-i18n="presentation.pricingNote">Sans engagement, résiliable à tout moment. Même en payant, tes données restent les tiennes : aucune pub, aucun suivi, aucune revente.</p>
       </section>
-
-
-
-      <section class="final-cta reveal">
-        <p class="kicker"><span></span> <span data-i18n="presentation.kickerReady">Prêt quand tu l’es</span></p>
-        <h2><span data-i18n="presentation.finalTitle">Fais de tes chiffres</span><br><em data-i18n="presentation.finalTitleEm">un vrai plan.</em></h2>
-        <a class="btn btn-primary btn-large" href="/accueil"><span data-i18n="presentation.ctaOpen">Ouvrir Meuniance</span> <span aria-hidden="true">→</span></a>
+      <section class="privacy-band" id="confiance">
+        <h2 data-i18n="presentation.privacyTitle">Tes données financières ne sont pas un produit.</h2>
+        <div><p data-i18n="presentation.privacyText">Aucune publicité, aucun suivi commercial et aucune revente.</p><a class="text-link" href="/confidentialite" data-i18n="presentation.privacyLink">Lire la politique de confidentialité</a></div>
       </section>
     </main>
 
     <footer class="public-footer">
-      <div><a class="public-brand" href="/"><span><svg class="brand-m" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="12" y="38" width="10" height="15" rx="2"/><rect x="27" y="29" width="10" height="24" rx="2"/><rect x="42" y="20" width="10" height="33" rx="2"/><path d="M12 24 24 11 34 20 51 5m-7 0h7v7" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 57h40" fill="none" stroke="var(--text)" stroke-width="2.7" stroke-linecap="round"/></svg><span class="brand-word">Meuniance</span></span></a><p data-i18n="presentation.footerTagline">La finance personnelle, rendue claire.</p></div>
+      <div><a class="public-brand" href="/"><span><svg class="brand-m mk" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect class="lg-sq" width="28" height="28" rx="7.5"/><circle class="lg-t" cx="14" cy="14" r="9.4"/><circle class="lg-a" cx="14" cy="14" r="9.4" transform="rotate(-90 14 14)"/><g transform="rotate(30 14 14)"><path class="lg-s" d="M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z"/><path class="lg-c" d="M14 9.6c-.4 2.8-.4 5.8 0 8.6"/></g></svg><span class="brand-word">Meuniance</span></span></a><p data-i18n="presentation.footerTagline">La finance personnelle, rendue claire.</p></div>
       <nav><a href="/confidentialite" data-i18n="presentation.footerPrivacy">Confidentialité et contact</a><a href="/conditions" data-i18n="presentation.footerTerms">Conditions</a></nav>
       <p data-i18n="presentation.footerCopyright">© 2026 Meuniance</p>
     </footer>
-  </div>
-</body>
+  </div></body>
 </html>
