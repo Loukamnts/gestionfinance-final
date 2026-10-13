@@ -19,6 +19,9 @@ body[data-theme="moulin"] #dashboardPage .chart-head p{margin:4px 0 0;font-size:
 .gfc-views button[aria-pressed="true"]{background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font-weight:600}
 .gfc-views button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 @media(max-width:560px){.gfc-views{display:flex;width:100%}.gfc-views button{flex:1 1 0;min-width:0;padding:0 4px;font-size:12.5px}}
+/* Très petits écrans (iPhone SE…) : les 4 vues passent sur deux lignes au lieu de déborder */
+body[data-theme="moulin"] #dashboardPage .chart-panel,body[data-theme="moulin"] #dashboardPage .chart-head,body[data-theme="moulin"] #dashboardPage .chart-head>*{min-width:0}
+@media(max-width:360px){.gfc-views{flex-wrap:wrap;border-radius:20px}.gfc-views button{flex:1 1 40%}}
 
 body[data-interface="studio"] .gfh-topbar{padding-right:min(170px,30vw)}
 @media(max-width:780px){body[data-interface="studio"] .gfh-topbar{padding-right:0}}

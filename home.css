@@ -4,7 +4,8 @@
    puis Épargne · Dépenses · Revenus et « Où part ton argent ».
    ═══════════════════════════════════════════════ */
 .gfh-home{display:none}
-body.gfh-ready .gfh-home{display:block;order:-3}
+body.gfh-ready .gfh-home{display:block;order:-3;min-width:0}
+body.gfh-ready #dashboardPage .content{grid-template-columns:minmax(0,1fr)}
 body.gfh-ready #dashboardPage .studio-hero,
 body.gfh-ready #dashboardPage .metrics,
 body.gfh-ready #dashboardPage .mobile-finance-summary,

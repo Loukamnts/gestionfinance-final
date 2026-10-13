@@ -25,8 +25,9 @@
   function flow(m){return m.salary-m.expenses-m.savings;}
   var emptyMi=new Date().getMonth(),emptyYear=new Date().getFullYear();
   var DEMO_KEY="personalFinanceDashboard.homeDemo",BLOCKS_KEY="personalFinanceDashboard.homeBlocks";
-  function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
-  function lsSet(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){}}
+  /* Toujours via safeStore : ces clés (dont la copie de sauvegarde du tableur) sont rangées par compte. */
+  function lsGet(k){try{return window.safeStore.getItem(k);}catch(e){return null;}}
+  function lsSet(k,v){try{if(v==null)window.safeStore.removeItem(k);else window.safeStore.setItem(k,v);}catch(e){}}
   /* Exemple chargé DANS le tableur : l'accueil, les graphiques et le tableur montrent les mêmes chiffres.
      Le tableur précédent est gardé de côté et revient quand on retire l'exemple. */
   var EX_BACKUP="personalFinanceDashboard.exampleBackup";
@@ -97,11 +98,21 @@
   function setRule(label,kind){
     try{var key="personalFinanceDashboard.categoryRules",r=JSON.parse(window.safeStore.getItem(key)||"{}")||{};r[normKey(label)]=kind;window.safeStore.setItem(key,JSON.stringify(r));}catch(e){}
   }
+  /* Signe déjà utilisé dans le tableur (dépenses saisies en positif ou en négatif) :
+     d'abord la ligne elle-même, puis les autres lignes du même type. 0 si rien ne permet de le savoir. */
+  function signIn(values){var pos=0,neg=0;values.forEach(function(v){if(v>0)pos++;else if(v<0)neg++;});return pos>neg?1:neg>pos?-1:0;}
+  function rowNumbers(sh,row){var out=[];Object.keys(sh.cells||{}).forEach(function(key){var p=key.split(",");if(Number(p[0])!==row)return;var raw=String((sh.cells[key]||{}).raw||"").trim().replace(",",".");if(raw&&raw.charAt(0)!=="="&&isFinite(Number(raw)))out.push(Number(raw));});return out;}
+  function sheetSign(snap,label,kind){
+    var own=[],same=[];
+    (snap.sheets||[]).forEach(function(sh){(sh.rowHeaders||[]).forEach(function(h,i){if(!String(h||"").trim())return;var nums=rowNumbers(sh,i);if(normKey(h)===normKey(label))own=own.concat(nums);else if(lineKind(h)===kind)same=same.concat(nums);});});
+    return signIn(own)||signIn(same);
+  }
   /* entries : [{year, mi, label, amount, onlyIfEmpty, kind}] */
   function writeEntries(entries){
     var FS=window.FinanceSheet,snap=snapshot();if(!FS||!snap||!snap.sheets)return false;
     var lastSheet=null;
     entries.forEach(function(e){
+      var sign=sheetSign(snap,e.label,e.kind||lineKind(e.label));if(sign)e.amount=sign*Math.abs(e.amount);
       var sh=sheetFor(snap,e.year,true),known=(sh.rowHeaders||[]).some(function(h){return normKey(h)===normKey(e.label);});
       var r=rowFor(sh,e.label),key=r+","+e.mi,cell=sh.cells[key],old=cell&&cell.raw;
       if(e.onlyIfEmpty&&String(old||"").trim())return;
