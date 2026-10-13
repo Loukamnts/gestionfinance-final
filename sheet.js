@@ -794,47 +794,53 @@
   }
 
   // ═════════════════════ Onglets de feuilles (type Excel) ════════
+  // Feuilles = années : une feuille par année, rangées dans l'ordre, ajout de l'année précédente ou suivante.
+  function sheetYear(sheet) { const m = String(sheet && sheet.name || "").trim().match(/^(19|20|21)\d{2}$/); return m ? Number(m[0]) : null; }
+  function sortSheetsByYear() {
+    state.sheets.sort(function (a, b) { const ya = sheetYear(a), yb = sheetYear(b); if (ya === null && yb === null) return 0; if (ya === null) return 1; if (yb === null) return -1; return ya - yb; });
+  }
+  function addYearSheet(year) {
+    const existing = state.sheets.find(function (s) { return sheetYear(s) === year; });
+    const s = existing || newSheet(String(year));
+    sortSheetsByYear();
+    state.activeSheetId = s.id; state.active = { r: 0, c: 0 }; state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
+    buildTable(); renderValues(); renderTabs(); scheduleSave(); notifyDashboard();
+  }
   function renderTabs() {
     if (!tabsEl) return;
+    sortSheetsByYear();
     tabsEl.innerHTML = "";
-    // Bouton "+" avant le premier onglet pour ajouter une année avant
-    const addBeforeBtn = document.createElement("button"); addBeforeBtn.type = "button"; addBeforeBtn.className = "sheet-tab add add-before"; addBeforeBtn.textContent = "+";
-    addBeforeBtn.title = "Ajouter une feuille avant";
-    addBeforeBtn.addEventListener("click", () => {
-      const s = newSheet();
-      const idx = state.sheets.indexOf(s);
-      // Déplace la nouvelle feuille au début
-      state.sheets.splice(idx, 1);
-      state.sheets.unshift(s);
-      state.activeSheetId = s.id; state.active = { r: 0, c: 0 }; state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
-      buildTable(); renderValues(); renderTabs(); scheduleSave(); notifyDashboard();
-    });
-    tabsEl.appendChild(addBeforeBtn);
-    state.sheets.forEach((sheet) => {
-      const tab = document.createElement("div"); tab.className = "sheet-tab" + (sheet.id === state.activeSheetId ? " active" : ""); tab.dataset.sheetId = sheet.id;
+    tabsEl.setAttribute("role", "tablist"); tabsEl.setAttribute("aria-label", "Années du tableur");
+    const years = state.sheets.map(sheetYear).filter(function (y) { return y !== null; });
+    const first = years.length ? Math.min.apply(null, years) : new Date().getFullYear();
+    const last = years.length ? Math.max.apply(null, years) : new Date().getFullYear();
+    const lbl = document.createElement("span"); lbl.className = "sheet-years-label"; lbl.textContent = "Année";
+    tabsEl.appendChild(lbl);
+    const before = document.createElement("button"); before.type = "button"; before.className = "sheet-year-add";
+    before.textContent = "+ " + (first - 1); before.title = "Ajouter l'année " + (first - 1);
+    before.addEventListener("click", function () { addYearSheet(first - 1); });
+    tabsEl.appendChild(before);
+    state.sheets.forEach(function (sheet) {
+      const active = sheet.id === state.activeSheetId;
+      const tab = document.createElement("div"); tab.className = "sheet-tab sheet-year" + (active ? " active" : ""); tab.dataset.sheetId = sheet.id;
       const label = document.createElement("button"); label.type = "button"; label.className = "sheet-tab-name";
-      label.textContent = sheet.name; label.title = "Sélectionner · double-clic pour renommer";
-      label.addEventListener("click", () => switchSheet(sheet.id));
-      label.addEventListener("dblclick", () => renameSheet(sheet.id));
+      label.setAttribute("role", "tab"); label.setAttribute("aria-selected", String(active));
+      label.textContent = sheet.name; label.title = sheetYear(sheet) === null ? "Double-clic pour donner une année à cette feuille" : "Afficher " + sheet.name;
+      label.addEventListener("click", function () { switchSheet(sheet.id); });
+      label.addEventListener("dblclick", function () { renameSheet(sheet.id); });
       tab.appendChild(label);
-      const edit = document.createElement("button"); edit.type = "button"; edit.className = "sheet-tab-rename"; edit.textContent = "✎"; edit.title = "Renommer la feuille"; edit.setAttribute("aria-label", "Renommer la feuille " + sheet.name);
-      edit.addEventListener("click", (e) => { e.stopPropagation(); renameSheet(sheet.id); });
-      tab.appendChild(edit);
-      if (state.sheets.length > 1) {
+      if (active && state.sheets.length > 1) {
         const x = document.createElement("button"); x.type = "button"; x.className = "sheet-tab-x"; x.textContent = "×";
-        x.title = "Supprimer la feuille";
-        x.addEventListener("click", (e) => { e.stopPropagation(); deleteSheet(sheet.id); });
+        x.title = "Supprimer l'année " + sheet.name; x.setAttribute("aria-label", "Supprimer l'année " + sheet.name);
+        x.addEventListener("click", function (e) { e.stopPropagation(); deleteSheet(sheet.id); });
         tab.appendChild(x);
       }
       tabsEl.appendChild(tab);
     });
-    const addBtn = document.createElement("button"); addBtn.type = "button"; addBtn.className = "sheet-tab add"; addBtn.textContent = "+";
-    addBtn.title = "Nouvelle feuille";
-    addBtn.addEventListener("click", () => {
-      const s = newSheet(); state.activeSheetId = s.id; state.active = { r: 0, c: 0 }; state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
-      buildTable(); renderValues(); renderTabs(); scheduleSave(); notifyDashboard();
-    });
-    tabsEl.appendChild(addBtn);
+    const after = document.createElement("button"); after.type = "button"; after.className = "sheet-year-add";
+    after.textContent = "+ " + (last + 1); after.title = "Ajouter l'année " + (last + 1);
+    after.addEventListener("click", function () { addYearSheet(last + 1); });
+    tabsEl.appendChild(after);
   }
   function switchSheet(id) {
     if (state.editing) commitActiveEdit();
@@ -843,7 +849,8 @@
     state.active = { r: 0, c: 0 }; state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
     lastTapKey = null;
     buildTable(); renderValues();
-    tabsEl.querySelectorAll(".sheet-tab").forEach((t) => t.classList.toggle("active", t.dataset.sheetId === id));
+    tabsEl.querySelectorAll(".sheet-tab").forEach((t) => { const on = t.dataset.sheetId === id; t.classList.toggle("active", on); const n = t.querySelector(".sheet-tab-name"); if (n) n.setAttribute("aria-selected", String(on)); });
+    renderTabs(); notifyDashboard();
     syncFormulaBar();
   }
   function renameSheet(id) {
@@ -856,21 +863,23 @@
     let done = false;
     const finish = () => {
       if (done) return; done = true;
-      const v = input.value.trim().replace(/[:\\/?*[\]]/g, "").slice(0, 28);
-      sheet.name = v || ("Feuille " + (state.sheets.indexOf(sheet) + 1));
-      renderTabs(); scheduleSave();
+      const v = input.value.trim();
+      if (!/^(19|20|21)\d{2}$/.test(v)) { toast("Une feuille correspond à une année : écris par exemple " + new Date().getFullYear() + "."); renderTabs(); return; }
+      if (state.sheets.some(function (o) { return o !== sheet && String(o.name).trim() === v; })) { toast("L'année " + v + " existe déjà."); renderTabs(); return; }
+      sheet.name = v;
+      renderTabs(); scheduleSave(); notifyDashboard();
     };
     input.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); finish(); } else if (e.key === "Escape") { e.preventDefault(); done = true; renderTabs(); } });
     input.addEventListener("blur", finish);
   }
   async function deleteSheet(id) {
     if (state.sheets.length <= 1) { toast("Impossible de supprimer la dernière feuille."); return; }
-    if (!await confirmDialog("Supprimer cette feuille et son contenu ?")) return;
+    if (!await confirmDialog("Supprimer l\u2019année " + ((state.sheets.find(function (o) { return o.id === id; }) || {}).name || "") + " et tout son contenu ?")) return;
     const idx = state.sheets.findIndex((s) => s.id === id); if (idx < 0) return;
     state.sheets.splice(idx, 1);
     if (state.activeSheetId === id) state.activeSheetId = state.sheets[0].id;
     state.active = { r: 0, c: 0 }; state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
-    buildTable(); renderValues(); renderTabs(); scheduleSave();
+    buildTable(); renderValues(); renderTabs(); scheduleSave(); notifyDashboard();
   }
 
   // ═════════════════════ Import / Export .xlsx (multi-feuilles) ════
@@ -1105,6 +1114,7 @@
     if (!sheetsData.length) { toast("Aucune feuille exploitable dans ce fichier."); return false; }
     const mode = options.mode || await importChoiceDialog(sheetsData.length);
     if (!mode) return false;
+    try { if (!options.silent && window.MeuniLoader) window.MeuniLoader.start("J’importe ton fichier…"); } catch (e) {}
     if (mode === "replace") {
       state.sheets = [];
       const created = sheetsData.map((s) => {
@@ -1521,10 +1531,11 @@
     // Migration : supprime les anciennes lignes de template si présentes
     migrateOldTemplate();
     const wrap = container.parentElement;
-    if (wrap && !wrap.querySelector(".sheet-tabs")) {
-      tabsEl = document.createElement("div"); tabsEl.className = "sheet-tabs";
-      wrap.appendChild(tabsEl);
-    } else { tabsEl = wrap && wrap.querySelector(".sheet-tabs"); }
+    const host = wrap && wrap.parentNode;
+    if (host && !host.querySelector(".sheet-tabs.sheet-years")) {
+      tabsEl = document.createElement("div"); tabsEl.className = "sheet-tabs sheet-years";
+      host.insertBefore(tabsEl, wrap);
+    } else { tabsEl = host && host.querySelector(".sheet-tabs.sheet-years"); }
     buildTable(); renderValues(); renderTabs(); recordHistory(); updateStatus();
     updateSheetBalanceCards();
     wireFormulaBar();
@@ -1542,7 +1553,7 @@
     });
     const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener("click", fn); };
     bind("btnSheetExport", exportXlsx);
-    bind("btnSheetImport", () => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".xlsx,.xls,.xlsm,.csv"; inp.addEventListener("change", () => { const f = inp.files[0]; if (!f) return; importXlsx(f); }); inp.click(); });
+    bind("btnSheetImport", () => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".xlsx,.xls,.xlsm,.csv"; inp.addEventListener("change", () => { const f = inp.files[0]; if (!f) return; Promise.resolve(importXlsx(f)).then((ok) => { try { window.MeuniLoader && window.MeuniLoader.done(ok ? "Fichier importé." : undefined); } catch (e) {} }); }); inp.click(); });
     bind("btnSheetClear", async () => { if (await confirmDialog("Vider la feuille active ?")) { const sheet = activeSheet(); sheet.cells = {}; sheet.rowHeaders = []; sheet.rows = DEFAULT_ROWS; enforceMonthHeaders(sheet); buildTable(); renderValues(); scheduleSave(); } });
     bind("btnSheetDeleteRow", deleteSelectedRow);
     bind("btnSheetCalc", openCalculator);
@@ -1716,14 +1727,16 @@
     });
 
     var remaining = startingCash + totalIncome - totalExpense;
+    try { if (window.GFHome && typeof window.GFHome.totalBalance === "function") { var hb = window.GFHome.totalBalance(); if (typeof hb === "number" && isFinite(hb)) remaining = hb; } } catch (e) {}
 
     function fmt(v) {
       if (typeof v !== "number" || !Number.isFinite(v)) return "—";
       return v.toLocaleString("fr-FR", { maximumFractionDigits: 0 }) + " \u20ac";
     }
 
-    balStart.textContent = fmt(startingCash);
+    balStart.textContent = hasStartingCash ? fmt(startingCash) : "Facultatif";
     if (balRemaining) balRemaining.textContent = fmt(remaining);
+    try { var cardS = document.getElementById("balCardStart"), noteS = cardS && cardS.querySelector(".balance-note"), editS = document.getElementById("startingBalanceEdit"), noteR = document.querySelector("#balCardRemaining .balance-note"), labR = document.querySelector("#balCardRemaining .balance-label"); if (cardS) cardS.classList.toggle("is-empty", !hasStartingCash); if (noteS) noteS.textContent = hasStartingCash ? "Avant revenus, dépenses et épargne" : "Ajoute-le pour connaître ton vrai solde disponible."; if (editS) editS.textContent = hasStartingCash ? "Modifier" : "Ajouter"; if (labR) labR.textContent = hasStartingCash ? "Solde disponible" : "Solde calculé"; if (noteR) noteR.textContent = hasStartingCash ? "Départ + revenus − dépenses − épargne" : "Revenus − dépenses − épargne des mois saisis"; } catch (e) {}
   }
 
   // Sources proposées aux objectifs : chaque ligne chiffrée peut alimenter
@@ -1743,7 +1756,17 @@
             total += Math.abs(result.value); hasValue = true;
           }
         }
-        if (hasValue) sources.push({ id: sheet.id + ":" + row, label: label + " — " + sheet.name, value: total });
+        if (hasValue) {
+          sources.push({ id: sheet.id + ":" + row, label: label + " — " + sheet.name, value: total, line: label, year: sheet.name, month: -1 });
+          // Liaison à un mois précis : la valeur de la cellule de ce mois.
+          for (var mc = 0; mc < 12; mc++) {
+            var mr = computed[row + "," + mc];
+            if (mr && !mr.error && typeof mr.value === "number" && Number.isFinite(mr.value) && mr.value !== 0) {
+              var mname = (sheet.headers && sheet.headers[mc]) || ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"][mc];
+              sources.push({ id: sheet.id + ":" + row + ":" + mc, label: label + " — " + mname + " " + sheet.name, value: Math.abs(mr.value), line: label, year: sheet.name, month: mc, monthName: mname });
+            }
+          }
+        }
       });
     });
     return sources;

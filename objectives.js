@@ -129,7 +129,7 @@
       meta.textContent = goal.dueDate ? "Objectif : " + new Intl.DateTimeFormat(document.documentElement.lang === "en" ? "en-GB" : "fr-FR", { month: "long", year: "numeric" }).format(new Date(goal.dueDate + "T00:00:00")) : typeName(goal.type);
       copy.append(title, meta);
       const stateLabel = document.createElement("span"); stateLabel.className = "objective-status";
-      stateLabel.textContent = goal.paused ? "En pause" : displayedCurrent >= goal.target ? "Atteint" : goal.sourceId ? "Lié au tableur" : "En cours";
+      stateLabel.textContent = goal.paused ? "En pause" : displayedCurrent >= goal.target ? "Atteint" : goal.sourceId ? "Lié à " + (((availableSources.find(function(src){ return src.id === goal.sourceId; }) || {}).label) || "ton tableur").replace(" — ", " · ") : "En cours";
       if (goal.paused) stateLabel.classList.add("is-paused");
       const progress = Math.min(100, goal.target ? Math.round((displayedCurrent / goal.target) * 100) : 0);
       const percent = document.createElement("strong"); percent.className = "objective-percent"; percent.textContent = progress + "%";
@@ -205,14 +205,18 @@
     const select = document.getElementById("objectiveSheetSource"); if (!select) return;
     select.replaceChildren(new Option("Aucune liaison", ""));
     const groups = new Map();
+    // Une ligne du tableur = un groupe ; on choisit un mois précis ou toute l'année.
     sources().forEach(function(source) {
-      const year = String(source.label).match(/\b(20\d{2})\b/)?.[1] || "Autres périodes";
-      if (!groups.has(year)) groups.set(year, []);
-      groups.get(year).push(source);
+      const key = (source.line || source.label) + " — " + (source.year || "");
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(source);
     });
-    Array.from(groups.keys()).sort(function(a, b) { return b.localeCompare(a, "fr", { numeric: true }); }).forEach(function(year) {
-      const group = document.createElement("optgroup"); group.label = year;
-      groups.get(year).forEach(source => group.append(new Option(source.label + " · " + euro(source.value), source.id)));
+    Array.from(groups.keys()).forEach(function(key) {
+      const group = document.createElement("optgroup"); group.label = key;
+      groups.get(key).sort(function(a, b) { return (b.month == null || b.month < 0 ? 99 : b.month) - (a.month == null || a.month < 0 ? 99 : a.month); }).forEach(function(source) {
+        const text = source.month == null || source.month < 0 ? "Toute l’année (cumul)" : String(source.monthName || "").replace(/^./, function(c){ return c.toUpperCase(); });
+        group.append(new Option(text + " · " + euro(source.value), source.id));
+      });
       select.append(group);
     });
     select.value = selected || "";

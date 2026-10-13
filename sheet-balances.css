@@ -1,0 +1,64 @@
+/* ═══════════════════════════════════════════════
+   Tableur · soldes, catégories et règles alignés sur la DA de la maquette :
+   cartes « k » (filet 1px, solde calculé en filet accent 2px), listes à filets,
+   boutons plein accent / contour encre, rayons 14–16px.
+   ═══════════════════════════════════════════════ */
+body[data-theme="moulin"] #sheetPage .sheet-balance-cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;max-width:560px;padding:0!important;margin:12px 0 16px}
+body[data-theme="moulin"] #sheetPage .balance-card{position:relative;display:flex;flex-direction:column;gap:2px;min-height:0!important;padding:12px 14px!important;border:1px solid var(--line)!important;border-radius:16px!important;background:transparent!important;box-shadow:none!important}
+body[data-theme="moulin"] #sheetPage .balance-card.balance-card-accent{border:2px solid var(--accent-fill,var(--accent))!important;padding:11px 13px!important}
+body[data-theme="moulin"] #sheetPage .balance-label{display:flex;align-items:center;gap:6px;font:500 12px/1.3 var(--font-body)!important;letter-spacing:0!important;text-transform:none!important;color:var(--muted)!important}
+body[data-theme="moulin"] #sheetPage .balance-value{font:600 22px/1.2 var(--font-heading)!important;letter-spacing:-.02em;color:var(--text)!important;font-variant-numeric:tabular-nums}
+body[data-theme="moulin"] #sheetPage .balance-card-accent .balance-value{color:var(--text)!important}
+body[data-theme="moulin"] #sheetPage .balance-note{font-size:12px!important;line-height:1.4;color:var(--muted)!important;margin-top:2px}
+body[data-theme="moulin"] #sheetPage .balance-edit{align-self:flex-start;margin-top:8px;padding:0;min-height:0;border:0;background:none;color:var(--text)!important;font:600 13px var(--font-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+body[data-theme="moulin"] #sheetPage .balance-info{width:18px;height:18px;min-height:0;font-size:11px}
+body[data-theme="moulin"] #sheetPage .balance-card.is-empty .balance-value{color:var(--muted)!important;font:500 16px/1.4 var(--font-body)!important;margin:4px 0}
+
+/* Sections Catégories / Règles : panneaux à filets, sans cartes imbriquées */
+body[data-theme="moulin"] #sheetPage .sheet-rules-section{margin-top:28px!important;padding:24px 0 0!important;border:0!important;border-top:1px solid var(--line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+body[data-theme="moulin"] #sheetPage .sheet-rules-section .settings-section-head h3{margin:0;font:600 18px/1.3 var(--font-body)!important;letter-spacing:0;color:var(--text)}
+body[data-theme="moulin"] #sheetPage .sheet-rules-section .settings-section-head p{margin:4px 0 0;font-size:14px;color:var(--muted)}
+body[data-theme="moulin"] #sheetPage .category-settings-list{display:block!important;max-height:none!important;overflow:visible!important;padding:0!important;margin-top:8px;max-width:720px}
+body[data-theme="moulin"] #sheetPage .category-row{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(150px,200px)!important;gap:12px!important;align-items:center;min-height:56px;padding:6px 0!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+body[data-theme="moulin"] #sheetPage .category-name{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;color:var(--text)}
+body[data-theme="moulin"] #sheetPage .category-color{width:10px;height:10px;border-radius:50%;flex:none}
+body[data-theme="moulin"] #sheetPage .category-row .custom-select-trigger{min-height:44px!important;border-radius:12px!important;border:1px solid var(--line)!important;background:transparent!important;font:500 14px var(--font-body)!important}
+body[data-theme="moulin"] #sheetPage .custom-rule-inputs{display:flex!important;flex-wrap:wrap;gap:10px!important;max-width:720px;margin:16px 0 8px!important}
+body[data-theme="moulin"] #sheetPage .custom-rule-inputs input{flex:1 1 220px;height:48px!important;min-height:48px!important;padding:0 14px;border:1px solid var(--line)!important;border-radius:14px!important;background:transparent!important;color:var(--text);font:500 15px var(--font-body)}
+body[data-theme="moulin"] #sheetPage .custom-rule-inputs input:focus{outline:2px solid var(--accent);outline-offset:1px}
+body[data-theme="moulin"] #sheetPage .custom-rule-inputs button{height:48px!important;min-height:48px!important;padding:0 20px!important;border:1px solid var(--accent-fill,var(--accent))!important;border-radius:14px!important;background:var(--accent-fill,var(--accent))!important;color:var(--on-accent-fill,#17261F)!important;font:600 15px var(--font-body)!important;box-shadow:none!important;transform:none!important}
+body[data-theme="moulin"] #sheetPage #customRulesList{display:block!important;max-width:720px;margin-top:4px}
+body[data-theme="moulin"] #sheetPage .custom-rule-badge{display:flex!important;align-items:center;gap:10px;width:100%;min-height:52px;padding:4px 0!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font-size:15px!important}
+body[data-theme="moulin"] #sheetPage .custom-rule-badge .rule-name{flex:1;font-weight:500}
+body[data-theme="moulin"] #sheetPage .custom-rule-badge .rule-status{background:transparent!important;border:1px solid var(--line);color:var(--muted)!important;font-size:12px!important;padding:2px 8px!important}
+body[data-theme="moulin"] #sheetPage .custom-rule-badge .btn-edit,body[data-theme="moulin"] #sheetPage .custom-rule-badge .btn-del{width:44px;height:44px;border-radius:12px;color:var(--muted)}
+body[data-theme="moulin"] #sheetPage .custom-rule-badge .btn-edit:hover,body[data-theme="moulin"] #sheetPage .custom-rule-badge .btn-del:hover{transform:none;background:var(--line);color:var(--text);opacity:1}
+body[data-theme="moulin"] #sheetPage .custom-rules-section .hint{font-size:13px;color:var(--muted)}
+
+/* Fenêtre « Renommer la règle » */
+body[data-theme="moulin"] #renameModal .modal-container{border:1px solid var(--line);border-radius:22px;background:var(--panel-solid);box-shadow:0 24px 60px rgba(0,0,0,.25);padding:24px}
+body[data-theme="moulin"] #renameModal .modal-title{font:700 20px/1.2 var(--font-heading);letter-spacing:-.02em;color:var(--text)}
+body[data-theme="moulin"] #renameModal .modal-input{height:48px;border:1px solid var(--line);border-radius:14px;background:transparent;color:var(--text);font:500 15px var(--font-body)}
+body[data-theme="moulin"] #renameModal .modal-btn{height:48px;padding:0 20px;border-radius:14px;font:600 15px var(--font-body)}
+body[data-theme="moulin"] #renameModal .modal-btn-cancel{border:1px solid var(--text);background:transparent;color:var(--text)}
+body[data-theme="moulin"] #renameModal .modal-btn-save{border:1px solid var(--accent-fill,var(--accent));background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F)}
+
+@media(max-width:560px){
+  body[data-theme="moulin"] #sheetPage .category-row{grid-template-columns:minmax(0,1fr) minmax(130px,46%)!important}
+}
+
+
+/* Années du tableur (1 feuille = 1 année), en haut de la grille */
+body[data-theme="moulin"] #sheetPage .sheet-tabs.sheet-years{display:flex!important;align-items:center;gap:8px!important;margin:0 0 12px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow-x:auto;scrollbar-width:none;position:static!important}
+body[data-theme="moulin"] #sheetPage .sheet-years::-webkit-scrollbar{display:none}
+body[data-theme="moulin"] #sheetPage .sheet-years-label{flex:none;margin-right:2px;font:500 13px var(--font-body);color:var(--muted)}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab{flex:none;display:inline-flex!important;align-items:center;gap:0;height:44px!important;min-height:44px!important;padding:0!important;margin:0!important;border:1px solid var(--line)!important;border-radius:22px!important;background:transparent!important;box-shadow:none!important;transform:none!important}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab .sheet-tab-name{height:42px;padding:0 18px;border:0!important;background:transparent!important;color:var(--text)!important;font:500 15px var(--font-body)!important;cursor:pointer;box-shadow:none!important}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab.active{background:var(--accent-fill,var(--accent))!important;border-color:var(--accent-fill,var(--accent))!important}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab.active .sheet-tab-name{color:var(--on-accent-fill,#17261F)!important;font-weight:600!important;padding-right:6px}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x{width:32px;height:32px;margin-right:6px;border:0!important;border-radius:16px;background:transparent!important;color:var(--on-accent-fill,#17261F)!important;font-size:18px;line-height:1;opacity:.7;cursor:pointer;box-shadow:none!important}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x:hover{opacity:1;background:rgba(0,0,0,.08)!important}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-rename{display:none!important}
+body[data-theme="moulin"] #sheetPage .sheet-year-add{flex:none;height:44px;padding:0 14px;border:1px dashed var(--line-strong,var(--line));border-radius:22px;background:transparent;color:var(--muted);font:500 14px var(--font-body);cursor:pointer}
+body[data-theme="moulin"] #sheetPage .sheet-year-add:hover{border-color:var(--text);color:var(--text)}
+body[data-theme="moulin"] #sheetPage .sheet-years :is(button):focus-visible{outline:2px solid var(--accent);outline-offset:2px}

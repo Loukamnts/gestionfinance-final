@@ -36,7 +36,7 @@
     byId("identityFactEmail").textContent=user.email||"—";
     byId("identityAvatar").textContent=(name||user.email||"?").charAt(0).toUpperCase();
     byId("identityCreated").textContent=date(profile?.created_at||user.created_at);
-    byId("identityPlan").textContent=profile?.plan==="premium"?"Premium":profile?.plan==="plus"?"Plus":tr("Gratuit","Free");
+    byId("identityPlan").textContent=(profile?.plan==="premium"||profile?.plan==="pro")?"Pro":profile?.plan==="plus"?"Plus":tr("Gratuit","Free");
     byId("identitySubscriptionDate").textContent=profile?.subscription_started_at?date(profile.subscription_started_at):"—";
     byId("identitySubscriptionRow").hidden=!profile?.subscription_started_at;
     const changed=profile?.username_changed_at?new Date(profile.username_changed_at):null;

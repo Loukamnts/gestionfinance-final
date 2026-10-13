@@ -83,6 +83,7 @@ const dictionary=Object.freeze({
   "Enregistrer": "Save",
   "3 à 24 caractères : lettres sans accent, chiffres, points, tirets ou tirets bas. Un changement tous les 30 jours.": "3 to 24 characters: unaccented letters, digits, dots, hyphens or underscores. One change every 30 days.",
   "Abonnement": "Plan",
+  "Free, Plus ou Pro : choisis la formule qui te va.": "Free, Plus or Pro: pick the plan that suits you.",
   "Gratuit": "Free",
   "Membre depuis": "Member since",
   "Abonnement depuis": "Subscribed since",

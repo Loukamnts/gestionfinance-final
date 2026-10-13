@@ -94,7 +94,7 @@
     if (blocker) blocker.classList.add("hidden");
     document.body.classList.remove("onboarding-active");
     if (typeof window.setPage === "function") window.setPage("dashboard");
-    setTimeout(function () { startTutorial(); }, 300);
+    (function waitHome(n){ if(document.body.classList.contains("gfh-ready")||n>30){ setTimeout(startTutorial, 250); return; } setTimeout(function(){ waitHome(n+1); }, 100); })(0);
   }
 
   // Vide toutes les données du tableur pour que le tutoriel soit visible
@@ -128,8 +128,8 @@
   var demoDataInjected = false;
 
   function injectDemoData() {
-    if (demoDataInjected) return;
-    demoDataInjected = true;
+    // Le tutoriel s’appuie sur le vrai accueil : plus de données fictives injectées dans le tableur.
+    return;
     if (typeof window.FinanceSheet === "undefined" || !window.FinanceSheet.loadDemoData) return;
 
     try {
@@ -611,41 +611,41 @@
   // === Tutoriel ===
   const TUTORIAL_STEPS = [
     {
-      title: "Cartes de synthèse",
-      text: "Voici tes statistiques : salaire moyen, total épargné et mois les plus/moins dépensiers.",
-      target: ".metrics, .mobile-finance-summary",
+      title: "Ton solde",
+      text: "Ton solde et son évolution sur l’année. Touche un mois pour l’afficher.",
+      target: "#gfhHome .gfh-card",
       action: "Suivant",
     },
     {
-      title: "Synchroniser le tableau de bord",
-      text: "Ce bouton met à jour les graphiques à partir de ton tableur, seulement lorsque tu le demandes.",
-      target: "#syncSheetButton",
+      title: "Ajouter en un geste",
+      text: "Ajoute une dépense, un revenu ou de l’épargne sans ouvrir le tableur.",
+      target: "#gfhHome .gfh-add",
       action: "Suivant",
     },
     {
-      title: "Graphique",
-      text: "Le graphique affiche la répartition de tes finances pour le mois sélectionné.",
-      target: ".chart-panel",
+      title: "Ton mois en détail",
+      text: "Ici : où part ton argent, tes dépenses fixes et tes objectifs. Au début, charge un exemple ou ouvre le tableur.",
+      target: "#gfhHome .gfh-right",
       action: "Suivant",
     },
     {
       title: "Onglet Tableur",
-      text: "Clique sur Tableur pour accéder à ton tableur et saisir tes données.",
+      text: "Le tableur est la source de tout : chaque montant saisi met l’accueil à jour.",
       target: ".studio-sidebar-nav [data-page='sheet'], .desktop-nav [data-page='sheet'], .bottom-nav [data-page='sheet']",
       action: "Aller au Tableur",
       navigateTo: "sheet",
     },
     {
-      title: "Tableau de saisie",
-      text: "Saisis tes transactions ici. Les mois sont en haut et les catégories (Revolut, Loyer...) à gauche.",
-      target: ".sheet-wrap, #sheetPage, .sheet-page",
+      title: "Une feuille = une année",
+      text: "Choisis l’année ici, ajoute la précédente ou la suivante avec +. Les mois sont en colonnes, tes lignes à gauche.",
+      target: "#sheetPage .sheet-years",
       action: "Suivant",
       ensureVisible: true,
     },
     {
-      title: "Profil et réglages",
-      text: "Retrouve ici le thème, ton compte, l’aide et les réglages de l’application.",
-      target: ".profile-trigger, .studio-mobile-menu-button, .desktop-nav [data-page='settings']",
+      title: "Paramètres",
+      text: "Ton compte, ton abonnement, l’apparence et tes données.",
+      target: ".bottom-nav [data-page='settings'], .desktop-nav [data-page='settings'], .studio-sidebar-nav [data-page='settings']",
       action: "Terminer",
       isLast: true,
     },
@@ -765,6 +765,7 @@
   var currentTutorialOverlay = null;
 
   function positionTutorialElements(overlay, target, step) {
+    if ((!target || !target.isConnected) && step && step.target) { var fresh = Array.prototype.find.call(document.querySelectorAll(step.target), function (n) { return n.getClientRects().length; }); if (fresh) target = fresh; }
     currentTutorialTarget = target;
     currentTutorialStep = step;
     currentTutorialOverlay = overlay;

@@ -17,14 +17,14 @@
   <meta name="twitter:title" content="Meuniance — Tableau de bord financier personnel" />
   <meta name="twitter:description" content="Un tableur intelligent, un tableau de bord clair et des objectifs d'épargne : suivez vos revenus, vos dépenses et votre épargne mois par mois." />
   <meta name="twitter:image" content="https://gestion-finance-coral.vercel.app/share-card.png?v=20260930" />
-  <link rel="icon" href="favicon.ico?v=20260930" sizes="any" />
-  <link rel="icon" href="brand-mark.svg?v=20260930" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="app-icon-180.png?v=20260930" />
+  <link rel="icon" href="favicon.ico?v=20261013" sizes="any" />
+  <link rel="icon" href="brand-mark.svg?v=20261013" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="app-icon-180.png?v=20261013" />
   <link rel="manifest" href="manifest.webmanifest" />
-  <meta name="theme-color" content="#111114" />
+  <meta name="theme-color" content="#17261F" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,900;1,400;1,900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,900;1,400;1,900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <script>
     /* Chargement différé des grosses bibliothèques : la page s'affiche sans les attendre.
        Les URLs sont réécrites vers les copies hébergées par le site au moment du build. */
@@ -1828,11 +1828,17 @@
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260923-r2">
   <link rel="stylesheet" href="ui-polish.css?v=20261003-r1">
-  <link rel="stylesheet" href="theme-directions.css?v=20261002-r2">
-  <script src="i18n.js?v=20261003-r1"></script>
+  <link rel="stylesheet" href="theme-directions.css?v=20261013-r1">
+  <link rel="stylesheet" href="plans.css?v=20261013-r1">
+  <link rel="stylesheet" href="home.css?v=20261013-r1">
+  <link rel="stylesheet" href="sheet-balances.css?v=20261013-r1">
+  <link rel="stylesheet" href="finishing.css?v=20261013-r1">
+  <link rel="stylesheet" href="home-news.css?v=20261013-r1">
+  <link rel="stylesheet" href="menus.css?v=20261013-r1">
+  <script src="i18n.js?v=20261013-r1"></script>
   <script src="ui-controls.js?v=20260923-r10" defer></script>
 </head>
-<body data-theme="glass" data-mode="dark" data-page="dashboard" data-interface="classic">
+<body data-theme="moulin" data-palette="ble" data-mode="dark" data-page="dashboard" data-interface="classic">
   <div class="loader" id="loader" aria-live="polite" aria-label="Chargement"><div class="spinner"></div></div>
   <div class="message" id="messageBox" role="alert" aria-live="polite" aria-atomic="true">
     <span class="message-text" id="messageText"></span>
@@ -1866,7 +1872,7 @@
     <button class="studio-sidebar-scrim" id="studioSidebarScrim" type="button" aria-label="Fermer la navigation" hidden></button>
     <aside class="studio-sidebar" id="studioSidebar" aria-label="Navigation de la nouvelle interface">
       <div class="studio-sidebar-brand">
-        <span class="studio-sidebar-mark" aria-hidden="true"><svg class="brand-m" viewBox="0 0 64 64" focusable="false"><rect x="12" y="38" width="10" height="15" rx="2"/><rect x="27" y="29" width="10" height="24" rx="2"/><rect x="42" y="20" width="10" height="33" rx="2"/><path d="M12 24 24 11 34 20 51 5m-7 0h7v7" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 57h40" fill="none" stroke="var(--text)" stroke-width="2.7" stroke-linecap="round"/></svg></span>
+        <span class="studio-sidebar-mark" aria-hidden="true"><svg class="brand-m mk" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect class="lg-sq" width="28" height="28" rx="7.5"/><circle class="lg-t" cx="14" cy="14" r="9.4"/><circle class="lg-a" cx="14" cy="14" r="9.4" transform="rotate(-90 14 14)"/><g transform="rotate(30 14 14)"><path class="lg-s" d="M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z"/><path class="lg-c" d="M14 9.6c-.4 2.8-.4 5.8 0 8.6"/></g></svg></span>
         <strong>Meuniance</strong><small>TON ESPACE FINANCIER</small>
         <button class="studio-sidebar-collapse" id="studioSidebarCollapse" type="button" aria-label="Réduire la navigation" aria-expanded="true" title="Réduire la navigation">
           <svg class="sidebar-icon-expanded" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2.5" y="3.5" width="19" height="17" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 4v16M16 9l-3 3 3 3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1886,7 +1892,7 @@
     </aside>
     <header class="topbar app-header">
       <div class="brand" aria-label="Meuniance">
-        <div class="brand-copy"><h1 aria-label="Meuniance"><svg class="brand-m" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="12" y="38" width="10" height="15" rx="2"/><rect x="27" y="29" width="10" height="24" rx="2"/><rect x="42" y="20" width="10" height="33" rx="2"/><path d="M12 24 24 11 34 20 51 5m-7 0h7v7" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 57h40" fill="none" stroke="var(--text)" stroke-width="2.7" stroke-linecap="round"/></svg><span class="brand-word" aria-hidden="true">Meuniance</span></h1></div>
+        <div class="brand-copy"><h1 aria-label="Meuniance"><svg class="brand-m mk" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect class="lg-sq" width="28" height="28" rx="7.5"/><circle class="lg-t" cx="14" cy="14" r="9.4"/><circle class="lg-a" cx="14" cy="14" r="9.4" transform="rotate(-90 14 14)"/><g transform="rotate(30 14 14)"><path class="lg-s" d="M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z"/><path class="lg-c" d="M14 9.6c-.4 2.8-.4 5.8 0 8.6"/></g></svg><span class="brand-word" aria-hidden="true">Meuniance</span></h1></div>
       </div>
       <nav class="desktop-nav" aria-label="Navigation principale">
         <button class="desktop-nav-link" id="desktopHomeButton" type="button" data-page="dashboard">Accueil</button>
@@ -2054,8 +2060,8 @@
             <label><span>Type</span><select id="objectiveType"><option value="savings">Épargne</option><option value="investment">Investissement</option><option value="expense">Dépense prévue</option><option value="custom">Personnalisé</option></select></label>
             <label><span>Montant visé (€)</span><input id="objectiveTarget" type="number" min="0" step="0.01" inputmode="decimal" required /></label>
             <label><span>Déjà atteint (€)</span><input id="objectiveCurrent" type="number" min="0" step="0.01" inputmode="decimal" value="0" /></label>
-            <button class="objective-plan-toggle" id="objectivePlanToggle" type="button" aria-expanded="false" aria-controls="objectivePlanFields">Définir une échéance ou une récurrence <span>Facultatif</span></button>
-            <div class="objective-plan-fields" id="objectivePlanFields" hidden><label><span>Rythme</span><select id="objectiveCadence"><option value="once">Sans récurrence</option><option value="monthly">Chaque mois</option><option value="yearly">Chaque année</option></select></label><label><span>Échéance <em>facultative</em></span><input id="objectiveDueDate" type="date" /></label><label class="objective-link-field"><span>Lier au tableur <em>facultatif</em></span><select id="objectiveSheetSource"><option value="">Aucune liaison</option></select></label></div>
+            <button class="objective-plan-toggle" id="objectivePlanToggle" type="button" aria-expanded="false" aria-controls="objectivePlanFields">Échéance ou rythme <span>Facultatif</span></button>
+            <div class="objective-plan-fields" id="objectivePlanFields" hidden><label><span>Rythme</span><select id="objectiveCadence"><option value="once">Sans récurrence</option><option value="monthly">Chaque mois</option><option value="yearly">Chaque année</option></select></label><label><span>Échéance <em>facultative</em></span><input id="objectiveDueDate" type="date" /></label><label class="objective-link-field"><span>Lier à un mois du tableur <em>facultatif</em></span><select id="objectiveSheetSource"><option value="">Aucune liaison</option></select></label></div>
             <div class="objective-form-actions"><button class="button button-ghost" id="objectiveCancelButton" type="button">Annuler</button><button class="button button-primary" type="submit">Enregistrer l'objectif</button></div>
           </form><div class="objectives-list" id="objectivesList"></div></section>
           </div>
@@ -2480,7 +2486,7 @@
       rawPages: [], months: [], detectedProperties: [], availableRules: SYSTEM_RULES.slice(),
       selectedMonthId: "", selectedYear: "", currentView: "pie", chart: null, isGlobal: false, page: "dashboard", source: "tableur",
       importedFile: null, importAnalysis: null,
-      appearance: { theme: "glass", palette: "violet", mode: "dark", interface: "classic" }, pendingRename: { oldName: null, callback: null }
+      appearance: { theme: "moulin", palette: "ble", mode: "dark", interface: "classic" }, pendingRename: { oldName: null, callback: null }
     };
 
     const elements = {
@@ -2829,7 +2835,7 @@
       const visibleMonths=getVisibleMonths(), chartScroll=document.getElementById("chartScroll"), chartWrap=document.getElementById("chartWrap");
       const usesTimeline=["grouped","stacked","line"].includes(state.currentView);
       if(chartScroll) chartScroll.classList.toggle("is-scrollable",usesTimeline&&visibleMonths.length>5);
-      if(chartWrap) chartWrap.style.setProperty("--chart-min-width",usesTimeline?Math.max(760,visibleMonths.length*128)+"px":"0px");
+      if(chartWrap) chartWrap.style.setProperty("--chart-min-width",usesTimeline?Math.max(760,(state.currentView==="grouped"?12*80:visibleMonths.length*128))+"px":"0px");
       if(!visibleMonths.length){ elements.chartTitle.textContent="Répartition du mois"; elements.chartSubtitle.textContent="Importe une source financière pour afficher les graphiques."; elements.emptyState.classList.add("is-visible"); return; }
       if(typeof Chart!=="function"){
         if(window.GFVendors){
@@ -2871,7 +2877,22 @@
         chart:{ type:"doughnut", data:{ labels:["Salaire",...items.map(i=>i.name)], datasets:[{ data:[Math.abs(month?.salary||0),...items.map(i=>Math.abs(i.value))], backgroundColor:[COLORS.salary,...items.map(i=>i.color||getRuleColor(i.name))], borderColor: "#000000", borderWidth: 2, hoverOffset:12 }] }, options:baseChartOptions({ cutout:"60%", layout:{padding:{top:10,bottom:10}}, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, animation:{animateRotate:true,animateScale:true,duration:1000,easing:"easeOutQuart"} }) }
       };
     }
-    function getGroupedBarConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Comparatif mois par mois", subtitle:"Salaire et règles appliquées sur toutes les périodes disponibles.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:[createBarDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createBarDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
+    function getYearOverYearConfig(){
+      // Comparatif : chaque mois de l'année choisie face au même mois de l'année précédente.
+      const all=state.months||[]; if(!all.length) return null;
+      const sel=getSelectedMonth(); const years=all.map(m=>Number(getMonthYear(m))).filter(Boolean);
+      const year=sel?Number(getMonthYear(sel)):Math.max.apply(null,years); const prevYear=year-1;
+      const idx=m=>(m.date instanceof Date&&!isNaN(m.date.getTime()))?m.date.getMonth():-1;
+      const cur=Array(12).fill(null), prev=Array(12).fill(null), curS=Array(12).fill(null), prevS=Array(12).fill(null);
+      let hasPrev=false;
+      all.forEach(m=>{ const y=Number(getMonthYear(m)), i=idx(m); if(i<0) return; const e=Math.abs(Number(m.expenses||0)), s=Math.abs(Number(m.savingsTotal||0)); if(y===year){cur[i]=e;curS[i]=s;} else if(y===prevYear){prev[i]=e;prevS[i]=s;hasPrev=true;} });
+      if(!hasPrev) return null;
+      const labels=["Janv.","Févr.","Mars","Avr.","Mai","Juin","Juil.","Août","Sept.","Oct.","Nov.","Déc."];
+      const ce=getRuleColor("Dépense")||"#B2452F", cs=getRuleColor("Épargne")||"#2F6B4A";
+      const fade=c=>/^#[0-9a-f]{6}$/i.test(c)?c+"59":c;
+      return{ title:"Comparatif "+year+" / "+prevYear, subtitle:"Dépenses et épargne, mois par mois, face à l'an dernier.", chart:{ type:"bar", data:{ labels, datasets:[createBarDataset("Dépenses "+prevYear,fade(ce),prev),createBarDataset("Dépenses "+year,ce,cur),createBarDataset("Épargne "+prevYear,fade(cs),prevS),createBarDataset("Épargne "+year,cs,curS)] }, options:axisChartOptions({stacked:false}) } };
+    }
+    function getGroupedBarConfig(context){ if(!context){ try{ const yoy=getYearOverYearConfig(); if(yoy) return yoy; }catch(e){} } const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Comparatif mois par mois", subtitle:"Salaire et règles appliquées sur toutes les périodes disponibles.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:[createBarDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createBarDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
     function getStackedRulesConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Répartition par règles", subtitle:"Vue empilée sur toutes les périodes disponibles.", chart:{ type:"bar", data:{ labels:months.map(m=>m.label), datasets:rules.map(rule=>({ label:rule, data:months.map(m=>getMonthRuleValue(m,rule)), backgroundColor:getRuleColor(rule), borderColor:getRuleColor(rule), borderWidth:1, borderRadius:6, maxBarThickness:44 })) }, options:axisChartOptions({stacked:true,onMonthClick:context?.onMonthClick}) } }; }
     function getLineConfig(context){ const months=context?context.months:getVisibleMonths(); const rules=context?context.rules:getActiveRules(); return{ title:"Évolution", subtitle:"Salaire et règles appliquées sur toutes les périodes disponibles.", chart:{ type:"line", data:{ labels:months.map(m=>m.label), datasets:[createLineDataset("Salaire",COLORS.salary,months.map(m=>m.salary)),...rules.map(rule=>createLineDataset(rule,getRuleColor(rule),months.map(m=>getMonthRuleValue(m,rule))))] }, options:axisChartOptions({stacked:false,onMonthClick:context?.onMonthClick}) } }; }
     function createBarDataset(l,c,d){ return{label:l,data:d,backgroundColor:c,borderColor:c,borderWidth:1,borderRadius:6,maxBarThickness:36}; }
@@ -2913,7 +2934,7 @@
     // ═══════════════════════════════════════════════════════════════════════
     // THÈMES & APPARENCE (avec persistance de la vue)
     // ═══════════════════════════════════════════════════════════════════════
-    function restoreAppearance(){ const savedTheme=safeStore.getItem(STORAGE_KEYS.theme); const savedPalette=safeStore.getItem(STORAGE_KEYS.palette); const savedMode=safeStore.getItem(STORAGE_KEYS.mode); const savedInterface=safeStore.getItem(STORAGE_KEYS.interface); state.appearance.theme=["glass","editorial","brutal"].includes(savedTheme)?savedTheme:"glass"; const originalPalette={glass:"violet",editorial:"bordeaux",brutal:"gold"}; state.appearance.palette=["violet","bordeaux","gold"].includes(savedPalette)?savedPalette:originalPalette[state.appearance.theme]; state.appearance.mode=["dark","light"].includes(savedMode)?savedMode:"dark"; state.appearance.interface=savedInterface==="studio"?"studio":"classic"; setStudioSidebarCollapsed(safeStore.getItem(STORAGE_KEYS.sidebarCollapsed)==="true",false); const savedView=safeStore.getItem(STORAGE_KEYS.view); if(["pie","grouped","stacked","line"].includes(savedView)) state.currentView=savedView; applyAppearance({persist:false,refreshChart:false}); if(elements.viewSelect){ elements.viewSelect.value=state.currentView; syncCustomDropdown(elements.viewSelect); } }
+    function restoreAppearance(){ const savedTheme=safeStore.getItem(STORAGE_KEYS.theme); const savedPalette=safeStore.getItem(STORAGE_KEYS.palette); const savedMode=safeStore.getItem(STORAGE_KEYS.mode); const savedInterface=safeStore.getItem(STORAGE_KEYS.interface); state.appearance.theme="moulin"; state.appearance.palette="ble"; state.appearance.mode=["dark","light"].includes(savedMode)?savedMode:(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"); state.appearance.interface=savedInterface==="studio"?"studio":"classic"; setStudioSidebarCollapsed(safeStore.getItem(STORAGE_KEYS.sidebarCollapsed)==="true",false); const savedView=safeStore.getItem(STORAGE_KEYS.view); if(["pie","grouped","stacked","line"].includes(savedView)) state.currentView=savedView; applyAppearance({persist:false,refreshChart:false}); if(elements.viewSelect){ elements.viewSelect.value=state.currentView; syncCustomDropdown(elements.viewSelect); } }
     window.addEventListener("gf:languagechange",function(){
       updateInterface();
       const activeSettings=document.querySelector('[data-settings-view][aria-current="true"]')?.dataset.settingsView;
@@ -2921,8 +2942,8 @@
       if(state.page==="updates") renderUpdatesPage(updatesPageNumber);
       requestAnimationFrame(function(){ if(window.GFI18n) window.GFI18n.apply(document.body); window.GFCustomSelect?.refreshAll?.(); });
     });
-    function setTheme(theme){ if(!["glass","editorial","brutal"].includes(theme)) return; state.appearance.theme=theme; applyAppearance({persist:true,refreshChart:true}); }
-    function setPalette(palette){ if(!["violet","bordeaux","gold"].includes(palette)) return; state.appearance.palette=palette; applyAppearance({persist:true,refreshChart:true}); }
+    function setTheme(theme){ if(!["moulin","glass","editorial","brutal"].includes(theme)) return; state.appearance.theme=theme; applyAppearance({persist:true,refreshChart:true}); }
+    function setPalette(palette){ if(!["ble","violet","bordeaux","gold"].includes(palette)) return; state.appearance.palette=palette; applyAppearance({persist:true,refreshChart:true}); }
     function setMode(mode){ if(!["dark","light"].includes(mode)) return; state.appearance.mode=mode; applyAppearance({persist:true,refreshChart:true}); }
     function setInterfaceLayout(layout){ state.appearance.interface=layout==="studio"?"studio":"classic"; applyAppearance({persist:true,refreshChart:false}); }
     function setStudioSidebarCollapsed(collapsed,persist=true){
@@ -3030,7 +3051,7 @@
       dialog.addEventListener("close",function(){ trigger.setAttribute("aria-expanded","false"); });
     }
     initSheetStatusHelp();
-    const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],account:["Paramètres","Profil","Pseudo, connexion et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."]};
+    const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],account:["Paramètres","Profil","Pseudo, connexion et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."],plan:["Paramètres","Abonnement","Free, Plus ou Pro : choisis la formule qui te va."]};
     function showSettingsView(view){ const next=view!=="home"&&Object.prototype.hasOwnProperty.call(SETTINGS_VIEW_COPY,view)?view:"account",copy=SETTINGS_VIEW_COPY[next],translate=window.GFI18n?window.GFI18n.t:function(value){return value;}; document.querySelectorAll("[data-settings-panel]").forEach(function(panel){ panel.hidden=panel.dataset.settingsPanel!==next; }); const kicker=document.getElementById("settingsKicker"),title=document.getElementById("settingsTitle"),subtitle=document.getElementById("settingsSubtitle"); if(kicker) kicker.textContent=translate(copy[0]); if(title) title.textContent=translate(copy[1]); if(subtitle) subtitle.textContent=translate(copy[2]); document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.setAttribute("aria-current",String(button.dataset.settingsView===next)); }); }
     function renderPersonalSpace(){ const profileEmail=document.getElementById("profileEmail"),profileAvatar=document.getElementById("profileAvatar"),email=document.getElementById("personalEmail"),avatar=document.getElementById("personalAvatar"),meta=document.getElementById("personalObjectivesMeta"); if(email){ const value=String(profileEmail?.textContent||"").trim(); email.textContent=value&&value!=="Non connecté"?value:"Un espace privé pour organiser tes projets et tes accès."; } if(avatar) avatar.textContent=String(profileAvatar?.textContent||"?").trim().slice(0,2)||"?"; if(meta){ let goals=[]; try{ const profile=JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile")||"{}"); goals=Array.isArray(profile?.objectives)?profile.objectives.filter(Boolean):[]; }catch(e){} meta.textContent=goals.length?goals.length+" objectif"+(goals.length>1?"s":"")+" en cours.":"Crée et suis tes projets financiers."; } }
     window.setPage = setPage;
@@ -3237,7 +3258,7 @@ function rowsToImportedPages(rows, fileName, sheetName){
     function pauseMessageTimer(){ if(!elements.messageBox?.classList.contains("is-visible")||messagePaused) return; messagePaused=true; messageRemainingMs=Math.max(0,messageDeadline-performance.now()); clearMessageTimers(); updateMessagePauseState(true); setMessageProgress(messageDurationMs?messageRemainingMs/messageDurationMs:0); }
     function resumeMessageTimer(){ if(!elements.messageBox?.classList.contains("is-visible")||!messagePaused) return; messagePaused=false; messageDeadline=performance.now()+messageRemainingMs; updateMessagePauseState(false); const tick=()=>{ if(!elements.messageBox?.classList.contains("is-visible")||messagePaused) return; const rem=Math.max(0,messageDeadline-performance.now()); messageRemainingMs=rem; setMessageProgress(messageDurationMs?rem/messageDurationMs:0); if(rem<=0){ hideMessage(); return; } messageRafId=requestAnimationFrame(tick); }; messageRafId=requestAnimationFrame(tick); messageTimeoutId=setTimeout(hideMessage,messageRemainingMs); }
     function showMessage(msg,duration=15000){ if(!elements.messageBox) return; clearMessageTimers(); if(messageLeaveTimeoutId){ clearTimeout(messageLeaveTimeoutId); messageLeaveTimeoutId=null; } const text=String(msg||"").trim(); if(!text){ hideMessage(); return; } messageDurationMs=Math.max(15000,Number(duration)||15000); messageRemainingMs=messageDurationMs; messageDeadline=performance.now()+messageDurationMs; messagePaused=false; if(elements.messageText) elements.messageText.textContent=text; elements.messageBox.style.setProperty("--message-duration",`${messageDurationMs}ms`); elements.messageBox.classList.remove("is-leaving"); elements.messageBox.classList.remove("is-visible"); void elements.messageBox.offsetWidth; elements.messageBox.classList.add("is-visible"); updateMessagePauseState(false); setMessageProgress(1); const tick=()=>{ if(!elements.messageBox?.classList.contains("is-visible")||elements.messageBox?.classList.contains("is-leaving")||messagePaused) return; const rem=Math.max(0,messageDeadline-performance.now()); messageRemainingMs=rem; setMessageProgress(messageDurationMs?rem/messageDurationMs:0); if(rem<=0){ hideMessage(); return; } messageRafId=requestAnimationFrame(tick); }; messageRafId=requestAnimationFrame(tick); messageTimeoutId=setTimeout(hideMessage,messageDurationMs); }
-    function setLoading(v){ elements.loader?.classList.toggle("is-visible",v); }
+    function setLoading(v){ try{ if(window.MeuniLoader){ if(v) window.MeuniLoader.start("J’analyse ton fichier…"); else window.MeuniLoader.done("Fichier importé."); return; } }catch(e){} elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
     const RELEASE_NOTES_VERSION="2026-10-02-account-and-interface";
@@ -4900,8 +4921,9 @@ function rowsToImportedPages(rows, fileName, sheetName){
       return { v:"dashboard-1", updatedAt:Date.now(), months:(state.months||[]).map(month=>({ label:month.label, year:getMonthYear(month), salary:Number(month.salary||0), expenses:Number(month.expenses||0), savingsTotal:Number(month.savingsTotal||0), hasIncome:month.hasIncome===true, hasExpenses:month.hasExpenses===true, hasSavings:month.hasSavings===true, ruleBreakdown:(month.ruleBreakdown||[]).map(item=>({name:item.name,value:Number(item.value||0)})) })) };
     }
     window.getDashboardSharingSnapshot = getDashboardSharingSnapshot;
+    window.__gfHomeData = function(){ const selected=getSelectedMonth(); return { all:(state.months||[]).map(month=>({ id:month.id, label:month.label, year:getMonthYear(month), salary:Number(month.salary||0), expenses:Number(month.expenses||0), savingsTotal:Number(month.savingsTotal||0), mi:(month.date instanceof Date&&!isNaN(month.date.getTime()))?month.date.getMonth():-1, cats:((month.ruleDetails||{})["Dépense"]||[]).map(item=>({name:item.name,value:Number(item.value||0)})) })), selectedId:selected?selected.id:null }; };
 
-    function updateSummaryCards(){
+    function updateSummaryCards(){ try{ queueMicrotask(function(){ window.dispatchEvent(new Event("gf:dashboardupdate")); }); }catch(e){}
       const metrics = calculateDashboardMetrics(getVisibleMonths());
       if(!metrics.monthCount){
         elements.avgSalary.textContent = "-";
@@ -5381,8 +5403,8 @@ function rowsToImportedPages(rows, fileName, sheetName){
     }
     init();
   </script>
-  <script src="sheet.js?v=20260923-r1"></script>
-  <script src="onboarding.js?v=20260908-r9"></script>
+  <script src="sheet.js?v=20261013-r1"></script>
+  <script src="onboarding.js?v=20261013-r1"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
   <script src="friends.js?v=20260923-r3"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -5698,7 +5720,7 @@ function rowsToImportedPages(rows, fileName, sheetName){
   window.__account = sb;
 })();
 </script>
-<script src="profile.js?v=20261003-r1"></script>
+<script src="profile.js?v=20261013-r1"></script>
 <script>(function(){
   /* === Sync Supabase (offline-first, multi-device) ===
      Sauvegarde locale immediate + sync cloud des qu'on est en ligne.
@@ -5780,7 +5802,14 @@ function rowsToImportedPages(rows, fileName, sheetName){
   }
 
   // === PULL : tire le snapshot depuis Supabase vers le tableur ===
+  var __firstPullShown = false;
   async function pullFromCloud(){
+    // Écran de chargement uniquement pour la première récupération du compte (ouverture, connexion).
+    var __ml = !__firstPullShown && window.MeuniLoader && getUser && getUser() ? window.MeuniLoader : null;
+    if (__ml) { __firstPullShown = true; __ml.start("Je récupère ton espace…"); }
+    try { return await __pullFromCloudInner(); } finally { if (__ml) __ml.done(); }
+  }
+  async function __pullFromCloudInner(){
     var sb = getSupabase();
     var user = getUser();
     var fs = getFinanceSheet();
@@ -5964,12 +5993,17 @@ function rowsToImportedPages(rows, fileName, sheetName){
   window.__gfSync = { pushToCloud: pushToCloud, pullFromCloud: pullFromCloud, markDirty: markDirty, updateSyncStatus: updateSyncStatus };
 })();
 </script>
-  <script src="objectives.js?v=20260923-r4"></script>
+  <script src="objectives.js?v=20261013-r1"></script>
+  <script src="meuni-loader.js?v=20261013-r1" defer></script>
   <script src="aria.js?v=20261006-r1" defer></script>
   <script src="feedback.js?v=20261006-r1" defer></script>
   <script src="storage-encryption.js?v=20261006-r1" defer></script>
   <script src="ios-fix.js?v=20261006-r1" defer></script>
   <script src="i18n-manager.js?v=20261006-r1" defer></script>
+  <script src="plans.js?v=20261013-r1" defer></script>
+  <script src="home.js?v=20261013-r1" defer></script>
+  <script src="finishing.js?v=20261013-r1" defer></script>
+  <script src="menus.js?v=20261013-r1" defer></script>
 </body>
 </html>
 

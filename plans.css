@@ -1,0 +1,64 @@
+/* ═══════════════════════════════════════════════
+   Abonnements Meuniance — Free / Plus / Pro
+   Hérite de l'identité « Le Moulin » : un seul bloc plein (Plus), filets ailleurs.
+   ═══════════════════════════════════════════════ */
+.gfs-panel-head{display:grid;gap:6px;margin:4px 0 18px}
+.gfs-panel-head h3{margin:0;font:700 clamp(1.5rem,3.2vw,2rem)/1.1 var(--font-heading);letter-spacing:-.025em;color:var(--text)}
+.gfs-panel-head p{margin:0;color:var(--muted);font-size:.92rem;max-width:56ch}
+.gfs-current{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;padding:14px 0;margin:0 0 20px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.gfs-current-copy{display:grid;gap:2px}
+.gfs-current-copy small{color:var(--muted);font-size:.78rem}
+.gfs-current-copy strong{font:700 1.1rem/1.2 var(--font-heading);color:var(--text)}
+.gfs-current-copy span{color:var(--muted);font-size:.84rem}
+.gfs-plans{display:grid;gap:14px;margin:0 0 18px}
+@media(min-width:900px){.gfs-plans{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}}
+.gfs-card{position:relative;display:flex;flex-direction:column;gap:0;padding:22px 20px 20px;border:1px solid var(--line);border-radius:var(--panel-radius,20px);background:var(--panel-solid,transparent);color:var(--text);min-width:0}
+.gfs-card.is-featured{background:var(--block-bg,#17261F);border-color:var(--block-bg,#17261F);color:var(--block-text,#F6F2E8)}
+body[data-mode="dark"] .gfs-card.is-featured{border-color:var(--accent)}
+.gfs-card.is-current{box-shadow:0 0 0 2px var(--accent) inset}
+.gfs-tag{position:absolute;top:-11px;left:20px;padding:3px 11px;border-radius:999px;background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font:700 .72rem/1.4 var(--font-body);letter-spacing:.01em}
+.gfs-card h4{margin:0 0 4px;font:700 1.45rem/1.1 var(--font-heading);letter-spacing:-.02em}
+.gfs-pitch{margin:0 0 16px;color:var(--muted);font-size:.86rem;min-height:2.6em}
+.gfs-card.is-featured .gfs-pitch,.gfs-card.is-featured .gfs-price small,.gfs-card.is-featured li.is-dim{color:var(--block-muted,#B7C2BB)}
+.gfs-price{display:flex;align-items:baseline;gap:6px;margin:0 0 16px}
+.gfs-price b{font:700 2.4rem/1 var(--font-heading);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.gfs-price small{color:var(--muted);font-size:.82rem}
+.gfs-card ul{list-style:none;margin:0 0 18px;padding:14px 0 0;display:grid;gap:9px;flex:1;border-top:1px solid var(--line)}
+.gfs-card.is-featured ul{border-top-color:var(--block-line,rgba(246,242,232,.18))}
+.gfs-card li{display:flex;gap:9px;font-size:.88rem;line-height:1.4}
+.gfs-card li::before{content:"";flex:none;width:15px;height:15px;margin-top:2px;background:var(--accent);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
+.gfs-card li.is-dim{color:var(--muted)}
+.gfs-card li.is-dim::before{background:var(--line-strong,var(--line));-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8h8' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8h8' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat}
+.gfs-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:44px;padding:10px 16px;border-radius:var(--control-radius,12px);border:1px solid var(--line-strong,var(--line));background:transparent;color:inherit;font:600 .9rem/1.2 var(--font-body);cursor:pointer;transition:border-color .15s,background .15s}
+.gfs-btn:hover{border-color:var(--accent)}
+.gfs-btn:focus-visible,.gfs-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.gfs-btn.is-primary{background:var(--button-primary-bg,var(--accent));border-color:var(--button-primary-bg,var(--accent));color:var(--button-primary-text,#17261F)}
+.gfs-btn.is-primary:hover{filter:brightness(1.05)}
+.gfs-btn[disabled]{cursor:default;opacity:.65}
+.gfs-btn.is-inline{width:auto}
+.gfs-card.is-featured .gfs-btn:not(.is-primary){border-color:var(--block-line,rgba(246,242,232,.3))}
+.gfs-note{display:block;margin:0 0 12px;padding:12px 14px;border:1px dashed var(--line-strong,var(--line));border-radius:var(--control-radius,12px);color:var(--muted);font-size:.84rem;line-height:1.45}
+.gfs-note strong{color:var(--text)}
+.gfs-promise{margin:6px 0 0;color:var(--muted);font-size:.86rem}
+.gfs-promise em{font-style:normal;color:var(--text);font-weight:600}
+.gfs-link{border:0;background:none;padding:0;color:var(--accent);font:600 .82rem/1.3 var(--font-body);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.gfs-lock{display:inline-flex;align-items:center;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--button-active-bg,rgba(0,0,0,.08));color:var(--button-active-text,var(--text));font:700 .62rem/1.5 var(--font-body);letter-spacing:.02em;vertical-align:middle;pointer-events:none}
+/* Version compacte dans l'accueil du compte */
+.gfs-plans.is-compact{gap:10px;margin:14px 0 4px}
+.gfs-plans.is-compact .gfs-card{padding:16px}
+.gfs-plans.is-compact .gfs-pitch{min-height:0;margin-bottom:10px}
+.gfs-plans.is-compact .gfs-price b{font-size:1.8rem}
+.gfs-plans.is-compact ul{display:none}
+@media(min-width:620px){.gfs-plans.is-compact{grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* Dialogue (paiement / fonction réservée) */
+.gfs-dialog{width:min(440px,calc(100vw - 32px));padding:24px;border:1px solid var(--line);border-radius:var(--panel-radius,20px);background:var(--panel-solid,var(--bg));color:var(--text);box-shadow:0 24px 60px rgba(0,0,0,.28)}
+.gfs-dialog::backdrop{background:rgba(10,16,13,.5)}
+.gfs-dialog h2{margin:0 0 8px;font:700 1.35rem/1.15 var(--font-heading);letter-spacing:-.02em}
+.gfs-dialog p{margin:0 0 16px;color:var(--muted);font-size:.9rem;line-height:1.5}
+.gfs-dialog .gfs-kicker{display:block;margin:0 0 8px;color:var(--accent);font:700 .72rem/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase}
+.gfs-dialog-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
+.gfs-dialog-actions .gfs-btn{width:auto}
+/* Navigation : entrée « Abonnement » */
+.studio-sidebar-nav [data-open-plans].is-active{background:var(--button-active-bg);color:var(--text)}
+.studio-sidebar-nav [data-open-plans].is-active > span{color:var(--accent)}
+@media(prefers-reduced-motion:reduce){.gfs-btn{transition:none}}

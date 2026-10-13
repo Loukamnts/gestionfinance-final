@@ -1,0 +1,70 @@
+/* ═══════════════════════════════════════════════
+   Menus déroulants Meuniance (ajout rapide, objectifs), page Apparence,
+   fond des notes en mode sombre.
+   ═══════════════════════════════════════════════ */
+.gfs-native{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;clip:rect(0 0 0 0)!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}
+.gfs-dd{position:relative;width:100%;min-width:0}
+.gfs-dd-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;height:48px;padding:0 14px;border:1px solid var(--line);border-radius:14px;background:transparent;color:var(--text);font:500 15px var(--font-body);text-align:left;cursor:pointer}
+.gfs-dd-btn span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gfs-dd-btn.is-placeholder span{color:var(--muted)}
+.gfs-dd-btn::after{content:"";flex:none;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+.gfs-dd-btn[aria-expanded="true"]{border-color:var(--text)}
+.gfs-dd-btn[aria-expanded="true"]::after{transform:rotate(-135deg) translateY(-1px)}
+.gfs-dd-btn:hover:not(:disabled){border-color:var(--text)}
+.gfs-dd-btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.gfs-dd-btn:disabled{opacity:.45;cursor:default}
+.gfs-dd-menu{position:absolute;left:0;min-width:100%;width:max-content;max-width:min(380px,calc(100vw - 32px));top:calc(100% + 6px);z-index:60;max-height:min(300px,50vh);overflow:auto;padding:6px;border:1px solid var(--line);border-radius:16px;background:var(--panel-solid,var(--bg));box-shadow:0 18px 44px rgba(0,0,0,.2)}
+.gfs-dd-menu.is-up{top:auto;bottom:calc(100% + 6px)}
+.gfs-dd-menu[hidden]{display:none}
+.gfs-dd-h{padding:10px 10px 4px;font:600 11px var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.gfs-dd-opt{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:42px;padding:0 10px;border:0;border-radius:10px;background:transparent;color:var(--text);font:500 15px var(--font-body);text-align:left;cursor:pointer}
+.gfs-dd-opt .t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gfs-dd-opt .v{flex:none;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.gfs-dd-opt:hover,.gfs-dd-opt:focus{background:var(--line);outline:none}
+.gfs-dd-opt[aria-selected="true"]{font-weight:600}
+.gfs-dd-opt[aria-selected="true"]::after{content:"";flex:none;width:6px;height:11px;margin-left:4px;border-right:2px solid var(--accent-fill,var(--accent));border-bottom:2px solid var(--accent-fill,var(--accent));transform:rotate(45deg) translateY(-2px)}
+.gfs-dd-opt[aria-selected="true"] .v{display:none}
+/* Formulaire d'objectif : nos menus remplacent les anciens */
+#objectiveForm .custom-select-wrapper{display:none!important}
+#objectiveForm .gfs-dd{margin-top:0}
+.gfo-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+@media(max-width:620px){.gfo-row{grid-template-columns:minmax(0,1fr)!important}}
+.gfo-field{width:100%;min-width:0}
+body[data-theme="moulin"] [data-settings-panel="appearance"] .gfh-set{margin-top:26px!important}
+
+/* Notes : voile sombre, jamais blanc */
+body[data-theme="moulin"] .personal-notes-overlay{background:rgba(14,23,19,.45)!important;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+body[data-theme="moulin"][data-mode="dark"] .personal-notes-overlay{background:rgba(0,0,0,.6)!important}
+body[data-theme="moulin"][data-mode="dark"] .personal-notes-panel{background:var(--panel-solid)!important;border-color:var(--line)!important}
+
+/* Apparence */
+body[data-theme="moulin"] [data-settings-panel="appearance"] .settings-section-head.split,
+body[data-theme="moulin"] [data-settings-panel="appearance"] .interface-choice{display:none!important}
+.gfa{display:grid;gap:26px;margin:6px 0 4px}
+.gfa h4{margin:0;font:600 18px var(--font-body);color:var(--text)}
+.gfa > section > p{margin:4px 0 12px;font-size:14px;color:var(--muted)}
+.gfa-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:560px}
+.gfa-tile{display:grid;gap:10px;padding:10px 10px 12px;border:1px solid var(--line);border-radius:18px;background:transparent;color:var(--text);text-align:left;cursor:pointer;font:inherit}
+.gfa-tile:hover{border-color:var(--text)}
+.gfa-tile[aria-pressed="true"]{border:2px solid var(--accent-fill,var(--accent));padding:9px 9px 11px}
+.gfa-tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.gfa-tile strong{display:flex;align-items:center;justify-content:space-between;font:600 15px var(--font-body);padding:0 4px}
+.gfa-tile small{display:block;padding:0 4px;font-size:12.5px;color:var(--muted)}
+.gfa-tile[aria-pressed="true"] strong::after{content:"";width:18px;height:18px;border-radius:50%;background:var(--accent-fill,var(--accent)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5' fill='none' stroke='%2317261F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat}
+.gfa-prev{position:relative;aspect-ratio:160/96;height:auto;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,.08)}
+.gfa-prev svg{display:block;width:100%;height:100%}
+.gfa-prev.light{background:#F6F2E8}.gfa-prev.dark{background:#0E1713;border-color:#2A3A32}
+.gfa-prev i{position:absolute;display:block;border-radius:6px}
+.gfa-prev .card{left:10px;top:12px;width:56%;height:62px;border-radius:9px}
+.gfa-prev.light .card{background:#17261F}.gfa-prev.dark .card{background:#182822}
+.gfa-prev .bar{bottom:24px;width:7%;background:rgba(246,242,232,.25)}
+.gfa-prev .bar.on{background:#E3A82B}
+.gfa-prev .ln{right:10px;width:30%;height:6px}
+.gfa-prev.light .ln{background:#D9D2BF}.gfa-prev.dark .ln{background:#2A3A32}
+.gfa-prev .ln.a{background:#E3A82B}
+.gfa-prev .side{left:0;top:0;bottom:0;width:22%;border-radius:0}
+.gfa-prev .top{left:10px;right:10px;top:8px;height:8px;border-radius:4px}
+.gfa-prev.light .side,.gfa-prev.light .top{background:#E9E2D1}
+@media(max-width:560px){.gfa-tiles{gap:8px}}
+/* Bloc Accueil (interrupteurs) dans le même style */
+body[data-theme="moulin"] [data-settings-panel="appearance"] .gfh-set{margin:0;padding:0;border:0}
