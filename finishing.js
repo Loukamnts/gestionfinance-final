@@ -77,10 +77,23 @@
     var nb=byId("latestUpdateAllButton");if(nb){nb.textContent=t2("Voir","See");nb.setAttribute("aria-label",t2("Voir les nouveautés","See what’s new"));}
     document.addEventListener("change",function(e){if(e.target&&e.target.id==="viewSelect")syncViews();});
     document.addEventListener("click",function(){setTimeout(syncBottom,0);});
-    // Barre du bas : l'onglet touché prend sa couleur dès l'appui, sans attendre que la page soit dessinée.
+    // Barre du bas : l'onglet touché prend sa couleur dès l'appui ; la nouvelle page n'est construite
+    // qu'après l'affichage de cette couleur, pour que le retour visuel soit immédiat.
     var nav=document.querySelector(".bottom-nav");
-    if(nav)nav.addEventListener("pointerdown",function(e){var b=e.target.closest(".bottom-nav-btn");if(!b||e.button>0)return;nav.querySelectorAll(".bottom-nav-btn").forEach(function(x){x.classList.toggle("is-active",x===b);});});
-    if(nav)nav.addEventListener("pointercancel",function(){var page=document.body.dataset.page;nav.querySelectorAll(".bottom-nav-btn").forEach(function(x){x.classList.toggle("is-active",x.dataset.page===page);});});
+    if(nav){
+      var mark=function(b){nav.querySelectorAll(".bottom-nav-btn").forEach(function(x){x.classList.toggle("is-active",x===b);});};
+      var restore=function(){var page=document.body.dataset.page;nav.querySelectorAll(".bottom-nav-btn").forEach(function(x){x.classList.toggle("is-active",x.dataset.page===page);});};
+      nav.addEventListener("pointerdown",function(e){var b=e.target.closest(".bottom-nav-btn");if(b&&!(e.button>0))mark(b);});
+      nav.addEventListener("pointercancel",restore);
+      nav.addEventListener("click",function(e){
+        var b=e.target.closest(".bottom-nav-btn");if(!b||!b.dataset.page||!window.setPage)return;
+        e.preventDefault();e.stopPropagation();
+        mark(b);b.classList.remove("gf-pop");void b.offsetWidth;b.classList.add("gf-pop");
+        var page=b.dataset.page;
+        requestAnimationFrame(function(){setTimeout(function(){window.setPage(page);syncBottom();},0);});
+      },true);
+      nav.addEventListener("animationend",function(e){if(e.target.classList&&e.target.classList.contains("gf-pop"))e.target.classList.remove("gf-pop");});
+    }
     window.addEventListener("gf:dashboardupdate",function(){if(!byId("gfcViews"))chartViews();syncViews();});
     window.addEventListener("gf:languagechange",function(){chartViews();});
   }
