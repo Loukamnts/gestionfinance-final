@@ -7,6 +7,8 @@
   var SEARCH="Je retrouve tes chiffres…",FOUND="Voilà.";
   function build(){
     if(o)return;
+    var boot=document.getElementById("meuniBoot");
+    if(boot){o=boot;svg=o.querySelector("svg");spin=o.querySelector(".ml-spin");gw=o.querySelector(".ml-gw");tx=o.querySelector(".meuni-loader-text");return;}
     o=document.createElement("div");o.className="meuni-loader";o.setAttribute("role","status");o.setAttribute("aria-live","polite");o.hidden=true;
     o.innerHTML='<svg class="meuni-loader-logo srch" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect class="lg-sq" width="28" height="28" rx="7.5"/><circle class="lg-t" cx="14" cy="14" r="9.4"/><g class="ml-spin"><circle class="lg-a" cx="14" cy="14" r="9.4" transform="rotate(-90 14 14)"/></g><g class="ml-gw"><g transform="rotate(30 14 14)"><path class="lg-s" d="M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z"/><path class="lg-c" d="M14 9.6c-.4 2.8-.4 5.8 0 8.6"/></g></g></svg><span class="meuni-loader-text"></span>';
     document.body.appendChild(o);
@@ -32,7 +34,31 @@
     };
   }
   window.MeuniLoader={start:start,done:done,isBusy:function(){return busy;}};
-  /* Ouverture de l'app : visible seulement si le chargement dure vraiment */
-  start();
-  if(document.readyState==="complete")done();else window.addEventListener("load",function(){done();});
+  /* Ouverture de l'app : l'écran d'ouverture (déjà affiché par la page) reste jusqu'à ce que tes vrais
+     chiffres soient calculés, puis s'efface en fondu. Sur un nouvel appareil d'un compte connecté, il attend
+     aussi tes données du cloud. Au plus 8 s dans tous les cas. */
+  (function(){
+    var boot=document.getElementById("meuniBoot");
+    if(!boot){start();if(document.readyState==="complete")done();else window.addEventListener("load",function(){done();});return;}
+    build();shown=true;busy=true;
+    var synced=false,finished=false;
+    function owner(){try{return window.safeStore&&window.safeStore.financialOwner?window.safeStore.financialOwner():"anonymous";}catch(e){return"anonymous";}}
+    function localEmpty(){try{var sn=window.FinanceSheet&&window.FinanceSheet.getSnapshot();return !sn||!(sn.sheets||[]).some(function(x){return Object.keys(x.cells||{}).some(function(k){return String((x.cells[k]||{}).raw||"").trim()!=="";});});}catch(e){return true;}}
+    function figuresReady(){try{var d=window.__gfHomeData&&window.__gfHomeData();return !!(d&&d.all&&d.all.length);}catch(e){return false;}}
+    function leave(){
+      if(finished)return;finished=true;
+      boot.classList.add("is-leaving");
+      setTimeout(function(){boot.hidden=true;boot.classList.remove("is-boot","is-leaving");shown=false;busy=false;},240);
+    }
+    function check(){
+      if(finished||!document.body.classList.contains("gfh-ready"))return;
+      if(localEmpty()){if(owner()!=="anonymous"&&!synced)return;leave();return;}
+      if(figuresReady())leave();
+    }
+    window.addEventListener("gf:syncready",function(){synced=true;setTimeout(check,120);});
+    window.addEventListener("gf:dashboardupdate",function(){setTimeout(check,30);});
+    if(window.MutationObserver)new MutationObserver(check).observe(document.body,{attributes:true,attributeFilter:["class"]});
+    setTimeout(leave,8000);
+    check();
+  })();
 })();

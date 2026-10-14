@@ -285,7 +285,7 @@
   }
 
   /* ── Bilan du mois écoulé : affiché dès le début du mois suivant, jusqu'à « J'ai vu » ─── */
-  var RECAP_KEY="personalFinanceDashboard.recapSeen";
+  var RECAP_KEY="personalFinanceDashboard.recapSeen",flashMonth=0;
   function recapMonth(all){
     var now=new Date(),cur=now.getFullYear()*12+now.getMonth();
     var past=all.filter(function(m){return !m.blank&&m.year*12+m.mi<cur&&(m.salary||m.expenses||m.savings);});
@@ -310,22 +310,23 @@
     stat(t2("Reste du mois","Left this month"),(rest<0?"−":"")+eur(Math.abs(rest)),R.salary?t2("sur ","of ")+eur(R.salary)+t2(" de revenus"," income"):t2("Revenus non saisis","Income not entered"),rest<0?"is-neg":"");
     var rate=R.salary?Math.round(R.savings/R.salary*100):null;
     stat(t2("Épargne","Savings"),eur(R.savings),rate!=null&&R.savings?rate+(en()?"%":" %")+t2(" de tes revenus"," of your income"):(R.savings?"":t2("Rien de côté","Nothing saved")));
-    if(top)stat(t2("Plus gros poste","Biggest expense"),eur(cats[top]),top+(R.expenses?" · "+Math.round(cats[top]/R.expenses*100)+(en()?"%":" %"):""));
+    if(top)stat(t2("Plus grosse dépense","Biggest expense"),eur(cats[top]),top+(R.expenses?" · "+Math.round(cats[top]/R.expenses*100)+(en()?"% of spending":" % de tes dépenses"):""));
     if(prev&&prev.expenses&&R.expenses){var dv=(R.expenses-prev.expenses)/prev.expenses*100,ab=Math.abs(dv);stat(t2("Dépenses","Spending"),(dv>0?"+":dv<0?"−":"")+ab.toLocaleString(en()?"en-IE":"fr-FR",{maximumFractionDigits:0})+(en()?"%":" %"),t2("vs ","vs ")+mname(prev.mi)+" · "+eur(R.expenses),dv>0?"is-up":"is-down");}
     else stat(t2("Dépenses","Spending"),eur(R.expenses),t2("Premier mois comparable","First comparable month"));
     box.append(grid);
     // Un fait marquant, le plus parlant d'abord
-    var fact="",savs=year.map(function(m){return m.savings;}),exps=year.filter(function(m){return m.expenses;}).map(function(m){return m.expenses;});
+    var others=year.filter(function(m){return m.id!==R.id;}),fact="",savs=others.map(function(m){return m.savings;}),exps=others.filter(function(m){return m.expenses;}).map(function(m){return m.expenses;});
     var over=names.filter(function(n){var b=budgetOf(n);return b&&cats[n]>b;});
     if(over.length)fact=over.length===1?t2("«\u00a0"+over[0]+"\u00a0» a dépassé son plafond de ","“"+over[0]+"” went over its limit by ")+eur(cats[over[0]]-budgetOf(over[0]))+".":t2(over.length+" lignes ont dépassé leur plafond.",over.length+" rows went over their limit.");
-    else if(year.length>=3&&R.savings>0&&R.savings>=Math.max.apply(null,savs))fact=t2("Ton meilleur mois d’épargne de l’année. Bravo !","Your best savings month of the year. Well done!");
-    else if(year.length>=3&&R.expenses&&R.expenses<=Math.min.apply(null,exps))fact=t2("Tes dépenses les plus basses de l’année.","Your lowest spending of the year.");
+    else if(year.length>=3&&R.savings>0&&R.savings>Math.max.apply(null,savs))fact=t2("Ton meilleur mois d’épargne de l’année. Bravo !","Your best savings month of the year. Well done!");
+    else if(year.length>=3&&R.expenses&&exps.length&&R.expenses<Math.min.apply(null,exps))fact=t2("Tes dépenses les plus basses de l’année.","Your lowest spending of the year.");
     else if(prev){var pm=catMap(prev),best=null;names.forEach(function(n){var d=cats[n]-(pm[n]||0);if(pm[n]&&d>0&&(!best||d>best.d))best={n:n,d:d};});
       if(best&&best.d>=20)fact=t2("«\u00a0"+best.n+"\u00a0» a augmenté de ","“"+best.n+"” went up by ")+eur(best.d)+t2(" par rapport à "," compared with ")+mname(prev.mi)+".";}
     if(!fact&&rest>0)fact=t2("Mois bouclé dans le vert : ","Month closed in the green: ")+eur(rest)+t2(" de reste."," left.");
     if(fact)box.append(el("p","gfh-recap-fact",fact));
     var acts=el("div","gfh-recap-acts"),see=el("button","gfh-btn",t2("Voir ","See ")+mname(R.mi)),ok=el("button","gfh-link",t2("J’ai vu","Got it"));see.type=ok.type="button";
-    see.addEventListener("click",function(){select(R);});ok.addEventListener("click",function(){lsSet(RECAP_KEY,tag);schedule();});
+    // Ouvre le mois sur l'accueil : le bilan se range et on remonte au mois choisi, bien visible.
+    see.addEventListener("click",function(){lsSet(RECAP_KEY,tag);flashMonth=Date.now();select(R);schedule();setTimeout(function(){var t=document.querySelector("#gfhHome .gfh-topbar");if(t)t.scrollIntoView({behavior:"smooth",block:"start"});},350);});ok.addEventListener("click",function(){lsSet(RECAP_KEY,tag);schedule();});
     acts.append(see,ok);box.append(acts);
     return box;
   }
@@ -401,6 +402,7 @@
     pb.disabled=idx===0;nb.disabled=idx===all.length-1;
     pb.addEventListener("click",function(){select(all[idx-1]);});nb.addEventListener("click",function(){select(all[idx+1]);});
     mon.append(pb,el("span","",cap(mname(sel.mi))+" "+sel.year),nb);
+    if(Date.now()-flashMonth<1500)mon.classList.add("is-flash");
 
     // Salutation
     var hi=el("div","gfh-hi"),nm=name();

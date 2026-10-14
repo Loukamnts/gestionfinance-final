@@ -1032,6 +1032,10 @@ body[data-theme="moulin"] #dashboardPage .mobile-finance-summary.panel { padding
 /* Écran de chargement « le grain qui cherche » */
 .meuni-loader{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:var(--bg,#F6F2E8);color:var(--muted,#5E6B63)}
 .meuni-loader[hidden]{display:none}
+/* Écran d'ouverture : fondu à la sortie, et retrait automatique au bout de 10 s si un script manquait */
+.meuni-loader.is-boot{transition:opacity .22s ease-out;animation:meuniBootSafety 0s linear 10s forwards}
+.meuni-loader.is-boot.is-leaving{opacity:0;pointer-events:none}
+@keyframes meuniBootSafety{to{visibility:hidden;pointer-events:none}}
 .meuni-loader-logo{width:112px;height:112px}
 .meuni-loader-logo .lg-sq{fill:var(--logo-sq,#17261F)}
 .meuni-loader-logo .lg-t{fill:none;stroke:var(--logo-ma,#F6F2E8);stroke-opacity:.2;stroke-width:2.4}
