@@ -135,18 +135,24 @@ body[data-theme="moulin"] #updatesPage .updates-list > article.update-entry{padd
 
 /* iPhone : pas de grossissement automatique du texte (rotation, petits écrans) */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-/* Téléphone : barre d’outils du tableur sur une ligne, « Calculatrice » écrite en toutes lettres.
-   Elle occupe toute la largeur et les boutons sont répartis à intervalles égaux.
-   Seulement sur les écrans trop étroits, la Calculatrice passe en icône seule. */
+/* Téléphone : barre d’outils du tableur sur une ligne, boutons pleine hauteur (44 px), « Calculatrice »
+   écrite en toutes lettres et intervalles égaux. Quand elle reste collée en haut, elle descend sous la zone
+   floutée de Safari. Seulement sur les écrans trop étroits, la Calculatrice passe en icône seule. */
 @media(max-width:560px){
-body[data-theme="moulin"] #sheetPage .sheet-bar{display:flex!important;width:100%!important;max-width:100%!important;justify-content:space-between!important;gap:0!important;padding:5px!important;box-sizing:border-box}
+body[data-theme="moulin"] #sheetPage .sheet-bar{display:flex!important;top:calc(24px + env(safe-area-inset-top,0px))!important;width:100%!important;max-width:100%!important;min-height:0!important;justify-content:space-between!important;gap:0!important;padding:5px!important;box-sizing:border-box}
 body[data-theme="moulin"] #sheetPage :is(.sheet-bar-left,.sheet-bar-right,.sheet-bar-file-actions){display:contents!important}
 body[data-theme="moulin"] #sheetPage .sheet-bar :is(.sheet-divider,.sheet-spacer){display:none!important}
-body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc){flex:0 0 34px!important;width:34px!important;min-width:34px!important;padding:0!important;margin:0!important;justify-content:center}
-body[data-theme="moulin"] #sheetPage #btnSheetCalc{flex:0 0 auto!important;width:auto!important;min-width:0!important;padding:0 9px!important;margin:0!important;gap:6px;justify-content:center}
+body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn{height:44px!important;min-height:44px!important;margin:0!important;border-radius:14px!important;justify-content:center}
+body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn svg{width:21px!important;height:21px!important;flex:0 0 21px!important}
+body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc){flex:0 0 37px!important;width:37px!important;min-width:37px!important;padding:0!important}
+body[data-theme="moulin"] #sheetPage #btnSheetCalc{flex:0 0 auto!important;width:auto!important;min-width:0!important;padding:0 7px!important;gap:6px;font-size:15px!important;font-weight:600}
 body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{display:inline!important}
 }
-@media(max-width:391px){body[data-theme="moulin"] #sheetPage #btnSheetCalc{flex:0 0 34px!important;width:34px!important;min-width:34px!important;padding:0!important}body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}}
+@media(max-width:399px){body[data-theme="moulin"] #sheetPage #btnSheetCalc{flex:0 0 37px!important;width:37px!important;min-width:37px!important;padding:0!important}body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}}
+/* Icône seule : boutons carrés aussi grands que la largeur le permet */
+@media(max-width:399px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 42px!important;width:42px!important;min-width:42px!important}}
+@media(max-width:369px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 38px!important;width:38px!important;min-width:38px!important}}
+@media(max-width:339px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 34px!important;width:34px!important;min-width:34px!important}}
 /* Vues du graphique sur petit écran : deux colonnes lisibles plutôt que quatre mots tronqués */
 @media(max-width:400px){.gfc-views{display:grid;grid-template-columns:1fr 1fr;border-radius:20px}.gfc-views button{font-size:14px;padding:0 6px}}
 
