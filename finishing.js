@@ -77,6 +77,10 @@
     var nb=byId("latestUpdateAllButton");if(nb){nb.textContent=t2("Voir","See");nb.setAttribute("aria-label",t2("Voir les nouveautés","See what’s new"));}
     document.addEventListener("change",function(e){if(e.target&&e.target.id==="viewSelect")syncViews();});
     document.addEventListener("click",function(){setTimeout(syncBottom,0);});
+    // Barre du bas : l'onglet touché prend sa couleur dès l'appui, sans attendre que la page soit dessinée.
+    var nav=document.querySelector(".bottom-nav");
+    if(nav)nav.addEventListener("pointerdown",function(e){var b=e.target.closest(".bottom-nav-btn");if(!b||e.button>0)return;nav.querySelectorAll(".bottom-nav-btn").forEach(function(x){x.classList.toggle("is-active",x===b);});});
+    if(nav)nav.addEventListener("pointercancel",function(){var page=document.body.dataset.page;nav.querySelectorAll(".bottom-nav-btn").forEach(function(x){x.classList.toggle("is-active",x.dataset.page===page);});});
     window.addEventListener("gf:dashboardupdate",function(){if(!byId("gfcViews"))chartViews();syncViews();});
     window.addEventListener("gf:languagechange",function(){chartViews();});
   }

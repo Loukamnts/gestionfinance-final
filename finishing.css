@@ -135,16 +135,23 @@ body[data-theme="moulin"] #updatesPage .updates-list > article.update-entry{padd
 
 /* iPhone : pas de grossissement automatique du texte (rotation, petits écrans) */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-/* Téléphone : la barre d’outils du tableur tient sur une ligne, la Calculatrice garde son icône (nom lu par les lecteurs d’écran) */
-@media(max-width:560px){body[data-theme="moulin"] #sheetPage #btnSheetCalc{width:38px!important;min-width:38px!important;padding:0!important;justify-content:center}body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;display:block!important}}
+/* Téléphone : barre d’outils du tableur sur une ligne, « Calculatrice » écrite en toutes lettres.
+   Seulement sur les écrans trop étroits pour tout faire tenir, la Calculatrice passe en icône seule. */
+@media(max-width:560px){
+body[data-theme="moulin"] #sheetPage .sheet-bar{gap:3px!important;padding:5px!important}
+body[data-theme="moulin"] #sheetPage :is(.sheet-bar-left,.sheet-bar-right,.sheet-bar-file-actions){gap:3px!important}
+body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc){flex:0 0 34px!important;width:34px!important;min-width:34px!important;padding:0!important;justify-content:center}
+body[data-theme="moulin"] #sheetPage #btnSheetCalc{flex:0 0 auto!important;width:auto!important;min-width:0!important;padding:0 9px!important;gap:6px;justify-content:center}
+body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{display:inline!important}
+}
+@media(max-width:391px){body[data-theme="moulin"] #sheetPage #btnSheetCalc{flex:0 0 34px!important;width:34px!important;min-width:34px!important;padding:0!important}body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}}
 /* Vues du graphique sur petit écran : deux colonnes lisibles plutôt que quatre mots tronqués */
 @media(max-width:400px){.gfc-views{display:grid;grid-template-columns:1fr 1fr;border-radius:20px}.gfc-views button{font-size:14px;padding:0 6px}}
 
-/* Barre du bas : petit rebond quand on change d'onglet, enfoncement léger au toucher */
-@keyframes gfNavBounce{0%{transform:scale(1)}30%{transform:scale(.9)}55%{transform:scale(1.06)}78%{transform:scale(.98)}100%{transform:scale(1)}}
-@keyframes gfNavIcon{0%{transform:none}35%{transform:translateY(2px) scale(.86)}65%{transform:translateY(-3px) scale(1.14)}100%{transform:none}}
-body[data-theme="moulin"] .bottom-nav-btn{transition:transform .14s ease,background-color .2s ease,color .2s ease;-webkit-tap-highlight-color:transparent}
-body[data-theme="moulin"] .bottom-nav-btn:active{transform:scale(.92)}
-body[data-theme="moulin"] .bottom-nav-btn.is-active{animation:gfNavBounce .48s cubic-bezier(.34,1.56,.64,1)}
-body[data-theme="moulin"] .bottom-nav-btn.is-active svg{animation:gfNavIcon .52s cubic-bezier(.34,1.56,.64,1)}
-@media(prefers-reduced-motion:reduce){body[data-theme="moulin"] .bottom-nav-btn,body[data-theme="moulin"] .bottom-nav-btn.is-active,body[data-theme="moulin"] .bottom-nav-btn.is-active svg{animation:none;transition:none}}
+/* Barre du bas : réponse immédiate au toucher, sans rebond. La couleur passe en ~0,1 s,
+   l'icône s'enfonce à peine pendant l'appui. Le survol ne reste plus « collé » sur iPhone. */
+body[data-theme="moulin"] .bottom-nav-btn{transition:transform .12s ease-out,background-color .1s ease-out,color .1s ease-out;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body[data-theme="moulin"] .bottom-nav-btn:active{transform:scale(.96);transition-duration:.06s}
+body[data-theme="moulin"] .bottom-nav-btn.is-active svg{transform:none}
+@media(hover:none){body[data-theme="moulin"] .bottom-nav-btn:hover:not(.is-active){background:transparent;color:var(--muted)}}
+@media(prefers-reduced-motion:reduce){body[data-theme="moulin"] .bottom-nav-btn{transition:none}body[data-theme="moulin"] .bottom-nav-btn:active{transform:none}}
