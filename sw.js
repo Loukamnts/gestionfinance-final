@@ -7,7 +7,7 @@ self.addEventListener("push", function (event) {
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = { body: event.data ? event.data.text() : "" }; }
   var url = typeof data.url === "string" && data.url.charAt(0) === "/" ? data.url : "/tableur";
   event.waitUntil(self.registration.showNotification(String(data.title || "Meuniance"), {
-    body: String(data.body || "Pense à mettre ton tableur à jour."),
+    body: String(data.body || "Pense à noter tes dépenses."),
     icon: "/app-icon-180.png",
     badge: "/app-icon-180.png",
     tag: "meuniance-rappel",

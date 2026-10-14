@@ -1227,6 +1227,44 @@
     return wb;
   }
 
+  // Mêmes tableaux que buildWorkbook() relu par XLSX.utils.sheet_to_json(header:1, raw:true), mais sans
+  // la bibliothèque Excel : l'accueil s'affiche sans attendre son téléchargement (930 Ko).
+  function buildTables() {
+    return state.sheets.map((sheet) => {
+      const cache = recompute(sheet.cells);
+      const hasRowLabels = sheet.rowHeaders && sheet.rowHeaders.some(h => h);
+      const dataCols = new Set(); let maxR = -1;
+      for (const k in sheet.cells) {
+        const raw = sheet.cells[k].raw;
+        if (raw === undefined || raw === null || raw === "") continue;
+        const parts = k.split(","); const r = +parts[0], c = +parts[1];
+        dataCols.add(c); if (r > maxR) maxR = r;
+      }
+      const cols = dataCols.size ? Math.max(...dataCols) + 1 : 0;
+      const rows = maxR + 1;
+      if (rows <= 0 || cols <= 0) return { name: sheet.name, aoa: [] };
+      const off = hasRowLabels ? 1 : 0, aoa = [];
+      const headerRow = hasRowLabels ? [""] : [];
+      for (let c = 0; c < cols; c++) headerRow[c + off] = sheet.headers[c] || (c < 12 ? MONTH_HEADERS[c] : colToLetter(c));
+      aoa.push(headerRow);
+      for (let r = 0; r < rows; r++) {
+        const row = hasRowLabels ? [sheet.rowHeaders[r] || String(r + 1)] : [];
+        let filled = hasRowLabels;
+        for (let c = 0; c < cols; c++) {
+          const k = cellKey(r, c), cell = sheet.cells[k] || { raw: "" }, res = cache[k];
+          let v;
+          if (res && typeof res.value === "number" && Number.isFinite(res.value)) v = res.value;
+          else if (cell.raw && cell.raw[0] === "=") v = undefined;
+          else v = cell.raw || "";
+          row[c + off] = v;
+          if (v !== undefined && v !== "") filled = true;
+        }
+        if (filled) aoa.push(row);
+      }
+      return { name: sheet.name, aoa };
+    });
+  }
+
   // ═════════════════════ Calculatrice modale ═════════════════════
   function openCalculator() {
     if (document.querySelector(".sheet-modal-overlay")) return;
@@ -1788,7 +1826,7 @@
     }
   }
 
-  window.FinanceSheet = { init, recompute, saveNow, openCalculator, openStartingBalance, getSnapshot, loadSnapshot, switchFinancialOwner, buildWorkbook, importXlsx, exportXlsx, loadDemoData, clearDemoDataFS, updateSheetBalanceCards, getObjectiveSources, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
+  window.FinanceSheet = { init, recompute, saveNow, openCalculator, openStartingBalance, getSnapshot, loadSnapshot, switchFinancialOwner, buildWorkbook, buildTables, importXlsx, exportXlsx, loadDemoData, clearDemoDataFS, updateSheetBalanceCards, getObjectiveSources, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
   // Hook appelé après import / édition / création de feuille pour rafraîchir le dashboard.
   let dashTimer = null;
   function notifyDashboard() {

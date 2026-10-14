@@ -1070,8 +1070,8 @@ body.sheet-modal-open { position:fixed; top:var(--sheet-modal-scroll-y,0px); lef
   .sheet-bar #btnSheetCalc .lbl { display:inline !important; }
 }
 
-/* Le rail reste devant le tableur, tandis que menus et dialogues le recouvrent. */
-#sheetPage .sheet-bar { z-index:200; }
+/* Le rail reste devant le tableur, mais sous l’en-tête (180) : le menu du profil et les dialogues le recouvrent. */
+#sheetPage .sheet-bar { z-index:170; }
 
 /* Override final des variantes historiques : rail compact, sans halo et
    contrôles suffisamment grands pour rester lisibles sur chaque thème. */

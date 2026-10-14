@@ -54,7 +54,7 @@
     fl.htmlFor="gfrDays";fl.append(el("strong","",t2("Me prévenir après","Remind me after")),el("small","",t2("sans aucune saisie","with no entry")));
     [[3,t2("3 jours","3 days")],[7,t2("1 semaine","1 week")],[14,t2("2 semaines","2 weeks")],[30,t2("1 mois","1 month")]].forEach(function(o){var op=new Option(o[1],String(o[0]));op.selected=o[0]===days;sel.append(op);});
     freq.append(fl,sel);freq.hidden=!on;
-    var acts=el("div","gfr-acts"),test=el("button","gfh-link",t2("Envoyer un rappel de test","Send a test reminder"));test.type="button";acts.append(test);acts.hidden=!on;
+    var acts=el("div","gfr-acts"),test=el("button","gfh-link",t2("Essayer une notification","Try a notification"));test.type="button";acts.append(test);acts.hidden=!on;
     var msg=el("p","gfr-msg");msg.setAttribute("role","status");
     var blocked="";
     if(!account().user)blocked=t2("Connecte-toi pour recevoir des rappels : ils sont liés à ton compte.","Sign in to get reminders: they are linked to your account.");
@@ -69,7 +69,7 @@
       busy=false;render();
     });
     sel.addEventListener("change",async function(){if(busy)return;busy=true;msg.textContent="";try{await enable(Number(sel.value));msg.textContent=t2("C’est noté.","Saved.");}catch(e){msg.textContent=errorText(e);}busy=false;});
-    test.addEventListener("click",async function(){try{var reg=await registration();await reg.showNotification("Meuniance",{body:t2("Les rappels fonctionnent. Tu seras prévenu si rien n’est saisi pendant un moment.","Reminders work. You’ll be told if nothing is entered for a while."),icon:"/app-icon-180.png",tag:"meuniance-test"});}catch(e){msg.textContent=errorText(e);}});
+    test.addEventListener("click",async function(){try{var reg=await registration();await reg.showNotification("Meuniance",{body:t2("Les rappels sont bien activés.","Reminders are on."),icon:"/app-icon-180.png",tag:"meuniance-test"});}catch(e){msg.textContent=errorText(e);}});
     box.replaceChildren(h,intro,row,freq,acts,msg);
   }
   function schedule(){clearTimeout(schedule.t);schedule.t=setTimeout(function(){render().catch(function(){});},150);}

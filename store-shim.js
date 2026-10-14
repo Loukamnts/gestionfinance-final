@@ -34,6 +34,21 @@
   })();
 
   try { accountSeen = nativeStore && nativeStore.getItem("gf-private-v1:account-seen") === "1"; } catch (e) {}
+  // Ouverture instantanée : si une session Supabase est déjà enregistrée sur cet appareil, on ouvre
+  // tout de suite le coffre local de ce compte (au lieu du coffre vide « sans compte ») en attendant que
+  // Supabase confirme la session. Si elle n'est plus valide, la déconnexion rebascule sur « sans compte ».
+  try {
+    if (nativeStore && accountSeen) {
+      for (var i = 0; i < nativeStore.length; i++) {
+        var name = nativeStore.key(i);
+        if (!/^sb-[a-z0-9]+-auth-token$/.test(String(name))) continue;
+        var session = JSON.parse(nativeStore.getItem(name) || "null");
+        var uid = session && session.user && session.user.id;
+        if (/^[0-9a-f-]{36}$/i.test(String(uid || ""))) financialOwner = String(uid).toLowerCase();
+        break;
+      }
+    }
+  } catch (e) {}
   function privateName(k) { return privateKeys[k] ? "gf-private-v1:" + financialOwner + ":" + k : k; }
   function rawGet(k) { if (nativeStore) { try { return nativeStore.getItem(k); } catch (e) {} } return Object.prototype.hasOwnProperty.call(mem,k) ? mem[k] : null; }
   function rawSet(k,v) { if (nativeStore) { try { nativeStore.setItem(k,String(v)); return; } catch (e) {} } mem[k]=String(v); }

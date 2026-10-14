@@ -282,3 +282,8 @@ body.gf-hide-amounts .gfb-row b{filter:blur(7px)}
 .gfr-freq select{flex:0 0 auto;width:auto}
 .gfb-opt span{font:400 15px/1.4 var(--font-body)!important;color:var(--text)!important}
 .gfb-mode legend{color:var(--text)}
+/* Mois ouvert depuis le bilan : bref surlignage pour montrer ce qui a changé */
+@keyframes gfhFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent-fill,#E3A82B) 70%,transparent)}100%{box-shadow:0 0 0 12px transparent}}
+.gfh-mon.is-flash{animation:gfhFlash .9s ease-out 2}
+@media(prefers-reduced-motion:reduce){.gfh-mon.is-flash{animation:none}}
+.gfh-topbar{scroll-margin-top:16px}

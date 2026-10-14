@@ -22,9 +22,8 @@ async function newVapidKeys() {
 function message(days: number) {
   return {
     title: "Meuniance",
-    body: days >= 14
-      ? "Ton tableur t’attend depuis un moment. Deux minutes suffisent pour le remettre à jour."
-      : "Pense à noter tes dernières dépenses pour garder ton solde juste.",
+    // Court : une notification n'affiche que deux lignes sur un téléphone.
+    body: days >= 14 ? "Ton tableur t’attend. 2 minutes suffisent." : "Pense à noter tes dernières dépenses.",
     url: "/tableur",
   };
 }

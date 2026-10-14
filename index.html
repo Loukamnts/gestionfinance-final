@@ -48,15 +48,15 @@
         chart:function(){ return typeof window.Chart==="function"?Promise.resolve(true):load("chart"); },
         xlsx:function(){ return (window.XLSX&&window.XLSX.utils)?Promise.resolve(true):load("xlsx"); }
       };
-      // Préchargement discret une fois la page prête, pour que rien ne traîne au clic.
+      // Préchargement discret des graphiques une fois la page prête. Le module Excel (le plus lourd)
+      // n'est chargé qu'au moment d'importer ou d'exporter.
       function warm(){ var idle=window.requestIdleCallback||function(fn){ return setTimeout(fn,1200); };
-        idle(function(){ window.GFVendors.chart().catch(function(){}); });
-        idle(function(){ window.GFVendors.xlsx().catch(function(){}); }); }
+        idle(function(){ window.GFVendors.chart().catch(function(){}); }); }
       if(document.readyState==="complete") warm(); else window.addEventListener("load",warm);
     })();
   </script>
-  <script src="store-shim.js?v=20261013-r1"></script>
-  <link rel="stylesheet" href="sheet.css?v=20260923-r5" />
+  <script src="store-shim.js?v=20261014-r2"></script>
+  <link rel="stylesheet" href="sheet.css?v=20261014-r3" />
   <link rel="stylesheet" href="onboarding.css?v=20261013-r1" />
   <style>
     /* Anti-zoom mobile : empêche le zoom automatique sur les inputs */
@@ -1819,10 +1819,10 @@
   </style>
   <link rel="stylesheet" href="sharing.css?v=20260923-r2">
   <link rel="stylesheet" href="ui-polish.css?v=20261003-r1">
-  <link rel="stylesheet" href="theme-directions.css?v=20261013-r1">
+  <link rel="stylesheet" href="theme-directions.css?v=20261014-r3">
   <link rel="stylesheet" href="plans.css?v=20261013-r1">
-  <link rel="stylesheet" href="home.css?v=20261014-r3">
-  <link rel="stylesheet" href="sheet-balances.css?v=20261013-r3">
+  <link rel="stylesheet" href="home.css?v=20261014-r4">
+  <link rel="stylesheet" href="sheet-balances.css?v=20261014-r4">
   <link rel="stylesheet" href="finishing.css?v=20261013-r7">
   <link rel="stylesheet" href="menus.css?v=20261013-r2">
   <link rel="stylesheet" href="discover.css?v=20261013-r3">
@@ -1830,6 +1830,14 @@
   <script src="ui-controls.js?v=20260923-r10" defer></script>
 </head>
 <body data-theme="moulin" data-palette="ble" data-mode="dark" data-page="dashboard" data-interface="classic">
+  <script>
+    /* Mode clair/sombre et interface appliqués dès la première image (évite un écran sombre puis clair à l'ouverture). */
+    (function(){try{var s=window.localStorage,m=s.getItem("personalFinanceDashboard.mode"),i=s.getItem("personalFinanceDashboard.interface");
+      document.body.dataset.mode=m==="dark"||m==="light"?m:(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+      if(i==="studio")document.body.dataset.interface="studio";}catch(e){}})();
+  </script>
+  <!-- Écran d’ouverture : visible dès la première image, retiré quand tes chiffres sont prêts (meuni-loader.js). -->
+  <div class="meuni-loader is-boot" id="meuniBoot" role="status" aria-live="polite"><svg class="meuni-loader-logo srch" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect class="lg-sq" width="28" height="28" rx="7.5"/><circle class="lg-t" cx="14" cy="14" r="9.4"/><g class="ml-spin"><circle class="lg-a" cx="14" cy="14" r="9.4" transform="rotate(-90 14 14)"/></g><g class="ml-gw"><g transform="rotate(30 14 14)"><path class="lg-s" d="M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z"/><path class="lg-c" d="M14 9.6c-.4 2.8-.4 5.8 0 8.6"/></g></g></svg><span class="meuni-loader-text">Connexion…</span></div>
   <div class="loader" id="loader" aria-live="polite" aria-label="Chargement"><div class="spinner"></div></div>
   <div class="message" id="messageBox" role="alert" aria-live="polite" aria-atomic="true">
     <span class="message-text" id="messageText"></span>
@@ -4921,7 +4929,9 @@ function inferColumnType(header, samples){
 
           return false;
         }
-        if(typeof window.XLSX === "undefined" || !window.XLSX?.utils?.sheet_to_json){
+        // Lecture directe du tableur : pas besoin du module Excel pour afficher l'accueil.
+        const tables = window.FinanceSheet.buildTables ? window.FinanceSheet.buildTables() : null;
+        if(!tables && (typeof window.XLSX === "undefined" || !window.XLSX?.utils?.sheet_to_json)){
           if(window.GFVendors){
             window.GFVendors.xlsx().then(function(){ syncDashboardFromFinanceSheet(opts); }).catch(function(){
               if(!silent) showMessage("Le module de lecture Excel n'a pas pu être préparé. Vérifiez votre connexion internet.");
@@ -4931,13 +4941,17 @@ function inferColumnType(header, samples){
           if(!silent) showMessage("Le module de lecture Excel n'a pas pu être préparé. Vérifiez votre connexion internet.");
           return false;
         }
-        const wb = window.FinanceSheet.buildWorkbook();
+        const wb = tables ? { SheetNames: tables.map(t => t.name), Sheets: {}, tables: tables } : window.FinanceSheet.buildWorkbook();
         if(!wb || !wb.SheetNames || !wb.SheetNames.length){ applyFinancePagesToState([], { source: "tableur", reset: true }); populateMonthSelect(); updateInterface(); if(!silent) showMessage("Le tableur est vide. Saisis des données dans l'onglet Tableur puis clique sur Recharger."); return false; }
         const pages = [];
-        wb.SheetNames.forEach((sheetName) => {
-          const ws = wb.Sheets[sheetName];
-          if(!ws || !ws["!ref"]) return;
-          const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, blankrows: false });
+        wb.SheetNames.forEach((sheetName, sheetIndex) => {
+          let aoa;
+          if(wb.tables){ aoa = wb.tables[sheetIndex].aoa; }
+          else {
+            const ws = wb.Sheets[sheetName];
+            if(!ws || !ws["!ref"]) return;
+            aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, blankrows: false });
+          }
           if(!aoa || aoa.length < 2) return;
           const headers = aoa[0] || [];
           // Détection des en-têtes qui sont des mois (layout "mois en colonnes")
@@ -5269,7 +5283,7 @@ function inferColumnType(header, samples){
     }
     init();
   </script>
-  <script src="sheet.js?v=20261014-r2"></script>
+  <script src="sheet.js?v=20261014-r3"></script>
   <script src="onboarding.js?v=20261014-r1"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
   <script src="friends.js?v=20261014-r1"></script>
@@ -5780,7 +5794,9 @@ function inferColumnType(header, samples){
       window.__gfSuppressSync = false;
       syncState.pushing = false; syncState.pulling = false; syncState.suppressPush = false;
       var sheet = getFinanceSheet();
-      if(sheet && sheet.switchFinancialOwner) sheet.switchFinancialOwner(user.id);
+      // Déjà ouvert au démarrage sur le coffre de ce compte : rien à recharger.
+      if(safeStore.financialOwner() === String(user.id).toLowerCase()) safeStore.setFinancialOwner(user.id);
+      else if(sheet && sheet.switchFinancialOwner) sheet.switchFinancialOwner(user.id);
       else safeStore.setFinancialOwner(user.id);
     }
     syncState.userId = user.id;
@@ -5789,6 +5805,7 @@ function inferColumnType(header, samples){
     syncState.scheduledPull = setTimeout(async function(){
       syncState.scheduledPull = null;
       var current = getUser();
+      try{
       if(!current || current.id !== user.id || !navigator.onLine) return;
       if(syncState.dirty){ await pushToCloud(); return; }
       var pulled = await pullFromCloud();
@@ -5805,6 +5822,7 @@ function inferColumnType(header, samples){
         updateSyncStatus();
         await pushToCloud();
       }else { safeStore.discardAnonymousClaim(); if(pulled === false) updateSyncStatus(); }
+      }finally{ window.dispatchEvent(new Event("gf:syncready")); }
     }, typeof delay === "number" ? delay : 500);
   }
 
@@ -5837,7 +5855,8 @@ function inferColumnType(header, samples){
       var detail = event && event.detail ? event.detail : {};
       updateSyncStatus();
       if(detail.user) scheduleAccountSync(detail.user, detail.event === "SIGNED_IN" ? 350 : 650);
-      else if(detail.event === "SIGNED_OUT") clearAccountSync();
+      // Session enregistrée mais plus valide au démarrage : on referme le coffre ouvert d'avance.
+      else if(detail.event === "SIGNED_OUT" || (detail.event === "INITIAL_SESSION" && safeStore.financialOwner() !== "anonymous")) clearAccountSync();
     });
     document.addEventListener("visibilitychange", function(){ if(!document.hidden) refreshFromCloud(); });
     window.addEventListener("focus", refreshFromCloud);
@@ -5860,13 +5879,13 @@ function inferColumnType(header, samples){
 })();
 </script>
   <script src="objectives.js?v=20261014-r1"></script>
-  <script src="meuni-loader.js?v=20261013-r1" defer></script>
+  <script src="meuni-loader.js?v=20261014-r3" defer></script>
   <script src="ios-fix.js?v=20261013-r2" defer></script>
   <script src="plans.js?v=20261014-r2" defer></script>
-  <script src="home.js?v=20261014-r2" defer></script>
+  <script src="home.js?v=20261014-r3" defer></script>
   <script src="finishing.js?v=20261014-r1" defer></script>
   <script src="bank-import.js?v=20261014-r1" defer></script>
-  <script src="reminders.js?v=20261014-r1" defer></script>
+  <script src="reminders.js?v=20261014-r2" defer></script>
   <script src="menus.js?v=20261013-r1" defer></script>
   <script src="discover.js?v=20261013-r2" defer></script>
 </body>
