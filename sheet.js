@@ -1271,7 +1271,9 @@
     modal.appendChild(document.createElement("h3")).textContent = "Calculatrice";
     modal.appendChild(display); modal.appendChild(grid); modal.appendChild(actions);
     overlay.appendChild(modal); overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
-    function close() { overlay.remove(); unlockModalBackground(); }
+    function onKey(e) { if (e.key === "Escape") { e.preventDefault(); close(); } }
+    function close() { document.removeEventListener("keydown", onKey, true); overlay.remove(); unlockModalBackground(); }
+    document.addEventListener("keydown", onKey, true);
     document.body.appendChild(overlay); lockModalBackground();
   }
 
