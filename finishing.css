@@ -141,7 +141,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 @media(max-width:560px){
 body[data-theme="moulin"] #sheetPage .sheet-bar{display:flex!important;top:calc(24px + env(safe-area-inset-top,0px))!important;width:100%!important;max-width:100%!important;min-height:0!important;justify-content:space-between!important;gap:0!important;padding:5px!important;box-sizing:border-box}
 body[data-theme="moulin"] #sheetPage :is(.sheet-bar-left,.sheet-bar-right,.sheet-bar-file-actions){display:contents!important}
-body[data-theme="moulin"] #sheetPage .sheet-bar :is(.sheet-divider,.sheet-spacer){display:none!important}
+body[data-theme="moulin"] #sheetPage .sheet-bar .sheet-spacer{display:none!important}
+body[data-theme="moulin"] #sheetPage .sheet-bar .sheet-divider,body[data-theme="moulin"] #sheetPage .sheet-bar-right::before{content:"";display:block!important;flex:0 0 1px;width:1px;height:24px;margin:0!important;background:var(--line-strong,var(--line));border:0;border-radius:1px}
 body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn{height:44px!important;min-height:44px!important;margin:0!important;border-radius:14px!important;justify-content:center}
 body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn svg{width:21px!important;height:21px!important;flex:0 0 21px!important}
 body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc){flex:0 0 37px!important;width:37px!important;min-width:37px!important;padding:0!important}
