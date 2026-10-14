@@ -46,17 +46,17 @@ test('Every script is integrity checked and every local digest matches the built
     const src=tag[1].match(/\bsrc="([^"?]+)(?:[^" ]*)"/);if(!src)continue;
     const sri=tag[1].match(/integrity="(sha384-[^"]+)"/);assert(sri,src[1]);
     assert(tag[1].includes('crossorigin="anonymous"'));
-    if(src[1].startsWith('https:')){
-      assert.equal(src[1],'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js');continue;
-    }
+    assert(!src[1].startsWith('https:'),'script tiers : '+src[1]);
     const bytes=fs.readFileSync(path.join(root,'dist',src[1]));
     assert.equal(sri[1],'sha384-'+crypto.createHash('sha384').update(bytes).digest('base64'));
     new vm.Script(bytes.toString());
   }
 });
-test('Fonts, Chart.js and Supabase are served locally',()=>{
-  assert(!/fonts\.googleapis|fonts\.gstatic|cdn\.jsdelivr/.test(published));
-  for(const file of ['vendor/fonts.css','vendor/chart.js','vendor/supabase.js'])assert(published.includes(file),file);
+test('Fonts, Chart.js, Supabase and SheetJS are served locally',()=>{
+  assert(!/fonts\.googleapis|fonts\.gstatic|cdn\.jsdelivr|cdn\.sheetjs/.test(published));
+  for(const file of ['vendor/fonts.css','vendor/chart.js','vendor/supabase.js','vendor/xlsx.js'])assert(published.includes(file),file);
+  const xlsx=fs.readFileSync(path.join(root,'dist/vendor/xlsx.js'));
+  assert.equal('sha384-'+crypto.createHash('sha384').update(xlsx).digest('base64'),'sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT');
 });
 test('The branded 404 page is included with a working route back to the app',()=>{
   const page=fs.readFileSync(path.join(root,'dist/404.html'),'utf8');
@@ -88,10 +88,9 @@ test('All direct dependency versions are exact and package lock is present',()=>
   for(const version of Object.values({...pkg.dependencies,...pkg.devDependencies}))assert(/^\d+\.\d+\.\d+$/.test(version));
   assert(fs.existsSync(path.join(root,'package-lock.json')));
 });
-test('Dialog controls use external listeners rather than CSP exemptions',()=>{
-  assert.equal([...html.matchAll(/data-dialog-target=/g)].length,2);
-  const source=fs.readFileSync(path.join(root,'dist/app/dialog-actions.js'),'utf8');
-  assert(source.includes('instanceof HTMLDialogElement'));
+test('No inline event handlers and no leftover dialog shim',()=>{
+  assert(!/\son[a-z]+\s*=/i.test(html.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,'')));
+  assert(!fs.existsSync(path.join(root,'dist/app/dialog-actions.js')));
 });
 test('Friend removal uses one atomic RPC and never falls back to direct deletes',async()=>{
   const source=fs.readFileSync(path.join(root,'friends.js'),'utf8');

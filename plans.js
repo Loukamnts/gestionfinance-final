@@ -79,6 +79,7 @@
       var btn=el("button","gfs-btn"+(plan.featured&&!isCurrent?" is-primary":""));btn.type="button";
       if(isCurrent){btn.textContent=t2("Formule actuelle","Current plan");btn.disabled=true;}
       else if(plan.id==="free"){btn.textContent=(RANK[state.plan]>0)?t2("Gérer mon abonnement","Manage my plan"):tr(plan.cta);btn.addEventListener("click",function(){if(options.onChoose&&RANK[state.plan]===0){options.onChoose("free");return;}manage();});}
+      else if(!BILLING.checkout[plan.id]){btn.textContent=t2("Bientôt disponible","Coming soon");btn.disabled=true;btn.classList.add("is-soon");}
       else{btn.textContent=tr(plan.cta);btn.addEventListener("click",function(){(options.onChoose||startCheckout)(plan.id);});}
       card.append(btn);grid.append(card);
     });
@@ -153,7 +154,7 @@
     else if(RANK[state.plan]>0){var m=el("button","gfs-btn is-inline",t2("Gérer","Manage"));m.type="button";m.addEventListener("click",manage);current.append(m);}
     var plans=el("div");renderPlans(plans);
     var nodes=[back,head,current];
-    if(!BILLING.enforce){var note=el("p","gfs-note");var b=el("strong","",t2("Période de lancement.","Launch period."));note.append(b,document.createTextNode(t2(" Toutes les fonctions sont ouvertes à tout le monde. Les formules s’appliqueront à l’ouverture des paiements, et tu seras prévenu avant."," Every feature is open to everyone. Plans will apply once payments open, and you will be told beforehand.")));nodes.push(note);}
+    if(!BILLING.enforce){var note=el("p","gfs-note");var b=el("strong","",t2("Période de lancement.","Launch period."));note.append(b,document.createTextNode(t2(" Les formules Plus et Pro ne sont pas encore en vente : aucun paiement n’est possible et toutes les fonctions sont ouvertes gratuitement. Leur ouverture s’accompagnera de conditions générales de vente, et tu seras prévenu avant."," Plus and Pro are not on sale yet: no payment is possible and every feature is open for free. They will come with terms of sale, and you will be told beforehand.")));nodes.push(note);}
     var promise=el("p","gfs-promise");promise.append(document.createTextNode(t2("Même en payant, tes données restent ","Even when paying, your data stays ")),el("em","",t2("les tiennes","yours")),document.createTextNode(t2(". Aucune pub, aucun suivi, aucune revente.",". No ads, no tracking, no resale.")));
     nodes.push(plans,promise);
     panel.replaceChildren.apply(panel,nodes);

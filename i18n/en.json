@@ -196,7 +196,9 @@
     "pro4": "Temporary access that expires on its own",
     "pro5": "Goal progress history",
     "proCta": "Upgrade to Pro",
-    "pricingNote": "No commitment, cancel anytime. Even when you pay, your data stays yours: no ads, no tracking, no resale.",
-    "perMonth": "per month"
+    "pricingNote": "Plus and Pro are not on sale yet: during launch, every feature is open for free. Indicative prices, no commitment once open. Your data stays yours: no ads, no tracking, no resale.",
+    "perMonth": "per month",
+    "soonCta": "Coming soon",
+    "footerLegal": "Legal notice"
   }
 }

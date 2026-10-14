@@ -65,13 +65,16 @@ html = html.replace(/\s*<link[^>]+https:\/\/fonts\.(?:googleapis|gstatic)\.com[^
 html = html.replace('</head>','<link rel="stylesheet" href="vendor/fonts.css">\n</head>');
 html = html.replace(/https:\/\/cdn\.jsdelivr\.net\/npm\/chart\.js@[^" ]+/g,'vendor/chart.js');
 html = html.replace(/https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@[^" ]+/g,'vendor/supabase.js');
-html = html.replace(/<script src="https:\/\/cdn\.sheetjs\.com\/[^" ]+"><\/script>/,
-  '<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>');
-// Chargement différé du module Excel : version épinglée + empreinte d'intégrité.
-html = html.replace(/https:\/\/cdn\.sheetjs\.com\/xlsx-0\.20\.2\/package\/dist\/xlsx\.full\.min\.js/g,
-  'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js');
-html = html.replace('var integrities={xlsx:""};',
-  'var integrities={xlsx:"sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT"};');
+// SheetJS servi par le site (aucun appel à un serveur tiers). Le fichier versionné doit être
+// identique, octet pour octet, à la version officielle 0.20.3 : sinon la construction échoue.
+const SHEETJS_OFFICIAL = 'sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT';
+const sheetjs = fs.readFileSync(path.join(root,'third_party/sheetjs/xlsx-0.20.3.full.min.js'));
+if (integrity(sheetjs) !== SHEETJS_OFFICIAL) throw new Error('SheetJS ne correspond pas à la version officielle 0.20.3');
+put('vendor/xlsx.js',sheetjs);
+copy('third_party/sheetjs/LICENSE','vendor/licenses/sheetjs.txt');
+html = html.replace(/<script src="https:\/\/cdn\.sheetjs\.com\/[^" ]+"><\/script>/,'<script src="vendor/xlsx.js"></script>');
+html = html.replace(/https:\/\/cdn\.sheetjs\.com\/xlsx-[0-9.]+\/package\/dist\/xlsx\.full\.min\.js/g,'vendor/xlsx.js');
+html = html.replace('var integrities={xlsx:""};','var integrities={xlsx:"'+SHEETJS_OFFICIAL+'"};');
 let inlineCount = 0;
 html = html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi,(tag,attrs,code)=>{
   if (/\bsrc\s*=/.test(attrs)) return tag;
@@ -81,17 +84,6 @@ html = html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi,(tag,attrs,code)=>
   put(file,code);
   return `<script src="${file}"></script>`;
 });
-// Remplace les gestionnaires des fenêtres légales restantes sans autoriser unsafe-inline.
-html = html.replace(/onclick="document\.getElementById\('(legalModal|privacyModal)'\)\.(showModal|close)\(\)"/g,
-  (_,id,method)=>`data-dialog-target="${id}" data-dialog-action="${method}"`);
-put('app/dialog-actions.js',`document.addEventListener('click',function(event){
-  var button=event.target.closest('[data-dialog-target]'); if(!button)return;
-  var dialog=document.getElementById(button.dataset.dialogTarget);
-  if(!(dialog instanceof HTMLDialogElement))return;
-  if(button.dataset.dialogAction==='showModal')dialog.showModal();
-  else if(button.dataset.dialogAction==='close')dialog.close();
-});\n`);
-html = html.replace('</body>','<script src="app/dialog-actions.js"></script>\n</body>');
 if (/\son[a-z]+\s*=/i.test(html.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,''))) throw new Error('Inline event handler remains');
 html = html.replace(/<script\b([^>]*?)\bsrc="([^"?#]+)([^" ]*)"([^>]*)><\/script>/g,(tag,before,src,query,after)=>{
   if (/^https:/.test(src)) return tag;
@@ -100,7 +92,7 @@ html = html.replace(/<script\b([^>]*?)\bsrc="([^"?#]+)([^" ]*)"([^>]*)><\/script
   return `<script ${before}src="${src}${query}"${after} integrity="${integrity(code)}" crossorigin="anonymous"></script>`;
 });
 put('app.html',html);
-for (const page of ['presentation.html','confidentialite.html','conditions.html','404.html']) {
+for (const page of ['presentation.html','confidentialite.html','conditions.html','mentions-legales.html','404.html']) {
   if (fs.existsSync(path.join(root,page))) copy(page);
 }
 // La page de présentation charge les modules publics : les scripts reçoivent leur empreinte SRI.

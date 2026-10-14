@@ -240,8 +240,6 @@ body:has(dialog[open]),body:has(.sheet-modal-overlay),body:has(.chart-detail-mod
 @media (max-width:560px) {
   .chart-detail-modal { align-items:center !important; justify-items:center; padding:14px; }
   .chart-detail-card { width:min(460px,100%); max-height:calc(100dvh - 28px); overflow:auto; border-bottom-left-radius:var(--radius); border-bottom-right-radius:var(--radius); }
-  .legal-modal { width:min(520px,calc(100vw - 28px)); max-height:calc(100dvh - 28px); }
-  .legal-modal-content { max-height:calc(100dvh - 28px); }
 }
 
 /* Les retours d'action sont lisibles sans cacher les actions de la page. */
