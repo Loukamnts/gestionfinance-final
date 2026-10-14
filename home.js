@@ -44,7 +44,7 @@
     b.addEventListener("click",function(){setHidden(!amountsHidden());});
     return b;
   }
-  function blocks(){var d={month:true,recap:true,where:true,goal:true,charts:true,fixed:true};try{var v=JSON.parse(lsGet(BLOCKS_KEY)||"{}");Object.keys(d).forEach(function(k){if(typeof v[k]==="boolean")d[k]=v[k];});}catch(e){}return d;}
+  function blocks(){var d={month:true,recap:true,recapPin:false,where:true,goal:true,charts:true,fixed:true};try{var v=JSON.parse(lsGet(BLOCKS_KEY)||"{}");Object.keys(d).forEach(function(k){if(typeof v[k]==="boolean")d[k]=v[k];});}catch(e){}return d;}
   function setBlock(k,on){var b=blocks();b[k]=!!on;lsSet(BLOCKS_KEY,JSON.stringify(b));schedule();}
   function exampleOn(){return lsGet(DEMO_KEY)==="1";}
   function sheetEmpty(){try{var sn=window.FinanceSheet&&window.FinanceSheet.getSnapshot&&window.FinanceSheet.getSnapshot();return !sn||!sn.sheets||!sn.sheets.some(function(x){return x.cells&&Object.keys(x.cells).some(function(k){return String(x.cells[k]&&x.cells[k].raw||"").trim()!=="";});});}catch(e){return true;}}
@@ -293,7 +293,8 @@
   }
   function recapPanel(all,bal,force){
     var R=recapMonth(all);if(!R)return null;
-    var tag=R.year+"-"+String(R.mi+1).padStart(2,"0");if(!force&&lsGet(RECAP_KEY)===tag)return null;
+    var pinned=blocks().recapPin;
+    var tag=R.year+"-"+String(R.mi+1).padStart(2,"0");if(!force&&!pinned&&lsGet(RECAP_KEY)===tag)return null;
     var prev=all.filter(function(m){return m.year*12+m.mi===R.year*12+R.mi-1&&!m.blank;})[0]||null;
     var rest=flow(R),cats=catMap(R),names=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a];}),top=names[0];
     var year=all.filter(function(m){return m.year===R.year&&!m.blank&&(m.salary||m.expenses||m.savings);});
@@ -304,7 +305,7 @@
     var h=el("h3","",en()?"Your "+MN_EN[R.mi]+ys+" in review":"Ton mois "+(/^[aeiou]/.test(fr)?"d’":"de ")+fr+ys);h.id="gfhRecapT";ht.append(h);
     var x=el("button","gfh-recap-x","×");x.type="button";x.setAttribute("aria-label",t2("Masquer le bilan","Hide recap"));
     x.addEventListener("click",function(){lsSet(RECAP_KEY,tag);schedule();});
-    head.append(ht,x);box.append(head);
+    head.append(ht);if(!pinned)head.append(x);box.append(head);
     var grid=el("div","gfh-recap-grid");
     function stat(label,value,note,cls){var d=el("div","gfh-recap-stat"+(cls?" "+cls:""));d.append(el("span","t",label),el("b","v gf-amount",value));if(note)d.append(el("small","",note));grid.append(d);}
     stat(t2("Reste du mois","Left this month"),(rest<0?"−":"")+eur(Math.abs(rest)),R.salary?t2("sur ","of ")+eur(R.salary)+t2(" de revenus"," income"):t2("Revenus non saisis","Income not entered"),rest<0?"is-neg":"");
@@ -326,8 +327,8 @@
     if(fact)box.append(el("p","gfh-recap-fact",fact));
     var acts=el("div","gfh-recap-acts"),see=el("button","gfh-btn",t2("Voir ","See ")+mname(R.mi)),ok=el("button","gfh-link",t2("J’ai vu","Got it"));see.type=ok.type="button";
     // Ouvre le mois sur l'accueil : le bilan se range et on remonte au mois choisi, bien visible.
-    see.addEventListener("click",function(){lsSet(RECAP_KEY,tag);flashMonth=Date.now();select(R);schedule();setTimeout(function(){var t=document.querySelector("#gfhHome .gfh-topbar");if(t)t.scrollIntoView({behavior:"smooth",block:"start"});},350);});ok.addEventListener("click",function(){lsSet(RECAP_KEY,tag);schedule();});
-    acts.append(see,ok);box.append(acts);
+    see.addEventListener("click",function(){if(!pinned)lsSet(RECAP_KEY,tag);flashMonth=Date.now();select(R);schedule();setTimeout(function(){var t=document.querySelector("#gfhHome .gfh-topbar");if(t)t.scrollIntoView({behavior:"smooth",block:"start"});},350);});ok.addEventListener("click",function(){lsSet(RECAP_KEY,tag);schedule();});
+    acts.append(see);if(!pinned)acts.append(ok);box.append(acts);
     return box;
   }
 
@@ -493,13 +494,14 @@
     var panel=document.querySelector('[data-settings-panel="appearance"]');if(!panel)return;
     var box=byId("gfhSettings");
     if(!box){box=el("section","gfh-set");box.id="gfhSettings";box.setAttribute("aria-labelledby","gfhSetTitle");var head=panel.querySelector(".settings-section-head");if(head&&head.nextSibling)panel.insertBefore(box,head.nextSibling);else panel.append(box);}
-    var b=blocks(),rows=[["month",t2("Chiffres du mois","Month figures"),t2("Revenus, dépenses et épargne sous le solde.","Income, expenses and savings under the balance.")],["recap",t2("Bilan du mois","Monthly recap"),t2("Au début de chaque mois, le résumé du mois écoulé.","At the start of each month, a summary of the month gone by.")],["where",t2("Où part ton argent","Where your money goes"),t2("Tes lignes de dépenses du mois.","Your expense rows for the month.")],["goal",t2("Objectif","Goal"),t2("La progression de ton objectif principal.","Progress of your main goal.")],["fixed",t2("Dépenses fixes","Fixed expenses"),t2("Propose les lignes qui reviennent chaque mois.","Suggests rows that come back every month.")],["charts",t2("Graphiques","Charts"),t2("Camembert, comparatif annuel, évolution.","Pie, yearly comparison, trends.")]];
+    var b=blocks(),rows=[["month",t2("Chiffres du mois","Month figures"),t2("Revenus, dépenses et épargne sous le solde.","Income, expenses and savings under the balance.")],["recap",t2("Bilan du mois","Monthly recap"),t2("Au début de chaque mois, le résumé du mois écoulé.","At the start of each month, a summary of the month gone by.")],["recapPin",t2("Bilan toujours affiché","Always show the recap"),t2("Le garde en haut de l’accueil en permanence, avec la comparaison au mois précédent.","Keeps it at the top of Home, with the comparison to the month before.")],["where",t2("Où part ton argent","Where your money goes"),t2("Tes lignes de dépenses du mois.","Your expense rows for the month.")],["goal",t2("Objectif","Goal"),t2("La progression de ton objectif principal.","Progress of your main goal.")],["fixed",t2("Dépenses fixes","Fixed expenses"),t2("Propose les lignes qui reviennent chaque mois.","Suggests rows that come back every month.")],["charts",t2("Graphiques","Charts"),t2("Camembert, comparatif annuel, évolution.","Pie, yearly comparison, trends.")]];
     var h=el("h4","",t2("Accueil","Home"));h.id="gfhSetTitle";
     var list=el("div","gfh-set-list");
     rows.forEach(function(r){
       var on=b[r[0]],row=el("div","gfh-set-row"),txt=el("div");txt.append(el("strong","",r[1]),el("small","",r[2]));
       var sw=el("button","gfh-switch");sw.type="button";sw.setAttribute("role","switch");sw.setAttribute("aria-checked",String(!!on));sw.setAttribute("aria-label",r[1]);sw.append(el("span"));
-      sw.addEventListener("click",function(){var next=sw.getAttribute("aria-checked")!=="true";sw.setAttribute("aria-checked",String(next));setBlock(r[0],next);});
+      if(r[0]==="recapPin"){row.classList.add("is-sub");if(!b.recap){sw.disabled=true;row.classList.add("is-off");}}
+      sw.addEventListener("click",function(){var next=sw.getAttribute("aria-checked")!=="true";sw.setAttribute("aria-checked",String(next));setBlock(r[0],next);if(r[0]==="recap")settingsUI();});
       row.append(txt,sw);list.append(row);
     });
     var hr=el("div","gfh-set-row"),ht=el("div");ht.append(el("strong","",t2("Masquer les montants","Hide amounts")),el("small","",t2("Floute tes chiffres pour montrer ton écran sans les dévoiler. Aussi avec l’œil à côté du solde.","Blurs your figures so you can show your screen. Also with the eye next to the balance.")));

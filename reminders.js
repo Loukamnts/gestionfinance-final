@@ -77,5 +77,46 @@
   window.addEventListener("gf:languagechange",schedule);
   document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest('[data-settings-view="appearance"]'))schedule();});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",schedule);else schedule();
-  window.GFReminders={render:schedule};
+  /* Invitation discrète : à un moment pris au hasard, sur l'accueil seulement (jamais pendant une saisie
+     dans le tableur), une petite carte propose d'activer les rappels. « Plus tard » la fait revenir dans
+     1 à 2 semaines ; une fois les rappels activés, elle ne revient plus. */
+  var INVITE="personalFinanceDashboard.reminderInvite";
+  function inviteState(){try{var v=JSON.parse(window.safeStore.getItem(INVITE)||"{}");return v&&typeof v==="object"?v:{};}catch(e){return{};}}
+  function setInviteState(v){try{window.safeStore.setItem(INVITE,JSON.stringify(v));}catch(e){}}
+  function openReminderSettings(){
+    if(window.setPage)window.setPage("settings");
+    setTimeout(function(){var hub=document.querySelector('[data-settings-view="appearance"]');if(hub)hub.click();
+      setTimeout(function(){var box=byId("gfrReminders");if(box){box.scrollIntoView({behavior:"smooth",block:"center"});box.classList.remove("is-flash");void box.offsetWidth;box.classList.add("is-flash");}},450);},120);
+  }
+  function hideInvite(){var c=byId("gfrInvite");if(!c)return;c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}
+  async function inviteEligible(){
+    if(!account().user||document.hidden||document.body.dataset.page!=="dashboard")return false;
+    // Rien d'ouvert à l'écran (fenêtre, tutoriel, repère, chargement) : on ne dérange pas.
+    if([].some.call(document.querySelectorAll("dialog[open],.sheet-modal-overlay,.tutorial-overlay,.gfd-coach,.meuni-loader"),function(e){return !e.hidden&&e.getClientRects().length>0;}))return false;
+    var a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return false;
+    if(!supported()&&!(isIOS()&&!standalone()))return false;
+    if("Notification" in window&&Notification.permission==="denied")return false;
+    var p=prefs();if(p.on&&await currentSub())return false;
+    return Date.now()>=(Number(inviteState().next)||0);
+  }
+  async function showInvite(){
+    if(byId("gfrInvite")||!(await inviteEligible()))return;
+    var ios=!supported();
+    var c=el("div","gfr-invite");c.id="gfrInvite";c.setAttribute("role","status");
+    var ic=el("span","gfr-invite-ic");ic.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+    var tx=el("div","gfr-invite-tx");tx.append(el("strong","",t2("Active les rappels","Turn on reminders")),el("span","",ios?t2("Ajoute Meuniance à ton écran d’accueil pour être prévenu si tu oublies de noter tes dépenses.","Add Meuniance to your Home Screen to be reminded when you forget to log expenses."):t2("Une notification si tu oublies de noter tes dépenses.","A notification if you forget to log your expenses.")));
+    var later=el("button","gfr-invite-later",t2("Plus tard","Later")),go=el("button","gfr-invite-go",ios?t2("Voir comment","Show me"):t2("Activer","Turn on"));later.type=go.type="button";
+    later.addEventListener("click",function(){setInviteState({next:Date.now()+(7+Math.random()*7)*864e5});hideInvite();});
+    go.addEventListener("click",function(){setInviteState({next:Date.now()+3*864e5});hideInvite();openReminderSettings();});
+    var acts=el("div","gfr-invite-acts");acts.append(later,go);c.append(ic,tx,acts);document.body.append(c);
+    requestAnimationFrame(function(){c.classList.add("is-on");});
+  }
+  // Une chance sur trois par visite, après 20 à 90 secondes passées sur l'accueil.
+  function planInvite(){
+    if(planInvite.done||Math.random()>0.34)return;planInvite.done=true;
+    setTimeout(function tryShow(){showInvite().catch(function(){});},(20+Math.random()*70)*1000);
+  }
+  if(window.MutationObserver)new MutationObserver(function(){if(document.body.dataset.page!=="dashboard")hideInvite();}).observe(document.body,{attributes:true,attributeFilter:["data-page"]});
+  window.addEventListener("authStateChanged",function(e){if(e.detail&&e.detail.user)planInvite();});
+  window.GFReminders={render:schedule,_invite:showInvite};
 })();

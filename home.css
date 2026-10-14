@@ -287,3 +287,24 @@ body.gf-hide-amounts .gfb-row b{filter:blur(7px)}
 .gfh-mon.is-flash{animation:gfhFlash .9s ease-out 2}
 @media(prefers-reduced-motion:reduce){.gfh-mon.is-flash{animation:none}}
 .gfh-topbar{scroll-margin-top:16px}
+/* Sous-réglage (dépend du réglage au-dessus) */
+.gfh-set-row.is-sub{padding-left:16px;border-left:2px solid var(--line)}
+.gfh-set-row.is-off{opacity:.5}
+.gfh-switch:disabled{cursor:not-allowed}
+
+/* Invitation aux rappels : petite carte au-dessus de la barre du bas, jamais bloquante */
+.gfr-invite{position:fixed;left:12px;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:1500;max-width:520px;margin:0 auto;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:start;padding:14px 14px 10px;border:1px solid var(--line);border-radius:20px;background:var(--panel-solid,var(--bg));color:var(--text);box-shadow:0 14px 34px rgba(0,0,0,.18);opacity:0;transform:translateY(12px);transition:opacity .22s ease-out,transform .22s ease-out}
+.gfr-invite.is-on{opacity:1;transform:none}
+.gfr-invite-ic{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--accent-fill,#E3A82B);color:var(--on-accent-fill,#17261F)}
+.gfr-invite-ic svg{width:20px;height:20px}
+.gfr-invite-tx strong{display:block;font:600 15px var(--font-body)}
+.gfr-invite-tx span{display:block;margin-top:2px;font-size:14px;line-height:1.4;color:var(--muted)}
+.gfr-invite-acts{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
+.gfr-invite-acts button{min-height:44px;padding:0 16px;border-radius:14px;font:600 15px var(--font-body);cursor:pointer}
+.gfr-invite-later{border:0;background:transparent;color:var(--text)}
+.gfr-invite-go{border:0;background:var(--accent-fill,#E3A82B);color:var(--on-accent-fill,#17261F)}
+.gfr-invite button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+@media(min-width:721px){.gfr-invite{bottom:24px;right:24px;left:auto;width:420px}}
+@keyframes gfrFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent-fill,#E3A82B) 60%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
+.gfr-set.is-flash{animation:gfrFlash .9s ease-out 2;border-radius:16px}
+@media(prefers-reduced-motion:reduce){.gfr-invite{transition:none}.gfr-set.is-flash{animation:none}}

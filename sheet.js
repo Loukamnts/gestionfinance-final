@@ -828,6 +828,18 @@
     after.addEventListener("click", function () { addYearSheet(last + 1); });
     tabsEl.appendChild(after);
   }
+  // À la première ouverture du tableur dans la session, on se place sur l'année en cours
+  // (et non sur la dernière feuille consultée, qui peut être une ancienne année).
+  let currentYearShown = false;
+  function showCurrentYearOnce() {
+    if (currentYearShown || document.body.dataset.page !== "sheet" || !state.sheets.length) return;
+    currentYearShown = true;
+    const year = String(new Date().getFullYear());
+    const sheet = state.sheets.find((x) => String(x.name).trim() === year);
+    if (sheet && sheet.id !== state.activeSheetId) switchSheet(sheet.id);
+  }
+  if (window.MutationObserver) new MutationObserver(showCurrentYearOnce).observe(document.body, { attributes: true, attributeFilter: ["data-page"] });
+
   function switchSheet(id) {
     if (state.editing) commitActiveEdit();
     if (id === state.activeSheetId) return;
@@ -1591,6 +1603,7 @@
     container.addEventListener("paste", (e) => { if (state.editing) return; const text = (e.clipboardData || window.clipboardData).getData("text"); if (text) { e.preventDefault(); paste(text); } });
     container.addEventListener("copy", (e) => { if (state.editing) return; e.clipboardData.setData("text/plain", copySelection()); e.preventDefault(); });
     notifyDashboard();
+    showCurrentYearOnce();
   }
 
   // === Charge des données démo sans persister (pour le tutoriel) ===
