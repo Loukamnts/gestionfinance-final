@@ -67,3 +67,10 @@ body[data-theme="moulin"] #sheetPage .sheet-years :is(button):focus-visible{outl
 /* « Année » posé au-dessus des feuilles, plutôt qu'à gauche */
 body[data-theme="moulin"] #sheetPage .sheet-tabs.sheet-years{flex-wrap:wrap}
 body[data-theme="moulin"] #sheetPage .sheet-years-label{flex:0 0 100%;margin:0 0 2px;font:600 12px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+/* Année active : nom bien centré, croix de suppression en pastille dans le coin (zone de toucher de 44 px) */
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab.active{position:relative;overflow:visible!important}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab.active .sheet-tab-name{padding:0 18px!important}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x{position:absolute;top:-7px;right:-7px;width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;margin:0!important;display:grid;place-items:center;padding:0;border:1px solid var(--line-strong,var(--line))!important;border-radius:50%;background:var(--panel-solid,var(--bg))!important;color:var(--text)!important;font-size:14px!important;line-height:1;opacity:1;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x::before{content:"";position:absolute;inset:-11px}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x:hover{background:var(--panel-solid,var(--bg))!important;border-color:var(--text)!important}
+body[data-theme="moulin"] #sheetPage .sheet-tabs.sheet-years{padding-top:8px!important}

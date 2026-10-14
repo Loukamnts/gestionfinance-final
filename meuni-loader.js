@@ -47,8 +47,11 @@
     function figuresReady(){try{var d=window.__gfHomeData&&window.__gfHomeData();return !!(d&&d.all&&d.all.length);}catch(e){return false;}}
     function leave(){
       if(finished)return;finished=true;
-      boot.classList.add("is-leaving");
-      setTimeout(function(){boot.hidden=true;boot.classList.remove("is-boot","is-leaving");shown=false;busy=false;},240);
+      function fade(){boot.classList.add("is-leaving");setTimeout(function(){boot.hidden=true;boot.classList.remove("is-boot","is-leaving");shown=false;busy=false;},220);}
+      // « Voilà. » seulement si l'attente a été perceptible, et brièvement : l'ouverture reste rapide.
+      if(!window.performance||performance.now()<500){fade();return;}
+      if(tx)tx.textContent=FOUND;if(svg)svg.classList.remove("srch");
+      setTimeout(fade,380);
     }
     function check(){
       if(finished||!document.body.classList.contains("gfh-ready"))return;

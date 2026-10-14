@@ -1036,6 +1036,8 @@ body[data-theme="moulin"] #dashboardPage .mobile-finance-summary.panel { padding
 .meuni-loader.is-boot{transition:opacity .22s ease-out;animation:meuniBootSafety 0s linear 10s forwards}
 .meuni-loader.is-boot.is-leaving{opacity:0;pointer-events:none}
 @keyframes meuniBootSafety{to{visibility:hidden;pointer-events:none}}
+/* Pendant l'écran d'ouverture, rien sous lui ne peut élargir la page (pas de dézoom sur téléphone) */
+html:has(#meuniBoot.is-boot:not([hidden])),body:has(#meuniBoot.is-boot:not([hidden])){overflow:clip;max-width:100vw}
 .meuni-loader-logo{width:112px;height:112px}
 .meuni-loader-logo .lg-sq{fill:var(--logo-sq,#17261F)}
 .meuni-loader-logo .lg-t{fill:none;stroke:var(--logo-ma,#F6F2E8);stroke-opacity:.2;stroke-width:2.4}
