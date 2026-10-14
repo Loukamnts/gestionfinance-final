@@ -14,15 +14,21 @@
   </url>
   <url>
     <loc>https://gestion-finance-coral.vercel.app/confidentialite</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://gestion-finance-coral.vercel.app/conditions</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://gestion-finance-coral.vercel.app/mentions-legales</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
   <url>
     <loc>https://gestion-finance-coral.vercel.app/404.html</loc>

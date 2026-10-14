@@ -31,7 +31,20 @@
   /* Exemple chargé DANS le tableur : l'accueil, les graphiques et le tableur montrent les mêmes chiffres.
      Le tableur précédent est gardé de côté et revient quand on retire l'exemple. */
   var EX_BACKUP="personalFinanceDashboard.exampleBackup";
-  function blocks(){var d={month:true,where:true,goal:true,charts:true,fixed:true};try{var v=JSON.parse(lsGet(BLOCKS_KEY)||"{}");Object.keys(d).forEach(function(k){if(typeof v[k]==="boolean")d[k]=v[k];});}catch(e){}return d;}
+  /* Mode discret : montants floutés (pour montrer son écran sans dévoiler ses chiffres). */
+  var HIDE_KEY="personalFinanceDashboard.hideAmounts";
+  function amountsHidden(){return lsGet(HIDE_KEY)==="1";}
+  function applyHidden(){document.body.classList.toggle("gf-hide-amounts",amountsHidden());}
+  function setHidden(on){lsSet(HIDE_KEY,on?"1":null);applyHidden();schedule();settingsUI();}
+  function eyeButton(){
+    var on=amountsHidden(),b=el("button","gfh-eye");b.type="button";b.setAttribute("aria-pressed",String(on));
+    b.setAttribute("aria-label",on?t2("Afficher les montants","Show amounts"):t2("Masquer les montants","Hide amounts"));b.title=b.getAttribute("aria-label");
+    b.innerHTML=on?'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A9.8 9.8 0 0 1 12 5c5 0 8.6 4.3 9.6 6.4a1.4 1.4 0 0 1 0 1.2 13 13 0 0 1-2.4 3.2M6.6 6.6A13.4 13.4 0 0 0 2.4 11.4a1.4 1.4 0 0 0 0 1.2C3.4 14.7 7 19 12 19a9.6 9.6 0 0 0 5.4-1.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      :'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.4 11.4C3.4 9.3 7 5 12 5s8.6 4.3 9.6 6.4a1.4 1.4 0 0 1 0 1.2C20.6 14.7 17 19 12 19s-8.6-4.3-9.6-6.4a1.4 1.4 0 0 1 0-1.2Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.9"/></svg>';
+    b.addEventListener("click",function(){setHidden(!amountsHidden());});
+    return b;
+  }
+  function blocks(){var d={month:true,recap:true,where:true,goal:true,charts:true,fixed:true};try{var v=JSON.parse(lsGet(BLOCKS_KEY)||"{}");Object.keys(d).forEach(function(k){if(typeof v[k]==="boolean")d[k]=v[k];});}catch(e){}return d;}
   function setBlock(k,on){var b=blocks();b[k]=!!on;lsSet(BLOCKS_KEY,JSON.stringify(b));schedule();}
   function exampleOn(){return lsGet(DEMO_KEY)==="1";}
   function sheetEmpty(){try{var sn=window.FinanceSheet&&window.FinanceSheet.getSnapshot&&window.FinanceSheet.getSnapshot();return !sn||!sn.sheets||!sn.sheets.some(function(x){return x.cells&&Object.keys(x.cells).some(function(k){return String(x.cells[k]&&x.cells[k].raw||"").trim()!=="";});});}catch(e){return true;}}
@@ -271,6 +284,52 @@
     return (d<0?t2("Tu as dépensé "+pct1+" % de moins qu’en "+pmn,"You spent "+pct1+"% less than in "+pmn):t2("Tu as dépensé "+pct1+" % de plus qu’en "+pmn,"You spent "+pct1+"% more than in "+pmn))+why+"."+tail;
   }
 
+  /* ── Bilan du mois écoulé : affiché dès le début du mois suivant, jusqu'à « J'ai vu » ─── */
+  var RECAP_KEY="personalFinanceDashboard.recapSeen";
+  function recapMonth(all){
+    var now=new Date(),cur=now.getFullYear()*12+now.getMonth();
+    var past=all.filter(function(m){return !m.blank&&m.year*12+m.mi<cur&&(m.salary||m.expenses||m.savings);});
+    return past.length?past[past.length-1]:null;
+  }
+  function recapPanel(all,bal,force){
+    var R=recapMonth(all);if(!R)return null;
+    var tag=R.year+"-"+String(R.mi+1).padStart(2,"0");if(!force&&lsGet(RECAP_KEY)===tag)return null;
+    var prev=all.filter(function(m){return m.year*12+m.mi===R.year*12+R.mi-1&&!m.blank;})[0]||null;
+    var rest=flow(R),cats=catMap(R),names=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a];}),top=names[0];
+    var year=all.filter(function(m){return m.year===R.year&&!m.blank&&(m.salary||m.expenses||m.savings);});
+    var box=el("section","gfh-recap");box.setAttribute("aria-labelledby","gfhRecapT");
+    var head=el("div","gfh-recap-head"),ht=el("div");
+    ht.append(el("span","gfh-kick",t2("Bilan du mois","Monthly recap")));
+    var ys=R.year!==new Date().getFullYear()?" "+R.year:"",fr=MN[R.mi];
+    var h=el("h3","",en()?"Your "+MN_EN[R.mi]+ys+" in review":"Ton mois "+(/^[aeiou]/.test(fr)?"d’":"de ")+fr+ys);h.id="gfhRecapT";ht.append(h);
+    var x=el("button","gfh-recap-x","×");x.type="button";x.setAttribute("aria-label",t2("Masquer le bilan","Hide recap"));
+    x.addEventListener("click",function(){lsSet(RECAP_KEY,tag);schedule();});
+    head.append(ht,x);box.append(head);
+    var grid=el("div","gfh-recap-grid");
+    function stat(label,value,note,cls){var d=el("div","gfh-recap-stat"+(cls?" "+cls:""));d.append(el("span","t",label),el("b","v gf-amount",value));if(note)d.append(el("small","",note));grid.append(d);}
+    stat(t2("Reste du mois","Left this month"),(rest<0?"−":"")+eur(Math.abs(rest)),R.salary?t2("sur ","of ")+eur(R.salary)+t2(" de revenus"," income"):t2("Revenus non saisis","Income not entered"),rest<0?"is-neg":"");
+    var rate=R.salary?Math.round(R.savings/R.salary*100):null;
+    stat(t2("Épargne","Savings"),eur(R.savings),rate!=null&&R.savings?rate+(en()?"%":" %")+t2(" de tes revenus"," of your income"):(R.savings?"":t2("Rien de côté","Nothing saved")));
+    if(top)stat(t2("Plus gros poste","Biggest expense"),eur(cats[top]),top+(R.expenses?" · "+Math.round(cats[top]/R.expenses*100)+(en()?"%":" %"):""));
+    if(prev&&prev.expenses&&R.expenses){var dv=(R.expenses-prev.expenses)/prev.expenses*100,ab=Math.abs(dv);stat(t2("Dépenses","Spending"),(dv>0?"+":dv<0?"−":"")+ab.toLocaleString(en()?"en-IE":"fr-FR",{maximumFractionDigits:0})+(en()?"%":" %"),t2("vs ","vs ")+mname(prev.mi)+" · "+eur(R.expenses),dv>0?"is-up":"is-down");}
+    else stat(t2("Dépenses","Spending"),eur(R.expenses),t2("Premier mois comparable","First comparable month"));
+    box.append(grid);
+    // Un fait marquant, le plus parlant d'abord
+    var fact="",savs=year.map(function(m){return m.savings;}),exps=year.filter(function(m){return m.expenses;}).map(function(m){return m.expenses;});
+    var over=names.filter(function(n){var b=budgetOf(n);return b&&cats[n]>b;});
+    if(over.length)fact=over.length===1?t2("«\u00a0"+over[0]+"\u00a0» a dépassé son plafond de ","“"+over[0]+"” went over its limit by ")+eur(cats[over[0]]-budgetOf(over[0]))+".":t2(over.length+" lignes ont dépassé leur plafond.",over.length+" rows went over their limit.");
+    else if(year.length>=3&&R.savings>0&&R.savings>=Math.max.apply(null,savs))fact=t2("Ton meilleur mois d’épargne de l’année. Bravo !","Your best savings month of the year. Well done!");
+    else if(year.length>=3&&R.expenses&&R.expenses<=Math.min.apply(null,exps))fact=t2("Tes dépenses les plus basses de l’année.","Your lowest spending of the year.");
+    else if(prev){var pm=catMap(prev),best=null;names.forEach(function(n){var d=cats[n]-(pm[n]||0);if(pm[n]&&d>0&&(!best||d>best.d))best={n:n,d:d};});
+      if(best&&best.d>=20)fact=t2("«\u00a0"+best.n+"\u00a0» a augmenté de ","“"+best.n+"” went up by ")+eur(best.d)+t2(" par rapport à "," compared with ")+mname(prev.mi)+".";}
+    if(!fact&&rest>0)fact=t2("Mois bouclé dans le vert : ","Month closed in the green: ")+eur(rest)+t2(" de reste."," left.");
+    if(fact)box.append(el("p","gfh-recap-fact",fact));
+    var acts=el("div","gfh-recap-acts"),see=el("button","gfh-btn",t2("Voir ","See ")+mname(R.mi)),ok=el("button","gfh-link",t2("J’ai vu","Got it"));see.type=ok.type="button";
+    see.addEventListener("click",function(){select(R);});ok.addEventListener("click",function(){lsSet(RECAP_KEY,tag);schedule();});
+    acts.append(see,ok);box.append(acts);
+    return box;
+  }
+
   /* ── Objectifs sur l'accueil (avec les montants liés au tableur) ─────────── */
   function goalsPanel(p){
     var srcs=[];try{srcs=window.FinanceSheet&&window.FinanceSheet.getObjectiveSources?window.FinanceSheet.getObjectiveSources():[];}catch(e){}
@@ -330,7 +389,7 @@
     else{
       var ylab=el("label","gfh-yr"),ysel=document.createElement("select");
       ylab.append(el("span","gfh-sr",t2("Année","Year")),ysel);
-      years.forEach(function(y){var last=all.filter(function(m){return m.year===y;}).pop(),o=new Option(String(y)+(last&&bal[last.id]!=null?" · "+eur(bal[last.id]):""),String(y));o.selected=y===sel.year;ysel.append(o);});
+      years.forEach(function(y){var last=all.filter(function(m){return m.year===y;}).pop(),o=new Option(String(y)+(last&&bal[last.id]!=null&&!amountsHidden()?" · "+eur(bal[last.id]):""),String(y));o.selected=y===sel.year;ysel.append(o);});
       // Changer d'année garde le même mois quand il existe
       ysel.addEventListener("change",function(){var y=Number(ysel.value);if(y===sel.year)return;var ms=all.filter(function(m){return m.year===y;}),same=ms.filter(function(m){return m.mi===sel.mi;})[0];select(same||ms[ms.length-1]);});
       yrs.append(ylab);
@@ -350,7 +409,7 @@
 
     // Carte solde
     var card=el("div","gfh-card");
-    card.append(el("div","gfh-lab",hasStart?t2("Solde disponible","Available balance"):t2("Solde calculé","Calculated balance")));
+    var lab=el("div","gfh-lab");lab.append(el("span","",hasStart?t2("Solde disponible","Available balance"):t2("Solde calculé","Calculated balance")),eyeButton());card.append(lab);
     card.append(el("div","gfh-big",eur(sd)));
     var dl=el("div","gfh-dl");
     if(blank)dl.append(document.createTextNode(t2("Aucune donnée pour l’instant","No data yet")));
@@ -409,6 +468,7 @@
       var fx=(B.fixed!==false)&&sel.id===all[all.length-1].id?fixedSuggestion(all):null,fp=fx?fixedPanel(fx):null;if(B.where)right.append(where);if(fp)right.append(fp);if(B.goal)right.append(goalsPanel(p));
     }
 
+    var rc=!blank&&B.recap?recapPanel(all,bal):null;
     var left=el("div","gfh-left");left.append(card);
     var dg=el("div","gfh-dg"+(right.childNodes.length?"":" is-solo"));dg.append(left);if(right.childNodes.length)dg.append(right);
     var top=[];
@@ -421,7 +481,7 @@
     var expLines=[];all.slice().reverse().forEach(function(m){(m.cats||[]).forEach(function(c){if(expLines.indexOf(c.name)<0)expLines.push(c.name);});});
     plus.addEventListener("click",function(){quickAdd({year:sel.year,mi:sel.mi,expenseLines:expLines});});
     bar.append(plus);
-    root.replaceChildren.apply(root,top.concat([bar,hi,dg]));
+    root.replaceChildren.apply(root,top.concat(rc?[bar,hi,rc,dg]:[bar,hi,dg]));
     document.body.classList.add("gfh-ready");
     if(document.body.classList.contains("tutorial-active"))setTimeout(function(){window.dispatchEvent(new Event("resize"));},30);
   }
@@ -431,7 +491,7 @@
     var panel=document.querySelector('[data-settings-panel="appearance"]');if(!panel)return;
     var box=byId("gfhSettings");
     if(!box){box=el("section","gfh-set");box.id="gfhSettings";box.setAttribute("aria-labelledby","gfhSetTitle");var head=panel.querySelector(".settings-section-head");if(head&&head.nextSibling)panel.insertBefore(box,head.nextSibling);else panel.append(box);}
-    var b=blocks(),rows=[["month",t2("Chiffres du mois","Month figures"),t2("Revenus, dépenses et épargne sous le solde.","Income, expenses and savings under the balance.")],["where",t2("Où part ton argent","Where your money goes"),t2("Tes lignes de dépenses du mois.","Your expense rows for the month.")],["goal",t2("Objectif","Goal"),t2("La progression de ton objectif principal.","Progress of your main goal.")],["fixed",t2("Dépenses fixes","Fixed expenses"),t2("Propose les lignes qui reviennent chaque mois.","Suggests rows that come back every month.")],["charts",t2("Graphiques","Charts"),t2("Camembert, comparatif annuel, évolution.","Pie, yearly comparison, trends.")]];
+    var b=blocks(),rows=[["month",t2("Chiffres du mois","Month figures"),t2("Revenus, dépenses et épargne sous le solde.","Income, expenses and savings under the balance.")],["recap",t2("Bilan du mois","Monthly recap"),t2("Au début de chaque mois, le résumé du mois écoulé.","At the start of each month, a summary of the month gone by.")],["where",t2("Où part ton argent","Where your money goes"),t2("Tes lignes de dépenses du mois.","Your expense rows for the month.")],["goal",t2("Objectif","Goal"),t2("La progression de ton objectif principal.","Progress of your main goal.")],["fixed",t2("Dépenses fixes","Fixed expenses"),t2("Propose les lignes qui reviennent chaque mois.","Suggests rows that come back every month.")],["charts",t2("Graphiques","Charts"),t2("Camembert, comparatif annuel, évolution.","Pie, yearly comparison, trends.")]];
     var h=el("h4","",t2("Accueil","Home"));h.id="gfhSetTitle";
     var list=el("div","gfh-set-list");
     rows.forEach(function(r){
@@ -440,6 +500,9 @@
       sw.addEventListener("click",function(){var next=sw.getAttribute("aria-checked")!=="true";sw.setAttribute("aria-checked",String(next));setBlock(r[0],next);});
       row.append(txt,sw);list.append(row);
     });
+    var hr=el("div","gfh-set-row"),ht=el("div");ht.append(el("strong","",t2("Masquer les montants","Hide amounts")),el("small","",t2("Floute tes chiffres pour montrer ton écran sans les dévoiler. Aussi avec l’œil à côté du solde.","Blurs your figures so you can show your screen. Also with the eye next to the balance.")));
+    var hs=el("button","gfh-switch");hs.type="button";hs.setAttribute("role","switch");hs.setAttribute("aria-checked",String(amountsHidden()));hs.setAttribute("aria-label",t2("Masquer les montants","Hide amounts"));hs.append(el("span"));
+    hs.addEventListener("click",function(){setHidden(!amountsHidden());});hr.append(ht,hs);list.append(hr);
     box.replaceChildren(h,el("p","",t2("Tout est facultatif : affiche seulement ce qui te sert.","Everything is optional: show only what helps you.")),list);
   }
   var queued=false;
@@ -460,6 +523,7 @@
   window.addEventListener("gf:languagechange",function(){schedule();settingsUI();});
   window.addEventListener("authStateChanged",function(){setTimeout(schedule,800);});
   document.addEventListener("change",function(e){if(e.target&&(e.target.id==="monthSelect"||e.target.id==="yearSelect"))schedule();});
+  applyHidden();window.addEventListener("authStateChanged",function(){setTimeout(applyHidden,850);});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){schedule();settingsUI();});else{schedule();settingsUI();}
   setTimeout(function(){preferCurrentYear();schedule();sheetBanner();},900);
 })();

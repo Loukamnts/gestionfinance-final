@@ -116,6 +116,7 @@ h1{font-size:clamp(44px,5.4vw,92px)}
 .plan-cta.is-primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .plan.is-featured .plan-cta:not(.is-primary){border-color:var(--block-line)}
 .plan-cta:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.plan-cta.is-soon{cursor:default;opacity:.72;border-style:dashed}.plan-cta.is-soon:hover{border-color:var(--line)}
 .pricing-note{margin:22px 0 0;font-size:14px;color:var(--muted);max-width:60ch}
 :root[data-mode="dark"] .plan.is-featured{border-color:var(--accent)}
 @media (prefers-color-scheme:dark){:root:not([data-mode="light"]) .plan.is-featured{border-color:var(--accent)}}

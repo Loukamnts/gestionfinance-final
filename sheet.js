@@ -1271,7 +1271,9 @@
     modal.appendChild(document.createElement("h3")).textContent = "Calculatrice";
     modal.appendChild(display); modal.appendChild(grid); modal.appendChild(actions);
     overlay.appendChild(modal); overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
-    function close() { overlay.remove(); unlockModalBackground(); }
+    function onKey(e) { if (e.key === "Escape") { e.preventDefault(); close(); } }
+    function close() { document.removeEventListener("keydown", onKey, true); overlay.remove(); unlockModalBackground(); }
+    document.addEventListener("keydown", onKey, true);
     document.body.appendChild(overlay); lockModalBackground();
   }
 
@@ -1539,7 +1541,10 @@
     });
     const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener("click", fn); };
     bind("btnSheetExport", exportXlsx);
-    bind("btnSheetImport", () => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".xlsx,.xls,.xlsm,.csv"; inp.addEventListener("change", () => { const f = inp.files[0]; if (!f) return; Promise.resolve(importXlsx(f)).then((ok) => { try { window.MeuniLoader && window.MeuniLoader.done(ok ? "Fichier importé." : undefined); } catch (e) {} }); }); inp.click(); });
+    bind("btnSheetImport", () => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".xlsx,.xls,.xlsm,.csv,.txt"; inp.addEventListener("change", () => { const f = inp.files[0]; if (!f) return;
+      // Un relevé bancaire CSV est lu à part (regroupement par catégorie et par mois) ; sinon import Excel classique.
+      const bank = window.GFBankImport ? window.GFBankImport.handle(f).catch(() => false) : Promise.resolve(false);
+      bank.then((handled) => { if (handled) return; Promise.resolve(importXlsx(f)).then((ok) => { try { window.MeuniLoader && window.MeuniLoader.done(ok ? "Fichier importé." : undefined); } catch (e) {} }); }); }); inp.click(); });
     bind("btnSheetClear", async () => { if (await confirmDialog("Vider la feuille active ?")) { const sheet = activeSheet(); sheet.cells = {}; sheet.rowHeaders = []; sheet.rows = DEFAULT_ROWS; enforceMonthHeaders(sheet); buildTable(); renderValues(); scheduleSave(); } });
     bind("btnSheetDeleteRow", deleteSelectedRow);
     bind("btnSheetCalc", openCalculator);

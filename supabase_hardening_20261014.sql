@@ -32,14 +32,15 @@ alter table public.share_permissions
 
 -- 6. Anti-énumération : au plus 30 recherches d'amis par heure et par compte
 --    (empêche de tester en masse si une adresse e-mail possède un compte).
-create table if not exists public.friend_request_attempts (
-  id bigint generated always as identity primary key,
-  sender_id uuid not null references auth.users(id) on delete cascade,
-  attempted_at timestamptz not null default now()
+--    Un seul compteur par compte, remis à zéro après une heure : la table ne grossit pas.
+--    (L'ancienne table friend_request_attempts, créée puis jamais utilisée, est vide.)
+create table if not exists public.friend_request_rate (
+  sender_id uuid primary key references auth.users(id) on delete cascade,
+  window_start timestamptz not null default now(),
+  attempts integer not null default 0 check (attempts >= 0)
 );
-create index if not exists friend_request_attempts_sender_time on public.friend_request_attempts (sender_id, attempted_at desc);
-alter table public.friend_request_attempts enable row level security;
-revoke all on table public.friend_request_attempts from public, anon, authenticated;
+alter table public.friend_request_rate enable row level security;
+revoke all on table public.friend_request_rate from public, anon, authenticated;
 
 create or replace function public.send_friend_request(p_identifier text)
  returns uuid
@@ -50,15 +51,15 @@ as $function$
 declare v_target_id uuid; relation public.friendships%rowtype; request_id uuid; ident text; recent integer;
 begin
   if auth.uid() is null then raise exception 'not_authenticated'; end if;
-  -- Compteur anti-abus : chaque recherche compte, qu'elle trouve un compte ou non.
-  delete from public.friend_request_attempts where sender_id = auth.uid() and attempted_at < now() - interval '1 day';
-  select count(*) into recent from public.friend_request_attempts
-    where sender_id = auth.uid() and attempted_at > now() - interval '1 hour';
-  if recent >= 30 then raise exception 'too_many_friend_requests'; end if;
-  insert into public.friend_request_attempts(sender_id) values (auth.uid());
+  insert into public.friend_request_rate as r (sender_id, window_start, attempts) values (auth.uid(), now(), 1)
+  on conflict (sender_id) do update set
+    window_start = case when r.window_start < now() - interval '1 hour' then now() else r.window_start end,
+    attempts = case when r.window_start < now() - interval '1 hour' then 1 else r.attempts + 1 end
+  returning attempts into recent;
+  if recent > 30 then raise exception 'too_many_friend_requests'; end if;
   ident:=lower(btrim(coalesce(p_identifier,'')));
-  -- Introuvable : on renvoie NULL au lieu d'une erreur, pour que la tentative reste comptée
-  -- (une erreur annulerait toute la transaction, compteur compris). Le site affiche « Aucun compte trouvé ».
+  -- Introuvable : NULL plutôt qu'une erreur, pour que la tentative reste comptée
+  -- (une erreur annulerait la transaction, compteur compris). Le site affiche « Aucun compte trouvé ».
   if length(ident)<3 or length(ident)>254 then return null; end if;
   if position('@' in ident)>0 then
     select u.id into v_target_id from auth.users u where lower(u.email)=ident and u.email_confirmed_at is not null limit 1;

@@ -181,7 +181,7 @@
     "free5": "Export et suppression de tes données",
     "free6": "Pas de partage",
     "freeCta": "Commencer gratuitement",
-    "plusTag": "Le plus choisi",
+    "plusTag": "Recommandé",
     "plusPitch": "Ton budget, à ton image, et à deux.",
     "plus1": "Import et export Excel",
     "plus2": "Objectifs illimités",
@@ -196,7 +196,9 @@
     "pro4": "Accès temporaire qui expire tout seul",
     "pro5": "Historique de progression des objectifs",
     "proCta": "Passer à Pro",
-    "pricingNote": "Sans engagement, résiliable à tout moment. Même en payant, tes données restent les tiennes : aucune pub, aucun suivi, aucune revente.",
-    "perMonth": "par mois"
+    "pricingNote": "Plus et Pro ne sont pas encore en vente : pendant le lancement, toutes les fonctions sont ouvertes gratuitement. Prix indicatifs, sans engagement à l’ouverture. Tes données restent les tiennes : aucune pub, aucun suivi, aucune revente.",
+    "perMonth": "par mois",
+    "soonCta": "Bientôt disponible",
+    "footerLegal": "Mentions légales"
   }
 }

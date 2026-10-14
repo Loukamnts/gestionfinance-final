@@ -1,0 +1,81 @@
+/* Rappels de saisie : une notification quand rien n'a été saisi depuis quelques jours.
+   Paramètres › Apparence › Rappels. L'abonnement est rattaché au compte (fonctions Supabase dédiées) ;
+   l'envoi est fait chaque jour par le serveur. Sur iPhone, il faut d'abord ajouter Meuniance à l'écran d'accueil. */
+(function(){
+  "use strict";
+  var LOCAL="personalFinanceDashboard.reminders";
+  var byId=function(id){return document.getElementById(id);};
+  function en(){return !!(window.GFI18n&&typeof window.GFI18n.getLanguage==="function"&&window.GFI18n.getLanguage()==="en");}
+  function t2(fr,e){return en()?e:fr;}
+  function el(tag,cls,text){var n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;}
+  function account(){return window.__account||{};}
+  function client(){var a=account();return a.client||null;}
+  function prefs(){try{var p=JSON.parse(window.safeStore.getItem(LOCAL)||"{}");return p&&typeof p==="object"?p:{};}catch(e){return{};}}
+  function savePrefs(p){try{window.safeStore.setItem(LOCAL,JSON.stringify(p));}catch(e){}}
+  function isIOS(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);}
+  function standalone(){return navigator.standalone===true||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);}
+  function supported(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window;}
+  function b64uToBytes(s){var p=s.replace(/-/g,"+").replace(/_/g,"/");p+="===".slice((p.length+3)%4);var raw=atob(p),out=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out;}
+  function registration(){return navigator.serviceWorker.register("/sw.js",{scope:"/"}).then(function(){return navigator.serviceWorker.ready;});}
+  function currentSub(){if(!supported())return Promise.resolve(null);return navigator.serviceWorker.getRegistration("/").then(function(r){return r?r.pushManager.getSubscription():null;}).catch(function(){return null;});}
+  function errorText(e){var m=String(e&&e.message||e||"");if(/too_many_devices/.test(m))return t2("Déjà 5 appareils reçoivent tes rappels. Désactive-les sur un autre appareil d’abord.","5 devices already get your reminders. Turn them off on another device first.");if(/denied|permission/i.test(m))return t2("Notifications refusées. Autorise-les dans les réglages de ton appareil, puis réessaie.","Notifications blocked. Allow them in your device settings, then try again.");return t2("Impossible d’activer les rappels pour le moment. Réessaie plus tard.","Could not turn reminders on right now. Try again later.");}
+
+  async function enable(days){
+    var sb=client();if(!sb||!account().user)throw new Error("not_authenticated");
+    var perm=await Notification.requestPermission();if(perm!=="granted")throw new Error("permission denied");
+    var reg=await registration();
+    var key=await sb.rpc("reminder_public_key");if(key.error||!key.data)throw new Error("no_key");
+    var sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await Promise.race([reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64uToBytes(key.data)}),new Promise(function(_,reject){setTimeout(function(){reject(new Error("timeout"));},20000);})]);
+    var json=sub.toJSON();
+    var res=await sb.rpc("save_reminder_subscription",{p_endpoint:json.endpoint,p_p256dh:json.keys.p256dh,p_auth:json.keys.auth,p_every_days:days});
+    if(res.error)throw new Error(res.error.message||"save");
+    savePrefs({on:true,days:days});
+  }
+  async function disable(){
+    var sub=await currentSub(),sb=client();
+    if(sub){var endpoint=sub.endpoint;try{await sub.unsubscribe();}catch(e){}if(sb)try{await sb.rpc("remove_reminder_subscription",{p_endpoint:endpoint});}catch(e){}}
+    var p=prefs();p.on=false;savePrefs(p);
+  }
+
+  var busy=false;
+  async function render(){
+    var panel=document.querySelector('[data-settings-panel="appearance"]');if(!panel)return;
+    var box=byId("gfrReminders");
+    if(!box){box=el("section","gfh-set gfr-set");box.id="gfrReminders";box.setAttribute("aria-labelledby","gfrTitle");panel.append(box);}
+    var h=el("h4","",t2("Rappels","Reminders"));h.id="gfrTitle";
+    var intro=el("p","",t2("Une notification si tu n’as rien saisi depuis quelques jours. Elle ne contient aucun montant.","A notification if you haven’t entered anything for a few days. It never shows any amount."));
+    var p=prefs(),sub=await currentSub(),on=!!(p.on&&sub),days=[3,7,14,30].indexOf(Number(p.days))>=0?Number(p.days):7;
+    var row=el("div","gfh-set-row"),txt=el("div");txt.append(el("strong","",t2("Rappel de saisie","Entry reminder")));
+    var hint=el("small","");txt.append(hint);
+    var sw=el("button","gfh-switch");sw.type="button";sw.setAttribute("role","switch");sw.setAttribute("aria-checked",String(on));sw.setAttribute("aria-label",t2("Rappel de saisie","Entry reminder"));sw.append(el("span"));
+    row.append(txt,sw);
+    var freq=el("div","gfh-set-row gfr-freq"),fl=el("label","gfr-label"),sel=document.createElement("select");sel.id="gfrDays";
+    fl.htmlFor="gfrDays";fl.append(el("strong","",t2("Me prévenir après","Remind me after")),el("small","",t2("sans aucune saisie","with no entry")));
+    [[3,t2("3 jours","3 days")],[7,t2("1 semaine","1 week")],[14,t2("2 semaines","2 weeks")],[30,t2("1 mois","1 month")]].forEach(function(o){var op=new Option(o[1],String(o[0]));op.selected=o[0]===days;sel.append(op);});
+    freq.append(fl,sel);freq.hidden=!on;
+    var acts=el("div","gfr-acts"),test=el("button","gfh-link",t2("Envoyer un rappel de test","Send a test reminder"));test.type="button";acts.append(test);acts.hidden=!on;
+    var msg=el("p","gfr-msg");msg.setAttribute("role","status");
+    var blocked="";
+    if(!account().user)blocked=t2("Connecte-toi pour recevoir des rappels : ils sont liés à ton compte.","Sign in to get reminders: they are linked to your account.");
+    else if(!supported())blocked=isIOS()&&!standalone()?t2("Sur iPhone, ajoute d’abord Meuniance à l’écran d’accueil (Partager › « Sur l’écran d’accueil »), puis ouvre-la depuis son icône pour activer les rappels.","On iPhone, first add Meuniance to your Home Screen (Share › “Add to Home Screen”), then open it from its icon to turn reminders on."):t2("Ce navigateur ne permet pas les notifications.","This browser does not support notifications.");
+    else if(Notification.permission==="denied"&&!on)blocked=t2("Les notifications sont bloquées pour Meuniance. Autorise-les dans les réglages de ton appareil.","Notifications are blocked for Meuniance. Allow them in your device settings.");
+    hint.textContent=blocked||(on?t2("Activé sur cet appareil.","On for this device."):t2("Désactivé.","Off."));
+    if(blocked){sw.disabled=true;sw.setAttribute("aria-checked","false");freq.hidden=true;acts.hidden=true;}
+    sw.addEventListener("click",async function(){
+      if(busy)return;busy=true;sw.disabled=true;msg.textContent="";
+      try{if(sw.getAttribute("aria-checked")==="true")await disable();else await enable(Number(sel.value)||7);}
+      catch(e){msg.textContent=errorText(e);}
+      busy=false;render();
+    });
+    sel.addEventListener("change",async function(){if(busy)return;busy=true;msg.textContent="";try{await enable(Number(sel.value));msg.textContent=t2("C’est noté.","Saved.");}catch(e){msg.textContent=errorText(e);}busy=false;});
+    test.addEventListener("click",async function(){try{var reg=await registration();await reg.showNotification("Meuniance",{body:t2("Les rappels fonctionnent. Tu seras prévenu si rien n’est saisi pendant un moment.","Reminders work. You’ll be told if nothing is entered for a while."),icon:"/app-icon-180.png",tag:"meuniance-test"});}catch(e){msg.textContent=errorText(e);}});
+    box.replaceChildren(h,intro,row,freq,acts,msg);
+  }
+  function schedule(){clearTimeout(schedule.t);schedule.t=setTimeout(function(){render().catch(function(){});},150);}
+  window.addEventListener("authStateChanged",schedule);
+  window.addEventListener("gf:languagechange",schedule);
+  document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest('[data-settings-view="appearance"]'))schedule();});
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",schedule);else schedule();
+  window.GFReminders={render:schedule};
+})();

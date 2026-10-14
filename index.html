@@ -606,19 +606,10 @@
     .sheet-status-tooltip-item { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; }
     .sheet-status-tooltip-item:last-child { margin-bottom: 0; }
     .sheet-status-tooltip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    /* Modale légale */
-    .legal-modal { border: none; border-radius: var(--radius, 16px); background: var(--panel-solid, #0e0c24); color: var(--text); padding: 0; max-width: 520px; max-height: 80vh; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
-    .legal-modal::backdrop { background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); }
-    .legal-modal-content { padding: 28px; overflow-y: auto; max-height: 80vh; }
-    .legal-modal-content h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 12px; color: var(--text); font-family: var(--font-heading); }
+    /* Sections légales (paramètres) */
     .legal-section { margin-bottom: 14px; }
     .legal-section strong { display: block; font-size: 0.88rem; color: var(--text); margin-bottom: 4px; }
     .legal-section p { margin: 0; font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
-    .legal-modal-content ul { font-size: 0.82rem; color: var(--muted); }
-    .legal-modal-content ul li { margin-bottom: 2px; }
-    .legal-modal-content p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
-    .legal-modal-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--muted); font-size: 1.2rem; cursor: pointer; padding: 4px 8px; border-radius: 8px; }
-    .legal-modal-close:hover { color: var(--accent); background: var(--button-active-bg); }
     .chart-panel { min-height: 530px; padding: 18px; display: grid; grid-template-rows: auto minmax(320px,1fr) auto; gap: 12px; }
     .chart-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
     .chart-head h2 { font-size: 1.15rem; }
@@ -1830,7 +1821,7 @@
   <link rel="stylesheet" href="ui-polish.css?v=20261003-r1">
   <link rel="stylesheet" href="theme-directions.css?v=20261013-r1">
   <link rel="stylesheet" href="plans.css?v=20261013-r1">
-  <link rel="stylesheet" href="home.css?v=20261013-r2">
+  <link rel="stylesheet" href="home.css?v=20261014-r3">
   <link rel="stylesheet" href="sheet-balances.css?v=20261013-r3">
   <link rel="stylesheet" href="finishing.css?v=20261013-r7">
   <link rel="stylesheet" href="menus.css?v=20261013-r2">
@@ -2267,70 +2258,16 @@
         </section>
         <section class="settings-section panel settings-reading-page" data-settings-panel="legal" hidden>
           <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
-          <div class="settings-section-head"><div><h3>Mentions légales</h3><p>Les informations importantes sur Meuniance.</p></div></div>
-          <div class="legal-section"><strong>Éditeur du site</strong><p>Meuniance est un outil personnel de gestion budgétaire. Le contact de l’éditeur figure dans la <a href="/confidentialite">page Confidentialité et contact</a>. Les informations saisies relèvent de l'utilisateur et demeurent sous sa responsabilité.</p></div>
-          <div class="legal-section"><strong>Nature du service</strong><p>Application de tableur et de tableau de bord financiers. Aucune donnée bancaire n'est collectée : les saisies sont manuelles et restent locales, avec synchronisation de compte optionnelle.</p></div>
-          <div class="legal-section"><strong>Propriété intellectuelle &amp; responsabilité</strong><p>Les données saisies sont les tiennes. Le site est fourni « en l'état », sans garantie de résultat. Il ne constitue pas un conseil financier, fiscal ou juridique.</p></div>
-          <div class="legal-section"><strong>Suspension de compte</strong><p>Un compte qui tente d'accéder aux données d'autrui ou de perturber le service peut être suspendu. Le détail figure dans les <a href="/conditions" target="_blank" rel="noopener">conditions d'utilisation</a>.</p></div>
-          <div class="legal-section"><strong>Pages publiques</strong><p><a href="/" target="_blank" rel="noopener">Présentation du service</a> · <a href="/confidentialite" target="_blank" rel="noopener">Confidentialité</a> · <a href="/conditions" target="_blank" rel="noopener">Conditions d'utilisation</a></p></div>
+          <div class="settings-section-head"><div><h3>Mentions légales</h3><p>Qui édite Meuniance, qui l’héberge et les règles qui s’appliquent.</p></div></div>
+          <div class="legal-section"><strong>Éditeur</strong><p>Meuniance est édité par un particulier, à titre non professionnel. Contact : <a href="mailto:louka.meunier1@gmail.com">louka.meunier1@gmail.com</a>. Le détail figure dans les <a href="/mentions-legales" target="_blank" rel="noopener">mentions légales complètes</a>.</p></div>
+          <div class="legal-section"><strong>Hébergement</strong><p>Site hébergé par Vercel Inc. (États-Unis). Base de données et comptes hébergés par Supabase dans l’Union européenne (Irlande).</p></div>
+          <div class="legal-section"><strong>Nature du service</strong><p>Outil de suivi budgétaire personnel, gratuit. Ce n’est ni une banque, ni un conseil financier, fiscal ou juridique. Aucune coordonnée bancaire n’est demandée.</p></div>
+          <div class="legal-section"><strong>Offres Plus et Pro</strong><p>Elles ne sont pas encore en vente : aucun paiement n’est possible pour le moment.</p></div>
+          <div class="legal-section"><strong>Pages publiques</strong><p><a href="/mentions-legales" target="_blank" rel="noopener">Mentions légales</a> · <a href="/conditions" target="_blank" rel="noopener">Conditions d'utilisation</a> · <a href="/confidentialite" target="_blank" rel="noopener">Confidentialité</a></p></div>
         </section>
       </div>
     </section>
 
-    <!-- Modale Confidentialité & sécurité -->
-    <dialog id="privacyModal" class="legal-modal">
-      <div class="legal-modal-content">
-        <button type="button" class="legal-modal-close" onclick="document.getElementById('privacyModal').close()">✕</button>
-        <h3>Confidentialité &amp; sécurité</h3>
-        <div class="legal-section">
-          <strong>Stockage local</strong>
-          <p>Une copie locale séparée par compte permet le mode hors ligne. Elle n'est pas chiffrée par un mot de passe personnel. Supabase chiffre les données stockées dans sa base.</p>
-        </div>
-        <div class="legal-section">
-          <strong>Connexion HTTPS</strong>
-          <p>Le site est servi via HTTPS pour garantir le chiffrement des données en transit.</p>
-        </div>
-        <div class="legal-section">
-          <strong>Synchronisation de compte (optionnelle)</strong>
-          <p>Lorsque tu te connectes, ton tableur est synchronisé avec ton compte Supabase via une connexion chiffrée.</p>
-        </div>
-        <div class="legal-section">
-          <strong>Pas de tracking publicitaire</strong>
-          <p>Ce site ne contient aucun tracker, cookie publicitaire ni script d'analyse tierce. Aucune donnée n'est vendue ou partagée avec des tiers.</p>
-        </div>
-      </div>
-    </dialog>
-
-    <!-- Modale Mentions légales (distincte de Confidentialité & sécurité) -->
-    <dialog id="legalModal" class="legal-modal">
-      <div class="legal-modal-content">
-        <button type="button" class="legal-modal-close" onclick="document.getElementById('legalModal').close()">✕</button>
-        <h3>Mentions légales</h3>
-        <div class="legal-section">
-          <strong>Éditeur du site</strong>
-          <p>Site « Gestion finance », outil personnel de gestion budgétaire. Les informations saisies relèvent de l'utilisateur et demeurent sous sa responsabilité.</p>
-        </div>
-        <div class="legal-section">
-          <strong>Nature du service</strong>
-          <p>Application de tableur et de tableau de bord financiers. Aucune donnée bancaire n'est collectée : les saisies sont manuelles et restent locales, avec synchronisation de compte optionnelle.</p>
-        </div>
-        <div class="legal-section">
-          <strong>Outils de conception & développement</strong>
-          <p>Ce site a été conçu et développé à l'aide des outils d'intelligence artificielle suivants :</p>
-          <ul style="margin:6px 0 0;padding-left:20px;display:grid;gap:4px;">
-            <li>Gemini (Google)</li>
-            <li>Codex (OpenAI)</li>
-            <li>Claude (Anthropic)</li>
-            <li>Vibes (Mistral AI)</li>
-            <li>Perplexity AI</li>
-          </ul>
-        </div>
-        <div class="legal-section">
-          <strong>Propriété intellectuelle & responsabilité</strong>
-          <p>Les données saisies sont les tiennes. Le site est fourni « en l'état », sans garantie de résultat. Il ne constitue pas un conseil financier, fiscal ou juridique.</p>
-        </div>
-      </div>
-    </dialog>
   </main>
   <div class="chart-detail-modal" id="chartDetailModal" hidden role="dialog" aria-modal="true" aria-labelledby="chartDetailTitle">
     <section class="chart-detail-card"><div class="chart-detail-head"><div><h2 id="chartDetailTitle">Détail du mois</h2><p id="chartDetailSubtitle"></p></div><button class="chart-detail-close" id="chartDetailClose" type="button" aria-label="Fermer">×</button></div><div class="chart-detail-grid" id="chartDetailGrid"></div></section>
@@ -5332,7 +5269,7 @@ function inferColumnType(header, samples){
     }
     init();
   </script>
-  <script src="sheet.js?v=20261014-r1"></script>
+  <script src="sheet.js?v=20261014-r2"></script>
   <script src="onboarding.js?v=20261014-r1"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
   <script src="friends.js?v=20261014-r1"></script>
@@ -5925,9 +5862,11 @@ function inferColumnType(header, samples){
   <script src="objectives.js?v=20261014-r1"></script>
   <script src="meuni-loader.js?v=20261013-r1" defer></script>
   <script src="ios-fix.js?v=20261013-r2" defer></script>
-  <script src="plans.js?v=20261014-r1" defer></script>
-  <script src="home.js?v=20261014-r1" defer></script>
+  <script src="plans.js?v=20261014-r2" defer></script>
+  <script src="home.js?v=20261014-r2" defer></script>
   <script src="finishing.js?v=20261014-r1" defer></script>
+  <script src="bank-import.js?v=20261014-r1" defer></script>
+  <script src="reminders.js?v=20261014-r1" defer></script>
   <script src="menus.js?v=20261013-r1" defer></script>
   <script src="discover.js?v=20261013-r2" defer></script>
 </body>

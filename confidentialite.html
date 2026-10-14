@@ -20,7 +20,7 @@
   <meta name="twitter:title" content="Politique de confidentialité — Meuniance" />
   <meta name="twitter:description" content="Quelles données sont collectées, où elles sont stockées, qui y accède et comment les supprimer." />
   <link rel="stylesheet" href="vendor/fonts.css" />
-  <link rel="stylesheet" href="public.css?v=20261013-r1" />
+  <link rel="stylesheet" href="public.css?v=20261014-r2" />
 </head>
 <body>
   <div class="public-shell">
@@ -33,37 +33,63 @@
 
     <main class="doc">
       <h1>Politique de confidentialité</h1>
-      <p class="doc-updated">Dernière mise à jour : 2 octobre 2026</p>
-      <p class="doc-lead">Voici ce que Meuniance conserve, qui peut le voir et comment garder la main sur vos données.</p>
-      <nav class="doc-toc" aria-label="Sections de la politique"><a href="#donnees">Vos données</a><a href="#partage">Accès et partage</a><a href="#droits">Vos droits</a><a href="#contact">Contact</a></nav>
+      <p class="doc-updated">Dernière mise à jour : 14 octobre 2026</p>
+      <p class="doc-lead">Voici ce que Meuniance conserve, pourquoi, qui peut le voir et comment garder la main sur vos données.</p>
+      <nav class="doc-toc" aria-label="Sections de la politique"><a href="#responsable">Responsable</a><a href="#donnees">Vos données</a><a href="#finalites">Pourquoi</a><a href="#stockage">Où</a><a href="#partage">Qui y accède</a><a href="#droits">Vos droits</a><a href="#contact">Contact</a></nav>
 
       <section>
         <h2>En résumé</h2>
         <p>
           Meuniance est un outil de suivi budgétaire personnel. Aucune publicité,
           aucun traqueur, aucune revente de données. Vos données financières servent
-          uniquement à afficher votre tableau de bord, et à rien d'autre.
+          uniquement à faire fonctionner votre tableau de bord, et à rien d'autre.
+        </p>
+      </section>
+
+      <section id="responsable">
+        <h2>Responsable du traitement</h2>
+        <p>
+          Le responsable du traitement est l’éditeur de Meuniance, un particulier (voir les
+          <a href="/mentions-legales">mentions légales</a>), joignable à
+          <a href="mailto:louka.meunier1@gmail.com">louka.meunier1@gmail.com</a>.
         </p>
       </section>
 
       <section id="donnees">
         <h2>Quelles données sont collectées</h2>
         <ul>
-          <li><strong>Compte :</strong> votre adresse e-mail et, si vous en choisissez un, votre pseudo. Le mot de passe est traité et haché par Supabase Auth ; Meuniance ne le conserve pas dans le tableur.</li>
+          <li><strong>Compte :</strong> votre adresse e-mail et, si vous en choisissez un, votre pseudo. Le mot de passe est traité et haché par Supabase Auth ; Meuniance ne le voit jamais en clair.</li>
           <li><strong>Données financières :</strong> le contenu de votre tableur (libellés, montants, dates), vos catégories, vos objectifs et vos notes.</li>
           <li><strong>Réglages :</strong> thème, langue et préférences d'affichage.</li>
           <li><strong>Partage :</strong> les accès que vous accordez à d'autres comptes, et ceux que l'on vous accorde.</li>
+          <li><strong>Rappels (si vous les activez) :</strong> l’adresse technique d’abonnement aux notifications fournie par votre navigateur, la fréquence choisie et la date du dernier rappel.</li>
+          <li><strong>Données techniques :</strong> adresse IP, date et type de navigateur, enregistrés dans les journaux de nos hébergeurs pour assurer la sécurité du service.</li>
         </ul>
-        <p>Aucune coordonnée bancaire, aucun identifiant de banque et aucun moyen de paiement n'est demandé ni stocké.</p>
+        <p>
+          Aucune coordonnée bancaire, aucun identifiant de banque et aucun moyen de paiement
+          n'est demandé ni stocké. Si vous importez un relevé bancaire (fichier CSV), il est
+          lu <strong>uniquement dans votre navigateur</strong> : le fichier n’est jamais envoyé,
+          seuls les totaux par catégorie et par mois sont ajoutés à votre tableur.
+        </p>
       </section>
 
-      <section>
+      <section id="finalites">
+        <h2>Pourquoi et sur quelle base</h2>
+        <ul>
+          <li><strong>Fournir le service</strong> (compte, tableur, tableau de bord, synchronisation, partage) : exécution des conditions d’utilisation que vous acceptez.</li>
+          <li><strong>Sécuriser le service</strong> (journaux techniques, limitation des abus comme les recherches d’amis répétées) : intérêt légitime à protéger le service et ses utilisateurs.</li>
+          <li><strong>Vous envoyer des rappels de saisie</strong> : votre consentement, que vous pouvez retirer à tout moment dans les paramètres ou les réglages de votre appareil.</li>
+        </ul>
+        <p>Aucune décision automatisée ni aucun profilage n’est réalisé.</p>
+      </section>
+
+      <section id="stockage">
         <h2>Où vos données sont stockées</h2>
         <p>
           Tant que vous n'êtes pas connecté, vos données restent dans votre navigateur.
           Une fois connecté, elles sont synchronisées avec votre compte sur une base de
-          données hébergée par Supabase, au sein de l'Union européenne, via une connexion
-          chiffrée (HTTPS). Supabase chiffre aussi la base de données au repos.
+          données Supabase située dans l'Union européenne (Irlande), via une connexion
+          chiffrée (HTTPS). La base de données est aussi chiffrée au repos.
         </p>
         <p>Pour fonctionner hors ligne, une copie locale reste sur cet appareil. Elle est séparée par compte dans le navigateur, mais elle n'est pas chiffrée par un secret personnel. Protégez l'accès à votre appareil et effacez les données du navigateur sur un appareil partagé.</p>
       </section>
@@ -73,6 +99,13 @@
         <ul>
           <li><strong>Vous.</strong> Des règles de sécurité au niveau de la base de données (Row Level Security) limitent chaque ligne à son propriétaire.</li>
           <li><strong>Les personnes que vous invitez</strong>, uniquement pour les éléments que vous partagez explicitement, et jusqu'à ce que vous retiriez l'accès.</li>
+          <li><strong>Nos sous-traitants techniques</strong>, uniquement pour faire fonctionner le service :
+            <ul>
+              <li>Supabase : base de données, comptes et e-mails de connexion, hébergés dans l’Union européenne ;</li>
+              <li>Vercel Inc. : hébergement et diffusion du site, aux États-Unis. Ce transfert est encadré par le cadre de protection des données UE–États-Unis (Data Privacy Framework) et par des clauses contractuelles types de la Commission européenne ;</li>
+              <li>si vous activez les rappels, le service de notifications de votre appareil (Apple, Google ou Mozilla) achemine le rappel ; son contenu est chiffré et ne contient aucun montant.</li>
+            </ul>
+          </li>
           <li>Personne d'autre : vos données ne sont ni vendues, ni louées, ni transmises à des tiers à des fins commerciales.</li>
         </ul>
       </section>
@@ -80,31 +113,45 @@
       <section>
         <h2>Cookies et mesure d'audience</h2>
         <p>
-          Aucun cookie publicitaire et aucun outil de statistiques tiers. Seul un stockage
-          local technique est utilisé pour vous garder connecté et conserver vos préférences.
+          Aucun cookie publicitaire et aucun outil de statistiques. Seul un stockage local
+          technique, indispensable au service, est utilisé pour vous garder connecté et
+          conserver vos préférences : il ne nécessite pas de consentement.
         </p>
       </section>
 
       <section>
         <h2>Durée de conservation</h2>
-        <p>
-          Vos données sont conservées tant que votre compte existe. À la suppression du
-          compte, elles sont effacées de la base de données ; les sauvegardes techniques
-          éventuelles expirent sous 30 jours.
-        </p>
+        <ul>
+          <li>Vos données sont conservées tant que votre compte existe. À sa suppression, elles sont effacées de la base de données ; les sauvegardes techniques éventuelles expirent sous 30 jours.</li>
+          <li>Un compte inactif depuis 3 ans peut être supprimé, après un e-mail de prévenance vous laissant le temps de le conserver.</li>
+          <li>Les données des rappels sont supprimées dès que vous les désactivez.</li>
+          <li>Les journaux techniques sont conservés pour une durée limitée fixée par nos hébergeurs.</li>
+        </ul>
       </section>
 
       <section id="droits">
         <h2>Vos droits (RGPD)</h2>
         <p>
-          Vous disposez d'un droit d'accès, de rectification, d'effacement, de portabilité
-          et d'opposition. Concrètement, depuis l'application :
+          Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation,
+          de portabilité et d'opposition, ainsi que du droit de retirer votre consentement
+          et de définir des directives sur le sort de vos données après votre décès.
+          Concrètement, depuis l'application :
         </p>
         <ul>
           <li><strong>Accès et rectification :</strong> vos données sont modifiables directement dans le tableur.</li>
-          <li><strong>Portabilité :</strong> le bouton « Exporter » télécharge le contenu du tableur. Pour une demande portant sur les autres données de votre compte, contactez-nous.</li>
+          <li><strong>Portabilité :</strong> le bouton « Exporter » télécharge le contenu du tableur. Pour les autres données de votre compte, écrivez-nous.</li>
           <li><strong>Effacement :</strong> <em>Paramètres → Données et synchronisation</em> permet de réinitialiser vos données, et <em>Paramètres → Profil</em> de supprimer votre compte.</li>
         </ul>
+        <p>
+          Nous répondons à toute demande dans un délai d’un mois. Si vous estimez que vos
+          droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL
+          (<a href="https://www.cnil.fr" rel="noopener">cnil.fr</a>).
+        </p>
+      </section>
+
+      <section>
+        <h2>Mineurs</h2>
+        <p>Meuniance s’adresse aux personnes de 15 ans et plus. En dessous, l’accord d’un titulaire de l’autorité parentale est nécessaire.</p>
       </section>
 
       <section>
@@ -112,14 +159,15 @@
         <p>
           Le site est servi exclusivement en HTTPS, avec une politique de sécurité de
           contenu stricte, des bibliothèques hébergées par le site lui-même et des
-          vérifications d'intégrité empêchant l'exécution de code modifié.
+          vérifications d'intégrité empêchant l'exécution de code modifié. En cas de violation
+          de données susceptible de vous exposer à un risque élevé, vous serez prévenu.
         </p>
       </section>
 
       <section id="contact">
         <h2>Nous contacter</h2>
         <p>
-           Pour toute question relative à vos données, écrivez à
+           Pour toute question ou demande relative à vos données, écrivez à
            <a href="mailto:louka.meunier1@gmail.com">louka.meunier1@gmail.com</a> depuis
            l'adresse e-mail associée à votre compte.
         </p>
@@ -128,7 +176,7 @@
 
     <footer class="public-footer">
       <p>© 2026 Meuniance</p>
-      <nav><a href="/conditions">Conditions d'utilisation</a></nav>
+      <nav><a href="/mentions-legales">Mentions légales</a><a href="/conditions">Conditions d'utilisation</a></nav>
     </footer>
   </div>
 </body>
