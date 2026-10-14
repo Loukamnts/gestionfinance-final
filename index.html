@@ -1821,7 +1821,7 @@
   <link rel="stylesheet" href="ui-polish.css?v=20261003-r1">
   <link rel="stylesheet" href="theme-directions.css?v=20261014-r3">
   <link rel="stylesheet" href="plans.css?v=20261013-r1">
-  <link rel="stylesheet" href="home.css?v=20261014-r4">
+  <link rel="stylesheet" href="home.css?v=20261014-r5">
   <link rel="stylesheet" href="sheet-balances.css?v=20261014-r4">
   <link rel="stylesheet" href="finishing.css?v=20261013-r7">
   <link rel="stylesheet" href="menus.css?v=20261013-r2">
@@ -2720,6 +2720,15 @@
       elements.yearSelect.disabled=false;
       syncCustomDropdown(elements.yearSelect);
     }
+    // Mois proposé par défaut : le mois en cours s'il est saisi, sinon le dernier mois passé, sinon le dernier.
+    function pickDefaultMonthId(months){
+      const list=(months||[]).filter(Boolean);if(!list.length) return "";
+      const now=new Date(),cy=now.getFullYear(),cm=now.getMonth()+1;
+      const info=m=>{const y=Number(getMonthYear(m))||0,mm=Number((String(m.id).match(/_m(\d{1,2})$/)||[])[1])||0;return {y,mm};};
+      const cur=list.find(m=>{const i=info(m);return i.y===cy&&i.mm===cm;});if(cur) return cur.id;
+      const past=list.filter(m=>{const i=info(m);return i.y&&i.mm&&(i.y<cy||(i.y===cy&&i.mm<=cm));});
+      return (past[past.length-1]||list[list.length-1]).id;
+    }
     function populateMonthSelect(){
       populateYearSelect();
       const months=getVisibleMonths();
@@ -2735,7 +2744,7 @@
         syncCustomDropdown(elements.monthSelect);
         return;
       }
-      if(!months.some(m=>m.id===state.selectedMonthId)) state.selectedMonthId=months[months.length-1]?.id||"";
+      if(!months.some(m=>m.id===state.selectedMonthId)) state.selectedMonthId=pickDefaultMonthId(months);
       months.forEach(m=>{ const opt=document.createElement("option"); opt.value=m.id; opt.textContent=m.label; elements.monthSelect.appendChild(opt); });
       elements.monthSelect.value=state.selectedMonthId;
       elements.monthSelect.disabled=false;
@@ -4802,7 +4811,7 @@ function inferColumnType(header, samples){
       const scopedMonths = normalized.months.filter(month => !state.selectedYear || getMonthYear(month) === state.selectedYear);
       state.selectedMonthId = scopedMonths.some(month => month.id === previousSelected)
         ? previousSelected
-        : scopedMonths[scopedMonths.length - 1]?.id || normalized.months[normalized.months.length - 1]?.id || "";
+        : pickDefaultMonthId(scopedMonths) || normalized.months[normalized.months.length - 1]?.id || "";
       state.isGlobal = false;
       if(options.source) state.source = options.source;
       return normalized;
@@ -5119,7 +5128,8 @@ function inferColumnType(header, samples){
             if(nonEmpty) pages.push({ id: sheetName + "_" + r, properties: props });
           }
         });
-        applyFinancePagesToState(pages, { source: "tableur", reset: true });
+        // Relire le tableur ne fait pas perdre le mois choisi sur l'accueil.
+        applyFinancePagesToState(pages, { source: "tableur", reset: true, keepSelected: true });
         populateMonthSelect();
         updateInterface();
         if(pages.length) setConnection(true, "Tableur");
@@ -5283,7 +5293,7 @@ function inferColumnType(header, samples){
     }
     init();
   </script>
-  <script src="sheet.js?v=20261014-r3"></script>
+  <script src="sheet.js?v=20261014-r4"></script>
   <script src="onboarding.js?v=20261014-r1"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
   <script src="friends.js?v=20261014-r1"></script>
@@ -5723,7 +5733,9 @@ function inferColumnType(header, samples){
         // doit rester actif jusque-là, sinon ce pull déclencherait aussitôt un
         // push inutile qui pourrait masquer une modification d'un autre appareil.
         window.__gfSuppressSync = true;
-        fs.loadSnapshot({ v: snap.v || "cloud", sheets: snap.sheets, activeSheetId: snap.activeSheetId });
+        // L'onglet ouvert reste celui de cet appareil (année en cours), pas celui enregistré dans le cloud.
+        var keepActive = (function(){ try{ var cur = fs.getSnapshot(); var a = cur && (cur.sheets||[]).find(function(x){ return x.id === cur.activeSheetId; }); var same = a && snap.sheets.find(function(x){ return String(x.name).trim() === String(a.name).trim(); }); return same ? same.id : snap.activeSheetId; }catch(e){ return snap.activeSheetId; } })();
+        fs.loadSnapshot({ v: snap.v || "cloud", sheets: snap.sheets, activeSheetId: keepActive });
         setTimeout(function(){ if(generation === syncState.generation) window.__gfSuppressSync = false; }, 800);
         if(typeof window.syncDashboardFromFinanceSheet === "function"){
           try{ window.syncDashboardFromFinanceSheet({ silent: true }); }catch(e){}
@@ -5882,10 +5894,10 @@ function inferColumnType(header, samples){
   <script src="meuni-loader.js?v=20261014-r3" defer></script>
   <script src="ios-fix.js?v=20261013-r2" defer></script>
   <script src="plans.js?v=20261014-r2" defer></script>
-  <script src="home.js?v=20261014-r3" defer></script>
+  <script src="home.js?v=20261014-r4" defer></script>
   <script src="finishing.js?v=20261014-r1" defer></script>
   <script src="bank-import.js?v=20261014-r1" defer></script>
-  <script src="reminders.js?v=20261014-r2" defer></script>
+  <script src="reminders.js?v=20261014-r3" defer></script>
   <script src="menus.js?v=20261013-r1" defer></script>
   <script src="discover.js?v=20261013-r2" defer></script>
 </body>
