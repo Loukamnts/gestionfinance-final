@@ -69,8 +69,11 @@ body[data-theme="moulin"] #updatesPage .updates-list{display:block}
 .update-details summary::-webkit-details-marker{display:none}
 .update-details summary::after{content:"";width:6px;height:6px;margin-left:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .15s}
 .update-details[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
-.update-detail{display:flex;gap:10px;align-items:baseline;margin:6px 0 0;max-width:68ch;font-size:14px;line-height:1.5;color:var(--muted)}
-.update-detail .update-type-badge{flex:none;padding:1px 8px;border:1px solid var(--line);border-radius:10px;font:600 11px/1.6 var(--font-body);text-transform:uppercase;letter-spacing:.04em;color:var(--text);background:transparent}
+/* L’étiquette « Nouveau » / « Amélioré » au-dessus, le paragraphe dessous */
+.update-detail{display:block;margin:12px 0 0;max-width:68ch;font-size:14px;line-height:1.5;color:var(--muted)}
+.update-detail .update-type-badge{display:inline-block;margin:0 0 4px}
+.update-detail .update-type-badge + span{display:block}
+.update-detail .update-type-badge{padding:1px 8px;border:1px solid var(--line);border-radius:10px;font:600 11px/1.6 var(--font-body);text-transform:uppercase;letter-spacing:.04em;color:var(--text);background:transparent}
 .update-detail .update-type-new{border-color:var(--accent-fill,var(--accent))}
 .update-more{display:block;margin:24px auto 0;height:48px;padding:0 24px;border:1px solid var(--line);border-radius:14px;background:transparent;color:var(--text);font:600 15px var(--font-body);cursor:pointer}
 .update-more:hover{border-color:var(--text)}
