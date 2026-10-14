@@ -248,3 +248,10 @@ body[data-theme="brutal"] .sf-onboarding-step,body[data-theme="brutal"] .sf-onbo
   .sf-onboarding-actions > .sf-button { flex:1 1 150px; }
 }
 
+
+/* Partage (Le Moulin) : pas de cadre autour de toute la page — chaque carte a déjà le sien.
+   L'ancien cadre sans marge intérieure coupait les boutons et collait au contenu. */
+body[data-theme="moulin"] #sharingPage #sharingContainer{border:0!important;border-radius:0!important;padding:0!important;background:transparent!important;box-shadow:none!important}
+body[data-theme="moulin"] #sharingContainer .sf-toolbar-actions{gap:10px}
+body[data-theme="moulin"] #sharingContainer .sf-tab-content{margin-top:16px}
+body[data-theme="moulin"] #sharingContainer .sf-privacy{margin-top:20px;padding:0 4px}
