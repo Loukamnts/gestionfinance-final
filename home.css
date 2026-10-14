@@ -242,9 +242,9 @@ button.gfh-cat:focus-visible{outline:2px solid var(--accent);outline-offset:0}
 /* Mode discret : bouton œil et montants floutés */
 .gfh-eye{flex:none;display:grid;place-items:center;width:44px;height:44px;margin:-12px -12px -12px 0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer}
 .gfh-eye svg{width:20px;height:20px}
-.gfh-eye:hover{background:var(--block-line,rgba(246,242,232,.14))}
+@media(hover:hover){.gfh-eye:hover{background:var(--block-line,rgba(246,242,232,.14))}}
 .gfh-eye:focus-visible{outline:2px solid currentColor;outline-offset:-2px}
-body.gf-hide-amounts :is(.gfh-big,.gfh-foot .v,.gfh-foot small,.gfh-cat .gfh-row span:last-child,.gfh-over,.gfh-fixed-amt,.gfh-goal small,.gfh-bilan,.gfh-yr,.gfh-recap-stat .v,.gfh-recap-stat small,.gfh-recap-fact,
+body.gf-hide-amounts :is(.gfh-big,.gfh-foot .v,.gfh-foot small,.gfh-cat .gfh-row span:last-child,.gfh-over,.gfh-fixed-amt,.gfh-goal small,.gfh-bilan,.gfh-recap-stat .v,.gfh-recap-stat small,.gfh-recap-fact,
   .metric-value,.metric-note,.mobile-finance-summary-value,#savingsGoalValue,#savingsGoalCurrent,#savingsGoalRemaining,.detail-row strong,#dashboardPage canvas,.chart-wrap,
   .balance-value,#sheetPage td.cell,#sheetPage .fx-input,#sheetPage .fx-preview,#sheetPage .sheet-table tfoot td,
   .objective-amount-wrap,.objective-remaining,.objective-insight,.objective-rhythm,.objective-stat strong,.objective-meta){filter:blur(7px);-webkit-user-select:none;user-select:none;transition:filter .15s ease}
@@ -263,7 +263,22 @@ body.gf-hide-amounts :is(.gfh-big,.gfh-foot .v,.gfh-foot small,.gfh-cat .gfh-row
 .gfb-row b{font-weight:600;font-variant-numeric:tabular-nums}
 .gfb-mode{display:grid;gap:4px;margin:0;padding:0;border:0}
 .gfb-mode legend{margin-bottom:4px;padding:0;font:600 14px var(--font-body)}
-.gfb-opt{display:flex;align-items:flex-start;gap:10px;min-height:44px;padding:6px 0;font-size:14px;line-height:1.4;cursor:pointer}
-.gfb-opt input{flex:none;width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent-fill,var(--accent))}
+.gfb-opt{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 0;font-size:14px;line-height:1.4;cursor:pointer}
+.gfb-opt input{flex:none;width:20px;height:20px;margin:0;accent-color:var(--accent-fill,var(--accent))}
 .gfb-actions{display:flex;justify-content:flex-end;gap:10px}
 body.gf-hide-amounts .gfb-row b{filter:blur(7px)}
+
+/* Rappels de saisie (Paramètres › Apparence) */
+.gfr-freq select{min-width:150px;height:44px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--text);font:500 15px var(--font-body)}
+.gfr-label{cursor:pointer}
+.gfr-acts{padding:8px 0}
+.gfr-acts .gfh-link{min-height:44px}
+.gfr-msg{margin:6px 0 0;font-size:14px;color:var(--text)}
+.gfr-msg:empty{display:none}
+@media(max-width:560px){.gfh-foot .v{font-size:clamp(15px,4.1vw,22px)}}
+.gfr-set [hidden]{display:none!important}
+.gfr-label strong{font:500 15px var(--font-body)!important;color:var(--text)!important}
+.gfr-label small{font:400 13px var(--font-body)!important;color:var(--muted)!important}
+.gfr-freq select{flex:0 0 auto;width:auto}
+.gfb-opt span{font:400 15px/1.4 var(--font-body)!important;color:var(--text)!important}
+.gfb-mode legend{color:var(--text)}

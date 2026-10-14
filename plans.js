@@ -72,7 +72,7 @@
       var isCurrent=plan.id===state.plan,card=el("article","gfs-card"+(plan.featured?" is-featured":"")+(isCurrent&&!options.compact?" is-current":""));
       card.setAttribute("role","listitem");
       if(isCurrent&&!options.compact)card.append(el("span","gfs-tag",t2("Ta formule","Your plan")));
-      else if(plan.featured)card.append(el("span","gfs-tag",t2("Le plus choisi","Most popular")));
+      else if(plan.featured)card.append(el("span","gfs-tag",t2("Recommandé","Recommended")));
       card.append(el("h4","",plan.name),el("p","gfs-pitch",tr(plan.pitch)));
       var p=el("div","gfs-price");p.append(el("b","",price(plan.price)),el("small","",tr(plan.period)));card.append(p);
       var list=el("ul");plan.features.forEach(function(f){var li=el("li",f[2]?"is-dim":"",tr(f));list.append(li);});card.append(list);

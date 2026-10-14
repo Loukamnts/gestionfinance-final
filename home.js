@@ -389,7 +389,7 @@
     else{
       var ylab=el("label","gfh-yr"),ysel=document.createElement("select");
       ylab.append(el("span","gfh-sr",t2("Année","Year")),ysel);
-      years.forEach(function(y){var last=all.filter(function(m){return m.year===y;}).pop(),o=new Option(String(y)+(last&&bal[last.id]!=null?" · "+eur(bal[last.id]):""),String(y));o.selected=y===sel.year;ysel.append(o);});
+      years.forEach(function(y){var last=all.filter(function(m){return m.year===y;}).pop(),o=new Option(String(y)+(last&&bal[last.id]!=null&&!amountsHidden()?" · "+eur(bal[last.id]):""),String(y));o.selected=y===sel.year;ysel.append(o);});
       // Changer d'année garde le même mois quand il existe
       ysel.addEventListener("change",function(){var y=Number(ysel.value);if(y===sel.year)return;var ms=all.filter(function(m){return m.year===y;}),same=ms.filter(function(m){return m.mi===sel.mi;})[0];select(same||ms[ms.length-1]);});
       yrs.append(ylab);

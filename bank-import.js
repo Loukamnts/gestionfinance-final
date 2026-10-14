@@ -210,7 +210,7 @@
       var note=el("p","gfb-note",t2("Le fichier reste sur ton appareil : seuls ces totaux sont ajoutés au tableur.","The file stays on your device: only these totals are added to the spreadsheet.")+(summary.ignored?" "+summary.ignored+t2(" virement(s) entre tes comptes ignoré(s)."," transfer(s) between your accounts ignored."):""));
       var modeBox=el("fieldset","gfb-mode");modeBox.append(el("legend","",t2("Si un mois contient déjà ces lignes","If a month already has these rows")));
       [["replace",t2("Remplacer leurs montants (recommandé si tu réimportes le même relevé)","Replace their amounts (recommended if you re-import the same statement)")],["add",t2("Ajouter aux montants existants","Add to existing amounts")]].forEach(function(o,i){var lab=el("label","gfb-opt"),r=document.createElement("input");r.type="radio";r.name="gfbMode";r.value=o[0];r.checked=i===0;lab.append(r,el("span","",o[1]));modeBox.append(lab);});
-      var acts=el("div","gfb-actions"),cancel=el("button","gfh-btn",t2("Annuler","Cancel")),ok=el("button","gfh-btn is-primary",t2("Importer","Import"));cancel.type="button";ok.type="submit";acts.append(cancel,ok);
+      var acts=el("div","gfb-actions"),cancel=el("button","gfh-btn",t2("Annuler","Cancel")),ok=el("button","gfh-btn is-primary",t2("Importer","Import"));cancel.type="button";ok.type="submit";ok.autofocus=true;acts.append(cancel,ok);
       var form=document.createElement("form");form.append(h,lead,list,modeBox,note,acts);d.append(form);
       var done=false;function finish(v){if(done)return;done=true;d.close();resolve(v);}
       cancel.addEventListener("click",function(){finish(null);});
