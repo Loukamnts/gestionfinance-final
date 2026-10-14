@@ -47,7 +47,8 @@ body[data-mode="dark"] .gfh-card{border-color:var(--line)}
 .gfh-bars{display:flex;gap:5px;align-items:flex-end;height:112px;margin-top:22px}
 .gfh-bars button{flex:1;min-width:0;height:100%;border:0;padding:0;background:transparent;display:flex;align-items:flex-end;cursor:pointer;border-radius:5px}
 .gfh-bars button span{display:block;width:100%;border-radius:5px 5px 2px 2px;background:var(--block-line,rgba(246,242,232,.22));transition:background .2s}
-.gfh-bars button:not(:disabled):hover span{background:rgba(246,242,232,.34)}
+/* Survol seulement avec une souris : sur iPhone, l’état « survolé » reste après un toucher et masquait le jaune */
+@media(hover:hover){.gfh-bars button:not(:disabled):not(.on):hover span{background:rgba(246,242,232,.34)}}
 .gfh-bars button.on span{background:var(--accent-fill,#E3A82B)}
 .gfh-bars button:disabled{cursor:default}
 .gfh-bars button:disabled span{opacity:.4}
