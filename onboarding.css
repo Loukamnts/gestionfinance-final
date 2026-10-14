@@ -447,3 +447,53 @@ body[data-theme="brutal"] .wizard-theme-card,
 body[data-theme="brutal"] .wizard-auth-choice,
 body[data-theme="brutal"] .wizard-auth-submit,
 body[data-theme="brutal"] .tutorial-tooltip { border-radius: 0 !important; }
+
+/* === Tutoriel « Le Moulin » : voile calme, anneau net, bulle claire === */
+body.tutorial-active .bottom-nav { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.tutorial-spotlight {
+  border: 2px solid var(--accent-fill, #E3A82B);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-fill, #E3A82B) 30%, transparent), 0 0 0 200vmax rgba(10, 18, 14, .6);
+  animation: none;
+  transition: top .35s cubic-bezier(.2,.8,.2,1), left .35s cubic-bezier(.2,.8,.2,1), width .35s cubic-bezier(.2,.8,.2,1), height .35s cubic-bezier(.2,.8,.2,1), border-radius .35s;
+}
+body[data-theme] .tutorial-tooltip {
+  padding: 18px 18px 16px; border: 1px solid var(--line); border-radius: 20px;
+  background: var(--panel-solid, #FBF8F1); color: var(--text);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .28);
+  opacity: 0; transform: translateY(6px); transition: opacity .25s ease, transform .25s ease, top .35s cubic-bezier(.2,.8,.2,1), left .35s cubic-bezier(.2,.8,.2,1);
+  max-height: calc(100dvh - 32px); overflow: auto;
+}
+body[data-theme] .tutorial-tooltip.is-placed { opacity: 1; transform: none; }
+.tutorial-head { display: flex; align-items: center; justify-content: space-between; margin: -6px -8px 4px 0; }
+.tutorial-count { font: 600 12px var(--font-body); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
+body[data-theme] .tutorial-tooltip .tutorial-skip {
+  width: 44px; height: 44px; margin: 0; padding: 0; border: 0; border-radius: 50%;
+  background: transparent; color: var(--muted); font: 400 24px/1 var(--font-body); cursor: pointer;
+}
+body[data-theme] .tutorial-tooltip .tutorial-skip:hover { background: var(--line); color: var(--text); }
+body[data-theme] .tutorial-tooltip h4 { margin: 0 0 6px; font: 700 20px/1.2 var(--font-heading); letter-spacing: -.02em; color: var(--text); }
+body[data-theme] .tutorial-tooltip p { margin: 0; font: 400 15px/1.5 var(--font-body); color: var(--muted); }
+.tutorial-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+body[data-theme] .tutorial-progress { margin: 0; gap: 5px; }
+body[data-theme] .tutorial-progress-dot { width: 6px; height: 6px; border-radius: 3px; background: var(--line); transition: width .25s, background .25s; }
+body[data-theme] .tutorial-progress-dot.done { background: color-mix(in srgb, var(--accent-fill, #E3A82B) 55%, var(--line)); }
+body[data-theme] .tutorial-progress-dot.active { width: 18px; background: var(--accent-fill, #E3A82B); }
+.tutorial-actions { display: flex; align-items: center; gap: 6px; }
+body[data-theme] .tutorial-tooltip .tutorial-back {
+  height: 44px; padding: 0 12px; border: 0; border-radius: 14px; background: transparent;
+  color: var(--text); font: 600 15px var(--font-body); cursor: pointer;
+}
+body[data-theme] .tutorial-tooltip .tutorial-back:hover { background: var(--line); }
+body[data-theme] .tutorial-tooltip .tutorial-btn {
+  height: 44px; padding: 0 20px; border: 0; border-radius: 14px;
+  background: var(--accent-fill, #E3A82B); color: var(--on-accent-fill, #17261F);
+  font: 600 15px var(--font-body); box-shadow: none; transform: none; cursor: pointer;
+}
+body[data-theme] .tutorial-tooltip .tutorial-btn:hover { filter: brightness(1.05); transform: none; }
+body[data-theme] .tutorial-tooltip button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+@media (max-width: 560px) {
+  body[data-theme] .tutorial-tooltip { left: 12px !important; width: calc(100vw - 24px) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tutorial-spotlight, body[data-theme] .tutorial-tooltip { transition: none; }
+}

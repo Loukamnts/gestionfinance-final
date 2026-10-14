@@ -67,9 +67,6 @@
     if (el) el.textContent = text;
   }
 
-  function cadenceName(cadence) {
-    return ({ monthly: "Chaque mois", yearly: "Chaque année" })[cadence] || "Sans récurrence";
-  }
 
   function sources() {
     try { return window.FinanceSheet?.getObjectiveSources?.() || []; } catch (_) { return []; }
@@ -267,7 +264,8 @@
     const cancel = document.getElementById("objectiveCancelButton");
     const notebook = document.getElementById("notebookInput");
     if (!form || !notebook) return;
-    add?.addEventListener("click", openForm);
+    // Nouvel objectif : ne pas passer l'événement du clic, qui serait lu comme un objectif à modifier
+    add?.addEventListener("click", function () { openForm(); });
     cancel?.addEventListener("click", closeForm);
     document.getElementById("objectivePlanToggle")?.addEventListener("click", function () {
       const fields = document.getElementById("objectivePlanFields"); if (!fields) return;

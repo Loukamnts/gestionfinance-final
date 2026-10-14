@@ -26,16 +26,6 @@
   function syncBottom(){var b=byId("settingsNavButton");if(b)b.classList.toggle("is-active",document.body.dataset.page==="settings");}
 
   /* 3. Paramètres : raccourcis vers Mon espace (accessible aussi par l'avatar) */
-  function hubLinks(){
-    var hub=byId("settingsHub");if(!hub||byId("gfpHubSpace"))return;
-    var label=el("span","settings-hub-label",t2("Mon espace","My space"));label.id="gfpHubSpace";
-    var items=[["objectives",t2("Objectifs","Goals"),t2("Tes projets et leur progression","Your projects and progress")],["sharing",t2("Partage et amis","Sharing and friends"),t2("Qui voit quoi, et quand","Who sees what, and when")],["updates",t2("Nouveautés","What’s new"),t2("Les dernières améliorations","Latest improvements")],["notes",t2("Notes","Notes"),t2("Tes idées et rappels privés","Your private ideas and reminders")]];
-    var labels=hub.querySelectorAll(".settings-hub-label"),first=labels[1]||null;
-    var frag=document.createDocumentFragment();frag.append(label);
-    items.forEach(function(it){var b=el("button","settings-hub-item gfp-hub-link");b.type="button";var s=el("span");s.append(el("strong","",it[1]),el("small","",it[2]));b.append(s);
-      b.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();if(it[0]==="notes"){if(window.GFObjectives&&window.GFObjectives.setNotesOpen)window.GFObjectives.setNotesOpen(true);}else if(window.setPage)window.setPage(it[0]);});frag.append(b);});
-    if(first)hub.insertBefore(frag,first);else hub.append(frag);
-  }
 
 
   /* Objectifs : lien avec le tableur en deux choix simples (ligne, puis mois ou toute l'année). */
@@ -79,7 +69,6 @@
     if(window.MutationObserver)new MutationObserver(function(){if(!form.hidden)setTimeout(sync,0);}).observe(form,{attributes:true,attributeFilter:["hidden"]});
     sync();
   }
-  function openManagement(){document.querySelectorAll("#objectivesPage details.objective-management").forEach(function(d){d.open=true;});}
   function shortLabels(){document.querySelectorAll('.personal-workspace-nav .personal-workspace-link[data-page="sharing"]').forEach(function(b){if(b.querySelector(".gfp-short"))return;b.innerHTML='<span class="gfp-long">'+t2("Partage et amis","Sharing and friends")+'</span><span class="gfp-short">'+t2("Partage","Sharing")+'</span>';});}
   function start(){
     shortLabels();

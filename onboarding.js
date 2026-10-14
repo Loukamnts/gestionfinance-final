@@ -124,45 +124,6 @@
     }
   }
 
-  // === Données démo pour le tutoriel (non persistées) ===
-  var demoDataInjected = false;
-
-  function injectDemoData() {
-    // Le tutoriel s’appuie sur le vrai accueil : plus de données fictives injectées dans le tableur.
-    return;
-    if (typeof window.FinanceSheet === "undefined" || !window.FinanceSheet.loadDemoData) return;
-
-    try {
-      window.FinanceSheet.loadDemoData({
-        headers: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin"],
-        rowHeaders: ["Salaire", "Loyer", "Courses", "Revolut", "Épargne"],
-        values: [
-          [1650, -750, -320, -180, 256],
-          [1650, -750, -280, -150, 300],
-          [1700, -750, -350, -200, 350],
-          [1700, -750, -300, -180, 400],
-          [1700, -750, -290, -160, 380],
-          [1750, -780, -310, -190, 420],
-        ]
-      });
-      // NE PAS appeler syncDashboardFromFinanceSheet — les données démo ne doivent pas polluer le dashboard
-    } catch (e) {}
-  }
-
-  function clearDemoData() {
-    demoDataInjected = false;
-    // 1. Vide le FinanceSheet sans notifier le dashboard
-    if (typeof window.FinanceSheet !== "undefined" && window.FinanceSheet.clearDemoDataFS) {
-      try { window.FinanceSheet.clearDemoDataFS({ notify: false }); } catch (e) {}
-    }
-    // 2. Vide l'état interne du dashboard (catégories, mois, pages)
-    try { window.dispatchEvent(new CustomEvent("financeClearData")); } catch (e) {}
-    // 3. Retour à la page d'accueil
-    if (typeof window.setPage === "function") {
-      try { window.setPage("dashboard"); } catch (e) {}
-    }
-  }
-
   function closeWizard() {
     const overlay = $("onboardingOverlay");
     if (overlay) overlay.classList.add("hidden");
@@ -615,18 +576,21 @@
       text: "Ton solde et son évolution sur l’année. Touche un mois pour l’afficher.",
       target: "#gfhHome .gfh-card",
       action: "Suivant",
+      page: "dashboard",
     },
     {
       title: "Ajouter en un geste",
       text: "Ajoute une dépense, un revenu ou de l’épargne sans ouvrir le tableur.",
       target: "#gfhHome .gfh-add",
       action: "Suivant",
+      page: "dashboard",
     },
     {
       title: "Ton mois en détail",
       text: "Ici : où part ton argent, tes dépenses fixes et tes objectifs. Au début, charge un exemple ou ouvre le tableur.",
       target: "#gfhHome .gfh-right",
       action: "Suivant",
+      page: "dashboard",
     },
     {
       title: "Onglet Tableur",
@@ -634,6 +598,7 @@
       target: ".studio-sidebar-nav [data-page='sheet'], .desktop-nav [data-page='sheet'], .bottom-nav [data-page='sheet']",
       action: "Aller au Tableur",
       navigateTo: "sheet",
+      page: "dashboard",
     },
     {
       title: "Une feuille = une année",
@@ -641,6 +606,7 @@
       target: "#sheetPage .sheet-years",
       action: "Suivant",
       ensureVisible: true,
+      page: "sheet",
     },
     {
       title: "Paramètres",
@@ -662,17 +628,16 @@
     // Active le calque bloquant
     const blocker = $("tutorialBlocker");
     if (blocker) blocker.classList.remove("hidden");
-    // Injecte les données démo pour le tutoriel (graphique + tableur)
-    // seulement si aucun fichier n'a été importé pendant le wizard
-    if (!wizardData.importedFile) {
-      injectDemoData();
-    }
     // Sync le dashboard pour afficher le graphique avec les données démo ou importées
     if (typeof window.syncDashboardFromFinanceSheet === "function") {
       try { window.syncDashboardFromFinanceSheet({ silent: true }); } catch (e) {}
     }
     renderTutorialStep();
   }
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && document.body.classList.contains("tutorial-active")) { var skip = $("tutorialSkip"); if (skip) skip.click(); }
+  });
 
   function closeTutorial() {
     const overlay = $("tutorialOverlay");
@@ -688,8 +653,6 @@
     currentTutorialOverlay = null;
     // Restaurer le hidden sur les éléments qu'on a rendus visibles pendant le tutoriel
     restoreHiddenElements();
-    // Nettoie les données démo injectées pendant le tutoriel (uniquement si elles ont été injectées)
-    if (demoDataInjected) clearDemoData();
     // Si un fichier a été importé, re-sync le dashboard avec les données réelles
     if (wizardData.importedFile && typeof window.syncDashboardFromFinanceSheet === "function") {
       try { window.syncDashboardFromFinanceSheet({ silent: true }); } catch (e) {}
@@ -746,17 +709,12 @@
       madeVisibleElements.push(target);
     }
 
-    // Scroll la cible en vue avant de positionner le tooltip
-    try {
-      target.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
-    } catch (e) {
-      try { target.scrollIntoView(); } catch (e2) {}
-    }
-
-    // Attend que le scroll se stabilise avant de positionner
+    // La bulle est construite d'abord : sa hauteur décide de la place laissée à l'élément expliqué
+    buildTutorialTooltip(overlay, step);
+    scrollTutorialTarget(target, overlay);
     setTimeout(function() {
       positionTutorialElements(overlay, target, step);
-    }, 400);
+    }, 380);
   }
 
   // Variable pour stocker la cible courante et la repositionner au scroll
@@ -764,68 +722,120 @@
   var currentTutorialStep = null;
   var currentTutorialOverlay = null;
 
-  function positionTutorialElements(overlay, target, step) {
-    if ((!target || !target.isConnected) && step && step.target) { var fresh = Array.prototype.find.call(document.querySelectorAll(step.target), function (n) { return n.getClientRects().length; }); if (fresh) target = fresh; }
-    currentTutorialTarget = target;
-    currentTutorialStep = step;
-    currentTutorialOverlay = overlay;
+  function tutorialNavHeight() {
+    var nav = document.querySelector(".bottom-nav");
+    if (!nav || !nav.getClientRects().length) return 0;
+    var r = nav.getBoundingClientRect();
+    return r.top < window.innerHeight ? window.innerHeight - r.top : 0;
+  }
+  function tutorialDocked() { return window.innerWidth <= 560; }
+  function tutorialEn() { return !!(window.GFI18n && typeof window.GFI18n.getLanguage === "function" && window.GFI18n.getLanguage() === "en"); }
+  // Sur téléphone, la bulle est ancrée en bas (au-dessus de la barre de navigation)
+  function tutorialTooltipTop(tooltip) {
+    return window.innerHeight - tutorialNavHeight() - 12 - tooltip.offsetHeight;
+  }
+  function tutorialIsInNav(target) { return !!(target && target.closest && target.closest(".bottom-nav")); }
 
-    var rect = target.getBoundingClientRect();
-    var padding = 8;
-
-    // Spotlight
-    var spotlight = overlay.querySelector(".tutorial-spotlight");
-    if (!spotlight) {
-      spotlight = create("div", "tutorial-spotlight");
-      overlay.appendChild(spotlight);
-    }
-    spotlight.style.top = (rect.top - padding) + "px";
-    spotlight.style.left = (rect.left - padding) + "px";
-    spotlight.style.width = (rect.width + padding * 2) + "px";
-    spotlight.style.height = (rect.height + padding * 2) + "px";
-
-    // Tooltip position : au-dessus ou en-dessous de la cible
+  function buildTutorialTooltip(overlay, step) {
     var tooltip = overlay.querySelector(".tutorial-tooltip");
     if (!tooltip) {
       tooltip = create("div", "tutorial-tooltip");
+      tooltip.setAttribute("role", "dialog");
+      tooltip.setAttribute("aria-live", "polite");
       overlay.appendChild(tooltip);
     }
-
-    var tooltipWidth = Math.min(340, window.innerWidth - 40);
-    var tooltipX = (window.innerWidth - tooltipWidth) / 2;
-
-    // Mobile : centrer horizontalement avec marges
-    if (window.innerWidth <= 480) {
-      tooltipX = Math.max(20, (window.innerWidth - tooltipWidth) / 2);
-    }
-
-    tooltip.style.width = tooltipWidth + "px";
-    tooltip.style.left = tooltipX + "px";
-    tooltip.style.animation = "tooltipIn 0.3s ease";
-
-    // Progress dots
+    var total = TUTORIAL_STEPS.length;
     var dotsHtml = TUTORIAL_STEPS.map(function(_, i) {
       var cls = "tutorial-progress-dot";
       if (i < tutorialIndex) cls += " done";
       if (i === tutorialIndex) cls += " active";
       return '<span class="' + cls + '"></span>';
     }).join("");
-
+    var text = document.body.dataset.interface === "studio" && window.innerWidth <= 780 && step.isLast ? "Ouvre la navigation pour retrouver ton profil et les réglages." : step.text;
     tooltip.innerHTML =
-      '<div class="tutorial-progress">' + dotsHtml + '</div>' +
-      '<h4>' + step.title + '</h4>' +
-      '<p>' + (document.body.dataset.interface === "studio" && window.innerWidth <= 780 && step.isLast ? "Ouvre la navigation pour retrouver ton profil et les réglages." : step.text) + '</p>' +
-      '<button class="tutorial-btn" id="tutorialNext">' + step.action + '</button>' +
-      '<button class="tutorial-skip" id="tutorialSkip">Passer</button>';
+      '<div class="tutorial-head"><span class="tutorial-count">' + (tutorialEn() ? 'Step ' + (tutorialIndex + 1) + ' of ' + total : 'Étape ' + (tutorialIndex + 1) + ' sur ' + total) + '</span>' +
+      '<button class="tutorial-skip" id="tutorialSkip" type="button" aria-label="' + (tutorialEn() ? 'Close the tour' : 'Fermer le tutoriel') + '">×</button></div>' +
+      '<h4 id="tutorialTitle">' + step.title + '</h4>' +
+      '<p>' + text + '</p>' +
+      '<div class="tutorial-foot"><div class="tutorial-progress" aria-hidden="true">' + dotsHtml + '</div>' +
+      '<div class="tutorial-actions">' + (tutorialIndex > 0 ? '<button class="tutorial-back" id="tutorialBack" type="button">Précédent</button>' : '') +
+      '<button class="tutorial-btn" id="tutorialNext" type="button">' + step.action + '</button></div></div>';
+    tooltip.setAttribute("aria-labelledby", "tutorialTitle");
+    if (window.GFI18n && typeof window.GFI18n.apply === "function") { try { window.GFI18n.apply(tooltip); } catch (e) {} }
+    var tooltipWidth = tutorialDocked() ? window.innerWidth - 24 : Math.min(360, window.innerWidth - 40);
+    tooltip.style.width = tooltipWidth + "px";
+    wireTutorialButtons(step);
+    return tooltip;
+  }
 
-    var tooltipHeight = tooltip.offsetHeight;
-    var below = rect.bottom + padding + 16;
-    var above = rect.top - tooltipHeight - padding - 16;
-    var tooltipY = below + tooltipHeight <= window.innerHeight - 16 ? below : above >= 16 ? above : Math.max(16, Math.min(window.innerHeight - tooltipHeight - 16, (window.innerHeight - tooltipHeight) / 2));
-    tooltip.style.top = tooltipY + "px";
+  // Fait défiler pour que l'élément soit centré dans la zone laissée libre par la bulle
+  function scrollTutorialTarget(target, overlay) {
+    if (tutorialIsInNav(target)) return;
+    var tooltip = overlay.querySelector(".tutorial-tooltip");
+    var rect = target.getBoundingClientRect();
+    var areaTop = 16, areaBottom = tutorialDocked() && tooltip ? tutorialTooltipTop(tooltip) - 16 : window.innerHeight - tutorialNavHeight() - 16;
+    var room = areaBottom - areaTop;
+    var offset = rect.height >= room ? areaTop : areaTop + (room - rect.height) / 2;
+    var body = document.body;
+    // Page verrouillée pendant le tutoriel (body en position fixe) : on déplace le décalage du verrou
+    if (getComputedStyle(body).position === "fixed") {
+      var current = -(parseFloat(body.style.top) || 0);
+      var max = Math.max(0, body.scrollHeight - window.innerHeight + tutorialNavHeight());
+      var next = Math.max(0, Math.min(max, current + rect.top - offset));
+      body.style.transition = "top .35s cubic-bezier(.2,.8,.2,1)";
+      body.style.top = (-next) + "px";
+      setTimeout(function () { body.style.transition = ""; }, 400);
+      return;
+    }
+    var y = window.scrollY + rect.top - offset;
+    try { window.scrollTo({ top: Math.max(0, y), behavior: "smooth" }); } catch (e) { window.scrollTo(0, Math.max(0, y)); }
+  }
 
-    // Wire buttons
+  function positionTutorialElements(overlay, target, step) {
+    if ((!target || !target.isConnected) && step && step.target) { var fresh = Array.prototype.find.call(document.querySelectorAll(step.target), function (n) { return n.getClientRects().length; }); if (fresh) target = fresh; }
+    currentTutorialTarget = target;
+    currentTutorialStep = step;
+    currentTutorialOverlay = overlay;
+
+    var tooltip = overlay.querySelector(".tutorial-tooltip") || buildTutorialTooltip(overlay, step);
+    var rect = target.getBoundingClientRect();
+    var padding = 6;
+    var docked = tutorialDocked();
+    var tooltipTop = docked ? tutorialTooltipTop(tooltip) : 0;
+
+    // Zone éclairée : l'élément, coupé à la place disponible pour ne jamais passer sous la bulle
+    var top = rect.top - padding, bottom = rect.bottom + padding;
+    if (docked && !tutorialIsInNav(target)) bottom = Math.min(bottom, tooltipTop - 10);
+    var spotlight = overlay.querySelector(".tutorial-spotlight");
+    if (!spotlight) {
+      spotlight = create("div", "tutorial-spotlight");
+      overlay.insertBefore(spotlight, overlay.firstChild);
+    }
+    var radius = parseFloat(getComputedStyle(target).borderTopLeftRadius) || 12;
+    spotlight.style.top = top + "px";
+    spotlight.style.left = (rect.left - padding) + "px";
+    spotlight.style.width = (rect.width + padding * 2) + "px";
+    spotlight.style.height = Math.max(24, bottom - top) + "px";
+    spotlight.style.borderRadius = (radius + padding) + "px";
+
+    // Bulle : ancrée en bas sur téléphone, sinon sous (ou au-dessus de) l'élément
+    if (docked) {
+      tooltip.style.left = "12px";
+      tooltip.style.top = tooltipTop + "px";
+    } else {
+      var tooltipWidth = tooltip.offsetWidth;
+      tooltip.style.left = Math.max(20, Math.min(window.innerWidth - tooltipWidth - 20, rect.left + rect.width / 2 - tooltipWidth / 2)) + "px";
+      var tooltipHeight = tooltip.offsetHeight;
+      var below = rect.bottom + padding + 14;
+      var above = rect.top - tooltipHeight - padding - 14;
+      tooltip.style.top = (below + tooltipHeight <= window.innerHeight - 16 ? below : above >= 16 ? above : Math.max(16, (window.innerHeight - tooltipHeight) / 2)) + "px";
+    }
+    tooltip.classList.add("is-placed");
+  }
+
+  function wireTutorialButtons(step) {
     var nextBtn = $("tutorialNext");
+    var backBtn = $("tutorialBack");
     var skipBtn = $("tutorialSkip");
     if (nextBtn) {
       nextBtn.onclick = function() {
@@ -834,24 +844,42 @@
         if (step.navigateTo) {
           if (typeof window.setPage === "function") window.setPage(step.navigateTo);
           else {
-            // Supporte les sélecteurs multiples
             var selectors = step.target.split(",");
             for (var s = 0; s < selectors.length; s++) {
               var navBtn = document.querySelector(selectors[s].trim());
               if (navBtn) { navBtn.click(); break; }
             }
           }
-          setTimeout(function() { tutorialIndex++; renderTutorialStep(); }, 800);
+          setTimeout(function() { tutorialIndex++; renderTutorialStep(); }, 500);
         } else if (step.isLast) {
           closeTutorial();
+          // Fin du tutoriel : retour à l'accueil, en haut
+          if (typeof window.setPage === "function") window.setPage("dashboard");
+          try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) { window.scrollTo(0, 0); }
         } else {
           tutorialIndex++;
           renderTutorialStep();
         }
       };
+      // Focus clavier seulement avec souris/clavier : sur écran tactile il dessinerait un contour inutile
+      if (window.matchMedia && window.matchMedia("(pointer: fine)").matches) { try { nextBtn.focus({ preventScroll: true }); } catch (e) {} }
+    }
+    if (backBtn) {
+      backBtn.onclick = function() {
+        restoreHiddenElements();
+        tutorialIndex = Math.max(0, tutorialIndex - 1);
+        var prev = TUTORIAL_STEPS[tutorialIndex];
+        if (prev && prev.page && document.body.dataset.page !== prev.page && typeof window.setPage === "function") {
+          window.setPage(prev.page);
+          setTimeout(renderTutorialStep, 500);
+        } else renderTutorialStep();
+      };
     }
     if (skipBtn) {
-      skipBtn.onclick = closeTutorial;
+      skipBtn.onclick = function() {
+        closeTutorial();
+        if (typeof window.setPage === "function" && document.body.dataset.page !== "dashboard") window.setPage("dashboard");
+      };
     }
   }
 

@@ -15,8 +15,8 @@
   var TOURS={
     "2026-10-13-le-moulin":[
       {id:"quickadd",title:["Ajoute en un geste","Add in one tap"],text:["Une dépense, un revenu ou de l’épargne, sans ouvrir le tableur.","An expense, income or savings, without opening the spreadsheet."],run:function(){goHome(function(){var b=document.querySelector("#gfhHome .gfh-add");if(b)b.click();});}},
-      {id:"years",title:["Une feuille par année","One sheet per year"],text:["Ton tableur se range par année : ajoute la précédente ou la suivante en un clic.","Your spreadsheet is organised by year: add the previous or next one in one click."],run:function(){openPage("sheet","#sheetPage .sheet-years");}},
-      {id:"goalmonth",title:["Un objectif lié à un mois","A goal linked to a month"],text:["Ton objectif suit une ligne du tableur, pour un mois précis ou toute l’année.","Your goal follows a spreadsheet row, for one month or the whole year."],run:function(){openPage("objectives","#gfoLink, .objective-link-field",function(){var form=byId("objectiveForm"),add=byId("objectiveAddButton");if(add&&(!form||form.hidden||!form.getClientRects().length))add.click();});}}
+      {id:"years",title:["Une feuille par année","One sheet per year"],text:["Ton tableur se range par année : ajoute la précédente ou la suivante en un clic.","Your spreadsheet is organised by year: add the previous or next one in one click."],run:function(){openPage("sheet",function(){var adds=document.querySelectorAll("#sheetPage .sheet-years .sheet-year-add");return adds[adds.length-1];},["Touche ici pour ajouter l’année suivante. Le « + » de gauche ajoute la précédente.","Tap here to add the next year. The “+” on the left adds the previous one."]);}},
+      {id:"goalmonth",title:["Un objectif lié à un mois","A goal linked to a month"],text:["Ton objectif suit une ligne du tableur, pour un mois précis ou toute l’année.","Your goal follows a spreadsheet row, for one month or the whole year."],run:function(){openPage("objectives",function(){return document.querySelector("#gfoLink .gfo-row")||byId("gfoLink");},["Choisis la ligne du tableur et le mois à suivre : l’objectif se mettra à jour tout seul.","Pick the spreadsheet row and month to follow: the goal updates on its own."],function(){var form=byId("objectiveForm"),add=byId("objectiveAddButton");if(add&&(!form||form.hidden||!form.getClientRects().length))add.click();});}}
     ]
   };
 
@@ -27,14 +27,45 @@
   function markSeen(){var r=release();try{if(r&&store())store().setItem("personalFinanceDashboard.lastSeenRelease",r.version);}catch(e){}}
 
   function goHome(after){if(typeof window.setPage==="function")window.setPage("dashboard");setTimeout(after,120);}
-  function openPage(page,target,before){
+  function openPage(page,find,caption,before){
     if(typeof window.setPage==="function")window.setPage(page);
-    setTimeout(function(){try{before&&before();}catch(e){}setTimeout(function(){spotlight(document.querySelector(target));},220);},120);
+    setTimeout(function(){try{before&&before();}catch(e){}
+      // Pas de clavier pendant la découverte : on veut montrer la fonction, pas saisir
+      var f=document.activeElement;if(f&&/^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName))f.blur();
+      setTimeout(function(){coach(find(),caption[en()?1:0]);},450);},120);
   }
-  function spotlight(node){
-    if(!node)return;try{node.scrollIntoView({block:"center",behavior:"smooth"});}catch(e){node.scrollIntoView();}
-    node.classList.remove("gfd-spot");void node.offsetWidth;node.classList.add("gfd-spot");
-    setTimeout(function(){node.classList.remove("gfd-spot");},2600);
+  function bottomBar(){var n=document.querySelector(".bottom-nav");if(!n||!n.getClientRects().length)return 0;var r=n.getBoundingClientRect();return r.top<window.innerHeight?window.innerHeight-r.top:0;}
+  /* Repère : l'écran s'assombrit sauf l'élément visé, entouré d'un anneau, avec une bulle d'explication. */
+  var coachEl=null;
+  var coachPad=null;
+  function closeCoach(){if(coachPad!==null){document.body.style.paddingBottom=coachPad;coachPad=null;}if(!coachEl)return;coachEl.remove();coachEl=null;window.removeEventListener("scroll",placeCoach,true);window.removeEventListener("resize",placeCoach);document.removeEventListener("keydown",coachKey);}
+  function coachKey(e){if(e.key==="Escape")closeCoach();}
+  function placeCoach(){
+    if(!coachEl)return;var node=coachEl._node;if(!node||!node.isConnected||!node.getClientRects().length){closeCoach();return;}
+    var r=node.getBoundingClientRect(),pad=6,hole=coachEl.querySelector(".gfd-coach-hole"),tip=coachEl.querySelector(".gfd-coach-tip");
+    hole.style.left=(r.left-pad)+"px";hole.style.top=(r.top-pad)+"px";hole.style.width=(r.width+pad*2)+"px";hole.style.height=(r.height+pad*2)+"px";
+    var vw=document.documentElement.clientWidth,tw=Math.min(320,vw-32),below=r.bottom+pad+12,room=window.innerHeight-bottomBar()-below;
+    tip.style.width=tw+"px";tip.style.left=Math.max(16,Math.min(vw-tw-16,r.left+r.width/2-tw/2))+"px";
+    var th=tip.offsetHeight;tip.classList.toggle("is-above",room<th+8);
+    tip.style.top=(room<th+8?Math.max(12,r.top-pad-12-th):below)+"px";
+  }
+  function coach(node,text){
+    closeCoach();if(!node)return;
+    // Place l'élément au centre de la zone visible, au-dessus de la barre de navigation du bas
+    var r=node.getBoundingClientRect(),visible=window.innerHeight-bottomBar(),y=window.scrollY+r.top-Math.max(16,(visible-r.height)/2);
+    // En bas de page, on ajoute un peu d'espace le temps du repère pour pouvoir centrer l'élément
+    var max=document.documentElement.scrollHeight-window.innerHeight;
+    if(y>max){coachPad=document.body.style.paddingBottom;document.body.style.paddingBottom=(parseFloat(getComputedStyle(document.body).paddingBottom)||0)+(y-max)+"px";}
+    var smooth=!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    try{window.scrollTo({top:Math.max(0,y),behavior:smooth?"smooth":"auto"});}catch(e){window.scrollTo(0,Math.max(0,y));}
+    setTimeout(function(){
+      coachEl=el("div","gfd-coach");coachEl._node=node;coachEl.setAttribute("role","dialog");coachEl.setAttribute("aria-label",t2("Nouveauté","New feature"));
+      var hole=el("div","gfd-coach-hole"),tip=el("div","gfd-coach-tip"),ok=el("button","gfd-coach-ok",t2("Compris","Got it"));ok.type="button";
+      tip.append(el("p","",text),ok);coachEl.append(hole,tip);document.body.append(coachEl);
+      coachEl.addEventListener("click",function(e){var rr=node.getBoundingClientRect(),inside=e.clientX>=rr.left&&e.clientX<=rr.right&&e.clientY>=rr.top&&e.clientY<=rr.bottom;closeCoach();if(inside&&e.target!==ok){try{node.click&&node.tagName==="BUTTON"&&node.click();}catch(err){}}});
+      window.addEventListener("scroll",placeCoach,true);window.addEventListener("resize",placeCoach);document.addEventListener("keydown",coachKey);
+      placeCoach();ok.focus({preventScroll:true});
+    },smooth?450:30);
   }
 
   function ring(done,total,complete){

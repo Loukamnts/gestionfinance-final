@@ -62,3 +62,8 @@ body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-rename{display:none
 body[data-theme="moulin"] #sheetPage .sheet-year-add{flex:none;height:44px;padding:0 14px;border:1px dashed var(--line-strong,var(--line));border-radius:22px;background:transparent;color:var(--muted);font:500 14px var(--font-body);cursor:pointer}
 body[data-theme="moulin"] #sheetPage .sheet-year-add:hover{border-color:var(--text);color:var(--text)}
 body[data-theme="moulin"] #sheetPage .sheet-years :is(button):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* Téléphone : les années passent à la ligne au lieu de défiler hors de l’écran */
+@media(max-width:560px){body[data-theme="moulin"] #sheetPage .sheet-tabs.sheet-years{flex-wrap:wrap;overflow:visible}}
+/* « Année » posé au-dessus des feuilles, plutôt qu'à gauche */
+body[data-theme="moulin"] #sheetPage .sheet-tabs.sheet-years{flex-wrap:wrap}
+body[data-theme="moulin"] #sheetPage .sheet-years-label{flex:0 0 100%;margin:0 0 2px;font:600 12px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
