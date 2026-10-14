@@ -484,7 +484,12 @@
     var expLines=[];all.slice().reverse().forEach(function(m){(m.cats||[]).forEach(function(c){if(expLines.indexOf(c.name)<0)expLines.push(c.name);});});
     plus.addEventListener("click",function(){quickAdd({year:sel.year,mi:sel.mi,expenseLines:expLines});});
     bar.append(plus);
+    // Redessiner l'accueil ne doit ni faire remonter la page ni perdre le focus (sinon, après un toucher sur
+    // une barre de mois, le navigateur remonte tout en haut et la barre jaune sort de l'écran).
+    var keepY=window.scrollY,hadFocus=document.activeElement&&root.contains(document.activeElement),focusBar=hadFocus&&document.activeElement.closest(".gfh-bars");
     root.replaceChildren.apply(root,top.concat(rc?[bar,hi,rc,dg]:[bar,hi,dg]));
+    if(focusBar){var nf=root.querySelector(".gfh-bars button.on");if(nf)try{nf.focus({preventScroll:true});}catch(e){}}
+    if(Math.abs(window.scrollY-keepY)>1)window.scrollTo(0,keepY);
     document.body.classList.add("gfh-ready");
     if(document.body.classList.contains("tutorial-active"))setTimeout(function(){window.dispatchEvent(new Event("resize"));},30);
   }
