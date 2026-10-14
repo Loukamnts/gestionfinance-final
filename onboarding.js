@@ -124,45 +124,6 @@
     }
   }
 
-  // === Données démo pour le tutoriel (non persistées) ===
-  var demoDataInjected = false;
-
-  function injectDemoData() {
-    // Le tutoriel s’appuie sur le vrai accueil : plus de données fictives injectées dans le tableur.
-    return;
-    if (typeof window.FinanceSheet === "undefined" || !window.FinanceSheet.loadDemoData) return;
-
-    try {
-      window.FinanceSheet.loadDemoData({
-        headers: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin"],
-        rowHeaders: ["Salaire", "Loyer", "Courses", "Revolut", "Épargne"],
-        values: [
-          [1650, -750, -320, -180, 256],
-          [1650, -750, -280, -150, 300],
-          [1700, -750, -350, -200, 350],
-          [1700, -750, -300, -180, 400],
-          [1700, -750, -290, -160, 380],
-          [1750, -780, -310, -190, 420],
-        ]
-      });
-      // NE PAS appeler syncDashboardFromFinanceSheet — les données démo ne doivent pas polluer le dashboard
-    } catch (e) {}
-  }
-
-  function clearDemoData() {
-    demoDataInjected = false;
-    // 1. Vide le FinanceSheet sans notifier le dashboard
-    if (typeof window.FinanceSheet !== "undefined" && window.FinanceSheet.clearDemoDataFS) {
-      try { window.FinanceSheet.clearDemoDataFS({ notify: false }); } catch (e) {}
-    }
-    // 2. Vide l'état interne du dashboard (catégories, mois, pages)
-    try { window.dispatchEvent(new CustomEvent("financeClearData")); } catch (e) {}
-    // 3. Retour à la page d'accueil
-    if (typeof window.setPage === "function") {
-      try { window.setPage("dashboard"); } catch (e) {}
-    }
-  }
-
   function closeWizard() {
     const overlay = $("onboardingOverlay");
     if (overlay) overlay.classList.add("hidden");
@@ -667,11 +628,6 @@
     // Active le calque bloquant
     const blocker = $("tutorialBlocker");
     if (blocker) blocker.classList.remove("hidden");
-    // Injecte les données démo pour le tutoriel (graphique + tableur)
-    // seulement si aucun fichier n'a été importé pendant le wizard
-    if (!wizardData.importedFile) {
-      injectDemoData();
-    }
     // Sync le dashboard pour afficher le graphique avec les données démo ou importées
     if (typeof window.syncDashboardFromFinanceSheet === "function") {
       try { window.syncDashboardFromFinanceSheet({ silent: true }); } catch (e) {}
@@ -697,8 +653,6 @@
     currentTutorialOverlay = null;
     // Restaurer le hidden sur les éléments qu'on a rendus visibles pendant le tutoriel
     restoreHiddenElements();
-    // Nettoie les données démo injectées pendant le tutoriel (uniquement si elles ont été injectées)
-    if (demoDataInjected) clearDemoData();
     // Si un fichier a été importé, re-sync le dashboard avec les données réelles
     if (wizardData.importedFile && typeof window.syncDashboardFromFinanceSheet === "function") {
       try { window.syncDashboardFromFinanceSheet({ silent: true }); } catch (e) {}

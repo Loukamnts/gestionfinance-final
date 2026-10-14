@@ -1831,12 +1831,11 @@
   <link rel="stylesheet" href="theme-directions.css?v=20261013-r1">
   <link rel="stylesheet" href="plans.css?v=20261013-r1">
   <link rel="stylesheet" href="home.css?v=20261013-r2">
-  <link rel="stylesheet" href="sheet-balances.css?v=20261013-r2">
-  <link rel="stylesheet" href="finishing.css?v=20261013-r6">
-  <link rel="stylesheet" href="home-news.css?v=20261013-r1">
+  <link rel="stylesheet" href="sheet-balances.css?v=20261013-r3">
+  <link rel="stylesheet" href="finishing.css?v=20261013-r7">
   <link rel="stylesheet" href="menus.css?v=20261013-r2">
   <link rel="stylesheet" href="discover.css?v=20261013-r3">
-  <script src="i18n.js?v=20261013-r3"></script>
+  <script src="i18n.js?v=20261014-r1"></script>
   <script src="ui-controls.js?v=20260923-r10" defer></script>
 </head>
 <body data-theme="moulin" data-palette="ble" data-mode="dark" data-page="dashboard" data-interface="classic">
@@ -1913,7 +1912,6 @@
             <button class="profile-menu-link" id="profileNotesButton" type="button" data-open-notes title="Ouvrir tes notes privées"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Notes</span></button>
           </div>
         </div>
-        <div class="server-control" id="serverControl" style="display:none"><button class="server-control-toggle" id="serverControlButton" type="button" title="Serveur local" aria-label="Contrôle du serveur" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6.8 6.8a7.35 7.35 0 1 0 10.4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><button class="server-stop-button" id="stopServerButton" type="button">Arrêter</button></div>
       </div>
     </header>
     <section class="app-page" id="dashboardPage">
@@ -2059,8 +2057,8 @@
           <section class="panel objectives-panel"><div class="objectives-panel-head"><div><h3>Mes objectifs</h3><p>Épargne, investissement, dépense prévue ou projet personnel.</p></div><button class="button button-primary" id="objectiveAddButton" type="button">Ajouter un objectif</button></div><form class="objective-form" id="objectiveForm" hidden>
             <label><span>Nom de l'objectif</span><input id="objectiveTitle" maxlength="80" placeholder="Ex. Apport immobilier" required /></label>
             <label><span>Type</span><select id="objectiveType"><option value="savings">Épargne</option><option value="investment">Investissement</option><option value="expense">Dépense prévue</option><option value="custom">Personnalisé</option></select></label>
-            <label><span>Montant visé (€)</span><input id="objectiveTarget" type="number" min="0" step="0.01" inputmode="decimal" required /></label>
-            <label><span>Déjà atteint (€)</span><input id="objectiveCurrent" type="number" min="0" step="0.01" inputmode="decimal" value="0" /></label>
+            <label><span>Montant visé (€)</span><input id="objectiveTarget" type="number" inputmode="decimal" min="0" step="0.01" inputmode="decimal" required /></label>
+            <label><span>Déjà atteint (€)</span><input id="objectiveCurrent" type="number" inputmode="decimal" min="0" step="0.01" inputmode="decimal" value="0" /></label>
             <button class="objective-plan-toggle" id="objectivePlanToggle" type="button" aria-expanded="false" aria-controls="objectivePlanFields">Échéance ou rythme <span>Facultatif</span></button>
             <div class="objective-plan-fields" id="objectivePlanFields" hidden><label><span>Rythme</span><select id="objectiveCadence"><option value="once">Sans récurrence</option><option value="monthly">Chaque mois</option><option value="yearly">Chaque année</option></select></label><label><span>Échéance <em>facultative</em></span><input id="objectiveDueDate" type="date" /></label><label class="objective-link-field"><span>Lier à un mois du tableur <em>facultatif</em></span><select id="objectiveSheetSource"><option value="">Aucune liaison</option></select></label></div>
             <div class="objective-form-actions"><button class="button button-ghost" id="objectiveCancelButton" type="button">Annuler</button><button class="button button-primary" type="submit">Enregistrer l'objectif</button></div>
@@ -2516,7 +2514,6 @@
       csvDropArea: document.getElementById("csvDropArea"), csvFileInput: document.getElementById("csvFileInput"),
       selectCsvBtn: document.getElementById("selectCsvBtn"), clearImportButton: document.getElementById("clearImportButton"),
       csvActiveBadge: document.getElementById("csvActiveBadge"),
-      serverControl: document.getElementById("serverControl"), serverControlButton: document.getElementById("serverControlButton"), stopServerButton: document.getElementById("stopServerButton")
     };
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -2823,7 +2820,6 @@
       rows.forEach(i=>{ elements.savingsBreakdown.appendChild(createDetailRow(i.name,formatEuro(i.value),i.color||getRuleColor(i.name))); });
       elements.bigExpenses.textContent=selected&&selected.bigExpenses&&selected.bigExpenses!=="-"?String(selected.bigExpenses):"Aucune dépense importante renseignée.";
     }
-    function formatRuleLines(items){ const m=new Map(); items.forEach(i=>{ if(i&&i.name) m.set(i.name,(m.get(i.name)||0)+Number(i.value||0)); }); return Array.from(m.entries()).filter(([,v])=>v!==0).map(([name,val])=>`${window.GFI18n?window.GFI18n.t(name):name}: ${formatEuro(val)}`).join("\n")||"-"; }
     function createDetailRow(lbl,val,col){ const row=document.createElement("div"); row.className="detail-row"; const name=document.createElement("span"); name.textContent=["Salaire","Dépense","Épargne"].includes(lbl)&&window.GFI18n?window.GFI18n.t(lbl):lbl; name.style.color=col; const amount=document.createElement("strong"); amount.textContent=val; row.append(name,amount); return row; }
     function getSelectedMonth(){ const visible=getVisibleMonths(); return visible.find(m=>m.id===state.selectedMonthId)||visible[visible.length-1]||state.months.find(m=>m.id===state.selectedMonthId); }
 
@@ -3054,16 +3050,12 @@
     initSheetStatusHelp();
     const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],account:["Paramètres","Profil","Pseudo, connexion et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."],plan:["Paramètres","Abonnement","Free, Plus ou Pro : choisis la formule qui te va."]};
     function showSettingsView(view){ const next=view!=="home"&&Object.prototype.hasOwnProperty.call(SETTINGS_VIEW_COPY,view)?view:"account",copy=SETTINGS_VIEW_COPY[next],translate=window.GFI18n?window.GFI18n.t:function(value){return value;}; document.querySelectorAll("[data-settings-panel]").forEach(function(panel){ panel.hidden=panel.dataset.settingsPanel!==next; }); const kicker=document.getElementById("settingsKicker"),title=document.getElementById("settingsTitle"),subtitle=document.getElementById("settingsSubtitle"); if(kicker) kicker.textContent=translate(copy[0]); if(title) title.textContent=translate(copy[1]); if(subtitle) subtitle.textContent=translate(copy[2]); document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.setAttribute("aria-current",String(button.dataset.settingsView===next)); }); }
-    function renderPersonalSpace(){ const profileEmail=document.getElementById("profileEmail"),profileAvatar=document.getElementById("profileAvatar"),email=document.getElementById("personalEmail"),avatar=document.getElementById("personalAvatar"),meta=document.getElementById("personalObjectivesMeta"); if(email){ const value=String(profileEmail?.textContent||"").trim(); email.textContent=value&&value!=="Non connecté"?value:"Un espace privé pour organiser tes projets et tes accès."; } if(avatar) avatar.textContent=String(profileAvatar?.textContent||"?").trim().slice(0,2)||"?"; if(meta){ let goals=[]; try{ const profile=JSON.parse(safeStore.getItem("personalFinanceDashboard.setupProfile")||"{}"); goals=Array.isArray(profile?.objectives)?profile.objectives.filter(Boolean):[]; }catch(e){} meta.textContent=goals.length?goals.length+" objectif"+(goals.length>1?"s":"")+" en cours.":"Crée et suis tes projets financiers."; } }
     window.setPage = setPage;
     window.setTheme = setTheme;
     window.setMode = setMode;
     function setView(view){ state.currentView=view; syncCustomDropdown(elements.viewSelect); safeStore.setItem(STORAGE_KEYS.view,view); if(view==="pie") state.isGlobal=false; updateInterface(); }
     function restoreConfiguration(){}
-    function saveConfiguration(){}
-    function showCompatibilityHint(){}
 
-function setConfigTab(tabName){ setActiveSource(tabName); }
 
 function escapeHtml(value){
   return String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;" }[ch]));
@@ -3188,9 +3180,6 @@ function scoreHeaderCandidate(row, nextRows){
   return score;
 }
 
-function looksLikeHeaderRow(row, nextRows){
-  return scoreHeaderCandidate(row, nextRows) >= 3.5;
-}
 
 
 
@@ -3225,12 +3214,6 @@ function inferColumnType(header, samples){
 
 
 
-function rowsToImportedPages(rows, fileName, sheetName){
-  const cleaned = cleanRows(rows);
-  if(!cleaned.length) return [];
-  const analysis = makeAnalysisReport({ name: sheetName || "Feuille 1", rows: cleaned, sourceKind: "table" }, { fileName, sheetName });
-  return buildPagesFromAnalysis(analysis, fileName, sheetName);
-}
 
     function resetDataState(){
   if(state.chart){ state.chart.destroy(); state.chart = null; }
@@ -3539,19 +3522,6 @@ function rowsToImportedPages(rows, fileName, sheetName){
       }
     }
 
-    function ensureImportAnalysisPanel(){
-      if(elements.importAnalysisPanel) return elements.importAnalysisPanel;
-      if(!elements.csvActiveBadge) return null;
-      const panel = document.createElement("div");
-      panel.id = "importAnalysisPanel";
-      panel.className = "analysis-panel";
-      panel.hidden = true;
-      elements.csvActiveBadge.insertAdjacentElement
-        ? elements.csvActiveBadge.insertAdjacentElement("afterend", panel)
-        : elements.csvActiveBadge.parentNode?.insertBefore(panel, elements.csvActiveBadge.nextSibling);
-      elements.importAnalysisPanel = panel;
-      return panel;
-    }
 
 
 
@@ -3568,14 +3538,6 @@ function rowsToImportedPages(rows, fileName, sheetName){
 
 
 
-    function detectedCategorySummary(){
-      const items = (state.detectedProperties || []).filter(prop => prop && prop.name);
-      return {
-        all: items,
-        review: items.filter(prop => prop.needsReview),
-        visible: items.slice(0, 18)
-      };
-    }
 
 
 
@@ -3719,14 +3681,6 @@ function rowsToImportedPages(rows, fileName, sheetName){
         '</details>';
     }
 
-    function readFileText(file){
-      return readFileArrayBuffer(file).then(buffer => {
-        const decoded = decodeTextBuffer(buffer, file?.name || "fichier");
-        file._textEncoding = decoded.encoding;
-        file._analysisIssues = decoded.issues || [];
-        return decoded.text;
-      });
-    }
 
     function decodeTextBuffer(buffer, fileName = "fichier"){
       const bytes = new Uint8Array(buffer || new ArrayBuffer(0));
@@ -3786,12 +3740,6 @@ function rowsToImportedPages(rows, fileName, sheetName){
         .trim();
     }
 
-    function normalizeValueForCheck(value){
-      if(value instanceof Date && !Number.isNaN(value.getTime())) return value;
-      if(typeof value === "number" || typeof value === "string") return value;
-      if(value === null || value === undefined) return "";
-      return String(value);
-    }
 
     function normalizeNumericText(value){
       if(typeof value === "number") return Number.isFinite(value) ? { ok: true, value } : { ok: false, value: NaN };
@@ -4336,10 +4284,6 @@ function rowsToImportedPages(rows, fileName, sheetName){
       return [{ name: parsed.sheetName || "CSV", rows: parsed.rows, sourceKind: extension === "tsv" ? "TSV" : "CSV", delimiter: parsed.delimiter, issues: mergeImportIssues(issues, parsed.issues || []) }];
     }
 
-    function tableFromFile(file, workbook){
-      if(workbook) return tableFromXlsxWorkbook(workbook);
-      return tableFromTextFile(file.name, file._text || "", file._analysisIssues || []);
-    }
 
     function extractYearFromText(...values){
       for(const value of values){
@@ -5012,44 +4956,8 @@ function rowsToImportedPages(rows, fileName, sheetName){
     }
 
 
-    function toggleServerControl(){
-      if(!elements.serverControl || elements.serverControl?.classList.contains("is-stopped")) return;
-      const open = !elements.serverControl.classList.contains("is-open");
-      elements.serverControl.classList.toggle("is-open", open);
-      elements.serverControlButton?.setAttribute("aria-expanded", String(open));
-    }
 
-    async function requestServerShutdown(){
-      if(!elements.serverControl || elements.serverControl.classList.contains("is-stopped")) return;
-      elements.serverControl.classList.add("is-open");
-      elements.serverControlButton?.setAttribute("aria-expanded", "true");
-      if(elements.stopServerButton){
-        elements.stopServerButton.disabled = true;
-        elements.stopServerButton.textContent = "Arrêt...";
-      }
-      try{
-        await fetch(buildLocalApiUrl("/api/server/shutdown"), { method: "POST", cache: "no-store" });
-      }catch{}
-      elements.serverControl.classList.remove("is-open");
-      elements.serverControl.classList.add("is-stopped");
-      if(elements.stopServerButton){
-        elements.stopServerButton.textContent = "Relance .bat";
-        elements.stopServerButton.disabled = true;
-      }
-      showMessage("Serveur arrêté. Relance start-dashboard.bat pour rouvrir le dashboard.", 22000);
-    }
 
-    function emitSiteEvent(type, message, details = {}){
-      try{
-        if(location.protocol === "file:" || typeof fetch !== "function") return;
-        fetch(buildLocalApiUrl("/api/server/log"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type, message, details }),
-          keepalive: true
-        }).catch(() => {});
-      }catch{}
-    }
 
     // Pont tableur -> dashboard : construit directement des "pages" a partir
     // des lignes/colonnes du tableur (ligne 0 = en-tetes, lignes suivantes = donnees),
@@ -5367,7 +5275,6 @@ function rowsToImportedPages(rows, fileName, sheetName){
         setConnection(true, "Fichier importé");
         updateInterface();
         setTimeout(function(){ if(typeof window.populateYearSelect === "function") window.populateYearSelect(); }, 500);
-        emitSiteEvent("import", "Import fichier réussi", { fileName: file.name, sheets: importedSheets.length, rows: pages.length, months: months.length });
         if(months.length === 0) showMessage("Le fichier a été analysé, mais aucun champ financier clair n'a été détecté.");
         else if(reviewCount) showMessage("Import réussi : " + file.name + ". " + reviewCount + " categorie" + (reviewCount > 1 ? "s" : "") + " à confirmer dans les réglages.", 22000);
         else if(warningCount) showMessage("Import réussi : " + file.name + " (" + warningCount + " anomalie" + (warningCount > 1 ? "s" : "") + " consignée" + (warningCount > 1 ? "s" : "") + ").", 20000);
@@ -5375,7 +5282,6 @@ function rowsToImportedPages(rows, fileName, sheetName){
       }catch(err){
         console.error(err);
         renderImportAnalysis(null);
-        emitSiteEvent("error", "Import fichier échoué", { reason: err?.message || "Erreur inconnue" });
         showMessage(err?.message || "Impossible d'importer ce fichier.");
       }finally{
         setLoading(false);
@@ -5426,10 +5332,10 @@ function rowsToImportedPages(rows, fileName, sheetName){
     }
     init();
   </script>
-  <script src="sheet.js?v=20261013-r1"></script>
-  <script src="onboarding.js?v=20261013-r2"></script>
+  <script src="sheet.js?v=20261014-r1"></script>
+  <script src="onboarding.js?v=20261014-r1"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
-  <script src="friends.js?v=20260923-r3"></script>
+  <script src="friends.js?v=20261014-r1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>(function(){
   /* === Auth email + mot de passe (Supabase) ===
@@ -6016,16 +5922,12 @@ function rowsToImportedPages(rows, fileName, sheetName){
   window.__gfSync = { pushToCloud: pushToCloud, pullFromCloud: pullFromCloud, markDirty: markDirty, updateSyncStatus: updateSyncStatus };
 })();
 </script>
-  <script src="objectives.js?v=20261013-r2"></script>
+  <script src="objectives.js?v=20261014-r1"></script>
   <script src="meuni-loader.js?v=20261013-r1" defer></script>
-  <script src="aria.js?v=20261006-r1" defer></script>
-  <script src="feedback.js?v=20261006-r1" defer></script>
-  <script src="storage-encryption.js?v=20261006-r1" defer></script>
-  <script src="ios-fix.js?v=20261013-r1" defer></script>
-  <script src="i18n-manager.js?v=20261006-r1" defer></script>
-  <script src="plans.js?v=20261013-r1" defer></script>
-  <script src="home.js?v=20261013-r2" defer></script>
-  <script src="finishing.js?v=20261013-r1" defer></script>
+  <script src="ios-fix.js?v=20261013-r2" defer></script>
+  <script src="plans.js?v=20261014-r1" defer></script>
+  <script src="home.js?v=20261014-r1" defer></script>
+  <script src="finishing.js?v=20261014-r1" defer></script>
   <script src="menus.js?v=20261013-r1" defer></script>
   <script src="discover.js?v=20261013-r2" defer></script>
 </body>

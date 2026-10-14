@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "";
+// Seul le site Meuniance peut demander une suppression ; une variable ALLOWED_ORIGIN reste prioritaire.
+const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "https://gestion-finance-coral.vercel.app";
 
 function corsHeaders(origin: string | null) {
   return {

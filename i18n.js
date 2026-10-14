@@ -17,6 +17,7 @@ const dictionary=Object.freeze({
   "Si un compte existe pour cette adresse, un lien de réinitialisation sera envoyé. Vérifie aussi les spams.": "If an account exists for this address, a reset link will be sent. Check your spam folder too.",
   "2 octobre 2026": "2 October 2026",
   "13 octobre 2026": "13 October 2026",
+  "Trop de recherches d’amis en peu de temps. Réessaie dans une heure.": "Too many friend searches in a short time. Try again in an hour.",
   "Ton solde": "Your balance",
   "Ton solde et son évolution sur l’année. Touche un mois pour l’afficher.": "Your balance and how it changes over the year. Tap a month to show it.",
   "Ajouter en un geste": "Add in one tap",

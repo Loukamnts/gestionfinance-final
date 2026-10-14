@@ -67,9 +67,6 @@
     if (el) el.textContent = text;
   }
 
-  function cadenceName(cadence) {
-    return ({ monthly: "Chaque mois", yearly: "Chaque année" })[cadence] || "Sans récurrence";
-  }
 
   function sources() {
     try { return window.FinanceSheet?.getObjectiveSources?.() || []; } catch (_) { return []; }

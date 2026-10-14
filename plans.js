@@ -108,7 +108,7 @@
     }
     var link=BILLING.checkout[plan.id];
     if(link){
-      try{var url=new URL(link);url.searchParams.set("client_reference_id",user.id);if(user.email)url.searchParams.set("prefilled_email",user.email);window.location.assign(url.toString());return;}catch(e){}
+      try{var url=new URL(link);if(url.protocol!=="https:")throw new Error("checkout");url.searchParams.set("client_reference_id",user.id);if(user.email)url.searchParams.set("prefilled_email",user.email);window.location.assign(url.toString());return;}catch(e){}
     }
     dialog(t2("Meuniance "+plan.name,"Meuniance "+plan.name),t2("Le paiement en ligne arrive bientôt","Online payment is coming soon"),
       BILLING.enforce?t2("Tu pourras passer à "+plan.name+" ("+price(plan.price)+" par mois) dès l’ouverture des paiements. Tes données restent intactes en attendant.","You will be able to upgrade to "+plan.name+" ("+price(plan.price)+" per month) as soon as payments open. Your data stays intact meanwhile.")
@@ -116,7 +116,7 @@
       [{label:t2("Compris","Got it"),primary:true}]);
   }
   function manage(){
-    if(BILLING.portal){window.location.assign(BILLING.portal);return;}
+    if(BILLING.portal&&/^https:\/\//.test(String(BILLING.portal))){window.location.assign(BILLING.portal);return;}
     dialog(t2("Abonnement","Plan"),t2("Gérer ton abonnement","Manage your plan"),t2("Pour changer de formule ou résilier, écris-nous depuis la page Confidentialité et contact. La résiliation prend effet à la fin du mois payé.","To change plan or cancel, contact us from the Privacy and contact page. Cancellation takes effect at the end of the paid month."),[{label:t2("Fermer","Close"),primary:true}]);
   }
   function openUpgrade(feature){

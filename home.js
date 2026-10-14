@@ -382,21 +382,6 @@
 
     // Colonne droite
     var right=el("div","gfh-right"),goal=mainGoal(p);
-    function goalPanel(){
-      var box=el("div","gfh-panel gfh-goal");
-      if(goal){
-        var cur=Number(goal.current||0),tar=Number(goal.target),pc=Math.max(0,Math.min(100,Math.round(cur/tar*100)));
-        var head=el("div","gfh-row");head.append(el("span","gfh-kick",t2("Objectif","Goal")),el("span","gfh-pc",pc+(en()?"%":" %")));
-        var pg=el("div","gfh-pg"),pf=el("b");pf.style.width=pc+"%";pg.append(pf);pg.setAttribute("role","progressbar");pg.setAttribute("aria-valuemin","0");pg.setAttribute("aria-valuemax","100");pg.setAttribute("aria-valuenow",String(pc));pg.setAttribute("aria-label",String(goal.title||""));
-        var nums=el("p","gfh-goal-n");nums.append(el("b","",eur(cur)),document.createTextNode(" "+t2("sur","of")+" "+eur(tar)));
-        var left=Math.max(0,tar-cur);
-        box.append(head,el("h3","",String(goal.title||t2("Mon objectif","My goal"))),pg,nums,el("small","",left>0?t2("Encore ","Still ")+eur(left)+t2(" à mettre de côté."," to put aside."):t2("Objectif atteint, bravo.","Goal reached, well done.")));
-      }else{
-        box.append(el("span","gfh-kick",t2("Objectif","Goal")),el("h3","",t2("Vers quoi tu avances ?","What are you saving for?")),el("small","",t2("Un voyage, un apport, un coussin de sécurité : fixe un montant et suis ta progression ici.","A trip, a deposit, a safety net: set an amount and follow your progress here.")));
-      }
-      var go=el("button","gfh-link",goal?t2("Voir mes objectifs","See my goals"):t2("Fixer un objectif","Set a goal"));go.type="button";go.addEventListener("click",function(){if(window.setPage)window.setPage("objectives");});
-      box.append(go);return box;
-    }
     if(blank){
       var start=el("div","gfh-panel gfh-start");
       start.append(el("span","gfh-kick",t2("Pour commencer","Get started")),el("h3","",t2("Ton accueil se remplit tout seul.","Your home fills itself in.")));

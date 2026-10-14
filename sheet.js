@@ -714,20 +714,6 @@
   function rebuildCell(td, r, c) { td.innerHTML = ""; const cv = document.createElement("span"); cv.className = "cv"; td.appendChild(cv); cellMap.set(cellKey(r, c), { td, cv }); }
 
   // ═════════ En-têtes éditables (colonnes ET lignes) ═══════════════
-  function editHeader(c) {
-    const th = thead.querySelector('th.col-head[data-c="' + c + '"]'); if (!th) return;
-    const input = document.createElement("input"); input.className = "h-edit"; input.value = headerLabel(c);
-    th.innerHTML = ""; th.appendChild(input); input.focus(); input.select();
-    let done = false;
-    const finish = () => {
-      if (done) return; done = true;
-      const v = input.value.trim(); state.headers[c] = v || colToLetter(c);
-      th.innerHTML = ""; const sp = document.createElement("span"); sp.className = "h-label"; sp.textContent = headerLabel(c); th.appendChild(sp);
-      scheduleSave();
-    };
-    input.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); finish(); } else if (e.key === "Escape") { e.preventDefault(); done = true; th.innerHTML = ""; const sp = document.createElement("span"); sp.className = "h-label"; sp.textContent = headerLabel(c); th.appendChild(sp); } });
-    input.addEventListener("blur", finish);
-  }
   function rebuildRowHeader(th, r) {
     buildRowHeaderContents(th, r);
   }
