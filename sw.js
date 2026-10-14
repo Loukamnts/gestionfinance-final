@@ -1,6 +1,60 @@
-/* Service worker de Meuniance : affiche les rappels de saisie. Aucun cache, aucune requête interceptée. */
-self.addEventListener("install", function () { self.skipWaiting(); });
-self.addEventListener("activate", function (event) { event.waitUntil(self.clients.claim()); });
+/* Service worker de Meuniance : rappels de saisie et ouverture sans connexion.
+   Sûr par construction :
+   - réseau d'abord : avec du réseau, on reçoit toujours la dernière version ; la copie ne sert que hors ligne ;
+   - seuls les fichiers publics du site (même origine, requêtes GET) sont copiés : jamais tes données,
+     jamais Supabase ni aucun autre site, jamais une réponse en erreur ;
+   - une seule copie par version : l'ancienne est supprimée à chaque mise en ligne.
+   La version et la liste des fichiers sont écrites par scripts/build.cjs. */
+var VERSION = "__BUILD_VERSION__";
+var CACHE = "meuniance-" + VERSION;
+var PRECACHE = __PRECACHE_LIST__;
+var APP_ROUTES = ["/accueil", "/tableur", "/objectifs", "/partage", "/nouveautes", "/parametres", "/app"];
+var KNOWN = new Set(PRECACHE);
+
+self.addEventListener("install", function (event) {
+  event.waitUntil(caches.open(CACHE).then(function (cache) {
+    // Fichier par fichier : un fichier manquant n'empêche pas l'installation.
+    return Promise.all(PRECACHE.map(function (url) {
+      return fetch(url, { cache: "no-cache", credentials: "same-origin" }).then(function (res) {
+        if (res.ok && res.type === "basic") return cache.put(url, res);
+      }).catch(function () {});
+    }));
+  }).then(function () { return self.skipWaiting(); }));
+});
+
+self.addEventListener("activate", function (event) {
+  event.waitUntil(caches.keys().then(function (keys) {
+    return Promise.all(keys.filter(function (k) { return k.indexOf("meuniance-") === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); }));
+  }).then(function () { return self.clients.claim(); }));
+});
+
+function cacheable(url, request) {
+  if (url.origin !== self.location.origin) return false;
+  if (url.pathname === "/sw.js") return false;
+  if (request.mode === "navigate") return APP_ROUTES.indexOf(url.pathname) >= 0;
+  return KNOWN.has(url.pathname + url.search) || url.pathname.indexOf("/vendor/") === 0;
+}
+
+self.addEventListener("fetch", function (event) {
+  var request = event.request;
+  if (request.method !== "GET" || request.headers.has("range")) return;
+  var url = new URL(request.url);
+  if (!cacheable(url, request)) return;
+  var navigate = request.mode === "navigate";
+  event.respondWith(fetch(request).then(function (res) {
+    if (res.ok && res.type === "basic") {
+      var copy = res.clone();
+      caches.open(CACHE).then(function (cache) { return cache.put(navigate ? "/app" : url.pathname + url.search, copy); }).catch(function () {});
+    }
+    return res;
+  }).catch(function () {
+    return caches.open(CACHE).then(function (cache) {
+      return cache.match(navigate ? "/app" : url.pathname + url.search).then(function (hit) {
+        return hit || (navigate ? new Response("<!doctype html><meta charset=utf-8><title>Meuniance</title><p style=\"font:16px system-ui;padding:24px\">Pas de connexion. Ouvre Meuniance une fois avec du réseau pour l’utiliser hors ligne.</p>", { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } }) : Response.error());
+      });
+    });
+  }));
+});
 
 self.addEventListener("push", function (event) {
   var data = {};

@@ -309,3 +309,10 @@ body.gf-hide-amounts .gfb-row b{filter:blur(7px)}
 @keyframes gfrFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent-fill,#E3A82B) 60%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
 .gfr-set.is-flash{animation:gfrFlash .9s ease-out 2;border-radius:16px}
 @media(prefers-reduced-motion:reduce){.gfr-invite{transition:none}.gfr-set.is-flash{animation:none}}
+
+/* Paramètres › Données : sauvegarde */
+.gfb-backup{margin:16px 0;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.gfb-backup h4{margin:0;font:600 16px var(--font-body);color:var(--text)}
+.gfb-backup p{margin:4px 0 12px;font-size:14px;line-height:1.45;color:var(--muted)}
+.gfb-backup-actions{display:flex;flex-wrap:wrap;gap:10px}
+.gfb-backup-actions .gfh-btn{height:44px;padding:0 16px;font-size:15px}

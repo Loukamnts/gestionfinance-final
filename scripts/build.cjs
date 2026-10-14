@@ -24,7 +24,7 @@ const copy = (from, to = from) => put(to, fs.readFileSync(path.join(root, from))
 const integrity = content => 'sha384-' + crypto.createHash('sha384').update(content).digest('base64');
 const publicFiles = ['sheet.js','sheet.css','onboarding.js','onboarding.css','friends.js','profile.js',
   'i18n.js','i18n/fr.json','i18n/en.json','ios-fix.js','i18n-manager.js','shared-dashboard.js','sharing.css','ui-controls.js','ui-polish.css','theme-directions.css','objectives.js',
-  'store-shim.js','meuni-loader.js','plans.js','plans.css','home.js','home.css','sheet-balances.css','finishing.js','finishing.css','bank-import.js','reminders.js','sw.js','menus.js','menus.css','discover.js','discover.css','favicon.ico','brand-mark.svg','app-icon-180.png','app-icon-180.webp','app-icon-512.png','app-icon-512.webp','manifest.webmanifest','supabase_config.json',
+  'store-shim.js','meuni-loader.js','plans.js','plans.css','home.js','home.css','sheet-balances.css','finishing.js','finishing.css','bank-import.js','reminders.js','backup.js','menus.js','menus.css','discover.js','discover.css','favicon.ico','brand-mark.svg','app-icon-180.png','app-icon-180.webp','app-icon-512.png','app-icon-512.webp','manifest.webmanifest','supabase_config.json',
   'robots.txt','sitemap.xml','public.css','public.js','share-card.png','share-card.webp'];
 for (const file of publicFiles) copy(file);
 const config = JSON.parse(fs.readFileSync(path.join(root,'supabase_config.json'),'utf8'));
@@ -92,6 +92,18 @@ html = html.replace(/<script\b([^>]*?)\bsrc="([^"?#]+)([^" ]*)"([^>]*)><\/script
   return `<script ${before}src="${src}${query}"${after} integrity="${integrity(code)}" crossorigin="anonymous"></script>`;
 });
 put('app.html',html);
+// Service worker : version = empreinte de la page, liste = fichiers publics référencés par la page.
+{
+  const local=[...html.matchAll(/\s(?:src|href)="([^"#:]+)"/g)].map(m=>m[1]).filter(u=>!/^\/\//.test(u)&&!/^(mailto|tel|data|blob):/.test(u)).map(u=>'/'+u.replace(/^\.?\//,''));
+  const extra=['/app','/manifest.webmanifest','/app-icon-180.png','/app-icon-512.png','/vendor/fonts.css'];
+  const list=[...new Set([...extra,...local])].filter(u=>!/\/vendor\/xlsx\.js/.test(u));
+  const version=crypto.createHash('sha256').update(html).digest('hex').slice(0,12);
+  let sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
+  if(!sw.includes('__BUILD_VERSION__')||!sw.includes('__PRECACHE_LIST__'))throw new Error('sw.js : marqueurs manquants');
+  sw=sw.replace('"__BUILD_VERSION__"',JSON.stringify(version)).replace('__PRECACHE_LIST__',JSON.stringify(list));
+  new vm.Script(sw,{filename:'sw.js'});
+  put('sw.js',sw);
+}
 for (const page of ['presentation.html','confidentialite.html','conditions.html','mentions-legales.html','404.html']) {
   if (fs.existsSync(path.join(root,page))) copy(page);
 }
