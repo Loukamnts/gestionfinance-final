@@ -104,3 +104,14 @@ test('Friend removal uses one atomic RPC and never falls back to direct deletes'
   assert.equal(calls[0].name,'remove_friendship');assert.equal(calls[0].args.p_friendship_id,'r');
   fail=true;assert((await context.removeFriend('r')).error);assert.equal(calls.length,2);
 });
+test('Offline service worker: versioned, same-origin only, network first',()=>{
+  const sw=fs.readFileSync(path.join(root,'dist/sw.js'),'utf8');
+  assert(!sw.includes('__BUILD_VERSION__')&&!sw.includes('__PRECACHE_LIST__'));
+  const list=JSON.parse(sw.match(/var PRECACHE = (\[[^\]]*\])/)[1]);
+  assert(list.length>10);
+  for(const url of list){assert(url.startsWith('/')&&!url.startsWith('//'),url);assert(!/supabase\.co|xlsx\.js/.test(url),url);}
+  assert(sw.includes('url.origin !== self.location.origin'));
+  assert(sw.includes('request.method !== "GET"'));
+  assert(/event\.respondWith\(fetch\(request\)/.test(sw),'network first');
+  assert(sw.includes('caches.delete'),'old versions are removed');
+});

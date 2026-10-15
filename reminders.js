@@ -118,5 +118,9 @@
   }
   if(window.MutationObserver)new MutationObserver(function(){if(document.body.dataset.page!=="dashboard")hideInvite();}).observe(document.body,{attributes:true,attributeFilter:["data-page"]});
   window.addEventListener("authStateChanged",function(e){if(e.detail&&e.detail.user)planInvite();});
+  // Service worker enregistré à chaque ouverture : il permet aussi d'ouvrir Meuniance sans connexion.
+  if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){
+    window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js",{scope:"/"}).catch(function(){});});
+  }
   window.GFReminders={render:schedule,_invite:showInvite};
 })();

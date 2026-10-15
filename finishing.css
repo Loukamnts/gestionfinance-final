@@ -169,3 +169,15 @@ body[data-theme="moulin"] .bottom-nav-btn.gf-pop{animation:gfNavPop .34s cubic-b
 body[data-theme="moulin"] .bottom-nav-btn.gf-pop svg{animation:gfNavIconPop .34s cubic-bezier(.3,1.4,.6,1)}
 @media(hover:none){body[data-theme="moulin"] .bottom-nav-btn:hover:not(.is-active){background:transparent;color:var(--muted)}}
 @media(prefers-reduced-motion:reduce){body[data-theme="moulin"] .bottom-nav-btn{transition:none}body[data-theme="moulin"] .bottom-nav-btn:active{transform:none}body[data-theme="moulin"] .bottom-nav-btn.gf-pop,body[data-theme="moulin"] .bottom-nav-btn.gf-pop svg{animation:none}}
+
+/* Objectifs : trois cartes de chiffres entières, libellés sur deux lignes au besoin */
+body[data-theme="moulin"] #objectivesPage .objectives-overview{overflow:visible!important;padding:1px!important;align-items:stretch!important}
+body[data-theme="moulin"] #objectivesPage .objectives-overview > .objective-stat{height:auto!important;align-self:stretch!important}
+body[data-theme="moulin"] #objectivesPage .objective-stat{min-width:0;display:flex!important;flex-direction:column;justify-content:space-between;gap:4px}
+body[data-theme="moulin"] #objectivesPage .objective-stat span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.25}
+/* Paramètres (téléphone) : la rangée d'onglets va jusqu'au bord de l'écran avec un léger fondu,
+   pour montrer qu'elle défile au lieu de couper les onglets net */
+@media(max-width:720px){
+  body[data-theme="moulin"] .settings-hub{width:calc(100% + 28px)!important;margin:0 -14px!important;padding:0 14px 2px!important;scroll-padding-inline:14px;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 32px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 32px),transparent 100%)}
+}
