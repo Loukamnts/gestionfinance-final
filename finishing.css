@@ -181,3 +181,7 @@ body[data-theme="moulin"] #objectivesPage .objective-stat span{white-space:norma
   body[data-theme="moulin"] .settings-hub{width:calc(100% + 28px)!important;margin:0 -14px!important;padding:0 14px 2px!important;scroll-padding-inline:14px;
     -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 32px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 32px),transparent 100%)}
 }
+
+/* Liens dans les pages de lecture des Paramètres : couleur du thème, pas le bleu du navigateur */
+.settings-reading-page a{color:var(--text);font-weight:600;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--accent) 70%,transparent);text-decoration-thickness:1.5px;text-underline-offset:3px}
+.settings-reading-page a:hover{text-decoration-color:var(--accent)}

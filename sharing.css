@@ -245,7 +245,7 @@ body[data-theme="brutal"] .sf-onboarding-step,body[data-theme="brutal"] .sf-onbo
 @media (max-width:720px) {
   .sf-empty-onboarding { padding:22px 18px; gap:13px; }
   .sf-onboarding-steps { grid-template-columns:1fr; }
-  .sf-onboarding-actions > .sf-button { flex:1 1 150px; }
+  .sf-onboarding-actions > .sf-button { flex:1 1 150px; padding-inline:10px; gap:7px; white-space:nowrap; }
 }
 
 
