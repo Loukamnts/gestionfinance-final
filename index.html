@@ -2163,7 +2163,7 @@
         <div class="panel-title"><h2>Profil</h2></div>
         <section class="identity-section" id="identitySection" aria-label="Profil" hidden>
           <div id="identityDetails">
-            <div class="identity-summary"><div class="identity-avatar" id="identityAvatar" aria-hidden="true">?</div><div class="identity-summary-copy"><div class="identity-name-row"><strong id="identityCurrentUsername" translate="no">À choisir</strong><button id="identityEditButton" class="identity-edit-button" type="button" aria-label="Modifier le pseudo" title="Modifier le pseudo"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m4 20 4.2-.9L19 8.3a2.1 2.1 0 0 0-3-3L5.2 16.1 4 20Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m14.4 6.9 2.7 2.7" stroke="currentColor" stroke-width="1.8"/></svg></button></div><span id="identityEmail" class="identity-email" translate="no"></span></div></div>
+            <div class="identity-summary"><div class="identity-avatar" id="identityAvatar" aria-hidden="true">?</div><div class="identity-summary-copy"><div class="identity-name-row"><strong id="identityCurrentUsername" translate="no">…</strong><button id="identityEditButton" class="identity-edit-button" type="button" aria-label="Modifier le pseudo" title="Modifier le pseudo"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m4 20 4.2-.9L19 8.3a2.1 2.1 0 0 0-3-3L5.2 16.1 4 20Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m14.4 6.9 2.7 2.7" stroke="currentColor" stroke-width="1.8"/></svg></button></div><span id="identityEmail" class="identity-email" translate="no"></span></div></div>
             <form id="identityForm" class="identity-form" hidden><label for="identityUsername">Pseudo</label><div class="identity-form-row"><span aria-hidden="true">@</span><input id="identityUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required><button type="submit" class="gf-button">Enregistrer</button><button id="identityCancelButton" type="button" class="gf-button gf-button-secondary">Annuler</button></div><p class="identity-help">3 à 24 caractères. Une modification tous les 30 jours.</p></form>
             <p id="identityChangeDate" class="identity-change-date"></p><p id="identityFeedback" class="identity-feedback" role="status" aria-live="polite"></p>
             <div class="identity-facts"><div><span>Email</span><strong id="identityFactEmail" translate="no">—</strong></div><div><span>Membre depuis</span><strong id="identityCreated">—</strong></div><div><span>Abonnement</span><strong id="identityPlan">Gratuit</strong></div><div id="identitySubscriptionRow" hidden><span>Abonnement depuis</span><strong id="identitySubscriptionDate">—</strong></div></div>
@@ -5611,7 +5611,7 @@ function inferColumnType(header, samples){
   window.__account = sb;
 })();
 </script>
-<script src="profile.js?v=20261013-r1"></script>
+<script src="profile.js?v=20261015-r1"></script>
 <script>(function(){
   /* === Sync Supabase (offline-first, multi-device) ===
      Sauvegarde locale immediate + sync cloud des qu'on est en ligne.
@@ -5899,7 +5899,7 @@ function inferColumnType(header, samples){
   <script src="finishing.js?v=20261014-r1" defer></script>
   <script src="bank-import.js?v=20261014-r1" defer></script>
   <script src="reminders.js?v=20261015-r1" defer></script>
-  <script src="backup.js?v=20261015-r1" defer></script>
+  <script src="backup.js?v=20261015-r2" defer></script>
   <script src="menus.js?v=20261013-r1" defer></script>
   <script src="discover.js?v=20261015-r1" defer></script>
 </body>
