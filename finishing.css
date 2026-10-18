@@ -215,3 +215,21 @@ body[data-theme="moulin"] #objectivesPage .objective-stat span{white-space:norma
 .gfi-step-tx small{display:block;margin-top:2px;font-size:12.5px;line-height:1.4;color:var(--muted)}
 .gfi-note{margin:12px 0 0;font-size:13px;line-height:1.4;color:var(--muted)}
 .gfr-how{display:inline-block;margin:2px 0 8px}
+
+/* Avatars Meuniance */
+.has-avatar{padding:0!important;background:none!important;overflow:hidden}
+.has-avatar .gfa-svg{display:block;width:100%;height:100%}
+.sf-avatar.has-avatar{border-radius:12px}
+.gfa-picker{margin:14px 0 6px;min-width:0;max-width:100%}
+.gfa-head strong{display:block;font:600 15px var(--font-body);color:var(--text)}
+.gfa-head small{display:block;margin-top:2px;font-size:12.5px;color:var(--muted)}
+.gfa-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:10px;max-width:440px}
+.gfa-opt{position:relative;aspect-ratio:1;width:100%;padding:0;border:0;border-radius:15px;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s}
+.gfa-opt .gfa-svg{display:block;width:100%;height:100%;border-radius:15px}
+.gfa-opt:active{transform:scale(.94)}
+.gfa-opt[aria-checked="true"]{box-shadow:0 0 0 2px var(--panel-solid,var(--bg)),0 0 0 4.5px var(--accent-fill,var(--accent))}
+.gfa-opt:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.gfa-letter{display:grid;place-items:center;border:1.5px dashed var(--line-strong,var(--line));color:var(--text);font:700 18px var(--font-body)}
+.gfa-feedback{margin:6px 0 0;font-size:13px;color:var(--red,#c0392b)}
+.gfa-feedback:empty{display:none}
+@media(prefers-reduced-motion:reduce){.gfa-opt{transition:none}}
