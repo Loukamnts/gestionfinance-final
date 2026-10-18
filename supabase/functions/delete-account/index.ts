@@ -1,11 +1,17 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-// Seul le site Meuniance peut demander une suppression ; une variable ALLOWED_ORIGIN reste prioritaire.
-const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "https://gestion-finance-coral.vercel.app";
+// Seul le site Meuniance peut demander une suppression (adresse actuelle, ancienne adresse redirigée,
+// ou une adresse ajoutée par la variable ALLOWED_ORIGIN).
+const allowedOrigins = [
+  "https://meuniance.vercel.app",
+  "https://gestion-finance-coral.vercel.app",
+  ...(Deno.env.get("ALLOWED_ORIGIN") || "").split(",").map((o) => o.trim()).filter(Boolean),
+];
+const isAllowed = (origin: string | null) => !!origin && allowedOrigins.includes(origin);
 
 function corsHeaders(origin: string | null) {
   return {
-  "Access-Control-Allow-Origin": origin === allowedOrigin ? origin : allowedOrigin,
+  "Access-Control-Allow-Origin": isAllowed(origin) ? origin! : allowedOrigins[0],
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
@@ -15,7 +21,7 @@ function corsHeaders(origin: string | null) {
 Deno.serve(async (request) => {
   const origin = request.headers.get("Origin");
   const headers = corsHeaders(origin);
-  if (!allowedOrigin || origin !== allowedOrigin) return new Response("Forbidden", { status: 403, headers });
+  if (!isAllowed(origin)) return new Response("Forbidden", { status: 403, headers });
   if (request.method === "OPTIONS") return new Response("ok", { headers });
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405, headers });
 
