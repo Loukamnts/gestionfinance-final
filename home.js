@@ -304,8 +304,48 @@
     var ok=el("button","gfr-invite-go",t2("Compris","Got it"));ok.type="button";ok.addEventListener("click",function(){c.classList.remove("is-on");setTimeout(function(){c.remove();},250);});
     var acts=el("div","gfr-invite-acts");acts.append(ok);c.append(ic,tx,acts);document.body.append(c);requestAnimationFrame(function(){c.classList.add("is-on");});
     setTimeout(function(){if(c.isConnected){c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}},9000);
-    // Notification de l'appareil, seulement si elle a été autorisée (jamais de demande surprise).
-    try{if("Notification" in window&&Notification.permission==="granted"&&navigator.serviceWorker)navigator.serviceWorker.ready.then(function(r){r.showNotification("Meuniance · "+title,{body:body,icon:"/app-icon-180.png",tag:"meuniance-plafond",data:{url:"/accueil"}});}).catch(function(){});}catch(e){}
+    pushBudget(list,title,body);
+  }
+  /* Notification sur tous mes appareils (compte connecté et notifications activées), même app fermée.
+     Sinon, notification de cet appareil seulement si elle a déjà été autorisée (jamais de demande surprise). */
+  function pushBudget(list,title,body){
+    var R=window.GFReminders;
+    var local=function(){try{if("Notification" in window&&Notification.permission==="granted"&&navigator.serviceWorker)navigator.serviceWorker.ready.then(function(r){r.showNotification("Meuniance · "+title,{body:body,icon:"/app-icon-180.png",tag:"meuniance-plafond",data:{url:"/accueil"}});}).catch(function(){});}catch(e){}};
+    if(!R||!R.pushReady){local();return;}
+    R.pushReady().then(function(ready){
+      if(!ready){local();return;}
+      var now=new Date(),month=now.getFullYear()+"-"+(now.getMonth()+1);
+      list.forEach(function(a){
+        var t=a.lvl>=100?t2(a.name+" : plafond atteint",a.name+": limit reached"):t2(a.name+" : 80 % du plafond",a.name+": 80% of the limit");
+        var b=amountsHidden()?(a.lvl>=100?t2("Tu as atteint le plafond fixé pour ce mois.","You reached the limit set for this month."):t2("Tu approches du plafond fixé pour ce mois.","You are getting close to this month’s limit."))
+          :(a.lvl>=100?t2(eur(a.spent)+" dépensés pour un plafond de "+eur(a.bud)+".",eur(a.spent)+" spent for a "+eur(a.bud)+" limit."):t2("Il reste "+eur(Math.max(0,a.bud-a.spent))+" avant le plafond de "+eur(a.bud)+".",eur(Math.max(0,a.bud-a.spent))+" left before the "+eur(a.bud)+" limit."));
+        R.notifyMe("budget","plafond:"+month+":"+normKey(a.name).slice(0,40)+":"+a.lvl,t,b,"/accueil");
+      });
+    }).catch(local);
+  }
+
+  /* ── Objectif atteint : bravo sur l'accueil et sur le téléphone (jamais pour un objectif de dépense) ── */
+  var GOALS_KEY="personalFinanceDashboard.goalsCelebrated";
+  function checkGoals(p){
+    var srcs=[];try{srcs=window.FinanceSheet&&window.FinanceSheet.getObjectiveSources?window.FinanceSheet.getObjectiveSources():[];}catch(e){}
+    var goals=(Array.isArray(p.objectives)?p.objectives:[]).filter(function(g){return g&&g.id&&!g.archived&&Number(g.target)>0&&g.type!=="expense";});
+    var seen=null;try{seen=JSON.parse(lsGet(GOALS_KEY)||"null");}catch(e){}
+    var first=!seen||typeof seen!=="object";if(first)seen={};
+    var fresh=[];
+    goals.forEach(function(g){
+      var src=g.sourceId&&srcs.filter(function(x){return x.id===g.sourceId;})[0],cur=src?Number(src.value):Number(g.current||0),tar=Number(g.target),key=String(g.id);
+      if(cur>=tar){if(Number(seen[key])!==tar){if(!first)fresh.push({g:g,cur:cur,tar:tar});seen[key]=tar;}}
+      else if(seen[key]&&cur<tar*.9)delete seen[key];// repassé nettement en dessous : on pourra refêter
+    });
+    lsSet(GOALS_KEY,JSON.stringify(seen));
+    if(!fresh.length)return;
+    var f=fresh[0],title=t2("Bravo, objectif atteint !","Well done, goal reached!"),name=String(f.g.title||t2("Ton objectif","Your goal"));
+    toast(title+" « "+name+" »");
+    var R=window.GFReminders;if(!R||!R.notifyMe)return;
+    fresh.forEach(function(x){
+      var nm=String(x.g.title||t2("Ton objectif","Your goal")).slice(0,60);
+      R.notifyMe("goals","goal:"+String(x.g.id).slice(0,40)+":"+x.tar,title,amountsHidden()?t2("« "+nm+" » est atteint.","“"+nm+"” is reached."):t2("« "+nm+" » : "+eur(x.cur)+" sur "+eur(x.tar)+".","“"+nm+"”: "+eur(x.cur)+" of "+eur(x.tar)+"."),"/objectifs");
+    });
   }
 
   /* ── Bilan du mois en une phrase ───────────────────────────────────────── */
@@ -533,7 +573,7 @@
     if(document.body.classList.contains("tutorial-active"))setTimeout(function(){window.dispatchEvent(new Event("resize"));},30);
     openFromLink(plus);
     if(window.GFYear&&!blank)window.GFYear.fromLink();
-    if(!blank&&!demo)checkBudgets(all);
+    if(!blank&&!demo){checkBudgets(all);checkGoals(p);}
     if(window.GFSubs)setTimeout(function(){try{window.GFSubs.afterRender();}catch(e){}},700);
   }
   /* Raccourci « Ajouter une dépense » (appui long sur l'icône de l'app, ou /accueil?ajout=depense|revenu|epargne) :

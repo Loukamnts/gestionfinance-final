@@ -64,7 +64,8 @@ self.addEventListener("push", function (event) {
     body: String(data.body || "Pense à noter tes dépenses."),
     icon: "/app-icon-180.png",
     badge: "/app-icon-180.png",
-    tag: "meuniance-rappel",
+    // Chaque type a son tag : une nouvelle notification du même sujet remplace l'ancienne, sans effacer les autres.
+    tag: typeof data.tag === "string" && data.tag.length > 0 && data.tag.length <= 90 ? data.tag : "meuniance-rappel",
     data: { url: url }
   }));
 });
