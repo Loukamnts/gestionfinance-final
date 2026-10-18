@@ -1,4 +1,4 @@
-/* Avatars Meuniance : 12 dessins aux couleurs du site, choisis dans Paramètres › Profil.
+/* Avatars Meuniance : 12 médailles finance (vert profond, anneau et pictogramme dorés, comme le logo).
    Pas de photos envoyées : rien d'inapproprié possible, aucune image personnelle stockée.
    La base n'accepte que ces noms (contrainte sur profiles.avatar). */
 (function(){
@@ -8,46 +8,34 @@
   function t2(fr,e){return en()?e:fr;}
   function el(tag,cls,text){var n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;}
 
-  // [identifiant, nom FR, nom EN, fond, dessin, contenu SVG (viewBox 0 0 48 48, « C » = couleur du dessin, « B » = fond)]
+  // [identifiant, nom FR, nom EN, dessin (viewBox 0 0 48 48 ; « C » = trait doré, « A » = remplissage doré)]
   var LIST=[
-    ["ble","Épi de blé","Wheat","#E3A82B","#17261F",
-      '<path d="M24 39V15" stroke="C" stroke-width="2.4" stroke-linecap="round"/>'+
-      '<ellipse cx="24" cy="12.5" rx="2.8" ry="4.6" fill="C"/>'+
-      [17.5,23.5,29.5].map(function(y){return '<ellipse cx="19.6" cy="'+y+'" rx="2.9" ry="4.8" fill="C" transform="rotate(-38 19.6 '+y+')"/><ellipse cx="28.4" cy="'+y+'" rx="2.9" ry="4.8" fill="C" transform="rotate(38 28.4 '+y+')"/>';}).join("")],
-    ["moulin","Moulin","Windmill","#17261F","#E3A82B",
-      '<path d="M20.2 39 22 25h4l1.8 14Z" fill="C"/>'+
-      [45,135,225,315].map(function(a){return '<g transform="rotate('+a+' 24 21)"><path d="M26.4 21h10.4" stroke="C" stroke-width="1.6" stroke-linecap="round"/><rect x="28" y="17.4" width="8.8" height="3.6" rx=".8" fill="C"/></g>';}).join("")+
-      '<circle cx="24" cy="21" r="2.6" fill="C"/>'],
-    ["tirelire","Tirelire","Piggy bank","#F2CDBD","#8A3B26",
-      '<ellipse cx="23" cy="27" rx="11.5" ry="8.6" fill="C"/><ellipse cx="34.6" cy="26.4" rx="2.6" ry="3.3" fill="C"/>'+
-      '<ellipse cx="17.6" cy="19.6" rx="2.6" ry="3.4" fill="C" transform="rotate(-28 17.6 19.6)"/><rect x="16" y="32" width="3.6" height="6.5" rx="1.6" fill="C"/><rect x="25.6" y="32" width="3.6" height="6.5" rx="1.6" fill="C"/>'+
-      '<path d="M20.5 21.4h6" stroke="B" stroke-width="2" stroke-linecap="round"/><circle cx="29.8" cy="24.4" r="1.3" fill="B"/>'+
-      '<circle cx="23.5" cy="11.5" r="3.6" fill="C"/><path d="M23.5 9.8v3.4" stroke="B" stroke-width="1.5" stroke-linecap="round"/>'],
-    ["pieces","Pièces","Coins","#2F6B4F","#F3EEE2",
-      '<rect x="10.5" y="32" width="18" height="5.2" rx="2.6" fill="C"/><rect x="13" y="25.6" width="18" height="5.2" rx="2.6" fill="C"/><rect x="10.5" y="19.2" width="18" height="5.2" rx="2.6" fill="C"/>'+
-      '<circle cx="35" cy="15" r="5.4" fill="none" stroke="C" stroke-width="2.4"/><path d="M35 12.6v4.8" stroke="C" stroke-width="2.2" stroke-linecap="round"/>'],
-    ["feuille","Feuille","Leaf","#DCE8D5","#2F6B4F",
-      '<path d="M13 35c0-13 8.5-21.5 22-22 0 13.6-8.6 22-22 22Z" fill="C"/><path d="M15.5 32.5 29 19" stroke="B" stroke-width="2.2" stroke-linecap="round"/>'],
-    ["cible","Objectif","Goal","#C2553F","#FFF4EA",
-      '<circle cx="22" cy="26" r="12" fill="none" stroke="C" stroke-width="2.6"/><circle cx="22" cy="26" r="6.6" fill="none" stroke="C" stroke-width="2.6"/><circle cx="22" cy="26" r="2.4" fill="C"/>'+
-      '<path d="m22 26 13-13M30.5 12.5H35v4.5" stroke="C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'],
-    ["pousse","Pousse","Sprout","#F3E6C4","#2F6B4F",
-      '<path d="M24 37V24" stroke="C" stroke-width="2.6" stroke-linecap="round"/>'+
-      '<path d="M24 26.5c-7 0-10.5-4.6-10.5-10.5 6.3 0 10.5 3.8 10.5 10.5Z" fill="C"/><path d="M24 23c0-6.8 3.8-10.5 10.5-10.5 0 6.6-3.8 10.5-10.5 10.5Z" fill="C"/>'+
-      '<path d="M15 37.5h18" stroke="C" stroke-width="2.6" stroke-linecap="round"/>'],
-    ["soleil","Soleil","Sun","#F6D57A","#A35B12",
-      '<circle cx="24" cy="24" r="6.8" fill="C"/>'+[0,45,90,135,180,225,270,315].map(function(a){var r=Math.PI*a/180,x1=24+Math.cos(r)*10.5,y1=24+Math.sin(r)*10.5,x2=24+Math.cos(r)*14.5,y2=24+Math.sin(r)*14.5;return '<path d="M'+x1.toFixed(1)+' '+y1.toFixed(1)+'L'+x2.toFixed(1)+' '+y2.toFixed(1)+'" stroke="C" stroke-width="2.6" stroke-linecap="round"/>';}).join("")],
-    ["maison","Maison","Home","#D9E3EC","#23415C",
-      '<path d="M11.5 24.5 24 13l12.5 11.5Z" fill="C"/><rect x="15.5" y="23" width="17" height="14" rx="1.6" fill="C"/><rect x="21.5" y="28.5" width="5" height="8.5" rx="1" fill="B"/>'],
-    ["avion","Voyage","Travel","#23415C","#F3EEE2",
-      '<path d="M24 9.5c1.6 0 2.2 2 2.2 4v7.3l11 6.2v3.2l-11-3.6v6.5l3.6 2.6v2.8L24 37l-5.8 1.5v-2.8l3.6-2.6v-6.5l-11 3.6V27l11-6.2v-7.3c0-2 .6-4 2.2-4Z" fill="C"/>'],
-    ["montagne","Sommet","Summit","#E6DDF0","#4B3B6B",
-      '<path d="M9.5 37 20 20l6 9 4-6 8.5 14Z" fill="C"/><path d="M20 20v-9.5" stroke="C" stroke-width="2.2" stroke-linecap="round"/><path d="M20 10.5 27.5 13 20 15.6Z" fill="C"/>'],
-    ["etoile","Étoile","Star","#3B2E22","#E3A82B",
-      (function(){var pts=[];for(var i=0;i<10;i++){var r=i%2?6.2:14,a=Math.PI/180*(-90+i*36);pts.push((24+Math.cos(a)*r).toFixed(1)+" "+(25+Math.sin(a)*r).toFixed(1));}return '<path d="M'+pts.join("L")+'Z" fill="C" stroke="C" stroke-width="1.6" stroke-linejoin="round"/>';})()]
+    ["piece","Pièce","Coin","<circle cx=\"24\" cy=\"24\" r=\"11.2\" fill=\"A\" fill-opacity=\".16\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"24\" cy=\"24\" r=\"8.4\" fill=\"none\" stroke=\"C\" stroke-width=\"1\" opacity=\".55\"/><path d=\"M28.4 19.6a5.6 5.6 0 1 0 0 8.8\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M19 22.6h6.6M19 25.4h6.6\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\"/>"],
+    ["tirelire","Tirelire","Piggy bank","<path d=\"M14.6 26.4c0-5 4.4-8.5 10-8.5 3 0 5.5.9 7.3 2.6l2.5-1.3v4.2c.7.9 1.1 1.8 1.3 2.8h1.6v4.1h-2.3c-.8 1.6-2 2.8-3.6 3.6v2.4h-3.6v-1.6c-1 .2-2 .3-3.2.3s-2.1-.1-3.1-.3v1.6h-3.6v-2.5c-2.1-1.7-3.3-4.7-3.3-7.4Z\" fill=\"A\" fill-opacity=\".16\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M21.6 18.6h5.8\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"30.4\" cy=\"24.4\" r=\"1.25\" fill=\"C\"/><circle cx=\"24.5\" cy=\"11.4\" r=\"2.9\" fill=\"A\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.6\"/>"],
+    ["croissance","Croissance","Growth","<path d=\"M13 35h22\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M13 13.5V35\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\".5\"/><path d=\"m16.6 29.2 5.8-6 4.3 4 8-8.8\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.4\"/><path d=\"M29.4 18.2h5.4v5.4\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.4\"/><path d=\"M16.6 29.2l5.8-6 4.3 4 8-8.8V35H16.6Z\" fill=\"A\" fill-opacity=\".14\"/>"],
+    ["coffre","Coffre-fort","Safe","<rect x=\"12.5\" y=\"13\" width=\"23\" height=\"20.5\" rx=\"3.4\" fill=\"A\" fill-opacity=\".16\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"24\" cy=\"23.2\" r=\"5.2\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"24\" cy=\"23.2\" r=\"1.7\" fill=\"C\"/><path d=\"M24 18v1.6M24 26.8v1.6M18.8 23.2h1.6M27.6 23.2h1.6\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.6\"/><path d=\"M16.2 33.5v2.4M31.8 33.5v2.4\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.4\"/>"],
+    ["billet","Billet","Banknote","<rect x=\"10.5\" y=\"16.5\" width=\"27\" height=\"15\" rx=\"2.6\" fill=\"A\" fill-opacity=\".16\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><rect x=\"13.4\" y=\"19.4\" width=\"21.2\" height=\"9.2\" rx=\"1.4\" fill=\"none\" stroke=\"C\" stroke-width=\"1\" opacity=\".5\"/><circle cx=\"24\" cy=\"24\" r=\"3.4\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"16.3\" cy=\"24\" r=\"1.2\" fill=\"C\"/><circle cx=\"31.7\" cy=\"24\" r=\"1.2\" fill=\"C\"/>"],
+    ["portefeuille","Portefeuille","Wallet","<path d=\"M14.2 18.2 29 12.8c1.1-.4 2.3.3 2.6 1.4l1 4\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><rect x=\"12\" y=\"18\" width=\"24\" height=\"17.5\" rx=\"3.2\" fill=\"A\" fill-opacity=\".16\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M36 23.2h-6a2.8 2.8 0 0 0 0 5.6h6\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"30.2\" cy=\"26\" r=\"1.2\" fill=\"C\"/>"],
+    ["carte","Carte","Card","<rect x=\"10.5\" y=\"15\" width=\"27\" height=\"18.5\" rx=\"3\" fill=\"A\" fill-opacity=\".16\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M10.5 20.6h27\" stroke=\"C\" stroke-width=\"2.6\"/><rect x=\"14.4\" y=\"25\" width=\"6\" height=\"4.4\" rx=\"1.1\" fill=\"A\" stroke=\"C\" stroke-width=\"1.2\"/><path d=\"M26 28.6h7.4\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\"/>"],
+    ["lingots","Lingots","Gold bars","<path d=\"M11 35.5l2.4-6.6h8.2l2.4 6.6Z\" fill=\"A\" fill-opacity=\".3\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M24 35.5l2.4-6.6h8.2l2.4 6.6Z\" fill=\"A\" fill-opacity=\".3\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M17.5 26.4l2.4-6.6h8.2l2.4 6.6Z\" fill=\"A\" fill-opacity=\".3\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M30.6 12.8v3M29.1 14.3h3M14.4 15.4v2.2M13.3 16.5h2.2\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\"/>"],
+    ["epargne","Épargne","Savings","<ellipse cx=\"24\" cy=\"15.4\" rx=\"9\" ry=\"3.3\" fill=\"A\" fill-opacity=\".3\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M15 15.4v16c0 1.8 4 3.3 9 3.3s9-1.5 9-3.3v-16\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M15 20.8c0 1.8 4 3.3 9 3.3s9-1.5 9-3.3M15 26.2c0 1.8 4 3.3 9 3.3s9-1.5 9-3.3\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\".75\"/>"],
+    ["diamant","Diamant","Diamond","<path d=\"M16.6 14h14.8l5.1 7.2L24 35.6 11.5 21.2Z\" fill=\"A\" fill-opacity=\".16\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M11.5 21.2h25M20.6 14l-2.4 7.2L24 35.6l5.8-14.4-2.4-7.2\" fill=\"none\" stroke=\"C\" stroke-width=\"1.4\" stroke-linejoin=\"round\" opacity=\".7\"/>"],
+    ["maison","Projet maison","Home project","<path d=\"M12 23.6 24 13.4l12 10.2\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M15.4 21v14h17.2V21\" fill=\"A\" fill-opacity=\".16\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M21.4 35v-6.4a1.2 1.2 0 0 1 1.2-1.2h2.8a1.2 1.2 0 0 1 1.2 1.2V35\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M30.8 15.6v3.6\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.4\"/>"],
+    ["objectif","Objectif","Goal","<circle cx=\"22.5\" cy=\"25.5\" r=\"11\" fill=\"A\" fill-opacity=\".16\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"22.5\" cy=\"25.5\" r=\"6.4\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"22.5\" cy=\"25.5\" r=\"2.2\" fill=\"C\"/><path d=\"M22.5 25.5 34 14M29.6 13.6H34.4v4.8\" fill=\"none\" stroke=\"C\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.2\"/>"]
   ];
   var BY={};LIST.forEach(function(a){BY[a[0]]=a;});
-  function svg(id){var a=BY[id];if(!a)return "";return '<svg class="gfa-svg" viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="'+a[3]+'"/>'+a[5].replace(/="C"/g,'="'+a[4]+'"').replace(/="B"/g,'="'+a[3]+'"')+'</svg>';}
+  var uid=0;
+  /* Médaille : fond vert profond en léger relief, anneau doré, pictogramme en dégradé doré.
+     Identifiants de dégradés uniques à chaque dessin (un dégradé partagé disparaît si son SVG est masqué). */
+  function svg(id){
+    var a=BY[id];if(!a)return "";var k="gfa"+(++uid);
+    return '<svg class="gfa-svg" viewBox="0 0 48 48" aria-hidden="true"><defs>'+
+      '<radialGradient id="'+k+'b" cx="24" cy="17" r="31" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#25402F"/><stop offset="1" stop-color="#101B15"/></radialGradient>'+
+      '<linearGradient id="'+k+'g" x1="0" y1="11" x2="0" y2="37" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#F7D886"/><stop offset="1" stop-color="#D3962A"/></linearGradient>'+
+      '<linearGradient id="'+k+'r" x1="0" y1="2" x2="0" y2="46" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#F2CB6C" stop-opacity=".85"/><stop offset="1" stop-color="#B07A1E" stop-opacity=".5"/></linearGradient></defs>'+
+      '<circle cx="24" cy="24" r="24" fill="url(#'+k+'b)"/><circle cx="24" cy="24" r="21.6" fill="none" stroke="url(#'+k+'r)" stroke-width="1.1"/>'+
+      a[3].replace(/="C"/g,'="url(#'+k+'g)"').replace(/="A"/g,'="#E3A82B"')+'</svg>';
+  }
   function name(id){var a=BY[id];return a?t2(a[1],a[2]):"";}
   /* Affiche un avatar dans un élément ; sans avatar, garde l'initiale (comportement d'origine). */
   function paint(node,id,letter){
@@ -63,9 +51,8 @@
     var a=account();if(!a.client||!a.user){mine=null;friends={};loadedFor=null;return;}
     try{
       var r=await a.client.rpc("get_avatars");if(r.error)throw r.error;
-      friends={};mine=null;(r.data||[]).forEach(function(x){if(x.user_id===a.user.id)mine=x.avatar||null;else friends[x.user_id]=x.avatar||null;});
+      friends={};mine=null;(r.data||[]).forEach(function(x){if(x.user_id===a.user.id)mine=BY[x.avatar]?x.avatar:null;else friends[x.user_id]=BY[x.avatar]?x.avatar:null;});
       loadedFor=a.user.id;apply();
-      // Amis déjà affichés : leur avatar remplace les initiales.
       document.querySelectorAll(".sf-avatar[data-friend-id]").forEach(function(n){var id=friends[n.dataset.friendId];if(id)paint(n,id);});
     }catch(e){/* refus passager : on garde l'affichage actuel */}
   }
@@ -74,33 +61,55 @@
     if(!account().user)return;
     paint(byId("profileAvatar"),mine,letterOf());
     paint(byId("identityAvatar"),mine,letterOf());
-    renderPicker();
+    changeButton();
   }
-  async function choose(id){
-    var a=account();if(!a.client||!a.user)return;
-    var prev=mine;mine=id||null;apply();
-    try{var r=await a.client.rpc("set_my_avatar",{p_avatar:mine});if(r.error)throw r.error;}
-    catch(e){mine=prev;apply();var f=byId("gfaFeedback");if(f)f.textContent=t2("Impossible d’enregistrer l’avatar. Réessaie.","Could not save the avatar. Try again.");}
-  }
-
-  /* ── Choix dans Paramètres › Profil ── */
-  function renderPicker(){
-    var details=byId("identityDetails");if(!details||!account().user)return;
-    var box=byId("gfaPicker");
-    if(!box){box=el("div","gfa-picker");box.id="gfaPicker";var facts=details.querySelector(".identity-facts");if(facts)details.insertBefore(box,facts);else details.append(box);}
-    var head=el("div","gfa-head");head.append(el("strong","",t2("Ton avatar","Your avatar")),el("small","",t2("Visible par toi et tes amis.","Seen by you and your friends.")));
-    var grid=el("div","gfa-grid");grid.setAttribute("role","radiogroup");grid.setAttribute("aria-label",t2("Ton avatar","Your avatar"));
-    var none=el("button","gfa-opt gfa-letter");none.type="button";none.setAttribute("role","radio");none.setAttribute("aria-checked",String(!mine));none.setAttribute("aria-label",t2("Initiale","Initial"));none.title=t2("Initiale","Initial");none.append(el("span","",letterOf()));
-    none.addEventListener("click",function(){choose(null);});grid.append(none);
-    LIST.forEach(function(a){var b=el("button","gfa-opt");b.type="button";b.setAttribute("role","radio");b.setAttribute("aria-checked",String(mine===a[0]));b.setAttribute("aria-label",name(a[0]));b.title=name(a[0]);b.innerHTML=svg(a[0]);b.addEventListener("click",function(){choose(a[0]);});grid.append(b);});
-    var fb=el("p","gfa-feedback");fb.id="gfaFeedback";fb.setAttribute("role","status");
-    box.replaceChildren(head,grid,fb);
+  async function save(id){
+    var a=account();if(!a.client||!a.user)return false;
+    var r=await a.client.rpc("set_my_avatar",{p_avatar:id||null});if(r.error)throw r.error;
+    mine=id||null;apply();return true;
   }
 
-  window.addEventListener("authStateChanged",function(e){var u=e.detail&&e.detail.user;if(!u){mine=null;friends={};loadedFor=null;var b=byId("gfaPicker");if(b)b.remove();return;}if(loadedFor!==u.id)setTimeout(load,300);});
-  window.addEventListener("gf:languagechange",function(){if(account().user)renderPicker();});
+  /* ── Bouton « Changer mon avatar » sous la carte du profil ── */
+  function changeButton(){
+    var copy=document.querySelector("#identityDetails .identity-summary-copy");if(!copy||!account().user)return;
+    var b=byId("gfaChange");
+    if(!b){b=el("button","gfa-change");b.id="gfaChange";b.type="button";b.addEventListener("click",openPicker);copy.append(b);}
+    b.textContent=t2("Changer mon avatar","Change my avatar");
+  }
+
+  /* ── Page de choix : grande grille rangée, aperçu, Enregistrer / Annuler ── */
+  function openPicker(){
+    if(byId("gfaDialog"))return;
+    var choice=mine;
+    var dlg=el("dialog","gfh-dialog gfa-dialog");dlg.id="gfaDialog";dlg.setAttribute("aria-labelledby","gfaTitle");
+    var head=el("div","gfa-dhead"),preview=el("span","gfa-preview"),htxt=el("div");
+    var h=el("h2","",t2("Choisis ton avatar","Choose your avatar"));h.id="gfaTitle";
+    var sub=el("p","",t2("Visible par toi et tes amis.","Seen by you and your friends."));htxt.append(h,sub);head.append(preview,htxt);
+    var grid=el("div","gfa-grid");grid.setAttribute("role","radiogroup");grid.setAttribute("aria-label",t2("Avatars","Avatars"));
+    function opt(id,label,inner){var b=el("button","gfa-opt");b.type="button";b.setAttribute("role","radio");b.dataset.id=id||"";var pic=el("span","gfa-pic"+(id?"":" gfa-letter"));if(id)pic.innerHTML=svg(id);else pic.textContent=inner;b.append(pic,el("span","gfa-name",label));b.addEventListener("click",function(){choice=id||null;sync();});return b;}
+    LIST.forEach(function(a){grid.append(opt(a[0],name(a[0])));});
+    // L'initiale reste possible, en lien discret sous la grille (4 × 3 médailles, sans case orpheline).
+    var letterBtn=el("button","gfa-use-letter");letterBtn.type="button";letterBtn.addEventListener("click",function(){choice=null;sync();});
+    var msg=el("p","gfa-feedback");msg.setAttribute("role","status");
+    var row=el("div","gfh-dialog-actions"),cancel=el("button","gfh-btn",t2("Annuler","Cancel")),ok=el("button","gfh-btn is-primary",t2("Enregistrer","Save"));cancel.type=ok.type="button";row.append(cancel,ok);
+    function sync(){
+      [].forEach.call(grid.children,function(b){b.setAttribute("aria-checked",String((b.dataset.id||null)===choice));});
+      letterBtn.textContent=choice?t2("Revenir à mon initiale ("+letterOf()+")","Use my initial ("+letterOf()+")"):t2("Initiale sélectionnée ("+letterOf()+")","Initial selected ("+letterOf()+")");letterBtn.disabled=!choice;
+      if(choice)preview.innerHTML=svg(choice);else{preview.textContent=letterOf();}
+      preview.classList.toggle("gfa-letter",!choice);
+      ok.disabled=choice===mine;
+    }
+    cancel.addEventListener("click",function(){dlg.close();});
+    ok.addEventListener("click",async function(){ok.disabled=true;msg.textContent="";try{await save(choice);dlg.close();}catch(e){msg.textContent=t2("Impossible d’enregistrer l’avatar. Réessaie.","Could not save the avatar. Try again.");ok.disabled=false;}});
+    dlg.addEventListener("close",function(){dlg.remove();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();});
+    dlg.append(head,grid,letterBtn,msg,row);document.body.append(dlg);sync();dlg.showModal();
+    if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();
+  }
+
+  window.addEventListener("authStateChanged",function(e){var u=e.detail&&e.detail.user;if(!u){mine=null;friends={};loadedFor=null;var b=byId("gfaChange");if(b)b.remove();return;}if(loadedFor!==u.id)setTimeout(load,300);});
+  window.addEventListener("gf:languagechange",function(){if(account().user)changeButton();});
   // Le profil (pseudo) peut redessiner l'initiale : on remet l'avatar par-dessus.
   if(window.MutationObserver)document.addEventListener("DOMContentLoaded",function(){["profileAvatar","identityAvatar"].forEach(function(id){var n=byId(id);if(n)new MutationObserver(function(){if(BY[mine]&&!n.querySelector(".gfa-svg")&&account().user)paint(n,mine);}).observe(n,{childList:true,characterData:true,subtree:true});});});
   if(document.readyState!=="loading"&&account().user)load();
-  window.GFAvatars={svg:svg,paint:paint,friend:function(id){return friends[id]||null;},list:LIST.map(function(a){return a[0];}),reload:load,_set:function(m,f){mine=m;friends=f||{};apply();}};
+  window.GFAvatars={svg:svg,paint:paint,open:openPicker,friend:function(id){return friends[id]||null;},list:LIST.map(function(a){return a[0];}),reload:load,_set:function(m,f){mine=m;friends=f||{};apply();}};
 })();
