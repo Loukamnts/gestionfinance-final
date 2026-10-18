@@ -611,17 +611,17 @@
     {
       title: "Mon espace",
       text: "Tes objectifs, le partage avec tes proches et les nouveautés de Meuniance.",
-      // Sur ordinateur, Mon espace s'ouvre depuis le menu Profil (barre en haut) ou le menu latéral.
-      textFor: { "#profileMenuButton": "Ouvre ce menu pour retrouver Mon espace : tes objectifs, le partage avec tes proches et les nouveautés.", ".studio-sidebar-nav [data-page='sharing']": "Mon espace est dans ce menu : Objectifs, Partage et amis, Nouveautés." },
-      target: ".bottom-nav #personalNavButton, .studio-sidebar-nav [data-page='sharing'], #profileMenuButton",
+      // Menu latéral sur ordinateur : Mon espace y est découpé en trois rubriques.
+      textFor: { ".studio-sidebar-nav [data-page='sharing']": "Mon espace est dans ce menu : Objectifs, Partage et amis, Nouveautés." },
+      target: ".bottom-nav #personalNavButton, .desktop-nav [data-space='1'], .studio-sidebar-nav [data-page='sharing']",
       action: "Suivant",
       page: "sheet",
     },
     {
       title: "Paramètres",
       text: "L’engrenage : ton compte, l’apparence, les notifications et tes données.",
-      textFor: { ".desktop-nav [data-page='settings']": "Paramètres : ton compte, l’apparence, les notifications et tes données.", ".studio-sidebar-nav [data-page='settings']": "Paramètres : ton compte, l’apparence, les notifications et tes données." },
-      target: ".mobile-settings-button, .desktop-nav [data-page='settings'], .studio-sidebar-nav [data-page='settings']",
+      textFor: { ".studio-sidebar-nav [data-page='settings']": "Paramètres : ton compte, l’apparence, les notifications et tes données." },
+      target: ".app-header .mobile-settings-button, .studio-sidebar-nav [data-page='settings']",
       action: "Terminer",
       isLast: true,
     },
