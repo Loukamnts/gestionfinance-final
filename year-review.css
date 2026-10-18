@@ -1,0 +1,140 @@
+/* Bilan de l'année (year-review.js) : lecteur plein écran façon « stories » et carte de l'accueil. */
+
+/* ── Lecteur ───────────────────────────────────────────── */
+.gfy { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: transparent; color: #F3EEE2; overflow: hidden; }
+.gfy::backdrop { background: #0b0f0d; }
+.gfy-stage { position: relative; box-sizing: border-box; width: 100%; height: 100%; overflow: hidden; background: #17261F; color: #F3EEE2; font-family: "Instrument Sans", system-ui, sans-serif; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; transition: background-color .35s ease, color .35s ease;
+  --gfy-pad: 24px; --gfy-gap: clamp(10px, 1.7vh, 16px); }
+.gfy-stage[data-look="wheat"], .gfy-stage[data-look="cream"] { color: #17261F; }
+.gfy-stage[data-look="clay"] { color: #FBF6EC; }
+@media (min-width: 700px) and (min-height: 640px) {
+  .gfy::backdrop { background: rgba(8, 11, 10, .88); }
+  .gfy-stage { width: min(430px, calc((100dvh - 48px) * .5)); min-width: 360px; height: min(900px, calc(100dvh - 48px)); margin: 24px auto; border-radius: 30px; box-shadow: 0 30px 90px rgba(0,0,0,.45); }
+}
+.gfy-zone { position: absolute; top: 0; bottom: 0; z-index: 1; margin: 0; padding: 0; border: 0; background: transparent; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.gfy-zone.is-prev { left: 0; width: 35%; cursor: w-resize; }
+.gfy-zone.is-next { right: 0; width: 65%; cursor: e-resize; }
+.gfy-zone:focus-visible { outline: none; }
+.gfy-top { position: relative; z-index: 2; padding: calc(env(safe-area-inset-top, 0px) + 14px) var(--gfy-pad) 0; pointer-events: none; transition: opacity .2s ease; }
+.gfy-stage.is-paused .gfy-top { opacity: 0; }
+.gfy-segs { display: flex; gap: 4px; }
+.gfy-seg { flex: 1; height: 3px; border-radius: 2px; overflow: hidden; background: rgba(243,238,226,.28); }
+.gfy-seg i { display: block; height: 100%; width: 0; background: #F3EEE2; }
+.gfy-stage:is([data-look="wheat"],[data-look="cream"]) .gfy-seg { background: rgba(23,38,31,.2); }
+.gfy-stage:is([data-look="wheat"],[data-look="cream"]) .gfy-seg i { background: #17261F; }
+.gfy-head { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.gfy-brand { font: 700 12px/1 "Instrument Sans", system-ui, sans-serif; letter-spacing: .08em; opacity: .75; }
+.gfy-close { pointer-events: auto; display: grid; place-items: center; width: 44px; height: 44px; margin-right: -12px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; }
+.gfy-close svg { width: 22px; height: 22px; }
+.gfy-close:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; }
+.gfy-body { position: relative; z-index: 2; box-sizing: border-box; height: calc(100% - 70px - env(safe-area-inset-top, 0px)); padding: clamp(12px, 3vh, 30px) var(--gfy-pad) calc(env(safe-area-inset-bottom, 0px) + 24px); overflow: hidden; pointer-events: none; }
+.gfy-screen { display: flex; flex-direction: column; gap: var(--gfy-gap); animation: gfyIn .4s ease both; }
+@keyframes gfyIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .gfy-screen { animation: none; } .gfy-stage, .gfy-top { transition: none; } }
+
+.gfy-tag { align-self: flex-start; padding: 6px 12px; border-radius: 99px; background: #E3A82B; color: #17261F; font: 700 11px/1.2 "Instrument Sans", system-ui, sans-serif; letter-spacing: .08em; }
+.gfy-stage:is([data-look="wheat"],[data-look="cream"]) .gfy-tag { background: #17261F; color: #F3EEE2; }
+.gfy-screen.is-best .gfy-tag { background: #A9BDA6; color: #17261F; }
+.gfy-stage[data-look="clay"] .gfy-tag { background: #FBF6EC; color: #8F3D2A; }
+.gfy-title { margin: 0; font: 700 clamp(32px, 5.4vh, 46px)/1.02 "Bricolage Grotesque", system-ui, sans-serif; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.gfy-title.is-xl { font-size: clamp(42px, 7vh, 58px); line-height: .98; }
+.gfy-title.is-l { font-size: clamp(38px, 6.2vh, 52px); line-height: 1; }
+.gfy-title.is-s { font-size: clamp(26px, 4vh, 32px); line-height: 1.1; }
+.gfy-big { font: 700 clamp(54px, 9vh, 78px)/1 "Bricolage Grotesque", system-ui, sans-serif; letter-spacing: -.035em; white-space: nowrap; }
+.gfy-text { margin: 0; max-width: 36ch; font: 500 clamp(15px, 2vh, 17px)/1.45 "Instrument Sans", system-ui, sans-serif; opacity: .85; }
+.gfy-hint { margin: 6px 0 0; font: 600 14px "Instrument Sans", system-ui, sans-serif; opacity: .65; }
+
+.gfy-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: clamp(8px, 2vh, 18px); }
+.gfy-tile { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 14px 12px; border-radius: 16px; background: rgba(243,238,226,.08); }
+.gfy-tile b { font: 700 clamp(24px, 3.6vh, 30px)/1 "Bricolage Grotesque", system-ui, sans-serif; color: #E3A82B; }
+.gfy-tile span { font: 600 13px/1.25 "Instrument Sans", system-ui, sans-serif; opacity: .82; }
+
+.gfy-chart, .gfy-dots-box, .gfy-cats { display: flex; flex-direction: column; gap: 12px; margin-top: clamp(8px, 2vh, 18px); padding: 16px; border-radius: 20px; background: rgba(243,238,226,.08); }
+.gfy-stage:is([data-look="wheat"],[data-look="cream"]) :is(.gfy-chart,.gfy-cats) { background: rgba(23,38,31,.07); }
+.gfy-stage[data-look="clay"] .gfy-dots-box { background: rgba(251,246,236,.1); }
+.gfy-chart-head { display: flex; justify-content: space-between; gap: 10px; font: 700 13px/1.3 "Instrument Sans", system-ui, sans-serif; }
+.gfy-chart-head span { opacity: .85; }
+.gfy-bars { display: flex; align-items: flex-end; gap: 6px; height: clamp(110px, 25vh, 240px); }
+.gfy-bar { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; }
+.gfy-bar i { display: block; width: 100%; border-radius: 6px; background: rgba(243,238,226,.22); }
+.gfy-bar.is-hi i { background: #E3A82B; }
+.gfy-bar.is-none i { background: rgba(243,238,226,.1); }
+.gfy-bar span { flex: 0 0 auto; font: 600 11px/1 "Instrument Sans", system-ui, sans-serif; opacity: .65; }
+.gfy-chart.is-cumul .gfy-bar i { background: rgba(23,38,31,.3); }
+.gfy-chart.is-cumul .gfy-bar.is-hi i { background: #17261F; }
+.gfy-chart.is-cumul .gfy-bar.is-none i { background: transparent; }
+.gfy-chart-ends { display: flex; justify-content: space-between; font: 600 11px "Instrument Sans", system-ui, sans-serif; opacity: .7; }
+
+.gfy-cats { gap: 14px; }
+.gfy-cat, .gfy-goal { display: flex; flex-direction: column; gap: 7px; }
+.gfy-cat-h { display: flex; justify-content: space-between; gap: 12px; font: 600 15px/1.3 "Instrument Sans", system-ui, sans-serif; }
+.gfy-cat-h span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gfy-cat-h span:last-child { flex: 0 0 auto; opacity: .85; }
+.gfy-cat-track { height: 9px; border-radius: 6px; background: rgba(23,38,31,.1); overflow: hidden; }
+.gfy-cat-track i { display: block; height: 100%; border-radius: 6px; background: #E3A82B; }
+.gfy-goals { display: flex; flex-direction: column; gap: 10px; margin-top: clamp(8px, 2vh, 18px); }
+.gfy-goal { padding: 14px 16px; border-radius: 16px; background: rgba(243,238,226,.09); }
+.gfy-goal .gfy-cat-track { height: 7px; background: rgba(243,238,226,.16); }
+
+.gfy-dots { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px 8px; }
+.gfy-dot { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.gfy-dot i { display: block; width: min(32px, 100%); aspect-ratio: 1; border-radius: 50%; box-sizing: border-box; }
+.gfy-dot.is-on i { background: #F3C55B; }
+.gfy-dot.is-miss i { border: 2px dashed rgba(251,246,236,.55); }
+.gfy-dot.is-none i { background: rgba(251,246,236,.12); }
+.gfy-dot span { font: 600 11px "Instrument Sans", system-ui, sans-serif; opacity: .75; }
+.gfy-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.gfy-chips span { padding: 8px 13px; border-radius: 99px; border: 1px solid rgba(251,246,236,.55); font: 600 14px "Instrument Sans", system-ui, sans-serif; }
+
+.gfy-card { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; padding: 20px; border-radius: 22px; background: #F3EEE2; color: #17261F; }
+.gfy-card-k { font: 700 12px "Instrument Sans", system-ui, sans-serif; letter-spacing: .08em; color: #5b665f; }
+.gfy-card-t { font: 700 clamp(26px, 4vh, 32px)/1.05 "Bricolage Grotesque", system-ui, sans-serif; }
+.gfy-card-g { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.gfy-card-g span { display: block; font: 600 13px "Instrument Sans", system-ui, sans-serif; color: #5b665f; }
+.gfy-card-g b { display: block; font: 700 19px/1.25 "Instrument Sans", system-ui, sans-serif; overflow-wrap: anywhere; }
+.gfy-card-u { font: 600 12px "Instrument Sans", system-ui, sans-serif; color: #5b665f; }
+.gfy-acts { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; pointer-events: auto; }
+.gfy-share { min-height: 52px; border: 0; border-radius: 16px; background: #E3A82B; color: #17261F; font: 700 16px "Instrument Sans", system-ui, sans-serif; cursor: pointer; }
+.gfy-again { min-height: 44px; border: 0; background: transparent; color: inherit; font: 600 14px "Instrument Sans", system-ui, sans-serif; opacity: .8; cursor: pointer; }
+.gfy-acts button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
+.gfy-paused { position: absolute; z-index: 3; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); transform: translateX(-50%); display: none; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 99px; background: rgba(0,0,0,.4); color: #fff; font: 600 13px "Instrument Sans", system-ui, sans-serif; pointer-events: none; }
+.gfy-paused svg { width: 14px; height: 14px; }
+.gfy-stage.is-paused .gfy-paused { display: flex; }
+
+/* Mode discret : les montants restent flous, même ici. */
+body.gf-hide-amounts .gfy .gf-amount, body.gf-hide-amounts .gfy-home .gf-amount { filter: blur(9px); }
+
+/* Petits écrans en hauteur (iPhone SE…) : on resserre. */
+@media (max-height: 700px) {
+  .gfy-stage { --gfy-pad: 20px; }
+  .gfy-tile { padding: 11px 10px; }
+  .gfy-chart, .gfy-dots-box, .gfy-cats { padding: 13px; gap: 9px; }
+  .gfy-goal { padding: 11px 14px; }
+  .gfy-card { padding: 16px; gap: 9px; }
+  .gfy-share { min-height: 48px; }
+}
+
+/* ── Carte de l'accueil ─────────────────────────────────── */
+.gfy-home { position: relative; display: flex; flex-direction: column; gap: 10px; margin: 0 0 18px; padding: 22px; border-radius: 22px; background: #17261F; color: #F3EEE2; }
+.gfy-home-x { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; opacity: .7; cursor: pointer; }
+.gfy-home-x svg { width: 18px; height: 18px; }
+.gfy-home-k { font: 700 11px "Instrument Sans", system-ui, sans-serif; letter-spacing: .1em; opacity: .75; }
+.gfy-home-t { margin: 0; padding-right: 30px; font: 700 28px/1.08 "Bricolage Grotesque", system-ui, sans-serif; color: inherit; }
+.gfy-home-p { margin: 0; font: 500 14px/1.45 "Instrument Sans", system-ui, sans-serif; opacity: .82; }
+.gfy-home-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 4px; }
+.gfy-home-tile { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 10px; border-radius: 14px; background: rgba(243,238,226,.08); }
+.gfy-home-tile b { font: 700 19px/1.15 "Bricolage Grotesque", system-ui, sans-serif; color: #E3A82B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gfy-home-tile span { font: 600 12px/1.25 "Instrument Sans", system-ui, sans-serif; opacity: .82; }
+.gfy-home-go { align-self: flex-start; margin-top: 6px; min-height: 46px; padding: 0 20px; border: 0; border-radius: 13px; background: #E3A82B; color: #17261F; font: 700 15px "Instrument Sans", system-ui, sans-serif; cursor: pointer; }
+.gfy-home :is(button):focus-visible { outline: 2px solid #E3A82B; outline-offset: 3px; }
+body[data-mode="dark"] .gfy-home { background: #0f1914; box-shadow: inset 0 0 0 1px rgba(243,238,226,.1); }
+@media (hover: hover) {
+  .gfy-home-go:hover, .gfy-share:hover { filter: brightness(1.06); }
+  .gfy-home-x:hover { opacity: 1; background: rgba(243,238,226,.1); }
+}
+@media (min-width: 900px) {
+  .gfy-home { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); grid-template-areas: "k tiles" "t tiles" "p tiles" "go tiles"; column-gap: 28px; align-items: start; }
+  .gfy-home-k { grid-area: k; } .gfy-home-t { grid-area: t; } .gfy-home-p { grid-area: p; } .gfy-home-go { grid-area: go; }
+  .gfy-home-tiles { grid-area: tiles; align-self: center; margin: 0 36px 0 0; }
+}

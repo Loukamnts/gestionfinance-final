@@ -1902,11 +1902,12 @@
   <link rel="stylesheet" href="theme-directions.css?v=20261018-h1">
   <link rel="stylesheet" href="plans.css?v=20261018-h1">
   <link rel="stylesheet" href="home.css?v=20261019-r3">
+  <link rel="stylesheet" href="year-review.css?v=20261019-r2">
   <link rel="stylesheet" href="sheet-balances.css?v=20261018-h1">
   <link rel="stylesheet" href="finishing.css?v=20261018-h1">
   <link rel="stylesheet" href="menus.css?v=20261018-h1">
   <link rel="stylesheet" href="discover.css?v=20261019-r1">
-  <script src="i18n.js?v=20261018-r4"></script>
+  <script src="i18n.js?v=20261019-r1"></script>
   <script src="ui-controls.js?v=20260923-r10" defer></script>
 </head>
 <body data-theme="moulin" data-palette="ble" data-mode="dark" data-page="dashboard" data-interface="classic">
@@ -3280,8 +3281,9 @@ function inferColumnType(header, samples){
     function setLoading(v){ try{ if(window.MeuniLoader){ if(v) window.MeuniLoader.start("J’analyse ton fichier…"); else window.MeuniLoader.done("Fichier importé."); return; } }catch(e){} elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
-    const RELEASE_NOTES_VERSION="2026-10-15-bilan";
+    const RELEASE_NOTES_VERSION="2026-10-19-ensemble";
     const RELEASE_NOTES=[
+      {date:"19 octobre 2026",title:"Ton année, tes amis, tes abonnements",text:"Le bilan de l’année, les dépenses partagées entre amis, les abonnements repérés dans tes relevés et des alertes avant de dépasser un plafond.",highlights:["Bilan de l’année : ton année en quelques écrans, à partager sans aucun montant.","Dépenses entre amis : qui a payé, qui doit combien, et « Marquer comme remboursé ».","Abonnements et alertes : tes prélèvements réguliers repérés, et une alerte à 80 % puis 100 % d’un plafond."],sections:[{type:"new",text:"Le bilan de l’année arrive sur l’accueil en décembre. Tes dépenses partagées se notent depuis la fiche de chaque ami. Les abonnements repérés dans tes relevés s’affichent sur l’accueil."},{type:"improvement",text:"À l’import d’un relevé, Meuniance retient la catégorie que tu choisis pour chaque commerçant. Un appui long sur l’icône de l’app (Android, ordinateur) ouvre directement l’ajout d’une dépense."}]},
       {date:"15 octobre 2026",title:"Ton mois en un coup d’œil",text:"Un bilan à chaque début de mois, l’import de ton relevé bancaire, des rappels et un mode discret pour montrer ton écran.",highlights:["Bilan du mois : ce qui reste, ton épargne et ta plus grosse dépense, comparés au mois d’avant.", "Relevé bancaire : importe le fichier CSV de ta banque, tes dépenses sont rangées par catégorie.", "Rappels : une notification si tu oublies de noter tes dépenses."],sections:[{type:"new",text:"Le bilan du mois s’affiche au début de chaque mois, et tu peux le garder en permanence dans Paramètres › Apparence. L’œil à côté du solde floute tes montants quand tu montres ton écran."},{type:"new",text:"Importe le relevé CSV de ta banque depuis le tableur : il est lu sur ton appareil et seuls les totaux par catégorie et par mois sont ajoutés. Active les rappels dans Paramètres › Apparence. Tu peux aussi télécharger une sauvegarde de toutes tes données et la restaurer."},{type:"improved",text:"L’ouverture est plus rapide et ton mois en cours s’affiche directement. Le mois choisi reste sélectionné, le tableur s’ouvre sur l’année en cours et le site s’ouvre même sans connexion. Les mentions légales, les conditions et la politique de confidentialité ont été complétées."}]},
       {date:"13 octobre 2026",title:"Meuniance change de visage",text:"Nouvelle identité claire et sombre, un accueil qui résume ton mois, un tableur rangé par année et des objectifs qui suivent un mois précis.",highlights:["Accueil : ton solde sur l’année, où part ton argent et l’ajout en un geste.","Tableur : une feuille par année, la précédente ou la suivante en un clic.","Objectifs : lie un objectif à un mois précis du tableur."],sections:[{type:"new",text:"L’accueil affiche ton solde sur l’année, où part ton argent et tes dépenses fixes. Tu peux ajouter une dépense, un revenu ou de l’épargne sans ouvrir le tableur."},{type:"new",text:"Le tableur compte une feuille par année : ajoute la précédente ou la suivante d’un geste. Un objectif peut suivre un mois précis du tableur."},{type:"improved",text:"Nouvelles couleurs, nouveau logo, menus déroulants repensés et une page Abonnement. Pendant la période de lancement, tout reste ouvert."}]},
       {date:"2 octobre 2026",title:"Du nouveau depuis le 20 septembre",text:"Une nouvelle disposition, plus de choix pour l’apparence et un profil plus utile. Plusieurs écrans ont aussi été revus pour faciliter la navigation.",sections:[{type:"new",text:"La nouvelle disposition propose une navigation latérale que tu peux réduire sur ordinateur et ouvrir sur téléphone. Tu peux choisir la couleur d’accent indépendamment du thème. Ton profil accueille un pseudo unique pour recevoir des demandes d’amis. Si tu ouvres un lien qui n’existe plus, une page te ramène à l’application."},{type:"improvement",text:"Les palettes, le logo et la navigation mobile ont été retravaillés. La barre du tableur reste plus lisible pendant le défilement, les fenêtres bloquent le défilement en arrière-plan et les menus passent au premier plan. Le partage et l’accueil vide guident mieux l’utilisateur. Le résumé global évite de répéter les catégories, le profil est plus clair et les données locales sont désormais séparées par compte. Sur la page de présentation, les chiffres d’exemple sont indiqués comme fictifs."}]},
@@ -5980,7 +5982,8 @@ function inferColumnType(header, samples){
   <script src="meuni-loader.js?v=20261014-r3" defer></script>
   <script src="ios-fix.js?v=20261013-r2" defer></script>
   <script src="plans.js?v=20261014-r2" defer></script>
-  <script src="home.js?v=20261019-r3" defer></script>
+  <script src="year-review.js?v=20261019-r5" defer></script>
+  <script src="home.js?v=20261019-r4" defer></script>
   <script src="finishing.js?v=20261018-r2" defer></script>
   <script src="bank-import.js?v=20261019-r2" defer></script>
   <script src="subs.js?v=20261019-r3" defer></script>
@@ -5989,7 +5992,7 @@ function inferColumnType(header, samples){
   <script src="install.js?v=20261019-r1" defer></script>
   <script src="avatars.js?v=20261018-h1" defer></script>
   <script src="menus.js?v=20261013-r1" defer></script>
-  <script src="discover.js?v=20261019-r3" defer></script>
+  <script src="discover.js?v=20261019-r4" defer></script>
 </body>
 </html>
 
