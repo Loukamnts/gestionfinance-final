@@ -767,7 +767,7 @@ const dictionary=Object.freeze({
   "Français ou English": "French or English",
   "Notifications": "Notifications",
   "Rappels de saisie": "Entry reminders",
-  "Un petit rappel quand tu oublies de noter tes dépenses.": "A small reminder when you forget to log your expenses.",
+  "Sur ton téléphone, même quand Meuniance est fermée. Tu choisis lesquelles.": "On your phone, even when Meuniance is closed. You choose which ones.",
   "Choisis si et quand Meuniance te rappelle de noter tes dépenses.": "Choose whether and when Meuniance reminds you to log your expenses.",
   "Données et synchronisation": "Data & sync",
   "Tableur, sauvegarde et réinitialisation": "Spreadsheet, backup and reset",

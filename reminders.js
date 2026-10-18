@@ -40,11 +40,11 @@
 
   /* Préférences du compte (serveur) : quels types de notifications recevoir sur ses appareils. */
   var KINDS=[
-    ["reminder",["Rappel de saisie","Entry reminder"],["Si tu n’as rien noté depuis quelques jours. Sans montant.","If you haven’t logged anything for a few days. No amounts."]],
-    ["budget",["Plafonds à 80 % et 100 %","Limits at 80% and 100%"],["Quand une ligne du mois approche puis atteint son plafond.","When a row of the month nears then reaches its limit."]],
-    ["friends",["Amis et dépenses partagées","Friends and shared expenses"],["Demande d’ami, dépense ajoutée avec toi, remboursement.","Friend request, expense added with you, payback."]],
-    ["recaps",["Bilans prêts","Recaps ready"],["Le 1er du mois, et ton bilan de l’année en décembre.","On the 1st of each month, and your year in review in December."]],
-    ["goals",["Objectifs et dépenses fixes","Goals and fixed expenses"],["Bravo quand un objectif est atteint ; le 25, tes dépenses fixes à noter.","Well done when a goal is reached; on the 25th, fixed expenses to add."]]
+    ["reminder",["Rappel de saisie","Entry reminder"],["Si tu n’as rien noté depuis un moment.","If you haven’t logged anything for a while."]],
+    ["budget",["Plafonds à 80\u00a0% et 100\u00a0%","Limits at 80% and 100%"],["Quand une ligne approche ou atteint son plafond.","When a row nears or reaches its limit."]],
+    ["friends",["Amis et dépenses partagées","Friends and shared expenses"],["Demande d’ami, dépense partagée, remboursement.","Friend request, shared expense, payback."]],
+    ["recaps",["Bilans prêts","Recaps ready"],["Chaque 1er du mois, et l’année en décembre.","Every 1st of the month, and the year in December."]],
+    ["goals",["Objectifs et dépenses fixes","Goals and fixed expenses"],["Objectif atteint, et tes fixes à noter le 25.","Goal reached, and fixed expenses on the 25th."]]
   ];
   var server={data:null,user:""};
   async function loadSettings(force){
@@ -60,28 +60,42 @@
   }
   function switchBtn(label,on){var sw=el("button","gfh-switch");sw.type="button";sw.setAttribute("role","switch");sw.setAttribute("aria-checked",String(!!on));sw.setAttribute("aria-label",label);sw.append(el("span"));return sw;}
 
-  var busy=false;
+  var ICONS={
+    bell:'<path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 20.5a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+    reminder:'<path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m14 8 3 3" stroke="currentColor" stroke-width="1.8"/>',
+    budget:'<path d="M4 16a8 8 0 1 1 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="m12 16 4-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="16" r="1.4" fill="currentColor"/>',
+    friends:'<circle cx="9" cy="8.5" r="3.2" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15.5 5.6a3 3 0 0 1 0 5.8M17.5 14.2A5 5 0 0 1 20.5 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+    recaps:'<rect x="4" y="5" width="16" height="15" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M9 3v4M15 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8.5 14.5h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+    goals:'<path d="M6 21V4M6 4h10l-2 3.5L16 11H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    send:'<path d="M20 4 9.5 14.5M20 4l-6.5 16-4-7.5L2 8.5 20 4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+    info:'<circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="8" r="1.1" fill="currentColor"/>'
+  };
+  function icon(name,cls){var s=el("span",cls||"gfr-ic");s.setAttribute("aria-hidden","true");s.innerHTML='<svg viewBox="0 0 24 24" fill="none">'+ICONS[name]+'</svg>';return s;}
+
+  var busy=false,kindsOpen=false;
   async function render(){
     var panel=document.querySelector('[data-settings-panel="notifications"]');if(!panel)return;
     var old=byId("gfrBudget");if(old)old.remove();
     var box=byId("gfrReminders");
     if(!box){box=el("section","gfh-set gfr-set");box.id="gfrReminders";box.setAttribute("aria-labelledby","gfrTitle");panel.append(box);}
-    var h=el("h4","",t2("Notifications","Notifications"));h.id="gfrTitle";
-    var intro=el("p","",t2("Sur ton téléphone, même quand Meuniance est fermée. Tu choisis lesquelles.","On your phone, even when Meuniance is closed. You choose which ones."));
     var p=prefs(),sub=await currentSub(),on=!!(p.on&&sub),days=[3,7,14,30].indexOf(Number(p.days))>=0?Number(p.days):7;
     var msg=el("p","gfr-msg");msg.setAttribute("role","status");
     var blocked="";
     if(!account().user)blocked=t2("Connecte-toi pour recevoir des notifications : elles sont liées à ton compte.","Sign in to get notifications: they are linked to your account.");
-    else if(!supported())blocked=isIOS()&&!standalone()?t2("Sur iPhone, ajoute d’abord Meuniance à l’écran d’accueil (Partager › « Sur l’écran d’accueil »), puis ouvre-la depuis son icône.","On iPhone, first add Meuniance to your Home Screen (Share › “Add to Home Screen”), then open it from its icon."):t2("Ce navigateur ne permet pas les notifications.","This browser does not support notifications.");
+    else if(!supported())blocked=isIOS()&&!standalone()?t2("Sur iPhone, ajoute d’abord Meuniance à l’écran d’accueil, puis ouvre-la depuis son icône.","On iPhone, first add Meuniance to your Home Screen, then open it from its icon."):t2("Ce navigateur ne permet pas les notifications.","This browser does not support notifications.");
     else if(Notification.permission==="denied"&&!on)blocked=t2("Les notifications sont bloquées pour Meuniance. Autorise-les dans les réglages de ton appareil.","Notifications are blocked for Meuniance. Allow them in your device settings.");
+    var active=on&&!blocked;
 
-    // 1. Cet appareil
-    var dev=el("div","gfh-set-group"),row=el("div","gfh-set-row"),txt=el("div","gfh-set-copy");
-    var hint=el("small","",blocked||(on?t2("Activées sur cet appareil.","On for this device."):t2("Désactivées sur cet appareil.","Off for this device.")));
-    txt.append(el("strong","",t2("Recevoir sur cet appareil","Get them on this device")),hint);
-    var master=switchBtn(t2("Recevoir les notifications sur cet appareil","Get notifications on this device"),on&&!blocked);if(blocked)master.disabled=true;
-    row.append(txt,master);dev.append(row);
-    var how=null;if(blocked&&account().user&&isIOS()&&!standalone()&&window.GFInstall){how=el("button","gfh-link gfr-how",t2("Voir comment faire","Show me how"));how.type="button";how.addEventListener("click",function(){window.GFInstall.open();});}
+    // En-tête : cette appareil, avec son état
+    var hero=el("div","gfr-hero"+(active?" is-on":"")),heroTx=el("div","gfr-hero-tx");
+    var h=el("h4","",t2("Sur cet appareil","On this device"));h.id="gfrTitle";
+    var state=el("span","gfr-state",blocked?t2("Indisponibles ici","Not available here"):active?t2("Notifications activées","Notifications on"):t2("Notifications désactivées","Notifications off"));
+    heroTx.append(h,state);
+    var master=switchBtn(t2("Recevoir les notifications sur cet appareil","Get notifications on this device"),active);if(blocked)master.disabled=true;
+    hero.append(icon("bell","gfr-hero-ic"),heroTx,master);
+    var parts=[hero];
+    if(blocked){var lead=el("p","gfr-lead is-warn",blocked);parts.push(lead);}
+    if(blocked&&account().user&&isIOS()&&!standalone()&&window.GFInstall){var how=el("button","gfr-btn",t2("Voir comment l’installer","Show me how to install it"));how.type="button";how.addEventListener("click",function(){window.GFInstall.open();});parts.push(how);}
     master.addEventListener("click",async function(){
       if(busy)return;busy=true;master.disabled=true;msg.textContent="";
       try{if(master.getAttribute("aria-checked")==="true")await disable();else{await enable(days);try{await saveSetting({});}catch(e){}}}
@@ -89,40 +103,59 @@
       busy=false;render();
     });
 
-    // 2. Les types (réglés pour le compte, sur tous ses appareils)
-    var parts=[h,intro,dev].concat(how?[how]:[]);
-    if(on&&!blocked){
+    if(active){
       var st=await loadSettings(false)||{};
-      var label=el("p","gfh-set-label",t2("Me prévenir pour","Notify me about"));
-      var grp=el("div","gfh-set-group gfr-kinds");
+      var list=el("div","gfr-kinds");list.setAttribute("role","group");list.setAttribute("aria-label",t2("Types de notifications","Notification types"));
       KINDS.forEach(function(k){
-        var r=el("div","gfh-set-row"),c=el("div","gfh-set-copy");c.append(el("strong","",t2(k[1][0],k[1][1])),el("small","",t2(k[2][0],k[2][1])));
-        var sw=switchBtn(t2(k[1][0],k[1][1]),st[k[0]]!==false);r.append(c,sw);grp.append(r);
+        var item=el("div","gfr-kind is-"+k[0]),r=el("div","gfr-kind-row"),c=el("div","gfr-kind-tx");
+        c.append(el("strong","",t2(k[1][0],k[1][1])),el("small","",t2(k[2][0],k[2][1])));
+        var sw=switchBtn(t2(k[1][0],k[1][1]),st[k[0]]!==false);
+        r.append(icon(k[0]),c,sw);item.append(r);list.append(item);
+        var chips=null;
+        if(k[0]==="reminder"){
+          chips=el("div","gfr-chips");chips.setAttribute("role","radiogroup");chips.setAttribute("aria-label",t2("Me prévenir après","Remind me after"));
+          var cap=el("span","gfr-chips-cap",t2("Si rien n’est noté depuis","If nothing is logged for"));
+          var row2=el("div","gfr-chip-row");
+          [[3,t2("3 jours","3 days")],[7,t2("7 jours","7 days")],[14,t2("14 jours","14 days")],[30,t2("1 mois","1 month")]].forEach(function(o){
+            var b=el("button","gfr-chip",o[1]);b.type="button";b.setAttribute("role","radio");b.setAttribute("aria-checked",String(o[0]===days));
+            b.addEventListener("click",async function(){if(busy||b.getAttribute("aria-checked")==="true")return;busy=true;msg.textContent="";
+              [].forEach.call(row2.children,function(x){x.setAttribute("aria-checked",String(x===b));});
+              try{await enable(o[0]);days=o[0];}catch(e){msg.textContent=errorText(e);}busy=false;});
+            row2.append(b);
+          });
+          chips.append(cap,row2);chips.hidden=st.reminder===false;item.append(chips);
+        }
         sw.addEventListener("click",async function(){
           var next=sw.getAttribute("aria-checked")!=="true";sw.setAttribute("aria-checked",String(next));msg.textContent="";
+          if(chips)chips.hidden=!next;
           if(k[0]==="budget"&&window.GFHome)window.GFHome.setAlertsOn(next);
-          try{var patch={};patch[k[0]]=next;await saveSetting(patch);}catch(e){sw.setAttribute("aria-checked",String(!next));msg.textContent=t2("Impossible d’enregistrer. Réessaie.","Could not save. Try again.");}
-          if(k[0]==="reminder")freq.hidden=!next;
+          try{var patch={};patch[k[0]]=next;await saveSetting(patch);}catch(e){sw.setAttribute("aria-checked",String(!next));if(chips)chips.hidden=next;msg.textContent=t2("Impossible d’enregistrer. Réessaie.","Could not save. Try again.");}
         });
-        if(k[0]==="reminder"){
-          var freq=el("div","gfh-set-row gfr-freq"),fl=el("label","gfr-label"),sel=document.createElement("select");sel.id="gfrDays";
-          fl.htmlFor="gfrDays";fl.append(el("strong","",t2("Me prévenir après","Remind me after")),el("small","",t2("sans aucune saisie","with no entry")));
-          [[3,t2("3 jours","3 days")],[7,t2("1 semaine","1 week")],[14,t2("2 semaines","2 weeks")],[30,t2("1 mois","1 month")]].forEach(function(o){var op=new Option(o[1],String(o[0]));op.selected=o[0]===days;sel.append(op);});
-          freq.append(fl,sel);freq.hidden=st.reminder===false;grp.append(freq);
-          sel.addEventListener("change",async function(){if(busy)return;busy=true;msg.textContent="";try{await enable(Number(sel.value));msg.textContent=t2("C’est noté.","Saved.");}catch(e){msg.textContent=errorText(e);}busy=false;});
-        }
       });
-      var acts=el("div","gfr-acts"),test=el("button","gfh-link",t2("Essayer une notification","Try a notification"));test.type="button";acts.append(test);
-      test.addEventListener("click",async function(){try{var reg=await registration();await reg.showNotification("Meuniance",{body:t2("Les notifications sont bien activées.","Notifications are on."),icon:"/app-icon-180.png",tag:"meuniance-test"});}catch(e){msg.textContent=errorText(e);}});
-      parts=parts.concat([label,grp,acts]);
+      var test=el("button","gfr-btn");test.type="button";test.append(icon("send","gfr-btn-ic"),document.createTextNode(t2("Envoyer une notification d’essai","Send a test notification")));
+      test.addEventListener("click",async function(){try{var reg=await registration();await reg.showNotification("Meuniance",{body:t2("Les notifications sont bien activées.","Notifications are on."),icon:"/app-icon-180.png",tag:"meuniance-test"});msg.textContent=t2("Envoyée : regarde en haut de ton écran.","Sent: look at the top of your screen.");}catch(e){msg.textContent=errorText(e);}});
+      // Repliable, comme « Accueil » dans Apparence : une flèche développe le choix des notifications.
+      var count=function(){return [].filter.call(list.querySelectorAll(".gfr-kind-row .gfh-switch"),function(x){return x.getAttribute("aria-checked")==="true";}).length;};
+      var card=el("div","gfr-card"),tog=el("button","gfh-set-toggle gfr-toggle");tog.type="button";tog.setAttribute("aria-expanded",String(kindsOpen));tog.setAttribute("aria-controls","gfrKinds");
+      var tt=el("span","gfh-set-toggle-text"),sum=el("small","");
+      var setSum=function(){var n=count();sum.textContent=n===KINDS.length?t2("Toutes activées","All on"):n===0?t2("Aucune activée","None on"):t2(n+" activées sur "+KINDS.length,n+" of "+KINDS.length+" on");};
+      setSum();tt.append(el("strong","",t2("Choisir les notifications","Choose notifications")),sum);
+      var chev=el("span","gfh-set-chev");chev.setAttribute("aria-hidden","true");chev.innerHTML='<svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      tog.append(tt,chev);
+      var body=el("div","gfr-card-body");body.id="gfrKinds";body.hidden=!kindsOpen;body.append(list,test);
+      tog.addEventListener("click",function(){kindsOpen=!kindsOpen;tog.setAttribute("aria-expanded",String(kindsOpen));body.hidden=!kindsOpen;});
+      list.addEventListener("click",function(e){if(e.target.closest&&e.target.closest(".gfh-switch"))setTimeout(setSum,0);});
+      card.append(tog,body);
+      parts.push(card);
     }else{
       // Sans notifications sur l'appareil : l'alerte de plafond reste visible sur l'accueil.
-      var H=window.GFHome,lab2=el("p","gfh-set-label",t2("Sur l’accueil","On Home")),g2=el("div","gfh-set-group"),r2=el("div","gfh-set-row"),c2=el("div","gfh-set-copy");
-      c2.append(el("strong","",t2("Alertes de plafond","Limit alerts")),el("small","",t2("Une carte à 80 % puis à 100 % du plafond d’une ligne.","A card at 80% then 100% of a row’s limit.")));
+      var H=window.GFHome,item2=el("div","gfr-kinds"),k2=el("div","gfr-kind is-budget"),r2=el("div","gfr-kind-row"),c2=el("div","gfr-kind-tx");
+      c2.append(el("strong","",t2("Alertes de plafond sur l’accueil","Limit alerts on Home")),el("small","",t2("Une carte à 80 % puis à 100 % du plafond d’une ligne.","A card at 80% then 100% of a row’s limit.")));
       var s2=switchBtn(t2("Alertes de plafond","Limit alerts"),!H||H.alertsOn());s2.addEventListener("click",function(){var next=s2.getAttribute("aria-checked")!=="true";s2.setAttribute("aria-checked",String(next));if(H)H.setAlertsOn(next);});
-      r2.append(c2,s2);g2.append(r2);parts=parts.concat([lab2,g2]);
+      r2.append(icon("budget"),c2,s2);k2.append(r2);item2.append(k2);parts.push(item2);
     }
-    parts.push(el("p","gfr-hint",t2("Les plafonds se fixent sur l’accueil, en touchant une ligne de « Où part ton argent ».","Limits are set on Home by tapping a row in “Where your money goes”.")),msg);
+    var note=el("p","gfr-note");note.append(icon("info","gfr-note-ic"),document.createTextNode(t2("Les plafonds se fixent sur l’accueil, en touchant une ligne de « Où part ton argent ».","Limits are set on Home by tapping a row in “Where your money goes”.")));
+    parts.push(msg,note);
     box.replaceChildren.apply(box,parts);
   }
   // Notification envoyée à tous mes appareils (plafond, objectif). Renvoie false si rien n'a été mis en file.
