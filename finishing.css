@@ -216,34 +216,41 @@ body[data-theme="moulin"] #objectivesPage .objective-stat span{white-space:norma
 .gfi-note{margin:12px 0 0;font-size:13px;line-height:1.4;color:var(--muted)}
 .gfr-how{display:inline-block;margin:2px 0 8px}
 
-/* Avatars Meuniance (initiale en médaille) */
+/* Avatars Meuniance (initiale dans un rond plat : couleur + style de lettre) */
 .has-avatar{padding:0!important;background:none!important;border:0!important;overflow:hidden;border-radius:50%!important}
 .has-avatar .gfa-svg{display:block;width:100%;height:100%}
+.gfa-edge{stroke:rgba(23,38,31,.12)}
+body[data-mode="dark"] .gfa-edge{stroke:rgba(243,238,226,.18)}
 .gfa-change{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--text);font:600 12.5px var(--font-body);cursor:pointer}
 .gfa-change:hover{border-color:var(--accent);color:var(--accent)}
 .gfa-change:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* Page de choix */
-.gfa-dialog{width:min(520px,calc(100vw - 24px))}
-.gfa-dhead{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.gfa-dialog{width:min(500px,calc(100vw - 24px))}
+.gfa-dhead{display:flex;align-items:center;gap:14px;margin-bottom:6px}
 .gfa-dialog .gfa-dhead h2{margin:0;font:600 20px/1.2 var(--font-body)}
-.gfa-dhead p{margin:3px 0 0;font-size:13px;color:var(--muted)}
-.gfa-preview{display:grid;place-items:center;flex:0 0 64px;width:64px;height:64px;border-radius:50%;overflow:hidden}
+.gfa-dhead p{margin:3px 0 0;font-size:13px;line-height:1.4;color:var(--muted)}
+.gfa-preview{display:grid;place-items:center;flex:0 0 68px;width:68px;height:68px;border-radius:50%;overflow:hidden}
 .gfa-preview .gfa-svg{width:100%;height:100%;display:block}
-.gfa-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 10px;padding:4px 2px 6px;margin:0 -2px}
-.gfa-opt{display:grid;justify-items:center;gap:6px;padding:0;border:0;background:none;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.gfa-pic{display:grid;place-items:center;width:100%;max-width:68px;aspect-ratio:1;border-radius:50%;overflow:hidden;transition:transform .15s}
+.gfa-classic{background:var(--accent-fill,#E3A82B);color:var(--on-accent-fill,#17261F);font:700 28px var(--font-body);border-radius:18px!important}
+.gfa-section{margin-top:16px}
+.gfa-label{margin:0 0 8px;font:700 11px/1.2 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.gfa-row{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}
+.gfa-row.is-styles{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.gfa-opt{display:grid;justify-items:center;gap:6px;min-width:0;padding:0;border:0;background:none;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.gfa-pic{display:block;width:100%;max-width:52px;aspect-ratio:1;border-radius:50%;overflow:hidden;transition:transform .15s}
 .gfa-pic .gfa-svg{display:block;width:100%;height:100%}
-.gfa-classic{background:var(--accent-fill,#E3A82B);color:var(--on-accent-fill,#17261F);font:700 26px var(--font-body);border-radius:16px!important}
-.gfa-name{font-size:11.5px;line-height:1.2;color:var(--muted);text-align:center}
+.gfa-name{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;line-height:1.2;color:var(--muted);text-align:center}
 .gfa-opt[aria-checked="true"] .gfa-pic{box-shadow:0 0 0 2.5px var(--panel-solid,var(--bg)),0 0 0 5px var(--accent-fill,var(--accent))}
 .gfa-opt[aria-checked="true"] .gfa-name{color:var(--text);font-weight:600}
 .gfa-opt:active .gfa-pic{transform:scale(.94)}
 .gfa-opt:focus-visible{outline:none}.gfa-opt:focus-visible .gfa-pic{outline:2px solid var(--accent);outline-offset:4px}
-.gfa-use-letter{display:block;margin:12px auto 0;padding:6px 10px;border:0;background:none;color:var(--text);font:600 13px var(--font-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.gfa-use-letter{display:block;margin:16px auto 0;padding:6px 10px;border:0;background:none;color:var(--text);font:600 13px var(--font-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .gfa-use-letter:disabled{color:var(--muted);text-decoration:none;cursor:default}
 .gfa-feedback{margin:8px 0 0;font-size:13px;color:var(--red,#c0392b)}
 .gfa-feedback:empty{display:none}
-@media(max-width:420px){.gfa-dialog{padding:20px 16px}}
+.gfa-current{color:var(--text);letter-spacing:0;text-transform:none;font-weight:600}
+@media(max-width:420px){.gfa-dialog{padding:20px 16px}.gfa-row{gap:6px}.gfa-row.is-styles{gap:8px}}
+@media(max-width:360px){.gfa-name{display:none}}
 @media(prefers-reduced-motion:reduce){.gfa-pic{transition:none}}
 
 /* Bas de page : une seule marge, juste ce qu'il faut pour la barre du bas (sur téléphone),

@@ -1,6 +1,6 @@
-/* Avatars Meuniance : ton initiale gravée en doré dans une médaille, avec 8 teintes au choix.
-   Sobre, aux couleurs du site, et lisible même en tout petit. Pas de photos envoyées :
-   rien d'inapproprié possible, aucune image stockée. La base n'accepte que ces noms de teintes. */
+/* Avatars Meuniance : ton initiale dans un rond plat, avec une couleur (8) et un style de lettre (5) au choix.
+   Les 5 styles utilisent les polices déjà chargées par le site. Pas de photos envoyées : aucune image stockée.
+   Valeur enregistrée : « couleur.style » (ex. « seigle.moderne ») ; la base n'accepte que ces combinaisons. */
 (function(){
   "use strict";
   var byId=function(id){return document.getElementById(id);};
@@ -9,35 +9,37 @@
   function el(tag,cls,text){var n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;}
   function esc(v){return String(v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
 
-  // [identifiant, nom FR, nom EN, fond centre, fond bord, lettre haut, lettre bas, anneau]
-  var LIST=[
-    ["seigle","Seigle","Rye","#2A4535","#0F1A14","#F7D886","#D3962A","#E3A82B"],
-    ["foret","Forêt","Forest","#2F7553","#16402C","#F7D886","#D3962A","#E3A82B"],
-    ["nuit","Nuit","Night","#2C4366","#121D30","#F7D886","#D3962A","#E3A82B"],
-    ["bordeaux","Bordeaux","Burgundy","#7A2E40","#3A111D","#F7D886","#D3962A","#E3A82B"],
-    ["terre","Terre cuite","Terracotta","#A5523A","#5A2516","#FBE3A6","#E3A82B","#F2C66B"],
-    ["prune","Prune","Plum","#5A3E6E","#271932","#F7D886","#D3962A","#E3A82B"],
-    ["ardoise","Ardoise","Slate","#4A535E","#1F252C","#F7D886","#D3962A","#E3A82B"],
-    ["or","Or","Gold","#F4CF72","#C98D1F","#2A4535","#0F1A14","#8A5E12"]
+  // Couleurs : [id, FR, EN, fond, lettre]
+  var COLORS=[
+    ["seigle","Seigle","Rye","#17261F","#F3EEE2"],["ble","Blé","Wheat","#E3A82B","#17261F"],
+    ["creme","Crème","Cream","#F3EEE2","#17261F"],["sauge","Sauge","Sage","#A9BDA6","#17261F"],
+    ["terre","Terre cuite","Terracotta","#B9553E","#FBF6EC"],["encre","Encre","Ink","#22304A","#F3EEE2"],
+    ["sable","Sable","Sand","#D9C6A5","#17261F"],["prune","Prune","Plum","#5E4566","#F3EEE2"]
   ];
-  var BY={};LIST.forEach(function(a){BY[a[0]]=a;});
-  var uid=0;
+  // Styles : [id, FR, EN, police, graisse, italique, taille (part du rond), échelle horizontale, échelle verticale]
+  var STYLES=[
+    ["moderne","Moderne","Modern","'Bricolage Grotesque','Helvetica Neue',Arial,sans-serif",700,false,.46,1,1],
+    ["classique","Classique","Classic","'Playfair Display',Georgia,serif",400,false,.48,1,1],
+    ["italique","Italique","Italic","'Playfair Display',Georgia,serif",400,true,.48,1,1],
+    // Syne est très large : on la resserre et on l'allonge, pour que L, M ou W restent des lettres et tiennent dans le rond.
+    ["affirmee","Affirmée","Bold","Syne,'Bricolage Grotesque',sans-serif",800,false,.40,.72,1.2],
+    ["technique","Technique","Technical","'Space Grotesk','Helvetica Neue',Arial,sans-serif",500,false,.46,1,1]
+  ];
+  var CBY={},SBY={};COLORS.forEach(function(c){CBY[c[0]]=c;});STYLES.forEach(function(f){SBY[f[0]]=f;});
+  function parts(id){var p=String(id||"").split(".");return CBY[p[0]]&&SBY[p[1]]?{c:CBY[p[0]],f:SBY[p[1]]}:null;}
+  function valid(id){return !!parts(id);}
   function initial(v){var c=String(v||"").trim().replace(/^@/,"").charAt(0).toUpperCase();return c||"?";}
-  /* Médaille : fond en léger relief, anneau doré, initiale gravée (dégradé doré).
-     Identifiants de dégradés uniques à chaque dessin (un dégradé partagé disparaît si son SVG est masqué). */
+  /* Rond plat, fin contour (visible sur les deux thèmes), initiale centrée dans le style choisi. */
   function svg(id,letter){
-    var a=BY[id];if(!a)return "";var k="gfa"+(++uid);
-    return '<svg class="gfa-svg" viewBox="0 0 48 48" aria-hidden="true"><defs>'+
-      '<radialGradient id="'+k+'b" cx="24" cy="16" r="32" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="'+a[3]+'"/><stop offset="1" stop-color="'+a[4]+'"/></radialGradient>'+
-      '<linearGradient id="'+k+'l" x1="0" y1="13" x2="0" y2="35" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="'+a[5]+'"/><stop offset="1" stop-color="'+a[6]+'"/></linearGradient></defs>'+
-      '<circle cx="24" cy="24" r="24" fill="url(#'+k+'b)"/><circle cx="24" cy="24" r="21.4" fill="none" stroke="'+a[7]+'" stroke-opacity=".55" stroke-width="1"/>'+
-      '<text x="24" y="24.6" text-anchor="middle" dominant-baseline="central" font-family="Georgia, \'Times New Roman\', serif" font-size="23" font-weight="600" fill="url(#'+k+'l)">'+esc(initial(letter))+'</text></svg>';
+    var p=parts(id);if(!p)return "";var f=p.f,sx=f[7],sy=f[8];
+    return '<svg class="gfa-svg" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="'+p.c[3]+'"/>'+
+      '<circle class="gfa-edge" cx="24" cy="24" r="23.5" fill="none" stroke-width="1"/>'+
+      '<text x="24" y="24.8" text-anchor="middle" dominant-baseline="central" font-size="'+(48*f[6]).toFixed(1)+'" font-weight="'+f[4]+'"'+(f[5]?' font-style="italic"':'')+' fill="'+p.c[4]+'" style="font-family:'+f[3].replace(/"/g,"'")+'"'+(sx!==1||sy!==1?' transform="translate(24 24.8) scale('+sx+' '+sy+') translate(-24 -24.8)"':'')+'>'+esc(initial(letter))+'</text></svg>';
   }
-  function name(id){var a=BY[id];return a?t2(a[1],a[2]):"";}
-  /* Affiche la médaille dans un élément ; sans teinte choisie, garde l'initiale classique. */
+  /* Affiche l'avatar dans un élément ; sans choix, garde l'initiale classique. */
   function paint(node,id,letter){
     if(!node)return;
-    if(BY[id]){node.innerHTML=svg(id,letter);node.classList.add("has-avatar");node.classList.remove("is-guest");}
+    if(valid(id)){node.innerHTML=svg(id,letter);node.classList.add("has-avatar");node.classList.remove("is-guest");}
     else{node.classList.remove("has-avatar");if(letter!=null)node.textContent=initial(letter);}
   }
 
@@ -48,7 +50,7 @@
     var a=account();if(!a.client||!a.user){mine=null;friends={};loadedFor=null;return;}
     try{
       var r=await a.client.rpc("get_avatars");if(r.error)throw r.error;
-      friends={};mine=null;(r.data||[]).forEach(function(x){if(x.user_id===a.user.id)mine=BY[x.avatar]?x.avatar:null;else friends[x.user_id]=BY[x.avatar]?x.avatar:null;});
+      friends={};mine=null;(r.data||[]).forEach(function(x){if(x.user_id===a.user.id)mine=valid(x.avatar)?x.avatar:null;else friends[x.user_id]=valid(x.avatar)?x.avatar:null;});
       loadedFor=a.user.id;apply();
       document.querySelectorAll(".sf-avatar[data-friend-id]").forEach(function(n){var id=friends[n.dataset.friendId];if(id)paint(n,id,n.dataset.letter);});
     }catch(e){/* refus passager : on garde l'affichage actuel */}
@@ -74,36 +76,41 @@
     b.textContent=t2("Changer mon avatar","Change my avatar");
   }
 
-  /* ── Page de choix : aperçu, 8 teintes, Enregistrer / Annuler ── */
+  /* ── Page de choix : aperçu en direct, couleur puis style de lettre, Enregistrer / Annuler ── */
   function openPicker(){
     if(byId("gfaDialog"))return;
-    var choice=mine,L=letterOf();
+    var L=letterOf(),cur=parts(mine),color=cur?cur.c[0]:"seigle",style=cur?cur.f[0]:"moderne",classic=!cur;
     var dlg=el("dialog","gfh-dialog gfa-dialog");dlg.id="gfaDialog";dlg.setAttribute("aria-labelledby","gfaTitle");
     var head=el("div","gfa-dhead"),preview=el("span","gfa-preview"),htxt=el("div");
     var h=el("h2","",t2("Ton avatar","Your avatar"));h.id="gfaTitle";
-    var sub=el("p","",t2("Ton initiale, gravée dans une médaille. Choisis sa teinte.","Your initial, engraved in a medal. Pick its colour."));htxt.append(h,sub);head.append(preview,htxt);
-    var grid=el("div","gfa-grid");grid.setAttribute("role","radiogroup");grid.setAttribute("aria-label",t2("Teinte","Colour"));
-    LIST.forEach(function(a){var b=el("button","gfa-opt");b.type="button";b.setAttribute("role","radio");b.dataset.id=a[0];var pic=el("span","gfa-pic");pic.innerHTML=svg(a[0],L);b.append(pic,el("span","gfa-name",name(a[0])));b.addEventListener("click",function(){choice=a[0];sync();});grid.append(b);});
-    var classic=el("button","gfa-use-letter");classic.type="button";classic.addEventListener("click",function(){choice=null;sync();});
+    var sub=el("p","",t2("Ton initiale, dans la couleur et le style de ton choix.","Your initial, in the colour and style you like."));htxt.append(h,sub);head.append(preview,htxt);
+    function section(title){var w=el("div","gfa-section"),lab=el("p","gfa-label",title),cur=el("span","gfa-current");lab.append(cur);w.append(lab);var g=el("div","gfa-row");g.setAttribute("role","radiogroup");g.setAttribute("aria-label",title);w.append(g);return{w:w,g:g,cur:cur};}
+    var cs=section(t2("Couleur","Colour")),ss=section(t2("Style de lettre","Letter style"));ss.g.classList.add("is-styles");
+    COLORS.forEach(function(c){var b=el("button","gfa-opt");b.type="button";b.setAttribute("role","radio");b.dataset.id=c[0];b.setAttribute("aria-label",t2(c[1],c[2]));b.title=t2(c[1],c[2]);var pic=el("span","gfa-pic");b.append(pic);b.addEventListener("click",function(){color=c[0];classic=false;sync();});cs.g.append(b);});
+    STYLES.forEach(function(f){var b=el("button","gfa-opt gfa-style");b.type="button";b.setAttribute("role","radio");b.dataset.id=f[0];var pic=el("span","gfa-pic");b.append(pic,el("span","gfa-name",t2(f[1],f[2])));b.addEventListener("click",function(){style=f[0];classic=false;sync();});ss.g.append(b);});
+    var back=el("button","gfa-use-letter");back.type="button";back.addEventListener("click",function(){classic=true;sync();});
     var msg=el("p","gfa-feedback");msg.setAttribute("role","status");
     var row=el("div","gfh-dialog-actions"),cancel=el("button","gfh-btn",t2("Annuler","Cancel")),ok=el("button","gfh-btn is-primary",t2("Enregistrer","Save"));cancel.type=ok.type="button";row.append(cancel,ok);
+    function value(){return classic?null:color+"."+style;}
     function sync(){
-      [].forEach.call(grid.children,function(b){b.setAttribute("aria-checked",String(b.dataset.id===choice));});
-      if(choice){preview.innerHTML=svg(choice,L);preview.classList.remove("gfa-classic");}else{preview.textContent=L;preview.classList.add("gfa-classic");}
-      classic.textContent=choice?t2("Revenir au style classique","Back to the classic style"):t2("Style classique sélectionné","Classic style selected");classic.disabled=!choice;
-      ok.disabled=choice===mine;
+      [].forEach.call(cs.g.children,function(b){b.setAttribute("aria-checked",String(!classic&&b.dataset.id===color));b.firstChild.innerHTML=svg(b.dataset.id+"."+style,L);});
+      [].forEach.call(ss.g.children,function(b){b.setAttribute("aria-checked",String(!classic&&b.dataset.id===style));b.firstChild.innerHTML=svg(color+"."+b.dataset.id,L);});
+      var cn=CBY[color],sn=SBY[style];cs.cur.textContent=classic?"":" · "+t2(cn[1],cn[2]);ss.cur.textContent=classic?"":" · "+t2(sn[1],sn[2]);
+      if(classic){preview.textContent=L;preview.classList.add("gfa-classic");}else{preview.innerHTML=svg(value(),L);preview.classList.remove("gfa-classic");}
+      back.textContent=classic?t2("Style classique sélectionné","Classic style selected"):t2("Revenir au style classique","Back to the classic style");back.disabled=classic;
+      ok.disabled=value()===mine;
     }
     cancel.addEventListener("click",function(){dlg.close();});
-    ok.addEventListener("click",async function(){ok.disabled=true;msg.textContent="";try{await save(choice);dlg.close();}catch(e){msg.textContent=t2("Impossible d’enregistrer. Réessaie.","Could not save. Try again.");ok.disabled=false;}});
+    ok.addEventListener("click",async function(){ok.disabled=true;msg.textContent="";try{await save(value());dlg.close();}catch(e){msg.textContent=t2("Impossible d’enregistrer. Réessaie.","Could not save. Try again.");ok.disabled=false;}});
     dlg.addEventListener("close",function(){dlg.remove();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();});
-    dlg.append(head,grid,classic,msg,row);document.body.append(dlg);sync();dlg.showModal();
+    dlg.append(head,cs.w,ss.w,back,msg,row);document.body.append(dlg);sync();dlg.showModal();
     if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();
   }
 
   window.addEventListener("authStateChanged",function(e){var u=e.detail&&e.detail.user;if(!u){mine=null;friends={};loadedFor=null;var b=byId("gfaChange");if(b)b.remove();["profileAvatar","identityAvatar"].forEach(function(id){var n=byId(id);if(n)n.classList.remove("has-avatar");});return;}if(loadedFor!==u.id)setTimeout(load,300);});
   window.addEventListener("gf:languagechange",function(){if(account().user)changeButton();});
   // Le profil (pseudo) peut redessiner l'initiale : on remet l'avatar par-dessus.
-  if(window.MutationObserver)document.addEventListener("DOMContentLoaded",function(){["profileAvatar","identityAvatar"].forEach(function(id){var n=byId(id);if(n)new MutationObserver(function(){if(BY[mine]&&!n.querySelector(".gfa-svg")&&account().user)paint(n,mine,letterOf());}).observe(n,{childList:true,characterData:true,subtree:true});});});
+  if(window.MutationObserver)document.addEventListener("DOMContentLoaded",function(){["profileAvatar","identityAvatar"].forEach(function(id){var n=byId(id);if(n)new MutationObserver(function(){if(valid(mine)&&!n.querySelector(".gfa-svg")&&account().user)paint(n,mine,letterOf());}).observe(n,{childList:true,characterData:true,subtree:true});});});
   if(document.readyState!=="loading"&&account().user)load();
-  window.GFAvatars={svg:svg,paint:paint,initial:initial,open:openPicker,friend:function(id){return friends[id]||null;},list:LIST.map(function(a){return a[0];}),reload:load,_set:function(m,f){mine=m;friends=f||{};apply();}};
+  window.GFAvatars={svg:svg,paint:paint,initial:initial,open:openPicker,friend:function(id){return friends[id]||null;},colors:COLORS.map(function(c){return c[0];}),styles:STYLES.map(function(f){return f[0];}),valid:valid,reload:load,_set:function(m,f){mine=m;friends=f||{};apply();}};
 })();

@@ -1,12 +1,11 @@
 -- Avatars (18 octobre 2026), appliqué sur le projet Supabase.
--- Pas de photos envoyées : l'avatar est l'initiale gravée dans une médaille ; on choisit seulement sa teinte
--- dans une liste fermée.
+-- Pas de photos envoyées : l'avatar est l'initiale dans un rond plat ; on choisit une couleur et un style de
+-- lettre dans des listes fermées. Valeur : « couleur.style » (ex. « seigle.moderne »).
 -- La base n'accepte que ces noms ; aucune image n'est stockée.
 
 alter table public.profiles add column if not exists avatar text;
 alter table public.profiles drop constraint if exists profiles_avatar_check;
-alter table public.profiles add constraint profiles_avatar_check check (avatar is null or avatar in
-  ('seigle','foret','nuit','bordeaux','terre','prune','ardoise','or'));
+alter table public.profiles add constraint profiles_avatar_check check (avatar is null or avatar ~ '^(seigle|ble|creme|sauge|terre|encre|sable|prune)\.(moderne|classique|italique|affirmee|technique)$');
 
 -- Choisir (ou retirer, avec null) son avatar.
 create or replace function public.set_my_avatar(p_avatar text)
@@ -14,7 +13,7 @@ returns text language plpgsql security definer set search_path to ''
 as $f$
 begin
   if auth.uid() is null then raise exception 'not_authenticated'; end if;
-  if p_avatar is not null and p_avatar not in ('seigle','foret','nuit','bordeaux','terre','prune','ardoise','or') then
+  if p_avatar is not null and p_avatar !~ '^(seigle|ble|creme|sauge|terre|encre|sable|prune)\.(moderne|classique|italique|affirmee|technique)$' then
     raise exception 'invalid_avatar';
   end if;
   update public.profiles set avatar = p_avatar where id = auth.uid();
