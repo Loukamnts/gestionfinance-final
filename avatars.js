@@ -100,7 +100,7 @@
     if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();
   }
 
-  window.addEventListener("authStateChanged",function(e){var u=e.detail&&e.detail.user;if(!u){mine=null;friends={};loadedFor=null;var b=byId("gfaChange");if(b)b.remove();return;}if(loadedFor!==u.id)setTimeout(load,300);});
+  window.addEventListener("authStateChanged",function(e){var u=e.detail&&e.detail.user;if(!u){mine=null;friends={};loadedFor=null;var b=byId("gfaChange");if(b)b.remove();["profileAvatar","identityAvatar"].forEach(function(id){var n=byId(id);if(n)n.classList.remove("has-avatar");});return;}if(loadedFor!==u.id)setTimeout(load,300);});
   window.addEventListener("gf:languagechange",function(){if(account().user)changeButton();});
   // Le profil (pseudo) peut redessiner l'initiale : on remet l'avatar par-dessus.
   if(window.MutationObserver)document.addEventListener("DOMContentLoaded",function(){["profileAvatar","identityAvatar"].forEach(function(id){var n=byId(id);if(n)new MutationObserver(function(){if(BY[mine]&&!n.querySelector(".gfa-svg")&&account().user)paint(n,mine,letterOf());}).observe(n,{childList:true,characterData:true,subtree:true});});});
