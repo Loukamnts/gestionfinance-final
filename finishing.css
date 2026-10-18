@@ -29,8 +29,8 @@ body[data-theme="moulin"] .studio-sidebar-brand{column-gap:10px!important}
 /* brand gap : un peu d'air entre le logo et le nom */
 body[data-theme="moulin"] .app-header .brand-copy h1{display:flex!important;align-items:center;gap:9px}
 body[data-theme="moulin"] .loader{display:none!important}
-/* Navigation : Paramètres passe en bas, on retire l'engrenage du haut */
-body[data-theme="moulin"] .mobile-settings-button{display:none!important}
+/* Navigation : Mon espace en bas ; Paramètres = engrenage en haut, à gauche du profil (mobile) */
+@media(max-width:720px){body[data-theme="moulin"] .app-header .top-actions{gap:8px}body[data-theme="moulin"] .mobile-settings-button{width:40px;height:40px;border-radius:12px;border-color:var(--line);background:transparent;color:var(--text)}body[data-theme="moulin"] .mobile-settings-button.is-active{background:var(--accent-fill);border-color:var(--accent-fill);color:var(--on-accent-fill)}}
 
 .gfp-short{display:none}
 @media(max-width:900px){.gfp-long{display:none}.gfp-short{display:inline}}

@@ -16,14 +16,15 @@
   }
   function syncViews(){var sel=byId("viewSelect");document.querySelectorAll("#gfcViews button").forEach(function(b){b.setAttribute("aria-pressed",String(sel&&sel.value===b.dataset.view));});}
 
-  /* 2. Barre du bas : Mon espace → Paramètres */
-  function bottomNav(){
-    var b=byId("personalNavButton");if(!b)return;
-    b.id="settingsNavButton";b.dataset.page="settings";b.setAttribute("aria-label",t2("Paramètres","Settings"));b.title=t2("Paramètres","Settings");
-    b.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="bottom-nav-label">'+t2("Paramètres","Settings")+'</span>';
-    b.addEventListener("click",function(e){e.preventDefault();e.stopImmediatePropagation();if(window.setPage)window.setPage("settings");},true);
+  /* 2. Barre du bas : Accueil, Tableur, Mon espace (Partage, Objectifs, Nouveautés).
+     Paramètres est l'engrenage en haut, à gauche du profil. */
+  var SPACE=["sharing","objectives","updates"];
+  function bottomNav(){var b=byId("personalNavButton");if(b)b.dataset.space="1";}
+  function navPage(x){var page=document.body.dataset.page;return x.dataset.page===page||(x.dataset.space==="1"&&SPACE.indexOf(page)>=0);}
+  function syncBottom(){
+    document.querySelectorAll(".bottom-nav .bottom-nav-btn").forEach(function(x){var on=navPage(x);x.classList.toggle("is-active",on);if(on)x.setAttribute("aria-current","page");else x.removeAttribute("aria-current");});
+    document.querySelectorAll(".mobile-settings-button").forEach(function(x){x.classList.toggle("is-active",document.body.dataset.page==="settings");});
   }
-  function syncBottom(){var b=byId("settingsNavButton");if(b)b.classList.toggle("is-active",document.body.dataset.page==="settings");}
 
   /* 3. Paramètres : raccourcis vers Mon espace (accessible aussi par l'avatar) */
 
@@ -74,6 +75,8 @@
     shortLabels();
     goalLinkUI();
     chartViews();bottomNav();syncBottom();
+    // Changement de page, d'où qu'il vienne : l'onglet du bas suit (Mon espace couvre ses trois pages).
+    if(window.MutationObserver)new MutationObserver(syncBottom).observe(document.body,{attributes:true,attributeFilter:["data-page"]});
     var nb=byId("latestUpdateAllButton");if(nb){nb.textContent=t2("Voir","See");nb.setAttribute("aria-label",t2("Voir les nouveautés","See what’s new"));}
     document.addEventListener("change",function(e){if(e.target&&e.target.id==="viewSelect")syncViews();});
     document.addEventListener("click",function(){setTimeout(syncBottom,0);});
@@ -82,7 +85,7 @@
     var nav=document.querySelector(".bottom-nav");
     if(nav){
       var mark=function(b){nav.querySelectorAll(".bottom-nav-btn").forEach(function(x){x.classList.toggle("is-active",x===b);});};
-      var restore=function(){var page=document.body.dataset.page;nav.querySelectorAll(".bottom-nav-btn").forEach(function(x){x.classList.toggle("is-active",x.dataset.page===page);});};
+      var restore=syncBottom;
       nav.addEventListener("pointerdown",function(e){var b=e.target.closest(".bottom-nav-btn");if(b&&!(e.button>0))mark(b);});
       nav.addEventListener("pointercancel",restore);
       nav.addEventListener("click",function(e){

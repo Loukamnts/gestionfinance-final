@@ -127,6 +127,16 @@ body.gfh-ready.gfh-nocharts #dashboardPage .month-details{display:none!important
 .gfh-set{margin:8px 0 20px;padding:20px 0 0;border-top:1px solid var(--line)}
 .gfh-set h4{margin:0;font:600 18px var(--font-body);color:var(--text)}
 .gfh-set > p{margin:4px 0 8px;font-size:14px;color:var(--muted)}
+.gfh-set-body > p{margin:4px 0 8px;font-size:14px;color:var(--muted)}
+.gfh-set-toggle{display:flex;align-items:center;gap:12px;width:100%;margin:0;padding:6px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.gfh-set-toggle-text{display:grid;gap:3px;flex:1;min-width:0}
+.gfh-set-toggle-text strong{font:600 18px var(--font-body);color:var(--text)}
+.gfh-set-toggle-text small{font-size:13px;color:var(--muted);font-weight:400}
+.gfh-set-chev{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border:1px solid var(--line);border-radius:50%;color:var(--text);transition:transform .2s ease,background .2s ease}
+.gfh-set-chev svg{width:18px;height:18px}
+.gfh-set-toggle[aria-expanded="true"] .gfh-set-chev{transform:rotate(90deg);background:var(--accent-fill,var(--accent));border-color:transparent;color:var(--on-accent-fill,#1b1b1b)}
+.gfh-set-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:10px}
+@media(prefers-reduced-motion:reduce){.gfh-set-chev{transition:none}}
 .gfh-set-row{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;padding:8px 0;border-bottom:1px solid var(--line)}
 .gfh-set-row strong{display:block;font:500 15px var(--font-body);color:var(--text)}
 .gfh-set-row small{display:block;margin-top:2px;font-size:13px;color:var(--muted)}

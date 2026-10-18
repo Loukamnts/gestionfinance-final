@@ -1,4 +1,4 @@
-Contact: https://gestion-finance-coral.vercel.app/confidentialite
+Contact: https://meuniance.vercel.app/confidentialite
 Expires: 2027-03-10T23:59:59Z
 Preferred-Languages: fr, en
-Canonical: https://gestion-finance-coral.vercel.app/.well-known/security.txt
+Canonical: https://meuniance.vercel.app/.well-known/security.txt

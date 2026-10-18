@@ -228,10 +228,12 @@
       var miss=stableIn([c,b,a]).filter(function(x){return !catMap(L)[x.name];});
       if(miss.length)return{year:L.year,mi:L.mi,items:miss};
     }
-    // 2) sinon, on prépare le mois suivant
+    // 2) sinon, on prépare le mois suivant, mais seulement à partir du 25 : plus tôt, c'est prématuré
     if(consecutive(b,a)&&consecutive(a,L)){
+      var ny=L.mi===11?L.year+1:L.year,nm=(L.mi+1)%12,now=new Date(),cur=now.getFullYear()*12+now.getMonth(),nxt=ny*12+nm;
+      if(cur<nxt-1||(cur===nxt-1&&now.getDate()<25))return null;
       var items=stableIn([b,a,L]);if(!items.length)return null;
-      var ny=L.mi===11?L.year+1:L.year,nm=(L.mi+1)%12;return{year:ny,mi:nm,items:items};
+      return{year:ny,mi:nm,items:items};
     }
     return null;
   }
@@ -495,12 +497,20 @@
   }
 
   /* Réglages : Paramètres › Apparence › Accueil (blocs facultatifs) */
+  var homeSetOpen=false;
   function settingsUI(){
     var panel=document.querySelector('[data-settings-panel="appearance"]');if(!panel)return;
     var box=byId("gfhSettings");
     if(!box){box=el("section","gfh-set");box.id="gfhSettings";box.setAttribute("aria-labelledby","gfhSetTitle");var head=panel.querySelector(".settings-section-head");if(head&&head.nextSibling)panel.insertBefore(box,head.nextSibling);else panel.append(box);}
     var b=blocks(),rows=[["month",t2("Chiffres du mois","Month figures"),t2("Revenus, dépenses et épargne sous le solde.","Income, expenses and savings under the balance.")],["recap",t2("Bilan du mois","Monthly recap"),t2("Au début de chaque mois, le résumé du mois écoulé.","At the start of each month, a summary of the month gone by.")],["recapPin",t2("Bilan toujours affiché","Always show the recap"),t2("Le garde en haut de l’accueil en permanence, avec la comparaison au mois précédent.","Keeps it at the top of Home, with the comparison to the month before.")],["where",t2("Où part ton argent","Where your money goes"),t2("Tes lignes de dépenses du mois.","Your expense rows for the month.")],["goal",t2("Objectif","Goal"),t2("La progression de ton objectif principal.","Progress of your main goal.")],["fixed",t2("Dépenses fixes","Fixed expenses"),t2("Propose les lignes qui reviennent chaque mois.","Suggests rows that come back every month.")],["charts",t2("Graphiques","Charts"),t2("Camembert, comparatif annuel, évolution.","Pie, yearly comparison, trends.")]];
-    var h=el("h4","",t2("Accueil","Home"));h.id="gfhSetTitle";
+    // En-tête repliable : une flèche à droite développe tous les réglages de l'accueil.
+    var h=el("h4","");h.id="gfhSetTitle";
+    var tog=el("button","gfh-set-toggle");tog.type="button";tog.setAttribute("aria-expanded",String(homeSetOpen));tog.setAttribute("aria-controls","gfhSetBody");
+    var tt=el("span","gfh-set-toggle-text");tt.append(el("strong","",t2("Accueil","Home")),el("small","",t2("Ce que montre ton accueil : chiffres, bilan, graphiques…","What your home shows: figures, recap, charts…")));
+    var chev=el("span","gfh-set-chev");chev.setAttribute("aria-hidden","true");chev.innerHTML='<svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    tog.append(tt,chev);h.append(tog);
+    var body=el("div","gfh-set-body");body.id="gfhSetBody";body.hidden=!homeSetOpen;
+    tog.addEventListener("click",function(){homeSetOpen=!homeSetOpen;tog.setAttribute("aria-expanded",String(homeSetOpen));body.hidden=!homeSetOpen;});
     var list=el("div","gfh-set-list");
     rows.forEach(function(r){
       var on=b[r[0]],row=el("div","gfh-set-row"),txt=el("div");txt.append(el("strong","",r[1]),el("small","",r[2]));
@@ -512,7 +522,8 @@
     var hr=el("div","gfh-set-row"),ht=el("div");ht.append(el("strong","",t2("Masquer les montants","Hide amounts")),el("small","",t2("Floute tes chiffres pour montrer ton écran sans les dévoiler. Aussi avec l’œil à côté du solde.","Blurs your figures so you can show your screen. Also with the eye next to the balance.")));
     var hs=el("button","gfh-switch");hs.type="button";hs.setAttribute("role","switch");hs.setAttribute("aria-checked",String(amountsHidden()));hs.setAttribute("aria-label",t2("Masquer les montants","Hide amounts"));hs.append(el("span"));
     hs.addEventListener("click",function(){setHidden(!amountsHidden());});hr.append(ht,hs);list.append(hr);
-    box.replaceChildren(h,el("p","",t2("Tout est facultatif : affiche seulement ce qui te sert.","Everything is optional: show only what helps you.")),list);
+    body.append(el("p","",t2("Tout est facultatif : affiche seulement ce qui te sert.","Everything is optional: show only what helps you.")),list);
+    box.replaceChildren(h,body);
   }
   var queued=false;
   function schedule(){if(queued)return;queued=true;requestAnimationFrame(function(){queued=false;try{render();}catch(e){console.warn("Accueil Meuniance",e);document.body.classList.remove("gfh-ready");}});}

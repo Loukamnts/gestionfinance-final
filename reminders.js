@@ -40,7 +40,7 @@
 
   var busy=false;
   async function render(){
-    var panel=document.querySelector('[data-settings-panel="appearance"]');if(!panel)return;
+    var panel=document.querySelector('[data-settings-panel="notifications"]');if(!panel)return;
     var box=byId("gfrReminders");
     if(!box){box=el("section","gfh-set gfr-set");box.id="gfrReminders";box.setAttribute("aria-labelledby","gfrTitle");panel.append(box);}
     var h=el("h4","",t2("Rappels","Reminders"));h.id="gfrTitle";
@@ -75,7 +75,7 @@
   function schedule(){clearTimeout(schedule.t);schedule.t=setTimeout(function(){render().catch(function(){});},150);}
   window.addEventListener("authStateChanged",schedule);
   window.addEventListener("gf:languagechange",schedule);
-  document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest('[data-settings-view="appearance"]'))schedule();});
+  document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest('[data-settings-view="notifications"]'))schedule();});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",schedule);else schedule();
   /* Invitation discrète : à un moment pris au hasard, sur l'accueil seulement (jamais pendant une saisie
      dans le tableur), une petite carte propose d'activer les rappels. « Plus tard » la fait revenir dans
@@ -85,7 +85,7 @@
   function setInviteState(v){try{window.safeStore.setItem(INVITE,JSON.stringify(v));}catch(e){}}
   function openReminderSettings(){
     if(window.setPage)window.setPage("settings");
-    setTimeout(function(){var hub=document.querySelector('[data-settings-view="appearance"]');if(hub)hub.click();
+    setTimeout(function(){var hub=document.querySelector('[data-settings-view="notifications"]');if(hub)hub.click();
       setTimeout(function(){var box=byId("gfrReminders");if(box){box.scrollIntoView({behavior:"smooth",block:"center"});box.classList.remove("is-flash");void box.offsetWidth;box.classList.add("is-flash");}},450);},120);
   }
   function hideInvite(){var c=byId("gfrInvite");if(!c)return;c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}
