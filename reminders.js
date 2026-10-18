@@ -116,7 +116,7 @@
           chips=el("div","gfr-chips");chips.setAttribute("role","radiogroup");chips.setAttribute("aria-label",t2("Me prévenir après","Remind me after"));
           var cap=el("span","gfr-chips-cap",t2("Si rien n’est noté depuis","If nothing is logged for"));
           var row2=el("div","gfr-chip-row");
-          [[3,t2("3 jours","3 days")],[7,t2("7 jours","7 days")],[14,t2("14 jours","14 days")],[30,t2("30 jours","30 days")]].forEach(function(o){
+          [[3,t2("3 jours","3 days")],[7,t2("7 jours","7 days")],[14,t2("14 jours","14 days")],[30,t2("1 mois","1 month")]].forEach(function(o){
             var b=el("button","gfr-chip",o[1]);b.type="button";b.setAttribute("role","radio");b.setAttribute("aria-checked",String(o[0]===days));
             b.addEventListener("click",async function(){if(busy||b.getAttribute("aria-checked")==="true")return;busy=true;msg.textContent="";
               [].forEach.call(row2.children,function(x){x.setAttribute("aria-checked",String(x===b));});

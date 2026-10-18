@@ -436,3 +436,4 @@ body[data-mode="dark"] .gfr-kind.is-goals .gfr-ic{color:#CDA8DA}
 .gfr-card-body .gfr-kinds{margin-top:12px;border-radius:16px}
 .gfr-card-body .gfr-btn{margin-top:12px}
 .gfr-hero+.gfr-card,.gfr-hero+.gfr-kinds{margin-top:14px}
+@media(max-width:360px){.gfr-card-body{padding:0 8px 10px}.gfr-chips{padding:0 10px 12px}.gfr-chip{padding:0 1px;font-size:12px;letter-spacing:-.01em}.gfr-chip-row{gap:2px;padding:2px}}
