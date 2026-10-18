@@ -363,3 +363,4 @@ body.gf-hide-amounts .gfb-row b{filter:blur(7px)}
 .gfb-group.is-todo>summary .gfb-name{font-weight:600}
 body.gf-hide-amounts .gfb-merchant b,body.gf-hide-amounts .gfb-group summary b{filter:blur(7px)}
 @media(prefers-reduced-motion:reduce){.gfb-group>summary::before{transition:none}}
+.gfh-alert.is-over .gfr-invite-ic{background:var(--red,#C0503A);color:#fff}

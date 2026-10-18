@@ -257,7 +257,7 @@
   /* ── Plafonds par ligne ─────────────────────────────────────────────────── */
   var BUDGET_KEY="personalFinanceDashboard.budgets";
   function budgets(){try{var b=JSON.parse(window.safeStore.getItem(BUDGET_KEY)||"{}");return b&&typeof b==="object"?b:{};}catch(e){return{};}}
-  function setBudget(name,v){var b=budgets();if(v>0)b[normKey(name)]=v;else delete b[normKey(name)];try{window.safeStore.setItem(BUDGET_KEY,JSON.stringify(b));}catch(e){}schedule();}
+  function setBudget(name,v){var b=budgets();quietAlerts=true;if(v>0)b[normKey(name)]=v;else delete b[normKey(name)];try{window.safeStore.setItem(BUDGET_KEY,JSON.stringify(b));}catch(e){}schedule();}
   function budgetOf(name){var v=Number(budgets()[normKey(name)]);return v>0?v:0;}
   function budgetDialog(name,spent){
     var d=el("dialog","gfh-dialog");var h=el("h2","",t2("Plafond pour ","Limit for ")+name);
@@ -270,6 +270,42 @@
     rm.addEventListener("click",function(){setBudget(name,0);d.close();});cancel.addEventListener("click",function(){d.close();});
     form.addEventListener("submit",function(e){e.preventDefault();var v=parseFloat(String(inp.value).replace(/\s/g,"").replace("€","").replace(",","."));setBudget(name,isFinite(v)&&v>0?v:0);d.close();});
     d.addEventListener("close",function(){d.remove();});document.body.append(d);d.showModal();setTimeout(function(){inp.focus();inp.select();},30);
+  }
+
+  /* ── Alertes de plafond : 80 % puis 100 %, une fois par seuil et par mois ─────── */
+  var ALERT_KEY="personalFinanceDashboard.budgetAlerts",ALERT_ON="personalFinanceDashboard.budgetAlertsOn",quietAlerts=false;
+  function alertsOn(){return lsGet(ALERT_ON)!=="0";}
+  function checkBudgets(all){
+    if(!alertsOn())return;
+    var now=new Date(),m=all.filter(function(x){return x.year===now.getFullYear()&&x.mi===now.getMonth();})[0];if(!m)return;
+    var b=budgets();if(!Object.keys(b).length)return;
+    var state={};try{state=JSON.parse(lsGet(ALERT_KEY)||"{}")||{};}catch(e){}
+    var month=m.year+"-"+m.mi,fresh=[];
+    Object.keys(state).forEach(function(k){if(k.split("|")[0]!==month)delete state[k];});// les mois passés sont oubliés
+    (m.cats||[]).forEach(function(c){
+      var name=String(c.name||""),bud=budgetOf(name);if(!bud)return;
+      var spent=Math.abs(Number(c.value||0)),lvl=spent>=bud?100:spent>=bud*.8?80:0,k=month+"|"+normKey(name),prev=Number(state[k]||0);
+      if(lvl>prev)fresh.push({name:name,spent:spent,bud:bud,lvl:lvl});
+      if(lvl!==prev){if(lvl)state[k]=lvl;else delete state[k];}
+    });
+    lsSet(ALERT_KEY,JSON.stringify(state));
+    // Juste après avoir fixé un plafond, on note le niveau actuel sans prévenir.
+    if(quietAlerts){quietAlerts=false;return;}
+    if(fresh.length)budgetAlert(fresh.sort(function(a,b){return b.lvl-a.lvl||b.spent/b.bud-a.spent/a.bud;}));
+  }
+  function alertText(a){return a.lvl>=100?t2(a.name+" : plafond atteint ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": limit reached ("+eur(a.spent)+" / "+eur(a.bud)+")"):t2(a.name+" : 80 % du plafond ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": 80% of the limit ("+eur(a.spent)+" / "+eur(a.bud)+")");}
+  function budgetAlert(list){
+    var first=list[0],more=list.length-1,title=first.lvl>=100?t2("Plafond atteint","Limit reached"):t2("Bientôt au plafond","Close to the limit");
+    var body=alertText(first)+(more?t2(" · et "+more+" autre"+(more>1?"s":""),", and "+more+" more"):"");
+    var old=byId("gfhBudgetAlert");if(old)old.remove();
+    var c=el("div","gfr-invite gfh-alert"+(first.lvl>=100?" is-over":""));c.id="gfhBudgetAlert";c.setAttribute("role","status");
+    var ic=el("span","gfr-invite-ic");ic.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4L12 4Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 10v4.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.1" fill="currentColor"/></svg>';
+    var tx=el("div","gfr-invite-tx");tx.append(el("strong","",title),el("span","",body));
+    var ok=el("button","gfr-invite-go",t2("Compris","Got it"));ok.type="button";ok.addEventListener("click",function(){c.classList.remove("is-on");setTimeout(function(){c.remove();},250);});
+    var acts=el("div","gfr-invite-acts");acts.append(ok);c.append(ic,tx,acts);document.body.append(c);requestAnimationFrame(function(){c.classList.add("is-on");});
+    setTimeout(function(){if(c.isConnected){c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}},9000);
+    // Notification de l'appareil, seulement si elle a été autorisée (jamais de demande surprise).
+    try{if("Notification" in window&&Notification.permission==="granted"&&navigator.serviceWorker)navigator.serviceWorker.ready.then(function(r){r.showNotification("Meuniance · "+title,{body:body,icon:"/app-icon-180.png",tag:"meuniance-plafond",data:{url:"/accueil"}});}).catch(function(){});}catch(e){}
   }
 
   /* ── Bilan du mois en une phrase ───────────────────────────────────────── */
@@ -495,6 +531,7 @@
     document.body.classList.add("gfh-ready");
     if(document.body.classList.contains("tutorial-active"))setTimeout(function(){window.dispatchEvent(new Event("resize"));},30);
     openFromLink(plus);
+    if(!blank&&!demo)checkBudgets(all);
   }
   /* Raccourci « Ajouter une dépense » (appui long sur l'icône de l'app, ou /accueil?ajout=depense|revenu|epargne) :
      ouvre l'ajout rapide une seule fois, dès que l'accueil est prêt, jamais par-dessus le tutoriel. */
@@ -545,7 +582,7 @@
     return run;
   }
   window.addEventListener("gf:dashboardupdate",function(){setTimeout(function(){try{window.FinanceSheet&&window.FinanceSheet.updateSheetBalanceCards&&window.FinanceSheet.updateSheetBalanceCards();}catch(e){}},0);});
-  window.GFHome={render:schedule,totalBalance:totalBalance,loadExample:loadExample,removeExample:removeExample};
+  window.GFHome={alertsOn:alertsOn,setAlertsOn:function(v){lsSet(ALERT_ON,v?null:"0");},render:schedule,totalBalance:totalBalance,loadExample:loadExample,removeExample:removeExample};
   document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest("[data-page]"))setTimeout(sheetBanner,60);});
   window.addEventListener("gf:dashboardupdate",function(){sheetBanner();});
   document.addEventListener("focusout",function(e){if(e.target&&e.target.closest&&e.target.closest("#sheetApp"))setTimeout(sheetBanner,400);});
