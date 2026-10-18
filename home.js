@@ -228,10 +228,12 @@
       var miss=stableIn([c,b,a]).filter(function(x){return !catMap(L)[x.name];});
       if(miss.length)return{year:L.year,mi:L.mi,items:miss};
     }
-    // 2) sinon, on prépare le mois suivant
+    // 2) sinon, on prépare le mois suivant, mais seulement à partir du 25 : plus tôt, c'est prématuré
     if(consecutive(b,a)&&consecutive(a,L)){
+      var ny=L.mi===11?L.year+1:L.year,nm=(L.mi+1)%12,now=new Date(),cur=now.getFullYear()*12+now.getMonth(),nxt=ny*12+nm;
+      if(cur<nxt-1||(cur===nxt-1&&now.getDate()<25))return null;
       var items=stableIn([b,a,L]);if(!items.length)return null;
-      var ny=L.mi===11?L.year+1:L.year,nm=(L.mi+1)%12;return{year:ny,mi:nm,items:items};
+      return{year:ny,mi:nm,items:items};
     }
     return null;
   }
