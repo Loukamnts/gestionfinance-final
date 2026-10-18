@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
 
-// Rappels de saisie : appelée une fois par jour par la tâche planifiée de la base (pg_cron).
+// Rappels de saisie (une fois par jour) et file de notifications (chaque minute), appelés par pg_cron.
 // Les clés de notification sont créées ici au premier appel puis rangées dans le coffre de la base :
 // elles ne quittent jamais Supabase. Le contenu d'un rappel ne contient aucun montant.
 
@@ -48,6 +48,36 @@ Deno.serve(async (request) => {
   if (allowed !== true) return new Response(JSON.stringify({ ready: !!keys?.public }), { status: 401 });
 
   webpush.setVapidDetails("mailto:louka.meunier1@gmail.com", keys.public, keys.private);
+
+  // File de notifications (plafonds, amis, bilans, objectifs) : appelée chaque minute s'il y a des messages.
+  let mode = "";
+  try { mode = String((await request.json())?.mode || ""); } catch (_e) { mode = ""; }
+  if (mode === "queue") {
+    const { data: rows, error: qerr } = await admin.rpc("due_notifications", { p_limit: 300 });
+    if (qerr) return new Response("Unable to list notifications", { status: 500 });
+    const done = new Set<number>();
+    const goneSubs = new Set<number>();
+    for (const row of rows || []) {
+      done.add(row.qid);
+      if (!row.endpoint) continue; // plus aucun appareil : le message est simplement retiré
+      try {
+        await webpush.sendNotification(
+          { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth_key } },
+          JSON.stringify({ title: row.title, body: row.body, url: row.url, tag: row.tag }),
+          { TTL: 60 * 60 * 12, urgency: "normal" },
+        );
+      } catch (e) {
+        const status = (e as { statusCode?: number }).statusCode;
+        if (status === 404 || status === 410) goneSubs.add(row.sub_id);
+      }
+    }
+    if (done.size) await admin.rpc("mark_notifications_sent", { p_ids: [...done] });
+    if (goneSubs.size) await admin.from("reminder_subscriptions").delete().in("id", [...goneSubs]);
+    return new Response(JSON.stringify({ messages: done.size, removed: goneSubs.size }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const { data: due, error } = await admin.rpc("due_reminders", { p_limit: 500 });
   if (error) return new Response("Unable to list reminders", { status: 500 });
 
