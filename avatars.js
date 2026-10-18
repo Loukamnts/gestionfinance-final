@@ -68,12 +68,15 @@
     mine=id||null;apply();return true;
   }
 
-  /* ── Bouton « Changer mon avatar » sous la carte du profil ── */
+  /* ── Changer l'avatar : un petit crayon posé sur l'avatar du profil (l'avatar lui-même est aussi cliquable) ── */
+  var PENCIL='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m13.5 6.5 4 4" stroke="currentColor" stroke-width="2"/></svg>';
   function changeButton(){
-    var copy=document.querySelector("#identityDetails .identity-summary-copy");if(!copy||!account().user)return;
+    var av=byId("identityAvatar");if(!av||!account().user)return;
+    var wrap=av.parentNode;
+    if(!wrap.classList.contains("gfa-wrap")){wrap=el("span","gfa-wrap");av.parentNode.insertBefore(wrap,av);wrap.append(av);av.addEventListener("click",openPicker);}
     var b=byId("gfaChange");
-    if(!b){b=el("button","gfa-change");b.id="gfaChange";b.type="button";b.addEventListener("click",openPicker);copy.append(b);}
-    b.textContent=t2("Changer mon avatar","Change my avatar");
+    if(!b){b=el("button","gfa-badge");b.id="gfaChange";b.type="button";b.innerHTML=PENCIL;b.addEventListener("click",openPicker);wrap.append(b);}
+    b.setAttribute("aria-label",t2("Changer mon avatar","Change my avatar"));b.title=t2("Changer mon avatar","Change my avatar");
   }
 
   /* ── Page de choix : aperçu en direct, couleur puis style de lettre, Enregistrer / Annuler ── */

@@ -19,11 +19,14 @@ body[data-theme="moulin"] #dashboardPage #latestUpdateBanner.latest-update-banne
 .gfd-text{margin:2px 0 0;font-size:14px;line-height:1.45;color:var(--muted)}
 .gfd-actions{display:flex;align-items:center;gap:6px;flex:none}
 .gfd-try{height:44px;padding:0 18px;border:1px solid var(--accent-fill,var(--accent));border-radius:14px;background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font:600 15px var(--font-body);cursor:pointer}
-.gfd-try:hover{filter:brightness(1.05)}
+@media (hover:hover){
+.gfd-try:hover{filter:brightness(1.05)}}
 .gfd-next{height:44px;padding:0 12px;border:0;border-radius:14px;background:transparent;color:var(--text);font:600 14px var(--font-body);text-decoration:underline;text-underline-offset:4px;cursor:pointer}
-.gfd-next:hover{background:var(--line)}
+@media (hover:hover){
+.gfd-next:hover{background:var(--line)}}
 .gfd-close{width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--muted);font:400 22px/1 var(--font-body);cursor:pointer;align-self:start}
-.gfd-close:hover{background:var(--line);color:var(--text)}
+@media (hover:hover){
+.gfd-close:hover{background:var(--line);color:var(--text)}}
 .gfd button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
 @media(max-width:560px){
   .gfd{grid-template-columns:44px minmax(0,1fr) 44px;grid-template-areas:"ring copy close" ". actions actions";gap:4px 12px}
@@ -76,7 +79,8 @@ body[data-theme="moulin"] #updatesPage .updates-list{display:block}
 .update-detail .update-type-badge{padding:1px 8px;border:1px solid var(--line);border-radius:10px;font:600 11px/1.6 var(--font-body);text-transform:uppercase;letter-spacing:.04em;color:var(--text);background:transparent}
 .update-detail .update-type-new{border-color:var(--accent-fill,var(--accent))}
 .update-more{display:block;margin:24px auto 0;height:48px;padding:0 24px;border:1px solid var(--line);border-radius:14px;background:transparent;color:var(--text);font:600 15px var(--font-body);cursor:pointer}
-.update-more:hover{border-color:var(--text)}
+@media (hover:hover){
+.update-more:hover{border-color:var(--text)}}
 .update-more:focus-visible,.update-details summary:focus-visible{outline:2px solid var(--text);outline-offset:2px}
 body[data-theme="moulin"] #updatesPagination{display:none!important}
-.gfd-actions .gfd-next:first-child{padding-left:0}.gfd-actions .gfd-next:first-child:hover{background:transparent}
+.gfd-actions .gfd-next:first-child{padding-left:0}@media (hover:hover){.gfd-actions .gfd-next:first-child:hover{background:transparent}}
