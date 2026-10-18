@@ -430,3 +430,9 @@ body[data-mode="dark"] .gfr-kind.is-goals .gfr-ic{color:#CDA8DA}
 .gfr-note-ic{display:inline-grid;flex:0 0 18px;width:18px;height:18px;margin-top:1px}.gfr-note-ic svg{width:18px;height:18px}
 @media(hover:hover){.gfr-btn:hover,.gfr-chip:not([aria-checked="true"]):hover{background:color-mix(in srgb,var(--text) 5%,transparent)}}
 @media(max-width:360px){.gfr-kind-row{gap:10px}.gfr-chip{font-size:12px}}
+.gfr-card{border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.gfr-card .gfr-toggle{padding:16px}
+.gfr-card-body{padding:0 12px 14px;border-top:1px solid var(--line)}
+.gfr-card-body .gfr-kinds{margin-top:12px;border-radius:16px}
+.gfr-card-body .gfr-btn{margin-top:12px}
+.gfr-hero+.gfr-card,.gfr-hero+.gfr-kinds{margin-top:14px}

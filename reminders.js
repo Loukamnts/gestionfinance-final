@@ -41,7 +41,7 @@
   /* Préférences du compte (serveur) : quels types de notifications recevoir sur ses appareils. */
   var KINDS=[
     ["reminder",["Rappel de saisie","Entry reminder"],["Si tu n’as rien noté depuis un moment.","If you haven’t logged anything for a while."]],
-    ["budget",["Plafonds à 80 % et 100 %","Limits at 80% and 100%"],["Quand une ligne approche ou atteint son plafond.","When a row nears or reaches its limit."]],
+    ["budget",["Plafonds à 80\u00a0% et 100\u00a0%","Limits at 80% and 100%"],["Quand une ligne approche ou atteint son plafond.","When a row nears or reaches its limit."]],
     ["friends",["Amis et dépenses partagées","Friends and shared expenses"],["Demande d’ami, dépense partagée, remboursement.","Friend request, shared expense, payback."]],
     ["recaps",["Bilans prêts","Recaps ready"],["Chaque 1er du mois, et l’année en décembre.","Every 1st of the month, and the year in December."]],
     ["goals",["Objectifs et dépenses fixes","Goals and fixed expenses"],["Objectif atteint, et tes fixes à noter le 25.","Goal reached, and fixed expenses on the 25th."]]
@@ -72,7 +72,7 @@
   };
   function icon(name,cls){var s=el("span",cls||"gfr-ic");s.setAttribute("aria-hidden","true");s.innerHTML='<svg viewBox="0 0 24 24" fill="none">'+ICONS[name]+'</svg>';return s;}
 
-  var busy=false;
+  var busy=false,kindsOpen=false;
   async function render(){
     var panel=document.querySelector('[data-settings-panel="notifications"]');if(!panel)return;
     var old=byId("gfrBudget");if(old)old.remove();
@@ -88,15 +88,13 @@
 
     // En-tête : cette appareil, avec son état
     var hero=el("div","gfr-hero"+(active?" is-on":"")),heroTx=el("div","gfr-hero-tx");
-    var h=el("h4","",t2("Notifications","Notifications"));h.id="gfrTitle";
-    var state=el("span","gfr-state",blocked?t2("Indisponibles ici","Not available here"):active?t2("Activées sur cet appareil","On for this device"):t2("Désactivées sur cet appareil","Off for this device"));
+    var h=el("h4","",t2("Sur cet appareil","On this device"));h.id="gfrTitle";
+    var state=el("span","gfr-state",blocked?t2("Indisponibles ici","Not available here"):active?t2("Notifications activées","Notifications on"):t2("Notifications désactivées","Notifications off"));
     heroTx.append(h,state);
     var master=switchBtn(t2("Recevoir les notifications sur cet appareil","Get notifications on this device"),active);if(blocked)master.disabled=true;
     hero.append(icon("bell","gfr-hero-ic"),heroTx,master);
     var parts=[hero];
-    var lead=el("p","gfr-lead",blocked||t2("Même quand Meuniance est fermée. Tu choisis lesquelles ci-dessous.","Even when Meuniance is closed. Choose which ones below."));
-    if(blocked)lead.classList.add("is-warn");
-    parts.push(lead);
+    if(blocked){var lead=el("p","gfr-lead is-warn",blocked);parts.push(lead);}
     if(blocked&&account().user&&isIOS()&&!standalone()&&window.GFInstall){var how=el("button","gfr-btn",t2("Voir comment l’installer","Show me how to install it"));how.type="button";how.addEventListener("click",function(){window.GFInstall.open();});parts.push(how);}
     master.addEventListener("click",async function(){
       if(busy)return;busy=true;master.disabled=true;msg.textContent="";
@@ -136,7 +134,19 @@
       });
       var test=el("button","gfr-btn");test.type="button";test.append(icon("send","gfr-btn-ic"),document.createTextNode(t2("Envoyer une notification d’essai","Send a test notification")));
       test.addEventListener("click",async function(){try{var reg=await registration();await reg.showNotification("Meuniance",{body:t2("Les notifications sont bien activées.","Notifications are on."),icon:"/app-icon-180.png",tag:"meuniance-test"});msg.textContent=t2("Envoyée : regarde en haut de ton écran.","Sent: look at the top of your screen.");}catch(e){msg.textContent=errorText(e);}});
-      parts.push(list,test);
+      // Repliable, comme « Accueil » dans Apparence : une flèche développe le choix des notifications.
+      var count=function(){return [].filter.call(list.querySelectorAll(".gfr-kind-row .gfh-switch"),function(x){return x.getAttribute("aria-checked")==="true";}).length;};
+      var card=el("div","gfr-card"),tog=el("button","gfh-set-toggle gfr-toggle");tog.type="button";tog.setAttribute("aria-expanded",String(kindsOpen));tog.setAttribute("aria-controls","gfrKinds");
+      var tt=el("span","gfh-set-toggle-text"),sum=el("small","");
+      var setSum=function(){var n=count();sum.textContent=n===KINDS.length?t2("Toutes activées","All on"):n===0?t2("Aucune activée","None on"):t2(n+" activées sur "+KINDS.length,n+" of "+KINDS.length+" on");};
+      setSum();tt.append(el("strong","",t2("Choisir les notifications","Choose notifications")),sum);
+      var chev=el("span","gfh-set-chev");chev.setAttribute("aria-hidden","true");chev.innerHTML='<svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      tog.append(tt,chev);
+      var body=el("div","gfr-card-body");body.id="gfrKinds";body.hidden=!kindsOpen;body.append(list,test);
+      tog.addEventListener("click",function(){kindsOpen=!kindsOpen;tog.setAttribute("aria-expanded",String(kindsOpen));body.hidden=!kindsOpen;});
+      list.addEventListener("click",function(e){if(e.target.closest&&e.target.closest(".gfh-switch"))setTimeout(setSum,0);});
+      card.append(tog,body);
+      parts.push(card);
     }else{
       // Sans notifications sur l'appareil : l'alerte de plafond reste visible sur l'accueil.
       var H=window.GFHome,item2=el("div","gfr-kinds"),k2=el("div","gfr-kind is-budget"),r2=el("div","gfr-kind-row"),c2=el("div","gfr-kind-tx");
