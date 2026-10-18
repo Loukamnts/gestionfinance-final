@@ -36,6 +36,17 @@
       '<circle class="gfa-edge" cx="24" cy="24" r="23.5" fill="none" stroke-width="1"/>'+
       '<text x="24" y="24.8" text-anchor="middle" dominant-baseline="central" font-size="'+(48*f[6]).toFixed(1)+'" font-weight="'+f[4]+'"'+(f[5]?' font-style="italic"':'')+' fill="'+p.c[4]+'" style="font-family:'+f[3].replace(/"/g,"'")+'"'+(sx!==1||sy!==1?' transform="translate(24 24.8) scale('+sx+' '+sy+') translate(-24 -24.8)"':'')+'>'+esc(initial(letter))+'</text></svg>';
   }
+  /* Met à jour un rond déjà affiché (couleur, police) sans le reconstruire : pas de clignotement sur iPhone. */
+  function restyle(node,id,letter){
+    var p=parts(id),el2=node&&node.querySelector("svg.gfa-svg");if(!p)return;
+    if(!el2){node.innerHTML=svg(id,letter);return;}
+    var f=p.f,sx=f[7],sy=f[8],c=el2.querySelector("circle"),t=el2.querySelector("text");
+    c.setAttribute("fill",p.c[3]);t.setAttribute("fill",p.c[4]);t.setAttribute("font-size",(48*f[6]).toFixed(1));t.setAttribute("font-weight",String(f[4]));
+    if(f[5])t.setAttribute("font-style","italic");else t.removeAttribute("font-style");
+    t.style.fontFamily=f[3];
+    if(sx!==1||sy!==1)t.setAttribute("transform","translate(24 24.8) scale("+sx+" "+sy+") translate(-24 -24.8)");else t.removeAttribute("transform");
+    var l=initial(letter);if(t.textContent!==l)t.textContent=l;
+  }
   /* Affiche l'avatar dans un élément ; sans choix, garde l'initiale classique. */
   function paint(node,id,letter){
     if(!node)return;
@@ -96,10 +107,10 @@
     var row=el("div","gfh-dialog-actions"),cancel=el("button","gfh-btn",t2("Annuler","Cancel")),ok=el("button","gfh-btn is-primary",t2("Enregistrer","Save"));cancel.type=ok.type="button";row.append(cancel,ok);
     function value(){return classic?null:color+"."+style;}
     function sync(){
-      [].forEach.call(cs.g.children,function(b){b.setAttribute("aria-checked",String(!classic&&b.dataset.id===color));b.firstChild.innerHTML=svg(b.dataset.id+"."+style,L);});
-      [].forEach.call(ss.g.children,function(b){b.setAttribute("aria-checked",String(!classic&&b.dataset.id===style));b.firstChild.innerHTML=svg(color+"."+b.dataset.id,L);});
+      [].forEach.call(cs.g.children,function(b){b.setAttribute("aria-checked",String(!classic&&b.dataset.id===color));restyle(b.firstChild,b.dataset.id+"."+style,L);});
+      [].forEach.call(ss.g.children,function(b){b.setAttribute("aria-checked",String(!classic&&b.dataset.id===style));restyle(b.firstChild,color+"."+b.dataset.id,L);});
       var cn=CBY[color],sn=SBY[style];cs.cur.textContent=classic?"":" · "+t2(cn[1],cn[2]);ss.cur.textContent=classic?"":" · "+t2(sn[1],sn[2]);
-      if(classic){preview.textContent=L;preview.classList.add("gfa-classic");}else{preview.innerHTML=svg(value(),L);preview.classList.remove("gfa-classic");}
+      if(classic){preview.textContent=L;preview.classList.add("gfa-classic");}else{if(preview.classList.contains("gfa-classic"))preview.textContent="";restyle(preview,value(),L);preview.classList.remove("gfa-classic");}
       back.textContent=classic?t2("Style classique sélectionné","Classic style selected"):t2("Revenir au style classique","Back to the classic style");back.disabled=classic;
       ok.disabled=value()===mine;
     }

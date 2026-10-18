@@ -246,13 +246,13 @@ body[data-mode="dark"] .gfa-edge{stroke:rgba(243,238,226,.18)}
 .gfa-label{margin:0 0 8px;font:700 11px/1.2 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .gfa-row{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}
 .gfa-row.is-styles{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
-.gfa-opt{display:grid;justify-items:center;gap:6px;min-width:0;padding:0;border:0;background:none;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.gfa-pic{display:block;width:100%;max-width:52px;aspect-ratio:1;border-radius:50%;overflow:hidden;transition:transform .15s}
+.gfa-opt{display:grid;justify-items:center;gap:6px;min-width:0;padding:0;border:0;background:none;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:none}
+.gfa-pic{display:block;width:100%;max-width:52px;aspect-ratio:1;border-radius:50%;transition:transform .12s}.gfa-pic,.gfa-preview{-webkit-transform:translateZ(0);transform:translateZ(0)}
 .gfa-pic .gfa-svg{display:block;width:100%;height:100%}
 .gfa-name{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;line-height:1.2;color:var(--muted);text-align:center}
 .gfa-opt[aria-checked="true"] .gfa-pic{box-shadow:0 0 0 2.5px var(--panel-solid,var(--bg)),0 0 0 5px var(--accent-fill,var(--accent))}
 .gfa-opt[aria-checked="true"] .gfa-name{color:var(--text);font-weight:600}
-.gfa-opt:active .gfa-pic{transform:scale(.94)}
+.gfa-opt:active .gfa-pic{transform:translateZ(0) scale(.94)}
 .gfa-dialog:focus,.gfa-dialog:focus-visible{outline:none}.gfa-opt:focus:not(:focus-visible){outline:none}.gfa-opt:focus-visible{outline:none}.gfa-opt:focus-visible .gfa-pic{outline:2px solid var(--accent);outline-offset:4px}
 .gfa-use-letter{display:block;margin:16px auto 0;padding:6px 10px;border:0;background:none;color:var(--text);font:600 13px var(--font-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .gfa-use-letter:disabled{color:var(--muted);text-decoration:none;cursor:default}
