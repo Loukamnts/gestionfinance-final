@@ -50,7 +50,7 @@
   function hideCard(){var c=byId("gfiCard");if(!c)return;c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}
   function busy(){
     if(document.hidden||document.body.dataset.page!=="dashboard"||document.body.classList.contains("tutorial-active"))return true;
-    if(byId("gfrInvite"))return true;
+    if(byId("gfrInvite")||(window.__gfCoachUntil||0)>Date.now())return true;
     if([].some.call(document.querySelectorAll("dialog[open],.sheet-modal-overlay,.tutorial-overlay:not(.hidden),.gfd-coach,.meuni-loader"),function(e){return !e.hidden&&e.getClientRects().length>0;}))return true;
     var a=document.activeElement;return !!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName));
   }

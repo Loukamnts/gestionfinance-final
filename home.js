@@ -44,7 +44,7 @@
     b.addEventListener("click",function(){setHidden(!amountsHidden());});
     return b;
   }
-  function blocks(){var d={month:true,recap:true,recapPin:false,where:true,goal:true,charts:true,fixed:true};try{var v=JSON.parse(lsGet(BLOCKS_KEY)||"{}");Object.keys(d).forEach(function(k){if(typeof v[k]==="boolean")d[k]=v[k];});}catch(e){}return d;}
+  function blocks(){var d={month:true,recap:true,recapPin:false,year:true,where:true,goal:true,subs:true,charts:true,fixed:true};try{var v=JSON.parse(lsGet(BLOCKS_KEY)||"{}");Object.keys(d).forEach(function(k){if(typeof v[k]==="boolean")d[k]=v[k];});}catch(e){}return d;}
   function setBlock(k,on){var b=blocks();b[k]=!!on;lsSet(BLOCKS_KEY,JSON.stringify(b));schedule();}
   function exampleOn(){return lsGet(DEMO_KEY)==="1";}
   function sheetEmpty(){try{var sn=window.FinanceSheet&&window.FinanceSheet.getSnapshot&&window.FinanceSheet.getSnapshot();return !sn||!sn.sheets||!sn.sheets.some(function(x){return x.cells&&Object.keys(x.cells).some(function(k){return String(x.cells[k]&&x.cells[k].raw||"").trim()!=="";});});}catch(e){return true;}}
@@ -257,7 +257,7 @@
   /* ── Plafonds par ligne ─────────────────────────────────────────────────── */
   var BUDGET_KEY="personalFinanceDashboard.budgets";
   function budgets(){try{var b=JSON.parse(window.safeStore.getItem(BUDGET_KEY)||"{}");return b&&typeof b==="object"?b:{};}catch(e){return{};}}
-  function setBudget(name,v){var b=budgets();if(v>0)b[normKey(name)]=v;else delete b[normKey(name)];try{window.safeStore.setItem(BUDGET_KEY,JSON.stringify(b));}catch(e){}schedule();}
+  function setBudget(name,v){var b=budgets();quietAlerts=true;if(v>0)b[normKey(name)]=v;else delete b[normKey(name)];try{window.safeStore.setItem(BUDGET_KEY,JSON.stringify(b));}catch(e){}schedule();}
   function budgetOf(name){var v=Number(budgets()[normKey(name)]);return v>0?v:0;}
   function budgetDialog(name,spent){
     var d=el("dialog","gfh-dialog");var h=el("h2","",t2("Plafond pour ","Limit for ")+name);
@@ -270,6 +270,42 @@
     rm.addEventListener("click",function(){setBudget(name,0);d.close();});cancel.addEventListener("click",function(){d.close();});
     form.addEventListener("submit",function(e){e.preventDefault();var v=parseFloat(String(inp.value).replace(/\s/g,"").replace("€","").replace(",","."));setBudget(name,isFinite(v)&&v>0?v:0);d.close();});
     d.addEventListener("close",function(){d.remove();});document.body.append(d);d.showModal();setTimeout(function(){inp.focus();inp.select();},30);
+  }
+
+  /* ── Alertes de plafond : 80 % puis 100 %, une fois par seuil et par mois ─────── */
+  var ALERT_KEY="personalFinanceDashboard.budgetAlerts",ALERT_ON="personalFinanceDashboard.budgetAlertsOn",quietAlerts=false;
+  function alertsOn(){return lsGet(ALERT_ON)!=="0";}
+  function checkBudgets(all){
+    if(!alertsOn())return;
+    var now=new Date(),m=all.filter(function(x){return x.year===now.getFullYear()&&x.mi===now.getMonth();})[0];if(!m)return;
+    var b=budgets();if(!Object.keys(b).length)return;
+    var state={};try{state=JSON.parse(lsGet(ALERT_KEY)||"{}")||{};}catch(e){}
+    var month=m.year+"-"+m.mi,fresh=[];
+    Object.keys(state).forEach(function(k){if(k.split("|")[0]!==month)delete state[k];});// les mois passés sont oubliés
+    (m.cats||[]).forEach(function(c){
+      var name=String(c.name||""),bud=budgetOf(name);if(!bud)return;
+      var spent=Math.abs(Number(c.value||0)),lvl=spent>=bud?100:spent>=bud*.8?80:0,k=month+"|"+normKey(name),prev=Number(state[k]||0);
+      if(lvl>prev)fresh.push({name:name,spent:spent,bud:bud,lvl:lvl});
+      if(lvl!==prev){if(lvl)state[k]=lvl;else delete state[k];}
+    });
+    lsSet(ALERT_KEY,JSON.stringify(state));
+    // Juste après avoir fixé un plafond, on note le niveau actuel sans prévenir.
+    if(quietAlerts){quietAlerts=false;return;}
+    if(fresh.length)budgetAlert(fresh.sort(function(a,b){return b.lvl-a.lvl||b.spent/b.bud-a.spent/a.bud;}));
+  }
+  function alertText(a){return a.lvl>=100?t2(a.name+" : plafond atteint ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": limit reached ("+eur(a.spent)+" / "+eur(a.bud)+")"):t2(a.name+" : 80 % du plafond ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": 80% of the limit ("+eur(a.spent)+" / "+eur(a.bud)+")");}
+  function budgetAlert(list){
+    var first=list[0],more=list.length-1,title=first.lvl>=100?t2("Plafond atteint","Limit reached"):t2("Bientôt au plafond","Close to the limit");
+    var body=alertText(first)+(more?t2(" · et "+more+" autre"+(more>1?"s":""),", and "+more+" more"):"");
+    var old=byId("gfhBudgetAlert");if(old)old.remove();
+    var c=el("div","gfr-invite gfh-alert"+(first.lvl>=100?" is-over":""));c.id="gfhBudgetAlert";c.setAttribute("role","status");
+    var ic=el("span","gfr-invite-ic");ic.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4L12 4Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 10v4.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.1" fill="currentColor"/></svg>';
+    var tx=el("div","gfr-invite-tx");tx.append(el("strong","",title),el("span","",body));
+    var ok=el("button","gfr-invite-go",t2("Compris","Got it"));ok.type="button";ok.addEventListener("click",function(){c.classList.remove("is-on");setTimeout(function(){c.remove();},250);});
+    var acts=el("div","gfr-invite-acts");acts.append(ok);c.append(ic,tx,acts);document.body.append(c);requestAnimationFrame(function(){c.classList.add("is-on");});
+    setTimeout(function(){if(c.isConnected){c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}},9000);
+    // Notification de l'appareil, seulement si elle a été autorisée (jamais de demande surprise).
+    try{if("Notification" in window&&Notification.permission==="granted"&&navigator.serviceWorker)navigator.serviceWorker.ready.then(function(r){r.showNotification("Meuniance · "+title,{body:body,icon:"/app-icon-180.png",tag:"meuniance-plafond",data:{url:"/accueil"}});}).catch(function(){});}catch(e){}
   }
 
   /* ── Bilan du mois en une phrase ───────────────────────────────────────── */
@@ -470,10 +506,11 @@
         if(cats.length>7)where.append(el("small","gfh-muted","+ "+(cats.length-7)+t2(" autres lignes"," more rows")));
         where.append(el("p","gfh-hint",t2("Touche une ligne pour lui fixer un plafond.","Tap a row to set a limit.")));}
       else where.append(el("p","gfh-empty",t2("Aucune dépense ce mois-ci.","No expenses this month.")));
-      var fx=(B.fixed!==false)&&sel.id===all[all.length-1].id?fixedSuggestion(all):null,fp=fx?fixedPanel(fx):null;if(B.where)right.append(where);if(fp)right.append(fp);if(B.goal)right.append(goalsPanel(p));
+      var fx=(B.fixed!==false)&&sel.id===all[all.length-1].id?fixedSuggestion(all):null,fp=fx?fixedPanel(fx):null;if(B.where)right.append(where);if(fp)right.append(fp);if(B.subs&&window.GFSubs){var sp=window.GFSubs.panel();if(sp)right.append(sp);}if(B.goal)right.append(goalsPanel(p));
     }
 
     var rc=!blank&&B.recap?recapPanel(all,bal):null;
+    var yc=!blank&&B.year!==false&&window.GFYear?window.GFYear.card():null;
     var left=el("div","gfh-left");left.append(card);
     var dg=el("div","gfh-dg"+(right.childNodes.length?"":" is-solo"));dg.append(left);if(right.childNodes.length)dg.append(right);
     var top=[];
@@ -489,11 +526,24 @@
     // Redessiner l'accueil ne doit ni faire remonter la page ni perdre le focus (sinon, après un toucher sur
     // une barre de mois, le navigateur remonte tout en haut et la barre jaune sort de l'écran).
     var keepY=window.scrollY,hadFocus=document.activeElement&&root.contains(document.activeElement),focusBar=hadFocus&&document.activeElement.closest(".gfh-bars");
-    root.replaceChildren.apply(root,top.concat(rc?[bar,hi,rc,dg]:[bar,hi,dg]));
+    root.replaceChildren.apply(root,top.concat([bar,hi],yc?[yc]:[],rc?[rc]:[],[dg]));
     if(focusBar){var nf=root.querySelector(".gfh-bars button.on");if(nf)try{nf.focus({preventScroll:true});}catch(e){}}
     if(Math.abs(window.scrollY-keepY)>1)window.scrollTo(0,keepY);
     document.body.classList.add("gfh-ready");
     if(document.body.classList.contains("tutorial-active"))setTimeout(function(){window.dispatchEvent(new Event("resize"));},30);
+    openFromLink(plus);
+    if(window.GFYear&&!blank)window.GFYear.fromLink();
+    if(!blank&&!demo)checkBudgets(all);
+    if(window.GFSubs)setTimeout(function(){try{window.GFSubs.afterRender();}catch(e){}},700);
+  }
+  /* Raccourci « Ajouter une dépense » (appui long sur l'icône de l'app, ou /accueil?ajout=depense|revenu|epargne) :
+     ouvre l'ajout rapide une seule fois, dès que l'accueil est prêt, jamais par-dessus le tutoriel. */
+  var linkAdd=(function(){try{var v=new URLSearchParams(location.search).get("ajout");return ["depense","revenu","epargne"].indexOf(v)>=0?v:null;}catch(e){return null;}})();
+  function openFromLink(plus){
+    if(!linkAdd||document.body.dataset.page!=="dashboard"||document.body.classList.contains("tutorial-active")||document.querySelector("dialog[open]"))return;
+    var kind=linkAdd;linkAdd=null;
+    try{var u=new URL(location.href);u.searchParams.delete("ajout");history.replaceState(history.state,"",u.pathname+u.search+u.hash);}catch(e){}
+    setTimeout(function(){plus.click();var i={depense:0,revenu:1,epargne:2}[kind];var b=document.querySelectorAll(".gfh-quick .gfh-seg button")[i];if(b&&i)b.click();},60);
   }
 
   /* Réglages : Paramètres › Apparence › Accueil (blocs facultatifs) */
@@ -502,7 +552,7 @@
     var panel=document.querySelector('[data-settings-panel="appearance"]');if(!panel)return;
     var box=byId("gfhSettings");
     if(!box){box=el("section","gfh-set");box.id="gfhSettings";box.setAttribute("aria-labelledby","gfhSetTitle");var head=panel.querySelector(".settings-section-head");if(head&&head.nextSibling)panel.insertBefore(box,head.nextSibling);else panel.append(box);}
-    var b=blocks(),rows=[["month",t2("Chiffres du mois","Month figures"),t2("Revenus, dépenses et épargne.","Income, expenses and savings.")],["recap",t2("Bilan du mois","Monthly recap"),t2("Le résumé du mois écoulé, en début de mois.","Last month’s summary, at the start of the month.")],["recapPin",t2("Bilan toujours affiché","Always show the recap"),t2("Le garde en haut de l’accueil tout le mois.","Keeps it at the top of Home all month.")],["where",t2("Où part ton argent","Where your money goes"),t2("Tes dépenses du mois, ligne par ligne.","Your month’s expenses, row by row.")],["goal",t2("Objectif","Goal"),t2("La progression de ton objectif principal.","Progress of your main goal.")],["fixed",t2("Dépenses fixes","Fixed expenses"),t2("Propose les lignes qui reviennent chaque mois.","Suggests rows that come back every month.")],["charts",t2("Graphiques","Charts"),t2("Camembert, comparatif, évolution.","Pie, comparison, trend.")]];
+    var b=blocks(),rows=[["month",t2("Chiffres du mois","Month figures"),t2("Revenus, dépenses et épargne.","Income, expenses and savings.")],["recap",t2("Bilan du mois","Monthly recap"),t2("Le résumé du mois écoulé, en début de mois.","Last month’s summary, at the start of the month.")],["recapPin",t2("Bilan toujours affiché","Always show the recap"),t2("Le garde en haut de l’accueil tout le mois.","Keeps it at the top of Home all month.")],["year",t2("Bilan de l’année","Year in review"),t2("En décembre et janvier, ton année en quelques écrans.","In December and January, your year in a few screens.")],["where",t2("Où part ton argent","Where your money goes"),t2("Tes dépenses du mois, ligne par ligne.","Your month’s expenses, row by row.")],["goal",t2("Objectif","Goal"),t2("La progression de ton objectif principal.","Progress of your main goal.")],["fixed",t2("Dépenses fixes","Fixed expenses"),t2("Propose les lignes qui reviennent chaque mois.","Suggests rows that come back every month.")],["subs",t2("Abonnements","Subscriptions"),t2("Ceux repérés dans tes relevés importés.","Those found in your imported statements.")],["charts",t2("Graphiques","Charts"),t2("Camembert, comparatif, évolution.","Pie, comparison, trend.")]];
     function sw(label,on,onClick){var x=el("button","gfh-switch");x.type="button";x.setAttribute("role","switch");x.setAttribute("aria-checked",String(!!on));x.setAttribute("aria-label",label);x.append(el("span"));x.addEventListener("click",function(){var next=x.getAttribute("aria-checked")!=="true";x.setAttribute("aria-checked",String(next));onClick(next);});return x;}
     function row(title,desc,control,sub){var r=el("div","gfh-set-row"+(sub?" is-sub":"")),txt=el("div","gfh-set-copy");txt.append(el("strong","",title),el("small","",desc));r.append(txt,control);return r;}
     // En-tête repliable : une flèche à droite développe tous les réglages de l'accueil.
@@ -535,7 +585,7 @@
     return run;
   }
   window.addEventListener("gf:dashboardupdate",function(){setTimeout(function(){try{window.FinanceSheet&&window.FinanceSheet.updateSheetBalanceCards&&window.FinanceSheet.updateSheetBalanceCards();}catch(e){}},0);});
-  window.GFHome={render:schedule,totalBalance:totalBalance,loadExample:loadExample,removeExample:removeExample};
+  window.GFHome={alertsOn:alertsOn,setAlertsOn:function(v){lsSet(ALERT_ON,v?null:"0");},render:schedule,totalBalance:totalBalance,loadExample:loadExample,removeExample:removeExample};
   document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest("[data-page]"))setTimeout(sheetBanner,60);});
   window.addEventListener("gf:dashboardupdate",function(){sheetBanner();});
   document.addEventListener("focusout",function(e){if(e.target&&e.target.closest&&e.target.closest("#sheetApp"))setTimeout(sheetBanner,400);});

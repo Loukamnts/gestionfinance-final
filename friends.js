@@ -229,7 +229,9 @@
     if(incoming.can_view_sheet)links.append(action("Tableur",function(){viewShared(friend,"sheet");},"view-link","sheet"));
     if(incoming.can_view_dashboard)links.append(action("Tableau de bord",function(){viewShared(friend,"dashboard");},"view-link","chart"));
     if(!links.childElementCount)received.append(el("p","sf-muted","Pas encore de partage de sa part."));else received.append(links);
-    card.append(head,mine,received);return card;
+    card.append(head,mine,received);
+    if(window.GFSplit&&friend.friendId){var split=el("div","sf-friend-split");card.append(split);window.GFSplit.mount(split,friend);}
+    return card;
   }
   function closeSharedView(){
     disposeSharedDashboard();viewVersion++;var target=document.getElementById("sharedView"),home=document.getElementById("sharingContainer");
@@ -363,6 +365,7 @@
     if(data.error)shell.append(notice(data.error,"error"));
     var friendPanel=el("section","sf-friend-grid"),invitationPanel=el("section","sf-invitations");
     friendPanel.id="sf-panel-friends";invitationPanel.id="sf-panel-invitations";[friendPanel,invitationPanel].forEach(function(panel){panel.setAttribute("role","tabpanel");panel.setAttribute("aria-labelledby",panel.id.replace("panel","tab"));});
+    var splitOverview=window.GFSplit&&data.friends.length?window.GFSplit.overview(data.friends):null;if(splitOverview)friendPanel.append(splitOverview);
     data.friends.forEach(function(friend){friendPanel.append(friendCard(friend,container));});
     if(!data.friends.length)friendPanel.append(emptyState("Un premier ami, quand tu veux","Partage quelques lignes ou plusieurs mois. Tu choisis, et tu peux changer d’avis à tout moment.","people",action("Inviter un ami",function(){inviteDialog(container);},"secondary","plus")));
     function requestSection(title,items,sent){
@@ -382,7 +385,7 @@
     function chooseTab(name){selectedTab=name;friendPanel.hidden=name!=="friends";invitationPanel.hidden=name!=="invitations";[[friendsTab,"friends"],[invitesTab,"invitations"]].forEach(function(item){var active=item[1]===name;item[0].setAttribute("aria-selected",String(active));item[0].tabIndex=active?0:-1;});}
     chooseTab(selectedTab);container.replaceChildren(shell);container.dataset.sharingReady=me.id;container._sharingData=data;
   }
-  window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots};
+  window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots,ui:{el:el,action:action,notice:notice,icon:icon,openDialog:openDialog}};
   // Lorsqu'on arrive directement sur /partage, le routeur est exécuté avant
   // ce fichier. On rend donc l'état initial ici, puis à chaque connexion.
   function refreshVisibleSharing(){var page=document.getElementById("sharingPage"),container=document.getElementById("sharingContainer");if(page&&!page.hidden&&container)renderSharing(container,{force:true});}

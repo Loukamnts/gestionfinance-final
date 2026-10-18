@@ -34,3 +34,21 @@ test('Virgule anglaise, dates ISO, virement interne ignoré',()=>{
 test('Un fichier qui n\'est pas un relevé n\'est pas pris pour un relevé',()=>{
   assert.equal(B.parse(B._decode(enc('Ligne;Janvier;Février\nSalaire;2000;2000\nLoyer;-700;-700\n'))),null);
 });
+test('Marchand : libellé bancaire sans le bruit',()=>{
+  assert.equal(B.merchantOf('CARTE 01/09/26 CARREFOUR CITY'),'carrefour city');
+  assert.equal(B.merchantOf('PRLV SEPA NETFLIX'),'netflix');
+  assert.equal(B.merchantOf('CARTE X1234 UBER EATS'),'uber eats');
+});
+test('Un choix fait une fois classe le marchand aux imports suivants',()=>{
+  const csv='Date,Description,Amount\n2026-09-02,"CARTE 02/09 CHEZ MARCEL",-15.00\n2026-10-02,"CARTE 02/10 CHEZ MARCEL",-18.00\n2026-09-05,"VIR SEPA M DUPONT REMBOURSEMENT",-100.00\n';
+  const ops=B.parse(B._decode(enc(csv)));
+  // Sans règle : « Autres dépenses »
+  assert.equal(total(B.summarize(ops),'Autres dépenses'),133);
+  // Choix dans l'aperçu : Marcel → Restaurants, le virement → ignoré
+  const extra={[B.merchantOf('CARTE 02/09 CHEZ MARCEL')]:['Restaurants','Dépense'],[B.merchantOf('VIR SEPA M DUPONT REMBOURSEMENT')]:['','Ignorer']};
+  const s=B.summarize(ops,extra);assert.equal(total(s,'Restaurants'),33);assert.equal(s.ignored,1);
+  // Mémorisé : le prochain import le refait tout seul
+  const mem={};ctx.window.safeStore={getItem:k=>mem[k]??null,setItem:(k,v)=>{mem[k]=String(v);}};
+  B.saveLearned(extra);const s2=B.summarize(ops);assert.equal(total(s2,'Restaurants'),33);assert.equal(s2.ignored,1);
+  delete ctx.window.safeStore;
+});

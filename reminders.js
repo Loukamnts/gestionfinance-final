@@ -72,7 +72,20 @@
     });
     sel.addEventListener("change",async function(){if(busy)return;busy=true;msg.textContent="";try{await enable(Number(sel.value));msg.textContent=t2("C’est noté.","Saved.");}catch(e){msg.textContent=errorText(e);}busy=false;});
     test.addEventListener("click",async function(){try{var reg=await registration();await reg.showNotification("Meuniance",{body:t2("Les rappels sont bien activés.","Reminders are on."),icon:"/app-icon-180.png",tag:"meuniance-test"});}catch(e){msg.textContent=errorText(e);}});
-    box.replaceChildren.apply(box,[h,intro,row].concat(how?[how]:[],[freq,acts,msg]));
+    box.replaceChildren.apply(box,[h,intro,row].concat(how?[how]:[],[freq,acts,msg]));    budgetSetting(panel);
+  }
+  /* Alertes de plafond (calculées sur l'appareil) : un interrupteur, activé par défaut. */
+  function budgetSetting(panel){
+    var box=byId("gfrBudget");
+    if(!box){box=el("section","gfh-set gfr-set");box.id="gfrBudget";box.setAttribute("aria-labelledby","gfrBudgetTitle");panel.append(box);}
+    var H=window.GFHome,on=!H||H.alertsOn();
+    var h=el("h4","",t2("Alertes de plafond","Limit alerts"));h.id="gfrBudgetTitle";
+    var row=el("div","gfh-set-row"),txt=el("div");txt.append(el("strong","",t2("Prévenir à 80 % et à 100 %","Warn at 80% and 100%")),el("small","",t2("Quand une ligne du mois approche puis atteint son plafond. Une seule fois par seuil et par mois.","When a row of the month nears then reaches its limit. Once per threshold and per month.")));
+    var sw=el("button","gfh-switch");sw.type="button";sw.setAttribute("role","switch");sw.setAttribute("aria-checked",String(on));sw.setAttribute("aria-label",t2("Alertes de plafond","Limit alerts"));sw.append(el("span"));
+    sw.addEventListener("click",function(){var next=sw.getAttribute("aria-checked")!=="true";sw.setAttribute("aria-checked",String(next));if(H)H.setAlertsOn(next);});
+    row.append(txt,sw);
+    var hint=el("p","gfr-msg",t2("Les plafonds se fixent sur l’accueil, en touchant une ligne de « Où part ton argent ».","Limits are set on Home by tapping a row in “Where your money goes”."));
+    box.replaceChildren(h,row,hint);
   }
   function schedule(){clearTimeout(schedule.t);schedule.t=setTimeout(function(){render().catch(function(){});},150);}
   window.addEventListener("authStateChanged",schedule);
@@ -92,7 +105,7 @@
   }
   function hideInvite(){var c=byId("gfrInvite");if(!c)return;c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}
   async function inviteEligible(){
-    if(!account().user||document.hidden||document.body.dataset.page!=="dashboard")return false;
+    if(!account().user||document.hidden||document.body.dataset.page!=="dashboard"||(window.__gfCoachUntil||0)>Date.now())return false;
     // Rien d'ouvert à l'écran (fenêtre, tutoriel, repère, chargement) : on ne dérange pas.
     if([].some.call(document.querySelectorAll("dialog[open],.sheet-modal-overlay,.tutorial-overlay,.gfd-coach,.meuni-loader"),function(e){return !e.hidden&&e.getClientRects().length>0;}))return false;
     var a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return false;

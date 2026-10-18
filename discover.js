@@ -13,6 +13,12 @@
 
   /* Parcours de découverte par version (identifiant = RELEASE_NOTES_VERSION) */
   var TOURS={
+    "2026-10-19-ensemble":[
+      {id:"year",title:["Ton bilan de l’année","Your year in review"],text:["Ton année en quelques écrans, avec tes propres chiffres.","Your year in a few screens, with your own numbers."],run:function(){goHome(function(){if(window.GFYear)window.GFYear.open(new Date().getFullYear());});}},
+      {id:"split",title:["Partage une dépense entre amis","Split an expense with friends"],text:["Qui a payé, qui doit combien : les comptes se font tout seuls.","Who paid, who owes what: the maths is done for you."],run:function(){openPage("sharing",function(){return document.querySelector(".sfx-overview .sf-button")||document.querySelector("#sharingPage .sf-toolbar-actions .sf-primary")||document.querySelector("#sharingPage .sf-empty-onboarding .sf-primary");},["Note une dépense partagée : chacun voit ce qu’il doit, et tu marques quand c’est remboursé.","Log a shared expense: everyone sees what they owe, and you mark it when it’s paid back."]);}},
+      {id:"alerts",title:["Prévenu avant le plafond","Warned before your limit"],text:["Une alerte à 80 % puis à 100 % du plafond d’une ligne.","An alert at 80% then 100% of a row’s limit."],run:function(){openPage("settings",function(){return byId("gfrBudget");},["Les alertes de plafond se règlent ici. Fixe un plafond en touchant une ligne de « Où part ton argent » sur l’accueil.","Limit alerts are set here. Set a limit by tapping a row in “Where your money goes” on Home."],function(){var h=document.querySelector('[data-settings-view="notifications"]');if(h)h.click();});}},
+      {id:"subs",title:["Tes abonnements, repérés","Your subscriptions, spotted"],text:["Importe un relevé : les prélèvements réguliers sont listés sur l’accueil.","Import a statement: recurring payments are listed on Home."],run:function(){if(byId("gfsPanel")){goHome(function(){var n=byId("gfsPanel");if(n){n.scrollIntoView({block:"center"});setTimeout(function(){coach(n,t2("Tes abonnements et leur coût sur un an. Touche « Tout voir et gérer » pour en retirer un.","Your subscriptions and their yearly cost. Tap “See and manage all” to remove one."));},350);}});return;}openPage("sheet",function(){return byId("btnSheetImport");},["Importe le relevé CSV de ta banque : les abonnements repérés apparaîtront sur l’accueil.","Import your bank’s CSV statement: the subscriptions found will show on Home."]);}}
+    ],
     "2026-10-15-bilan":[
       {id:"discreet",title:["Montre ton écran sans tes chiffres","Show your screen, not your figures"],text:["L’œil à côté du solde floute tous tes montants.","The eye next to the balance blurs all your amounts."],run:function(){openPage("dashboard",function(){return document.querySelector("#gfhHome .gfh-eye");},["Touche l’œil pour flouter tes montants, et touche-le à nouveau pour les revoir.","Tap the eye to blur your amounts, and tap it again to see them."]);}},
       {id:"bank",title:["Importe ton relevé bancaire","Import your bank statement"],text:["Le fichier CSV de ta banque, rangé par catégorie et par mois.","Your bank’s CSV file, sorted by category and month."],run:function(){openPage("sheet",function(){return byId("btnSheetImport");},["Choisis ici le relevé CSV téléchargé depuis ta banque : tu vois un aperçu avant l’import.","Pick the CSV statement downloaded from your bank here: you get a preview before importing."]);}},
@@ -43,10 +49,13 @@
   /* Repère : l'écran s'assombrit sauf l'élément visé, entouré d'un anneau, avec une bulle d'explication. */
   var coachEl=null;
   var coachPad=null;
-  function closeCoach(){if(coachPad!==null){document.body.style.paddingBottom=coachPad;coachPad=null;}if(!coachEl)return;coachEl.remove();coachEl=null;window.removeEventListener("scroll",placeCoach,true);window.removeEventListener("resize",placeCoach);document.removeEventListener("keydown",coachKey);}
+  function closeCoach(){if(coachEl&&!coachEl._multiNext)window.__gfCoachUntil=0;if(coachPad!==null){document.body.style.paddingBottom=coachPad;coachPad=null;}if(!coachEl)return;coachEl.remove();coachEl=null;window.removeEventListener("scroll",placeCoach,true);window.removeEventListener("resize",placeCoach);document.removeEventListener("keydown",coachKey);}
   function coachKey(e){if(e.key==="Escape")closeCoach();}
   function placeCoach(){
-    if(!coachEl)return;var node=coachEl._node;if(!node||!node.isConnected||!node.getClientRects().length){closeCoach();return;}
+    if(!coachEl)return;var node=coachEl._node;
+    // L'accueil peut se redessiner pendant le repère : on retrouve l'élément par son identifiant.
+    if(node&&!node.isConnected&&node.id){var again=document.getElementById(node.id);if(again)node=coachEl._node=again;}
+    if(!node||!node.isConnected||!node.getClientRects().length){closeCoach();return;}
     var r=node.getBoundingClientRect(),pad=6,hole=coachEl.querySelector(".gfd-coach-hole"),tip=coachEl.querySelector(".gfd-coach-tip");
     hole.style.left=(r.left-pad)+"px";hole.style.top=(r.top-pad)+"px";hole.style.width=(r.width+pad*2)+"px";hole.style.height=(r.height+pad*2)+"px";
     var vw=document.documentElement.clientWidth,tw=Math.min(320,vw-32),below=r.bottom+pad+12,room=window.innerHeight-bottomBar()-below;
@@ -54,7 +63,8 @@
     var th=tip.offsetHeight;tip.classList.toggle("is-above",room<th+8);
     tip.style.top=(room<th+8?Math.max(12,r.top-pad-12-th):below)+"px";
   }
-  function coach(node,text){
+  /* opts (facultatif) : {step, total, last, onNext} pour enchaîner plusieurs repères (« Suivant », 1/3…). */
+  function coach(node,text,opts){
     closeCoach();if(!node)return;
     // Place l'élément au centre de la zone visible, au-dessus de la barre de navigation du bas
     var r=node.getBoundingClientRect(),visible=window.innerHeight-bottomBar(),y=window.scrollY+r.top-Math.max(16,(visible-r.height)/2);
@@ -65,9 +75,11 @@
     try{window.scrollTo({top:Math.max(0,y),behavior:smooth?"smooth":"auto"});}catch(e){window.scrollTo(0,Math.max(0,y));}
     setTimeout(function(){
       coachEl=el("div","gfd-coach");coachEl._node=node;coachEl.setAttribute("role","dialog");coachEl.setAttribute("aria-label",t2("Nouveauté","New feature"));
-      var hole=el("div","gfd-coach-hole"),tip=el("div","gfd-coach-tip"),ok=el("button","gfd-coach-ok",t2("Compris","Got it"));ok.type="button";
+      var multi=opts&&opts.total>1,label=multi&&!opts.last?t2("Suivant","Next"):t2("Compris","Got it");
+      var hole=el("div","gfd-coach-hole"),tip=el("div","gfd-coach-tip"),ok=el("button","gfd-coach-ok",label);ok.type="button";
+      if(multi)tip.append(el("span","gfd-coach-step",opts.step+" / "+opts.total));
       tip.append(el("p","",text),ok);coachEl.append(hole,tip);document.body.append(coachEl);
-      coachEl.addEventListener("click",function(e){var rr=node.getBoundingClientRect(),inside=e.clientX>=rr.left&&e.clientX<=rr.right&&e.clientY>=rr.top&&e.clientY<=rr.bottom;closeCoach();if(inside&&e.target!==ok){try{node.click&&node.tagName==="BUTTON"&&node.click();}catch(err){}}});
+      coachEl.addEventListener("click",function(e){node=coachEl._node||node;var rr=node.getBoundingClientRect(),inside=e.clientX>=rr.left&&e.clientX<=rr.right&&e.clientY>=rr.top&&e.clientY<=rr.bottom;if(e.target===ok&&multi&&!opts.last&&opts.onNext){coachEl._multiNext=true;closeCoach();setTimeout(opts.onNext,60);return;}closeCoach();if(inside&&e.target!==ok){try{node.click&&node.tagName==="BUTTON"&&node.click();}catch(err){}}});
       window.addEventListener("scroll",placeCoach,true);window.addEventListener("resize",placeCoach);document.addEventListener("keydown",coachKey);
       placeCoach();ok.focus({preventScroll:true});
     },smooth?450:30);
@@ -124,7 +136,7 @@
 
   var queued=false;
   function schedule(){if(queued)return;queued=true;requestAnimationFrame(function(){queued=false;try{render();}catch(e){console.warn("Nouveautés Meuniance",e);}});}
-  window.GFDiscover={render:schedule,reset:function(){var r=release();if(!r)return;write({v:r.version,tried:[],hidden:false});focus=null;schedule();}};
+  window.GFDiscover={coach:coach,render:schedule,reset:function(){var r=release();if(!r)return;write({v:r.version,tried:[],hidden:false});focus=null;schedule();}};
   window.addEventListener("gf:dashboardupdate",schedule);
   window.addEventListener("gf:languagechange",schedule);
   window.addEventListener("authStateChanged",schedule);
