@@ -107,6 +107,8 @@
     ok.addEventListener("click",async function(){ok.disabled=true;msg.textContent="";try{await save(value());dlg.close();}catch(e){msg.textContent=t2("Impossible d’enregistrer. Réessaie.","Could not save. Try again.");ok.disabled=false;}});
     dlg.addEventListener("close",function(){dlg.remove();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();});
     dlg.append(head,cs.w,ss.w,back,msg,row);document.body.append(dlg);sync();dlg.showModal();
+    // Safari entoure le premier bouton qui reçoit le focus à l’ouverture : on le donne à la fenêtre elle-même.
+    dlg.tabIndex=-1;try{dlg.focus({preventScroll:true});}catch(e){}
     if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();
   }
 
