@@ -3,7 +3,7 @@
   "use strict";
   const byId=id=>document.getElementById(id);
   let request=0;
-  let profile=null;
+  let profile=null,profileUser=null,retryTimer=0;
   const welcomeKey=userId=>"gf.welcome.dismissed."+userId;
   function billingReady(){const api=window.GFSubscriptions;return !!(api&&api.enabled===true&&typeof api.renderOnboardingOffer==="function"&&typeof api.startCheckout==="function");}
   function closeWelcome(userId){const dialog=byId("accountWelcomeDialog");if(dialog?.open)dialog.close();if(userId)try{localStorage.setItem(welcomeKey(userId),"1");}catch(e){}}
@@ -29,9 +29,11 @@
   function render(){
     const user=account().user,connected=!!user;
     byId("identitySection").hidden=!connected;
-    if(!connected){profile=null;byId("identityUsername").value="";byId("identityForm").hidden=true;feedback("",true);return;}
+    if(!connected){profile=null;profileUser=null;byId("identityUsername").value="";byId("identityForm").hidden=true;feedback("",true);return;}
+    if(profileUser!==user.id)profile=null;
     const name=profile?.username||"";
-    byId("identityCurrentUsername").textContent=name?"@"+name:tr("À choisir","Not set yet");
+    // Profil pas encore lu (connexion lente, jeton en cours de renouvellement) : on n'affirme rien.
+    byId("identityCurrentUsername").textContent=name?"@"+name:profile?tr("À choisir","Not set yet"):"…";
     byId("identityEmail").textContent=user.email||"";
     byId("identityFactEmail").textContent=user.email||"—";
     byId("identityAvatar").textContent=(name||user.email||"?").charAt(0).toUpperCase();
@@ -44,7 +46,7 @@
     const waiting=next&&next>Date.now();
     byId("identityUsername").disabled=!!waiting;
     byId("identityForm").querySelector("button[type=submit]").disabled=!!waiting;
-    byId("identityEditButton").disabled=!!waiting;
+    byId("identityEditButton").disabled=!!waiting||!profile;
     byId("identityEditButton").title=waiting?tr("Prochain changement possible le ","Next change available on ")+date(next):tr("Modifier le pseudo","Edit username");
     byId("identityEditButton").setAttribute("aria-label",byId("identityEditButton").title);
     byId("identityChangeDate").hidden=!waiting;
@@ -52,21 +54,35 @@
     if(waiting)byId("identityForm").hidden=true;
     const menuAvatar=byId("profileAvatar");if(menuAvatar&&name)menuAvatar.textContent=name.charAt(0).toUpperCase();
   }
-  async function load(){
+  async function load(attempt){
+    attempt=Number(attempt)||0;clearTimeout(retryTimer);
     const current=++request,user=account().user;
     if(!user){render();return;}
     try{
+      if(!account().client)throw new Error("client_not_ready");
       const result=await account().client.rpc("get_my_profile");
       if(current!==request||account().user?.id!==user.id)return;
       if(result.error)throw result.error;
-      profile=Array.isArray(result.data)?result.data[0]:result.data;
+      const row=Array.isArray(result.data)?result.data[0]:result.data;
+      if(!row)throw new Error("profile_empty");
+      profile=row;profileUser=user.id;
+      if(byId("identityFeedback")?.dataset.kind==="error"&&byId("identityForm").hidden)feedback("",true);
       render();
       maybeWelcome(user);
     }catch(error){
       if(current!==request)return;
-      profile=null;render();
-      feedback(tr("Le profil n’est pas encore disponible. Applique la migration Supabase du profil.","Profile is not available yet. Apply the Supabase profile migration."),false);
+      // Un refus passager (souvent un jeton expiré juste avant son renouvellement, au retour sur l'app)
+      // ne doit jamais effacer un profil déjà lu : on garde l'affichage et on réessaie.
+      render();
+      if(attempt<4){retryTimer=setTimeout(()=>load(attempt+1),[800,2000,5000,12000][attempt]);return;}
+      if(!profile)feedback(tr("Ton profil n’a pas pu être chargé. Vérifie ta connexion puis rouvre cette page.","Your profile could not be loaded. Check your connection and reopen this page."),false);
     }
+  }
+  function cooldownMessage(){
+    const changed=profile?.username_changed_at?new Date(profile.username_changed_at):null;
+    if(!changed||Number.isNaN(changed.getTime()))return tr("Tu peux changer ton pseudo une fois tous les 30 jours.","You can change your username every 30 days.");
+    const next=new Date(changed.getTime()+30*86400000);
+    return tr("Ton pseudo actuel est @"+profile.username+". Prochain changement possible le "+date(next)+".","Your current username is @"+profile.username+". Next change available on "+date(next)+".");
   }
   async function saveUsername(value){
     const user=account().user;
@@ -85,7 +101,8 @@
       return true;
     }catch(error){
       const code=String(error?.message||"").toLowerCase();
-      const message=code.includes("username_invalid")?tr("Utilise 3 à 24 caractères sans espace ni accent.","Use 3 to 24 characters without spaces or accents."):code.includes("username_taken")?tr("Ce pseudo est déjà utilisé.","This username is already taken."):code.includes("username_cooldown")?tr("Tu peux changer ton pseudo une fois tous les 30 jours.","You can change your username every 30 days."):tr("Impossible d’enregistrer ce pseudo. Réessaie.","Could not save this username. Try again.");
+      if(code.includes("username_cooldown")&&!profile)await load(0).catch(()=>{});
+      const message=code.includes("username_invalid")?tr("Utilise 3 à 24 caractères sans espace ni accent.","Use 3 to 24 characters without spaces or accents."):code.includes("username_taken")?tr("Ce pseudo est déjà utilisé.","This username is already taken."):code.includes("username_cooldown")?cooldownMessage():tr("Impossible d’enregistrer ce pseudo. Réessaie.","Could not save this username. Try again.");
       feedback(message,false);throw error;
     }
   }
@@ -110,7 +127,7 @@
     byId("welcomeSkipUsername")?.addEventListener("click",()=>showPlanStep(account().user));
     byId("welcomeSkipPlan")?.addEventListener("click",()=>closeWelcome(account().user?.id));
     byId("accountWelcomeDialog")?.addEventListener("close",()=>{const user=account().user;if(user)try{localStorage.setItem(welcomeKey(user.id),"1");}catch(e){}});
-    window.addEventListener("authStateChanged",load);window.addEventListener("gf:languagechange",render);render();if(account().user)load();
+    window.addEventListener("authStateChanged",()=>load(0));window.addEventListener("gf:languagechange",render);render();if(account().user)load(0);
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
   window.GFProfile={reload:load};

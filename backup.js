@@ -26,7 +26,7 @@
     KEYS.forEach(function(k){var v=store().getItem(k);if(v==null)return;try{settings[k]=JSON.parse(v);}catch(e){settings[k]=v;}});
     var sheet=window.FinanceSheet&&window.FinanceSheet.getSnapshot?window.FinanceSheet.getSnapshot():null;
     return{format:FORMAT,version:VERSION,application:"Meuniance",creeLe:new Date().toISOString(),
-      compte:user?{email:user.email||"",pseudo:(byId("identityCurrentUsername")||{}).textContent||""}:null,
+      compte:user?{email:user.email||"",pseudo:(function(t){t=String(t||"");return t.charAt(0)==="@"?t.slice(1):"";})((byId("identityCurrentUsername")||{}).textContent)}:null,
       tableur:sheet?{feuilles:sheet.sheets,feuilleActive:sheet.activeSheetId}:null,
       reglages:settings,partages:await sharing()};
   }
