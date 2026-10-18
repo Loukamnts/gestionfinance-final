@@ -43,10 +43,13 @@
   /* Repère : l'écran s'assombrit sauf l'élément visé, entouré d'un anneau, avec une bulle d'explication. */
   var coachEl=null;
   var coachPad=null;
-  function closeCoach(){if(coachPad!==null){document.body.style.paddingBottom=coachPad;coachPad=null;}if(!coachEl)return;coachEl.remove();coachEl=null;window.removeEventListener("scroll",placeCoach,true);window.removeEventListener("resize",placeCoach);document.removeEventListener("keydown",coachKey);}
+  function closeCoach(){if(coachEl&&!coachEl._multiNext)window.__gfCoachUntil=0;if(coachPad!==null){document.body.style.paddingBottom=coachPad;coachPad=null;}if(!coachEl)return;coachEl.remove();coachEl=null;window.removeEventListener("scroll",placeCoach,true);window.removeEventListener("resize",placeCoach);document.removeEventListener("keydown",coachKey);}
   function coachKey(e){if(e.key==="Escape")closeCoach();}
   function placeCoach(){
-    if(!coachEl)return;var node=coachEl._node;if(!node||!node.isConnected||!node.getClientRects().length){closeCoach();return;}
+    if(!coachEl)return;var node=coachEl._node;
+    // L'accueil peut se redessiner pendant le repère : on retrouve l'élément par son identifiant.
+    if(node&&!node.isConnected&&node.id){var again=document.getElementById(node.id);if(again)node=coachEl._node=again;}
+    if(!node||!node.isConnected||!node.getClientRects().length){closeCoach();return;}
     var r=node.getBoundingClientRect(),pad=6,hole=coachEl.querySelector(".gfd-coach-hole"),tip=coachEl.querySelector(".gfd-coach-tip");
     hole.style.left=(r.left-pad)+"px";hole.style.top=(r.top-pad)+"px";hole.style.width=(r.width+pad*2)+"px";hole.style.height=(r.height+pad*2)+"px";
     var vw=document.documentElement.clientWidth,tw=Math.min(320,vw-32),below=r.bottom+pad+12,room=window.innerHeight-bottomBar()-below;
@@ -54,7 +57,8 @@
     var th=tip.offsetHeight;tip.classList.toggle("is-above",room<th+8);
     tip.style.top=(room<th+8?Math.max(12,r.top-pad-12-th):below)+"px";
   }
-  function coach(node,text){
+  /* opts (facultatif) : {step, total, last, onNext} pour enchaîner plusieurs repères (« Suivant », 1/3…). */
+  function coach(node,text,opts){
     closeCoach();if(!node)return;
     // Place l'élément au centre de la zone visible, au-dessus de la barre de navigation du bas
     var r=node.getBoundingClientRect(),visible=window.innerHeight-bottomBar(),y=window.scrollY+r.top-Math.max(16,(visible-r.height)/2);
@@ -65,9 +69,11 @@
     try{window.scrollTo({top:Math.max(0,y),behavior:smooth?"smooth":"auto"});}catch(e){window.scrollTo(0,Math.max(0,y));}
     setTimeout(function(){
       coachEl=el("div","gfd-coach");coachEl._node=node;coachEl.setAttribute("role","dialog");coachEl.setAttribute("aria-label",t2("Nouveauté","New feature"));
-      var hole=el("div","gfd-coach-hole"),tip=el("div","gfd-coach-tip"),ok=el("button","gfd-coach-ok",t2("Compris","Got it"));ok.type="button";
+      var multi=opts&&opts.total>1,label=multi&&!opts.last?t2("Suivant","Next"):t2("Compris","Got it");
+      var hole=el("div","gfd-coach-hole"),tip=el("div","gfd-coach-tip"),ok=el("button","gfd-coach-ok",label);ok.type="button";
+      if(multi)tip.append(el("span","gfd-coach-step",opts.step+" / "+opts.total));
       tip.append(el("p","",text),ok);coachEl.append(hole,tip);document.body.append(coachEl);
-      coachEl.addEventListener("click",function(e){var rr=node.getBoundingClientRect(),inside=e.clientX>=rr.left&&e.clientX<=rr.right&&e.clientY>=rr.top&&e.clientY<=rr.bottom;closeCoach();if(inside&&e.target!==ok){try{node.click&&node.tagName==="BUTTON"&&node.click();}catch(err){}}});
+      coachEl.addEventListener("click",function(e){node=coachEl._node||node;var rr=node.getBoundingClientRect(),inside=e.clientX>=rr.left&&e.clientX<=rr.right&&e.clientY>=rr.top&&e.clientY<=rr.bottom;if(e.target===ok&&multi&&!opts.last&&opts.onNext){coachEl._multiNext=true;closeCoach();setTimeout(opts.onNext,60);return;}closeCoach();if(inside&&e.target!==ok){try{node.click&&node.tagName==="BUTTON"&&node.click();}catch(err){}}});
       window.addEventListener("scroll",placeCoach,true);window.addEventListener("resize",placeCoach);document.addEventListener("keydown",coachKey);
       placeCoach();ok.focus({preventScroll:true});
     },smooth?450:30);
@@ -124,7 +130,7 @@
 
   var queued=false;
   function schedule(){if(queued)return;queued=true;requestAnimationFrame(function(){queued=false;try{render();}catch(e){console.warn("Nouveautés Meuniance",e);}});}
-  window.GFDiscover={render:schedule,reset:function(){var r=release();if(!r)return;write({v:r.version,tried:[],hidden:false});focus=null;schedule();}};
+  window.GFDiscover={coach:coach,render:schedule,reset:function(){var r=release();if(!r)return;write({v:r.version,tried:[],hidden:false});focus=null;schedule();}};
   window.addEventListener("gf:dashboardupdate",schedule);
   window.addEventListener("gf:languagechange",schedule);
   window.addEventListener("authStateChanged",schedule);

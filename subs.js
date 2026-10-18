@@ -1,0 +1,138 @@
+/* Abonnements détectés dans les relevés bancaires importés.
+   Tout est calculé sur l'appareil, à partir des opérations importées (rien n'est envoyé).
+   Un marchand est un abonnement s'il est prélevé au moins 2 mois, une seule fois par mois, d'un montant
+   stable (à 25 % près, pour accepter une hausse de prix) — ou s'il fait partie des abonnements connus
+   (Netflix, Spotify, opérateurs, salles de sport…). Un abonnement plus prélevé depuis 2 mois sort du total. */
+(function(){
+  "use strict";
+  var KEY="personalFinanceDashboard.subscriptions",TUTO="personalFinanceDashboard.subsTutoDone";
+  var byId=function(id){return document.getElementById(id);};
+  function en(){return !!(window.GFI18n&&typeof window.GFI18n.getLanguage==="function"&&window.GFI18n.getLanguage()==="en");}
+  function t2(fr,e){return en()?e:fr;}
+  function el(tag,cls,text){var n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;}
+  function eur(v){return new Intl.NumberFormat(en()?"en-IE":"fr-FR",{style:"currency",currency:"EUR"}).format(v);}
+  function lsGet(k){try{return window.safeStore.getItem(k);}catch(e){return null;}}
+  function lsSet(k,v){try{window.safeStore.setItem(k,v);}catch(e){}}
+  function load(){try{var v=JSON.parse(lsGet(KEY)||"{}");return v&&v.items&&typeof v.items==="object"?v:{v:1,items:{}};}catch(e){return{v:1,items:{}};}}
+  function save(d){lsSet(KEY,JSON.stringify(d));}
+  function mk(y,m){return y*12+m;}
+  var NOT_SUB=/^(Loyer|Rent|Impôts|Taxes|Retraits|Cash withdrawals|Courses|Groceries)$/;
+  function pretty(m){return String(m||"").split(" ").map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(" ");}
+
+  /* Appelé après un import : mémorise, par marchand et par mois, le montant et le nombre de prélèvements. */
+  function ingest(ops){
+    var B=window.GFBankImport;if(!B||!ops||!ops.length)return 0;
+    var d=load(),per={};
+    ops.forEach(function(op){
+      if(!(op.amount<0))return;var m=B.merchantOf(op.label);if(!m)return;
+      var c=B.categorize(op,B.learned());if(!c||c[2]!=="Dépense")return;// virement, revenu ou épargne
+      if(NOT_SUB.test(c[0])||NOT_SUB.test(c[1]))return;// le loyer revient chaque mois, mais ce n'est pas un abonnement
+      var k=mk(op.date.y,op.date.m),slot=(per[m]=per[m]||{name:pretty(m),known:/^(Abonnements|Subscriptions)$/.test(c[0])||/^(Abonnements|Subscriptions)$/.test(c[1]),months:{}});
+      var cur=slot.months[k]||(slot.months[k]=[0,0]);cur[0]+=-op.amount;cur[1]++;
+    });
+    Object.keys(per).forEach(function(m){
+      var it=d.items[m]||(d.items[m]={name:per[m].name,known:false,months:{},hidden:false});
+      it.known=it.known||per[m].known;
+      // Un mois réimporté remplace l'ancien (même relevé importé deux fois)
+      Object.keys(per[m].months).forEach(function(k){var v=per[m].months[k];it.months[k]=[Math.round(v[0]*100)/100,v[1]];});
+      // On garde 18 mois au plus
+      var ks=Object.keys(it.months).map(Number).sort(function(a,b){return a-b;});ks.slice(0,Math.max(0,ks.length-18)).forEach(function(k){delete it.months[k];});
+    });
+    // Les marchands vus une seule fois et inconnus depuis longtemps ne servent à rien : on les oublie
+    var latest=0;Object.keys(d.items).forEach(function(m){Object.keys(d.items[m].months).forEach(function(k){latest=Math.max(latest,Number(k));});});
+    Object.keys(d.items).forEach(function(m){var it=d.items[m],ks=Object.keys(it.months).map(Number);if(!it.known&&ks.length<2&&latest-Math.max.apply(null,ks)>3)delete d.items[m];});
+    save(d);return list().length;
+  }
+
+  /* Abonnements détectés, du plus cher au moins cher. */
+  function list(includeHidden){
+    var d=load(),latest=0,out=[];
+    Object.keys(d.items).forEach(function(m){Object.keys(d.items[m].months).forEach(function(k){latest=Math.max(latest,Number(k));});});
+    Object.keys(d.items).forEach(function(m){
+      var it=d.items[m],ks=Object.keys(it.months).map(Number).sort(function(a,b){return a-b;});if(!ks.length)return;
+      var vals=ks.map(function(k){return it.months[k][0];}),once=ks.every(function(k){return it.months[k][1]===1;});
+      var mx=Math.max.apply(null,vals),mn=Math.min.apply(null,vals),recurring=ks.length>=2&&once&&mn>0&&mx/mn<=1.25;
+      if(!(recurring||it.known))return;
+      var last=ks[ks.length-1],amount=it.months[last][0],prev=ks.length>1?it.months[ks[ks.length-2]][0]:null;
+      var rise=prev!=null&&amount-prev>=0.5&&amount>prev*1.02?Math.round((amount-prev)*100)/100:0;
+      var active=latest-last<=1;
+      if(it.hidden&&!includeHidden)return;
+      out.push({key:m,name:it.name,amount:amount,yearly:Math.round(amount*12*100)/100,rise:rise,active:active,hidden:!!it.hidden,since:ks.length,lastKey:last});
+    });
+    return out.sort(function(a,b){return (b.active-a.active)||b.amount-a.amount;});
+  }
+  function setHidden(key,v){var d=load();if(d.items[key]){d.items[key].hidden=!!v;save(d);}}
+  function totals(items){var act=items.filter(function(i){return i.active&&!i.hidden;});var m=act.reduce(function(s,i){return s+i.amount;},0);return{month:Math.round(m*100)/100,year:Math.round(m*1200)/100,count:act.length};}
+
+  /* ── Panneau de l'accueil ── */
+  var MN=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"],MNE=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  function monthName(k){var m=k%12,y=Math.floor(k/12);return (en()?MNE[m]:MN[m])+" "+y;}
+  function riseBadge(r){var b=el("span","gfs-rise","↑ +"+eur(r));b.title=t2("Le prix a augmenté par rapport au mois précédent","The price went up compared with the previous month");return b;}
+  function panel(){
+    var items=list();if(!items.length)return null;
+    var tot=totals(items),box=el("div","gfh-panel gfs-panel");box.id="gfsPanel";
+    var head=el("div","gfh-row");head.append(el("h3","",t2("Tes abonnements","Your subscriptions")),el("span","gfh-muted",t2("détectés dans tes relevés","found in your statements")));
+    var sum=el("div","gfs-sum");sum.id="gfsTotal";
+    var a=el("div");a.append(el("span","gfs-k",t2("Par mois","Per month")),el("b","gfs-v",eur(tot.month)));
+    var b=el("div");b.append(el("span","gfs-k",t2("Sur un an","Per year")),el("b","gfs-v",eur(tot.year)));
+    var c=el("div");c.append(el("span","gfs-k",t2("Abonnements","Subscriptions")),el("b","gfs-v",String(tot.count)));
+    sum.append(a,b,c);
+    var ul=el("div","gfs-list");
+    items.filter(function(i){return i.active;}).slice(0,4).forEach(function(i,n){
+      var r=el("button","gfs-row");r.type="button";if(n===0)r.id="gfsFirst";
+      var nm=el("span","gfs-name",i.name);r.append(nm);if(i.rise)r.append(riseBadge(i.rise));r.append(el("span","gfs-amt",eur(i.amount)));
+      r.addEventListener("click",function(){openAll(i.key);});ul.append(r);
+    });
+    var all=el("button","gfh-link gfs-all",t2("Tout voir et gérer","See and manage all")+" ("+items.length+")");all.type="button";all.addEventListener("click",function(){openAll();});
+    box.append(head,sum,ul,all);return box;
+  }
+
+  /* ── Liste complète : retirer ce qui n'est pas un abonnement, le remettre ── */
+  function openAll(focusKey){
+    if(byId("gfsDialog"))return;
+    var d=el("dialog","gfh-dialog gfs-dialog");d.id="gfsDialog";d.setAttribute("aria-labelledby","gfsTitle");
+    var h=el("h2","",t2("Tes abonnements","Your subscriptions"));h.id="gfsTitle";
+    var lead=el("p","gfh-muted"),body=el("div","gfs-all-list"),showHidden=false;
+    var close=el("button","gfh-btn is-primary",t2("Fermer","Close"));close.type="button";close.addEventListener("click",function(){d.close();});
+    var row=el("div","gfh-dialog-actions");row.append(close);
+    function draw(){
+      var items=list(true),vis=items.filter(function(i){return !i.hidden;}),hid=items.filter(function(i){return i.hidden;}),tot=totals(items);
+      lead.textContent=t2(tot.count+" abonnement"+(tot.count>1?"s":"")+" en cours : "+eur(tot.month)+" par mois, soit "+eur(tot.year)+" sur un an.",tot.count+" active subscription"+(tot.count>1?"s":"")+": "+eur(tot.month)+" a month, "+eur(tot.year)+" a year.");
+      var nodes=[];
+      vis.forEach(function(i){
+        var it=el("div","gfs-item"+(i.active?"":" is-old"));if(i.key===focusKey)it.classList.add("is-focus");
+        var top=el("div","gfs-item-top");var nm=el("strong","",i.name);top.append(nm);if(i.rise)top.append(riseBadge(i.rise));top.append(el("b","gfs-amt",eur(i.amount)));
+        var meta=el("small","gfh-muted",i.active?t2(eur(i.yearly)+" sur un an · vu "+i.since+" mois",eur(i.yearly)+" a year · seen "+i.since+" month"+(i.since>1?"s":"")):t2("Plus prélevé depuis "+monthName(i.lastKey),"Not charged since "+monthName(i.lastKey)));
+        var rm=el("button","gfh-link gfs-rm",t2("Ce n’est pas un abonnement","Not a subscription"));rm.type="button";rm.addEventListener("click",function(){setHidden(i.key,true);draw();refresh();});
+        it.append(top,meta,rm);nodes.push(it);
+      });
+      if(!vis.length)nodes.push(el("p","gfh-muted",t2("Aucun abonnement affiché.","No subscription shown.")));
+      if(hid.length){
+        var tg=el("button","gfh-link gfs-toggle",(showHidden?t2("Masquer","Hide"):t2("Voir","Show"))+t2(" les éléments retirés"," removed items")+" ("+hid.length+")");tg.type="button";tg.addEventListener("click",function(){showHidden=!showHidden;draw();});nodes.push(tg);
+        if(showHidden)hid.forEach(function(i){var it=el("div","gfs-item is-hidden");var top=el("div","gfs-item-top");top.append(el("strong","",i.name),el("b","gfs-amt",eur(i.amount)));var back=el("button","gfh-link gfs-rm",t2("C’est un abonnement","It is a subscription"));back.type="button";back.addEventListener("click",function(){setHidden(i.key,false);draw();refresh();});it.append(top,back);nodes.push(it);});
+      }
+      body.replaceChildren.apply(body,nodes);
+    }
+    d.append(h,lead,body,row);d.addEventListener("close",function(){d.remove();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();});
+    document.body.append(d);draw();d.showModal();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();
+    var f=d.querySelector(".is-focus");if(f)f.scrollIntoView({block:"center"});
+  }
+  function refresh(){if(window.GFHome&&window.GFHome.render)window.GFHome.render();}
+
+  /* ── Petit tutoriel (3 repères), une seule fois, la première fois que des abonnements apparaissent ── */
+  function afterRender(){
+    if(lsGet(TUTO)==="1"||!byId("gfsPanel"))return;
+    if(document.body.dataset.page!=="dashboard"||document.body.classList.contains("tutorial-active")||document.querySelector("dialog[open],.gfd-coach"))return;
+    var D=window.GFDiscover;if(!D||!D.coach)return;
+    lsSet(TUTO,"1");
+    var steps=[
+      ["gfsPanel",t2("Nouveau : Meuniance a repéré tes abonnements dans ton relevé, les prélèvements qui reviennent chaque mois.","New: Meuniance found your subscriptions in your statement, the charges that come back every month.")],
+      ["gfsTotal",t2("Leur coût par mois et sur un an, pour voir d’un coup d’œil ce qu’ils pèsent.","Their cost per month and per year, to see at a glance what they weigh.")],
+      ["gfsFirst",t2("Touche un abonnement pour le retirer si ce n’en est pas un. « ↑ » signale une hausse de prix.","Tap a subscription to remove it if it isn’t one. “↑” flags a price rise.")]
+    ].filter(function(s){return byId(s[0]);});
+    // Pendant le tutoriel (et entre deux repères), aucune autre invitation ne doit s'afficher.
+    (function go(i){if(i>=steps.length){window.__gfCoachUntil=0;return;}window.__gfCoachUntil=Date.now()+20000;D.coach(byId(steps[i][0]),steps[i][1],{step:i+1,total:steps.length,last:i===steps.length-1,onNext:function(){go(i+1);}});})(0);
+  }
+
+  window.GFSubs={ingest:ingest,list:list,totals:totals,panel:panel,openAll:openAll,afterRender:afterRender,setHidden:setHidden};
+})();

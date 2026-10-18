@@ -105,7 +105,7 @@
   }
   function hideInvite(){var c=byId("gfrInvite");if(!c)return;c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}
   async function inviteEligible(){
-    if(!account().user||document.hidden||document.body.dataset.page!=="dashboard")return false;
+    if(!account().user||document.hidden||document.body.dataset.page!=="dashboard"||(window.__gfCoachUntil||0)>Date.now())return false;
     // Rien d'ouvert à l'écran (fenêtre, tutoriel, repère, chargement) : on ne dérange pas.
     if([].some.call(document.querySelectorAll("dialog[open],.sheet-modal-overlay,.tutorial-overlay,.gfd-coach,.meuni-loader"),function(e){return !e.hidden&&e.getClientRects().length>0;}))return false;
     var a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return false;

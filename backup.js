@@ -8,7 +8,7 @@
   var KEYS=["personalFinanceDashboard.setupProfile","personalFinanceDashboard.categoryRules","personalFinanceDashboard.customRules",
     "personalFinanceDashboard.budgets","personalFinanceDashboard.homeBlocks","personalFinanceDashboard.hideAmounts",
     "personalFinanceDashboard.mode","personalFinanceDashboard.palette","personalFinanceDashboard.interface",
-    "personalFinanceDashboard.language","personalFinanceDashboard.currentView","personalFinanceDashboard.merchantRules"];
+    "personalFinanceDashboard.language","personalFinanceDashboard.currentView","personalFinanceDashboard.merchantRules","personalFinanceDashboard.subscriptions"];
   var byId=function(id){return document.getElementById(id);};
   function en(){return !!(window.GFI18n&&typeof window.GFI18n.getLanguage==="function"&&window.GFI18n.getLanguage()==="en");}
   function t2(fr,e){return en()?e:fr;}

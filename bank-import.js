@@ -282,7 +282,8 @@
         if(Object.keys(res.extra).length)saveLearned(res.extra);
         var summary=res.summary;
         if(write(summary,res.mode)){
-          var n=summary.months.length;toast(t2("Relevé importé : ","Statement imported: ")+summary.count+t2(" opérations sur "," transactions over ")+n+t2(" mois."," month(s)."));
+          var n=summary.months.length,subs=0;try{subs=window.GFSubs?window.GFSubs.ingest(ops):0;}catch(e){}
+          toast(t2("Relevé importé : ","Statement imported: ")+summary.count+t2(" opérations sur "," transactions over ")+n+t2(" mois."," month(s).")+(subs?t2(" "+subs+" abonnement"+(subs>1?"s":"")+" repéré"+(subs>1?"s":"")+" : retrouve-les sur l’accueil."," "+subs+" subscription"+(subs>1?"s":"")+" found: see them on Home."):""));
           if(window.setPage)window.setPage("sheet");
         }
         return true;

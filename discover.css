@@ -84,3 +84,4 @@ body[data-theme="moulin"] #updatesPage .updates-list{display:block}
 .update-more:focus-visible,.update-details summary:focus-visible{outline:2px solid var(--text);outline-offset:2px}
 body[data-theme="moulin"] #updatesPagination{display:none!important}
 .gfd-actions .gfd-next:first-child{padding-left:0}@media (hover:hover){.gfd-actions .gfd-next:first-child:hover{background:transparent}}
+.gfd-coach-step{font:700 12px var(--font-body);letter-spacing:.06em;color:var(--muted)}
