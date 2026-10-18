@@ -21,9 +21,9 @@
     ["moderne","Moderne","Modern","'Bricolage Grotesque','Helvetica Neue',Arial,sans-serif",700,false,.46,1,1],
     ["classique","Classique","Classic","'Playfair Display',Georgia,serif",400,false,.48,1,1],
     ["italique","Italique","Italic","'Playfair Display',Georgia,serif",400,true,.48,1,1],
-    // Syne est très large : on la resserre et on l'allonge, pour que L, M ou W restent des lettres et tiennent dans le rond.
-    ["affirmee","Affirmée","Bold","Syne,'Bricolage Grotesque',sans-serif",800,false,.40,.72,1.2],
-    ["technique","Technique","Technical","'Space Grotesk','Helvetica Neue',Arial,sans-serif",500,false,.46,1,1]
+    // Identifiants « affirmee » et « technique » gardés (valeurs déjà enregistrées) : les styles ont changé de police.
+    ["affirmee","Douce","Soft","Fraunces,'Playfair Display',Georgia,serif",600,false,.48,1,1],
+    ["technique","Prestige","Prestige","'Bodoni Moda','Playfair Display',Georgia,serif",600,false,.5,1,1]
   ];
   // Réservés aux abonnés (le reste est gratuit). Le blocage ne s'applique que si l'abonnement est activé (GFSubscriptions).
   var TIER={c:{encre:"plus",prune:"plus",terre:"pro",sable:"pro"},s:{classique:"plus",italique:"plus",affirmee:"pro",technique:"pro"}};
