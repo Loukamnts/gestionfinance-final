@@ -215,3 +215,43 @@ body[data-theme="moulin"] #objectivesPage .objective-stat span{white-space:norma
 .gfi-step-tx small{display:block;margin-top:2px;font-size:12.5px;line-height:1.4;color:var(--muted)}
 .gfi-note{margin:12px 0 0;font-size:13px;line-height:1.4;color:var(--muted)}
 .gfr-how{display:inline-block;margin:2px 0 8px}
+
+/* Avatars Meuniance (initiale en médaille) */
+.has-avatar{padding:0!important;background:none!important;border:0!important;overflow:hidden;border-radius:50%!important}
+.has-avatar .gfa-svg{display:block;width:100%;height:100%}
+.gfa-change{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--text);font:600 12.5px var(--font-body);cursor:pointer}
+.gfa-change:hover{border-color:var(--accent);color:var(--accent)}
+.gfa-change:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* Page de choix */
+.gfa-dialog{width:min(520px,calc(100vw - 24px))}
+.gfa-dhead{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.gfa-dialog .gfa-dhead h2{margin:0;font:600 20px/1.2 var(--font-body)}
+.gfa-dhead p{margin:3px 0 0;font-size:13px;color:var(--muted)}
+.gfa-preview{display:grid;place-items:center;flex:0 0 64px;width:64px;height:64px;border-radius:50%;overflow:hidden}
+.gfa-preview .gfa-svg{width:100%;height:100%;display:block}
+.gfa-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 10px;padding:4px 2px 6px;margin:0 -2px}
+.gfa-opt{display:grid;justify-items:center;gap:6px;padding:0;border:0;background:none;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.gfa-pic{display:grid;place-items:center;width:100%;max-width:68px;aspect-ratio:1;border-radius:50%;overflow:hidden;transition:transform .15s}
+.gfa-pic .gfa-svg{display:block;width:100%;height:100%}
+.gfa-classic{background:var(--accent-fill,#E3A82B);color:var(--on-accent-fill,#17261F);font:700 26px var(--font-body);border-radius:16px!important}
+.gfa-name{font-size:11.5px;line-height:1.2;color:var(--muted);text-align:center}
+.gfa-opt[aria-checked="true"] .gfa-pic{box-shadow:0 0 0 2.5px var(--panel-solid,var(--bg)),0 0 0 5px var(--accent-fill,var(--accent))}
+.gfa-opt[aria-checked="true"] .gfa-name{color:var(--text);font-weight:600}
+.gfa-opt:active .gfa-pic{transform:scale(.94)}
+.gfa-opt:focus-visible{outline:none}.gfa-opt:focus-visible .gfa-pic{outline:2px solid var(--accent);outline-offset:4px}
+.gfa-use-letter{display:block;margin:12px auto 0;padding:6px 10px;border:0;background:none;color:var(--text);font:600 13px var(--font-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.gfa-use-letter:disabled{color:var(--muted);text-decoration:none;cursor:default}
+.gfa-feedback{margin:8px 0 0;font-size:13px;color:var(--red,#c0392b)}
+.gfa-feedback:empty{display:none}
+@media(max-width:420px){.gfa-dialog{padding:20px 16px}}
+@media(prefers-reduced-motion:reduce){.gfa-pic{transition:none}}
+
+/* Bas de page : une seule marge, juste ce qu'il faut pour la barre du bas (sur téléphone),
+   au lieu de trois marges empilées (page + application + écran) qui laissaient une grande zone vide. */
+html body[data-theme="moulin"]:not([data-interface="studio"]) .app-page{padding-bottom:24px}
+@media(max-width:720px){
+  html body[data-theme="moulin"]:not([data-interface="studio"]){padding-bottom:0}
+  html body[data-theme="moulin"]:not([data-interface="studio"]) .app{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+  html body[data-theme="moulin"]:not([data-interface="studio"]) .app-page{padding-bottom:0}
+}
+.gfh-dialog .gfh-btn:disabled{opacity:.45;cursor:default;filter:none}

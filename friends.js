@@ -170,6 +170,7 @@
   function tag(text,graphic,active){var node=el("span","sf-tag"+(active?" is-active":""),text);if(graphic)node.prepend(icon(graphic));return node;}
   function identity(friend,level){
     var root=el("div","sf-identity"),avatar=el("span","sf-avatar",String(friend.displayName||"A").trim().slice(0,2).toLocaleUpperCase("fr")),copy=el("div","sf-identity-copy");
+    if(friend.friendId){avatar.dataset.friendId=friend.friendId;avatar.dataset.letter=String(friend.displayName||"A").trim().charAt(0);var av=window.GFAvatars&&window.GFAvatars.friend(friend.friendId);if(av)window.GFAvatars.paint(avatar,av,avatar.dataset.letter);}
     avatar.setAttribute("aria-hidden","true");copy.setAttribute("translate","no");copy.append(el(level||"h3","",friend.displayName),el("p","",friend.email));root.append(avatar,copy);return root;
   }
   function emptyState(title,description,graphic,cta){
