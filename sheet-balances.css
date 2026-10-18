@@ -32,7 +32,8 @@ body[data-theme="moulin"] #sheetPage .custom-rule-badge{display:flex!important;a
 body[data-theme="moulin"] #sheetPage .custom-rule-badge .rule-name{flex:1;font-weight:500}
 body[data-theme="moulin"] #sheetPage .custom-rule-badge .rule-status{background:transparent!important;border:1px solid var(--line);color:var(--muted)!important;font-size:12px!important;padding:2px 8px!important}
 body[data-theme="moulin"] #sheetPage .custom-rule-badge .btn-edit,body[data-theme="moulin"] #sheetPage .custom-rule-badge .btn-del{width:44px;height:44px;border-radius:12px;color:var(--muted)}
-body[data-theme="moulin"] #sheetPage .custom-rule-badge .btn-edit:hover,body[data-theme="moulin"] #sheetPage .custom-rule-badge .btn-del:hover{transform:none;background:var(--line);color:var(--text);opacity:1}
+@media (hover:hover){
+body[data-theme="moulin"] #sheetPage .custom-rule-badge .btn-edit:hover,body[data-theme="moulin"] #sheetPage .custom-rule-badge .btn-del:hover{transform:none;background:var(--line);color:var(--text);opacity:1}}
 body[data-theme="moulin"] #sheetPage .custom-rules-section .hint{font-size:13px;color:var(--muted)}
 
 /* Fenêtre « Renommer la règle » */
@@ -57,10 +58,12 @@ body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab .sheet-tab-name{hei
 body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab.active{background:var(--accent-fill,var(--accent))!important;border-color:var(--accent-fill,var(--accent))!important}
 body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab.active .sheet-tab-name{color:var(--on-accent-fill,#17261F)!important;font-weight:600!important;padding-right:6px}
 body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x{width:32px;height:32px;margin-right:6px;border:0!important;border-radius:16px;background:transparent!important;color:var(--on-accent-fill,#17261F)!important;font-size:18px;line-height:1;opacity:.7;cursor:pointer;box-shadow:none!important}
-body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x:hover{opacity:1;background:rgba(0,0,0,.08)!important}
+@media (hover:hover){
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x:hover{opacity:1;background:rgba(0,0,0,.08)!important}}
 body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-rename{display:none!important}
 body[data-theme="moulin"] #sheetPage .sheet-year-add{flex:none;height:44px;padding:0 14px;border:1px dashed var(--line-strong,var(--line));border-radius:22px;background:transparent;color:var(--muted);font:500 14px var(--font-body);cursor:pointer}
-body[data-theme="moulin"] #sheetPage .sheet-year-add:hover{border-color:var(--text);color:var(--text)}
+@media (hover:hover){
+body[data-theme="moulin"] #sheetPage .sheet-year-add:hover{border-color:var(--text);color:var(--text)}}
 body[data-theme="moulin"] #sheetPage .sheet-years :is(button):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* Téléphone : les années passent à la ligne au lieu de défiler hors de l’écran */
 @media(max-width:560px){body[data-theme="moulin"] #sheetPage .sheet-tabs.sheet-years{flex-wrap:wrap;overflow:visible}}
@@ -72,5 +75,6 @@ body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab.active{position:rel
 body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab.active .sheet-tab-name{padding:0 18px!important}
 body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x{position:absolute;top:-7px;right:-7px;width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;margin:0!important;display:grid;place-items:center;padding:0;border:1px solid var(--line-strong,var(--line))!important;border-radius:50%;background:var(--panel-solid,var(--bg))!important;color:var(--text)!important;font-size:14px!important;line-height:1;opacity:1;box-shadow:0 2px 6px rgba(0,0,0,.12)}
 body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x::before{content:"";position:absolute;inset:-11px}
-body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x:hover{background:var(--panel-solid,var(--bg))!important;border-color:var(--text)!important}
+@media (hover:hover){
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x:hover{background:var(--panel-solid,var(--bg))!important;border-color:var(--text)!important}}
 body[data-theme="moulin"] #sheetPage .sheet-tabs.sheet-years{padding-top:8px!important}

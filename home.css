@@ -163,7 +163,8 @@ body.gfh-ready.gfh-nocharts #dashboardPage .month-details{display:none!important
 .gfh-topbar .gfh-mon{flex:1 1 220px;max-width:420px;margin:0!important}
 .gfh-add{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 18px;border:1px solid var(--accent-fill,var(--accent));border-radius:16px;background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font:600 15px var(--font-body);cursor:pointer;margin-left:auto}
 .gfh-add svg{width:20px;height:20px}
-.gfh-add:hover{filter:brightness(1.05)}
+@media (hover:hover){
+.gfh-add:hover{filter:brightness(1.05)}}
 .gfh-add:focus-visible{outline:2px solid var(--text);outline-offset:2px}
 @media(max-width:560px){.gfh-add{width:46px;padding:0;margin-left:0;flex:none}.gfh-add span{display:none}.gfh-topbar .gfh-yrs{flex:none}.gfh-topbar .gfh-mon{flex:1 1 0;max-width:none;min-width:0}}
 .gfh-bilan{max-width:60ch;line-height:1.45}
@@ -183,7 +184,8 @@ body.gfh-ready.gfh-nocharts #dashboardPage .month-details{display:none!important
 .gfh-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:-6px}
 .gfh-chips:empty{display:none}
 .gfh-chips button{height:34px;padding:0 12px;border:1px solid var(--line);border-radius:17px;background:transparent;color:var(--text);font:500 13px var(--font-body);cursor:pointer}
-.gfh-chips button:hover{border-color:var(--text)}
+@media (hover:hover){
+.gfh-chips button:hover{border-color:var(--text)}}
 .gfh-err{margin:0;min-height:0;font-size:13px;color:var(--red)}
 .gfh-err:empty{display:none}
 .gfh-dialog-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px;margin-top:4px}
@@ -200,11 +202,13 @@ body.gfh-ready.gfh-nocharts #dashboardPage .month-details{display:none!important
 .gfh-fixed-row span:first-child{flex:1}
 .gfh-fixed-amt{font-variant-numeric:tabular-nums}
 .gfh-icon-btn{width:40px;height:40px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--text);font:600 20px/1 var(--font-body);cursor:pointer}
-.gfh-icon-btn:hover{border-color:var(--text)}
+@media (hover:hover){
+.gfh-icon-btn:hover{border-color:var(--text)}}
 .gfh-fixed .gfh-acts{margin-top:14px;align-items:center}
 /* Lignes de dépenses cliquables + plafonds */
 button.gfh-cat{display:block;width:100%;padding:10px 6px;margin:0 -6px;width:calc(100% + 12px);border:0;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
-button.gfh-cat:hover{background:var(--line)}
+@media (hover:hover){
+button.gfh-cat:hover{background:var(--line)}}
 button.gfh-cat:focus-visible{outline:2px solid var(--accent);outline-offset:0}
 .gfh-cat.is-over .gfh-pg b{background:var(--red)}
 .gfh-cat.is-over .gfh-row span:last-child{color:var(--red);font-weight:600}
@@ -224,7 +228,9 @@ button.gfh-cat:focus-visible{outline:2px solid var(--accent);outline-offset:0}
 .gfh-type-row .gfh-seg{flex:1}
 .gfh-new-line{flex:none;width:46px;height:46px;display:grid;place-items:center;border:1px dashed var(--line-strong,var(--line));border-radius:23px;background:transparent;color:var(--text);cursor:pointer}
 .gfh-new-line svg{width:20px;height:20px}
-.gfh-new-line:hover,.gfh-new-line[aria-pressed="true"]{border-style:solid;border-color:var(--accent-fill,var(--accent));background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F)}
+.gfh-new-line[aria-pressed="true"]{border-style:solid;border-color:var(--accent-fill,var(--accent));background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F)}
+@media (hover:hover){
+.gfh-new-line:hover{border-style:solid;border-color:var(--accent-fill,var(--accent));background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F)}}
 .gfh-field{position:relative}
 .gfh-pick{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 14px;border:1px solid var(--line);border-radius:14px;background:transparent;color:var(--muted);font:500 15px var(--font-body);text-align:left;cursor:pointer}
 .gfh-pick.has-value{color:var(--text)}
@@ -236,7 +242,9 @@ button.gfh-cat:focus-visible{outline:2px solid var(--accent);outline-offset:0}
 .gfh-menu-h{padding:8px 10px 4px;font:600 11px var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .gfh-menu-item{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:42px;padding:0 10px;border:0;border-radius:10px;background:transparent;color:var(--text);font:500 15px var(--font-body);text-align:left;cursor:pointer}
 .gfh-menu-item small{font-size:12px;color:var(--muted)}
-.gfh-menu-item:hover,.gfh-menu-item:focus{background:var(--line);outline:none}
+.gfh-menu-item:focus{background:var(--line);outline:none}
+@media (hover:hover){
+.gfh-menu-item:hover{background:var(--line);outline:none}}
 .gfh-menu-item.is-on{background:var(--button-active-bg,var(--line));font-weight:600}
 .gfh-menu-new{margin-top:4px;border-top:1px solid var(--line);border-radius:0 0 10px 10px;color:var(--text);font-weight:600}
 .gfh-menu-empty{margin:6px 10px;font-size:13px;color:var(--muted)}
@@ -247,7 +255,8 @@ button.gfh-cat:focus-visible{outline:2px solid var(--accent);outline-offset:0}
 .gfh-recap-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .gfh-recap h3{margin:4px 0 0;font:700 22px/1.15 var(--font-heading);letter-spacing:-.02em;color:var(--text)}
 .gfh-recap-x{flex:none;width:44px;height:44px;margin:-10px -10px 0 0;border:0;border-radius:50%;background:transparent;color:var(--muted);font:400 24px/1 var(--font-body);cursor:pointer}
-.gfh-recap-x:hover{background:var(--line);color:var(--text)}
+@media (hover:hover){
+.gfh-recap-x:hover{background:var(--line);color:var(--text)}}
 .gfh-recap-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:18px}
 .gfh-recap-stat{min-width:0}
 .gfh-recap-stat .t{display:block;font-size:13px;color:var(--muted)}

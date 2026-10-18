@@ -15,7 +15,8 @@ body[data-theme="moulin"] #dashboardPage .chart-head h2{margin:0;font:600 18px/1
 body[data-theme="moulin"] #dashboardPage .chart-head p{margin:4px 0 0;font-size:14px;color:var(--muted)}
 .gfc-views{display:inline-flex;align-items:center;gap:2px;padding:4px;border:1px solid var(--line);border-radius:999px;background:transparent;max-width:100%}
 .gfc-views button{height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--muted);font:500 14px var(--font-body);cursor:pointer;white-space:nowrap}
-.gfc-views button:hover{color:var(--text)}
+@media (hover:hover){
+.gfc-views button:hover{color:var(--text)}}
 .gfc-views button[aria-pressed="true"]{background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font-weight:600}
 .gfc-views button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 @media(max-width:560px){.gfc-views{display:flex;width:100%}.gfc-views button{flex:1 1 0;min-width:0;padding:0 4px;font-size:12.5px}}
@@ -41,7 +42,8 @@ body[data-theme="moulin"] .loader{display:none!important}
 body[data-theme="moulin"] .personal-workspace-title{font:700 26px/1.1 var(--font-heading)!important;letter-spacing:-.03em!important;margin:4px 0 6px!important;color:var(--text)}
 body[data-theme="moulin"] .personal-workspace-nav{gap:4px!important}
 body[data-theme="moulin"] .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes){min-height:48px!important;border-radius:14px!important;font:500 15px var(--font-body)!important;color:var(--muted)!important;background:transparent!important;border:0!important;box-shadow:none!important}
-body[data-theme="moulin"] .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes):hover{color:var(--text)!important;background:var(--line)!important}
+@media (hover:hover){
+body[data-theme="moulin"] .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes):hover{color:var(--text)!important;background:var(--line)!important}}
 body[data-theme="moulin"] .personal-workspace-nav .personal-workspace-link.is-active{background:var(--accent-fill,var(--accent))!important;color:var(--on-accent-fill,#17261F)!important;font-weight:600!important}
 body[data-theme="moulin"] .personal-workspace-nav .personal-workspace-link.is-active::before{background:currentColor!important}
 @media(max-width:900px){
@@ -71,7 +73,8 @@ body[data-theme="moulin"] #objectivesPage .objective-management > summary::after
 body[data-theme="moulin"] #objectivesPage .objective-management[open] > summary{border-color:var(--text)}
 body[data-theme="moulin"] #objectivesPage .objective-management[open] > summary::after{transform:rotate(-135deg) translateY(-2px)}
 body[data-theme="moulin"] #objectivesPage .objective-management[open] > summary ~ *{margin-top:12px}
-body[data-theme="moulin"] #objectivesPage .objective-management > summary:hover{border-color:var(--text)}
+@media (hover:hover){
+body[data-theme="moulin"] #objectivesPage .objective-management > summary:hover{border-color:var(--text)}}
 body[data-theme="moulin"] #objectivesPage .objective-progress-editor{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px}
 body[data-theme="moulin"] #objectivesPage .objective-progress-editor label{display:flex;flex-direction:column;gap:4px;min-width:0;font:500 13px var(--font-body);color:var(--muted)}
 body[data-theme="moulin"] #objectivesPage .objective-progress-editor input{height:44px;padding:0 12px;border:1px solid var(--line)!important;border-radius:12px!important;background:transparent!important;color:var(--text);font:500 15px var(--font-body)}
@@ -79,7 +82,8 @@ body[data-theme="moulin"] #objectivesPage .objective-progress-editor input:disab
 body[data-theme="moulin"] #objectivesPage .objective-remaining{margin:8px 0 0;font-size:13px}
 body[data-theme="moulin"] #objectivesPage .objective-card-actions{display:flex!important;flex-wrap:wrap;gap:0 4px;margin-top:10px}
 body[data-theme="moulin"] #objectivesPage .objective-card-actions .button-ghost{height:40px!important;padding:0 10px!important;border:0!important;background:transparent!important;color:var(--text)!important;font:600 13px var(--font-body)!important;text-decoration:underline;text-underline-offset:3px}
-body[data-theme="moulin"] #objectivesPage .objective-card-actions .button-ghost:hover{background:var(--line)!important}
+@media (hover:hover){
+body[data-theme="moulin"] #objectivesPage .objective-card-actions .button-ghost:hover{background:var(--line)!important}}
 body[data-theme="moulin"] #objectivesPage .objective-card-actions .objective-remove{margin-left:auto;color:var(--red)!important}
 
 /* Objectifs */
@@ -184,7 +188,8 @@ body[data-theme="moulin"] #objectivesPage .objective-stat span{white-space:norma
 
 /* Liens dans les pages de lecture des Paramètres : couleur du thème, pas le bleu du navigateur */
 .settings-reading-page a{color:var(--text);font-weight:600;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--accent) 70%,transparent);text-decoration-thickness:1.5px;text-underline-offset:3px}
-.settings-reading-page a:hover{text-decoration-color:var(--accent)}
+@media (hover:hover){
+.settings-reading-page a:hover{text-decoration-color:var(--accent)}}
 
 /* Profil hors connexion : silhouette au lieu d'un « ? » */
 .profile-avatar.is-guest{color:var(--on-accent-fill,var(--button-primary-text,#17261F))!important}
@@ -194,7 +199,8 @@ body[data-theme="moulin"] #objectivesPage .objective-stat span{white-space:norma
 @media(min-width:721px){
   body:not([data-interface="studio"]) .app-header .mobile-settings-button{display:grid;place-items:center;width:42px;height:42px;padding:0;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--text);cursor:pointer;transition:background .15s,border-color .15s}
   body:not([data-interface="studio"]) .app-header .mobile-settings-button svg{width:20px;height:20px}
-  body:not([data-interface="studio"]) .app-header .mobile-settings-button:hover{border-color:var(--line-strong,var(--line));background:var(--button-active-bg)}
+  @media (hover:hover){
+  body:not([data-interface="studio"]) .app-header .mobile-settings-button:hover{border-color:var(--line-strong,var(--line));background:var(--button-active-bg)}}
   body:not([data-interface="studio"]) .app-header .mobile-settings-button.is-active{background:var(--accent-fill,var(--accent));border-color:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F)}
   body:not([data-interface="studio"]) .app-header .top-actions{gap:8px}
 }
@@ -221,9 +227,13 @@ body[data-theme="moulin"] #objectivesPage .objective-stat span{white-space:norma
 .has-avatar .gfa-svg{display:block;width:100%;height:100%}
 .gfa-edge{stroke:rgba(23,38,31,.12)}
 body[data-mode="dark"] .gfa-edge{stroke:rgba(243,238,226,.18)}
-.gfa-change{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--text);font:600 12.5px var(--font-body);cursor:pointer}
-.gfa-change:hover{border-color:var(--accent);color:var(--accent)}
-.gfa-change:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.gfa-wrap{position:relative;display:inline-grid;flex:none}
+.gfa-wrap #identityAvatar{cursor:pointer}
+.gfa-badge{position:absolute;right:-7px;bottom:-3px;display:grid;place-items:center;width:23px;height:23px;padding:0;border:2px solid var(--panel-solid,var(--bg));border-radius:50%;background:var(--accent-fill,#E3A82B);color:var(--on-accent-fill,#17261F);cursor:pointer;transition:transform .12s}
+.gfa-badge svg{width:12px;height:12px}
+.gfa-badge::after{content:"";position:absolute;inset:-8px}
+.gfa-badge:active{transform:scale(.9)}
+.gfa-badge:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* Page de choix */
 .gfa-dialog{width:min(500px,calc(100vw - 24px))}
 .gfa-dhead{display:flex;align-items:center;gap:14px;margin-bottom:6px}
@@ -262,3 +272,9 @@ html body[data-theme="moulin"]:not([data-interface="studio"]) .app-page{padding-
   html body[data-theme="moulin"]:not([data-interface="studio"]) .app-page{padding-bottom:0}
 }
 .gfh-dialog .gfh-btn:disabled{opacity:.45;cursor:default;filter:none}
+
+/* Boutons de navigation : pas de fondu de couleur (transition globale de 0,4 s), juste un léger enfoncement au toucher. */
+.app-header .mobile-settings-button,.app-header .profile-trigger,.bottom-nav .bottom-nav-btn,.desktop-nav .desktop-nav-link{transition:transform .12s ease!important}
+.app-header .mobile-settings-button:active,.app-header .profile-trigger:active{transform:scale(.94)}
+.app-header .mobile-settings-button *,.app-header .profile-trigger *,.bottom-nav .bottom-nav-btn *{transition:none!important}
+@media (hover:hover){.app-header .profile-trigger:hover{border-color:var(--line-strong,var(--line));background:var(--button-active-bg)}}
