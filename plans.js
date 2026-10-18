@@ -8,8 +8,10 @@
   var BILLING=Object.assign({enforce:false,checkout:{plus:"",pro:""},portal:""},window.MEUNIANCE_BILLING||{});
   BILLING.checkout=Object.assign({plus:"",pro:""},(window.MEUNIANCE_BILLING||{}).checkout||{});
   var RANK={free:0,plus:1,pro:2};
-  var FEATURE_PLAN={excel:"plus",goals_unlimited:"plus",share:"plus",share_multi:"pro",share_rights:"pro",share_expiry:"pro",goals_history:"pro"};
+  var FEATURE_PLAN={avatar_plus:"plus",avatar_pro:"pro",excel:"plus",goals_unlimited:"plus",share:"plus",share_multi:"pro",share_rights:"pro",share_expiry:"pro",goals_history:"pro"};
   var FEATURE_COPY={
+    avatar_plus:["Ce style d’avatar","This avatar style"],
+    avatar_pro:["Ce style d’avatar","This avatar style"],
     excel:["L’import et l’export Excel","Excel import and export"],
     goals_unlimited:["Les objectifs illimités","Unlimited goals"],
     share:["Le partage avec un proche","Sharing with someone"],
@@ -24,10 +26,10 @@
       features:[["Tableau de bord et sélecteur de mois","Dashboard and month picker"],["Tableur avec formules","Spreadsheet with formulas"],["1 objectif","1 goal"],["Mode clair et sombre","Light and dark mode"],["Export et suppression de tes données","Export and delete your data"],["Pas de partage","No sharing",true]]},
     {id:"plus",name:"Plus",price:4.99,featured:true,pitch:["Ton budget, à ton image, et à deux.","Your budget, your way, for two."],period:["par mois","per month"],
       cta:["Passer à Plus","Upgrade to Plus"],
-      features:[["Import et export Excel","Excel import and export"],["Objectifs illimités","Unlimited goals"],["Partage avec 1 personne : tu choisis les mois et les lignes visibles","Share with 1 person: you choose visible months and rows"],["Évolution mensuelle complète","Full monthly trends"],["Tout ce qui est dans Free","Everything in Free"]]},
+      features:[["Import et export Excel","Excel import and export"],["Objectifs illimités","Unlimited goals"],["Partage avec 1 personne : tu choisis les mois et les lignes visibles","Share with 1 person: you choose visible months and rows"],["Évolution mensuelle complète","Full monthly trends"],["Styles et couleurs d’avatar Plus","Plus avatar styles and colours"],["Tout ce qui est dans Free","Everything in Free"]]},
     {id:"pro",name:"Pro",price:7.99,pitch:["Pour partager sans limite et aller plus loin.","Share without limits and go further."],period:["par mois","per month"],
       cta:["Passer à Pro","Upgrade to Pro"],
-      features:[["Tout ce qui est dans Plus","Everything in Plus"],["Partage avec plusieurs personnes","Share with several people"],["Droits par personne : lecture seule ou modification","Per-person rights: read-only or edit"],["Accès temporaire qui expire tout seul","Temporary access that expires on its own"],["Historique de progression des objectifs","Goal progress history"]]}
+      features:[["Tout ce qui est dans Plus","Everything in Plus"],["Partage avec plusieurs personnes","Share with several people"],["Droits par personne : lecture seule ou modification","Per-person rights: read-only or edit"],["Accès temporaire qui expire tout seul","Temporary access that expires on its own"],["Historique de progression des objectifs","Goal progress history"],["Tous les styles et couleurs d’avatar","Every avatar style and colour"]]}
   ];
   var state={plan:"free",since:null,loaded:false,request:0};
   var byId=function(id){return document.getElementById(id);};

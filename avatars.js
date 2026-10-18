@@ -25,6 +25,11 @@
     ["affirmee","Affirmée","Bold","Syne,'Bricolage Grotesque',sans-serif",800,false,.40,.72,1.2],
     ["technique","Technique","Technical","'Space Grotesk','Helvetica Neue',Arial,sans-serif",500,false,.46,1,1]
   ];
+  // Réservés aux abonnés (le reste est gratuit). Le blocage ne s'applique que si l'abonnement est activé (GFSubscriptions).
+  var TIER={c:{encre:"plus",prune:"plus",terre:"pro",sable:"pro"},s:{classique:"plus",italique:"plus",affirmee:"pro",technique:"pro"}};
+  var TRANK={plus:1,pro:2};
+  function tierOf(id){var p=String(id||"").split("."),a=TIER.c[p[0]],b=TIER.s[p[1]];return (TRANK[b]||0)>(TRANK[a]||0)?b:(a||b||null);}
+  function badge(t){var b=document.createElement("span");b.className="gfa-tier is-"+t;b.textContent=t==="pro"?"Pro":"Plus";b.setAttribute("aria-hidden","true");return b;}
   var CBY={},SBY={};COLORS.forEach(function(c){CBY[c[0]]=c;});STYLES.forEach(function(f){SBY[f[0]]=f;});
   function parts(id){var p=String(id||"").split(".");return CBY[p[0]]&&SBY[p[1]]?{c:CBY[p[0]],f:SBY[p[1]]}:null;}
   function valid(id){return !!parts(id);}
@@ -39,7 +44,7 @@
   /* Met à jour un rond déjà affiché (couleur, police) sans le reconstruire : pas de clignotement sur iPhone. */
   function restyle(node,id,letter){
     var p=parts(id),el2=node&&node.querySelector("svg.gfa-svg");if(!p)return;
-    if(!el2){node.innerHTML=svg(id,letter);return;}
+    if(!el2){node.insertAdjacentHTML("afterbegin",svg(id,letter));return;}
     var f=p.f,sx=f[7],sy=f[8],c=el2.querySelector("circle"),t=el2.querySelector("text");
     c.setAttribute("fill",p.c[3]);t.setAttribute("fill",p.c[4]);t.setAttribute("font-size",(48*f[6]).toFixed(1));t.setAttribute("font-weight",String(f[4]));
     if(f[5])t.setAttribute("font-style","italic");else t.removeAttribute("font-style");
@@ -100,8 +105,9 @@
     var sub=el("p","",t2("Ton initiale, dans la couleur et le style de ton choix.","Your initial, in the colour and style you like."));htxt.append(h,sub);head.append(preview,htxt);
     function section(title){var w=el("div","gfa-section"),lab=el("p","gfa-label",title),cur=el("span","gfa-current");lab.append(cur);w.append(lab);var g=el("div","gfa-row");g.setAttribute("role","radiogroup");g.setAttribute("aria-label",title);w.append(g);return{w:w,g:g,cur:cur};}
     var cs=section(t2("Couleur","Colour")),ss=section(t2("Style de lettre","Letter style"));ss.g.classList.add("is-styles");
-    COLORS.forEach(function(c){var b=el("button","gfa-opt");b.type="button";b.setAttribute("role","radio");b.dataset.id=c[0];b.setAttribute("aria-label",t2(c[1],c[2]));b.title=t2(c[1],c[2]);var pic=el("span","gfa-pic");b.append(pic);b.addEventListener("click",function(){color=c[0];classic=false;sync();});cs.g.append(b);});
-    STYLES.forEach(function(f){var b=el("button","gfa-opt gfa-style");b.type="button";b.setAttribute("role","radio");b.dataset.id=f[0];var pic=el("span","gfa-pic");b.append(pic,el("span","gfa-name",t2(f[1],f[2])));b.addEventListener("click",function(){style=f[0];classic=false;sync();});ss.g.append(b);});
+    COLORS.forEach(function(c){var b=el("button","gfa-opt");b.type="button";b.setAttribute("role","radio");b.dataset.id=c[0];var tc=TIER.c[c[0]];b.setAttribute("aria-label",t2(c[1],c[2])+(tc?" ("+(tc==="pro"?"Pro":"Plus")+")":""));b.title=t2(c[1],c[2]);var pic=el("span","gfa-pic");b.append(pic);if(tc)pic.append(badge(tc));b.addEventListener("click",function(){color=c[0];classic=false;sync();});cs.g.append(b);});
+    STYLES.forEach(function(f){var b=el("button","gfa-opt gfa-style");b.type="button";b.setAttribute("role","radio");b.dataset.id=f[0];var ts=TIER.s[f[0]];if(ts)b.setAttribute("aria-label",t2(f[1],f[2])+" ("+(ts==="pro"?"Pro":"Plus")+")");var pic=el("span","gfa-pic");b.append(pic,el("span","gfa-name",t2(f[1],f[2])));if(ts)pic.append(badge(ts));b.addEventListener("click",function(){style=f[0];classic=false;sync();});ss.g.append(b);});
+    var legend=el("p","gfa-legend");legend.append(badge("plus"),badge("pro"),document.createTextNode(t2(" : inclus dans les abonnements Plus et Pro."," : included with Plus and Pro.")));
     var back=el("button","gfa-use-letter");back.type="button";back.addEventListener("click",function(){classic=true;sync();});
     var msg=el("p","gfa-feedback");msg.setAttribute("role","status");
     var row=el("div","gfh-dialog-actions"),cancel=el("button","gfh-btn",t2("Annuler","Cancel")),ok=el("button","gfh-btn is-primary",t2("Enregistrer","Save"));cancel.type=ok.type="button";row.append(cancel,ok);
@@ -115,9 +121,9 @@
       ok.disabled=value()===mine;
     }
     cancel.addEventListener("click",function(){dlg.close();});
-    ok.addEventListener("click",async function(){ok.disabled=true;msg.textContent="";try{await save(value());dlg.close();}catch(e){msg.textContent=t2("Impossible d’enregistrer. Réessaie.","Could not save. Try again.");ok.disabled=false;}});
+    ok.addEventListener("click",async function(){var need=classic?null:tierOf(value()),api=window.GFSubscriptions;if(need&&api&&typeof api.requires==="function"&&!api.requires("avatar_"+need))return;ok.disabled=true;msg.textContent="";try{await save(value());dlg.close();}catch(e){msg.textContent=t2("Impossible d’enregistrer. Réessaie.","Could not save. Try again.");ok.disabled=false;}});
     dlg.addEventListener("close",function(){dlg.remove();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();});
-    dlg.append(head,cs.w,ss.w,back,msg,row);document.body.append(dlg);sync();dlg.showModal();
+    dlg.append(head,cs.w,ss.w,legend,back,msg,row);document.body.append(dlg);sync();dlg.showModal();
     // Safari entoure le premier bouton qui reçoit le focus à l’ouverture : on le donne à la fenêtre elle-même.
     dlg.tabIndex=-1;try{dlg.focus({preventScroll:true});}catch(e){}
     if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();
