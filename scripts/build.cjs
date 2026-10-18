@@ -45,8 +45,10 @@ for (const [family,weights,styles] of [
   ['syne',[700,800],['normal']],
   ['bricolage-grotesque',[500,700],['normal']],
   ['instrument-sans',[400,500,600],['normal']],
-  ['fraunces',[600],['normal']],
-  ['bodoni-moda',[600],['normal']]
+  ['bebas-neue',[400],['normal']],
+  ['special-elite',[400],['normal']],
+  ['great-vibes',[400],['normal']],
+  ['unifrakturcook',[700],['normal']]
 ]) {
   for (const weight of weights) for (const style of styles) {
     const filename = `latin-${weight}${style==='italic'?'-italic':''}.css`;
