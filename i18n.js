@@ -28,6 +28,8 @@ const dictionary=Object.freeze({
   "Une feuille = une année": "One sheet = one year",
   "Choisis l’année ici, ajoute la précédente ou la suivante avec +. Les mois sont en colonnes, tes lignes à gauche.": "Pick the year here, add the previous or next one with +. Months are columns, your rows are on the left.",
   "Ton compte, ton abonnement, l’apparence et tes données.": "Your account, plan, appearance and data.",
+  "Tes objectifs, le partage avec tes proches et les nouveautés de Meuniance.": "Your goals, sharing with your close ones and what’s new in Meuniance.",
+  "L’engrenage : ton compte, l’apparence, les notifications et tes données.": "The gear: your account, appearance, notifications and data.",
   "Ouvre la navigation pour retrouver ton profil et les réglages.": "Open the navigation to find your profile and settings.",
   "20 septembre 2026": "20 September 2026",
   "18 septembre 2026": "18 September 2026",

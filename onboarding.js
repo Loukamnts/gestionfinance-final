@@ -609,9 +609,16 @@
       page: "sheet",
     },
     {
+      title: "Mon espace",
+      text: "Tes objectifs, le partage avec tes proches et les nouveautés de Meuniance.",
+      target: ".bottom-nav #personalNavButton, .studio-sidebar-nav [data-page='sharing'], #profileMenuButton",
+      action: "Suivant",
+      page: "sheet",
+    },
+    {
       title: "Paramètres",
-      text: "Ton compte, ton abonnement, l’apparence et tes données.",
-      target: ".bottom-nav [data-page='settings'], .desktop-nav [data-page='settings'], .studio-sidebar-nav [data-page='settings']",
+      text: "L’engrenage : ton compte, l’apparence, les notifications et tes données.",
+      target: ".mobile-settings-button, .desktop-nav [data-page='settings'], .studio-sidebar-nav [data-page='settings']",
       action: "Terminer",
       isLast: true,
     },
@@ -710,6 +717,7 @@
     }
 
     // La bulle est construite d'abord : sa hauteur décide de la place laissée à l'élément expliqué
+    step._rescrolled = false;
     buildTutorialTooltip(overlay, step);
     scrollTutorialTarget(target, overlay);
     setTimeout(function() {
@@ -802,6 +810,15 @@
     var padding = 6;
     var docked = tutorialDocked();
     var tooltipTop = docked ? tutorialTooltipTop(tooltip) : 0;
+    // Au démarrage, la page se verrouille pendant le premier défilement et l'annule : si l'élément
+    // n'est pas entièrement visible au-dessus de la bulle, on refait défiler une fois.
+    var limit = docked ? tooltipTop - 10 : window.innerHeight - tutorialNavHeight() - 10;
+    if (!tutorialIsInNav(target) && !step._rescrolled && rect.height < limit - 16 && (rect.top < 8 || rect.bottom > limit)) {
+      step._rescrolled = true;
+      scrollTutorialTarget(target, overlay);
+      setTimeout(function () { positionTutorialElements(overlay, target, step); }, 420);
+      return;
+    }
 
     // Zone éclairée : l'élément, coupé à la place disponible pour ne jamais passer sous la bulle
     var top = rect.top - padding, bottom = rect.bottom + padding;
