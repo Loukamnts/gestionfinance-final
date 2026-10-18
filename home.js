@@ -494,6 +494,16 @@
     if(Math.abs(window.scrollY-keepY)>1)window.scrollTo(0,keepY);
     document.body.classList.add("gfh-ready");
     if(document.body.classList.contains("tutorial-active"))setTimeout(function(){window.dispatchEvent(new Event("resize"));},30);
+    openFromLink(plus);
+  }
+  /* Raccourci « Ajouter une dépense » (appui long sur l'icône de l'app, ou /accueil?ajout=depense|revenu|epargne) :
+     ouvre l'ajout rapide une seule fois, dès que l'accueil est prêt, jamais par-dessus le tutoriel. */
+  var linkAdd=(function(){try{var v=new URLSearchParams(location.search).get("ajout");return ["depense","revenu","epargne"].indexOf(v)>=0?v:null;}catch(e){return null;}})();
+  function openFromLink(plus){
+    if(!linkAdd||document.body.dataset.page!=="dashboard"||document.body.classList.contains("tutorial-active")||document.querySelector("dialog[open]"))return;
+    var kind=linkAdd;linkAdd=null;
+    try{var u=new URL(location.href);u.searchParams.delete("ajout");history.replaceState(history.state,"",u.pathname+u.search+u.hash);}catch(e){}
+    setTimeout(function(){plus.click();var i={depense:0,revenu:1,epargne:2}[kind];var b=document.querySelectorAll(".gfh-quick .gfh-seg button")[i];if(b&&i)b.click();},60);
   }
 
   /* Réglages : Paramètres › Apparence › Accueil (blocs facultatifs) */

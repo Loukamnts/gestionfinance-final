@@ -20,5 +20,44 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ajouter une dépense",
+      "short_name": "Dépense",
+      "description": "Ouvre directement l'ajout d'une dépense",
+      "url": "/accueil?ajout=depense",
+      "icons": [
+        {
+          "src": "/app-icon-180.png?v=20261013",
+          "sizes": "180x180",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Ajouter un revenu",
+      "short_name": "Revenu",
+      "url": "/accueil?ajout=revenu",
+      "icons": [
+        {
+          "src": "/app-icon-180.png?v=20261013",
+          "sizes": "180x180",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Ouvrir le tableur",
+      "short_name": "Tableur",
+      "url": "/tableur",
+      "icons": [
+        {
+          "src": "/app-icon-180.png?v=20261013",
+          "sizes": "180x180",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
