@@ -20,9 +20,9 @@
   // Chaque initiale est mesurée puis centrée sur sa forme réelle (voir geom) : même taille visuelle, toujours au centre.
   var STYLES=[
     ["moderne","Moderne","Modern","'Bricolage Grotesque','Helvetica Neue',Arial,sans-serif",700,false,19.5,30],
-    ["condensee","Condensée","Condensed","'Bebas Neue','Bricolage Grotesque',sans-serif",400,false,23,27],
     ["classique","Classique","Classic","'Playfair Display',Georgia,serif",400,false,20.5,30],
     ["italique","Italique","Italic","'Playfair Display',Georgia,serif",400,true,20.5,30],
+    ["condensee","Condensée","Condensed","'Bebas Neue','Bricolage Grotesque',sans-serif",400,false,23,27],
     ["machine","Machine","Typewriter","'Special Elite','Courier New',monospace",400,false,21.5,30],
     ["calligraphie","Calligraphie","Calligraphy","'Great Vibes','Playfair Display',cursive",400,false,27,33],
     ["gothique","Gothique","Blackletter","UnifrakturCook,'Playfair Display',serif",700,false,23,32]
@@ -30,7 +30,7 @@
   // Anciennes valeurs encore enregistrées ou envoyées par une vieille version du site.
   var LEGACY={affirmee:"condensee",technique:"machine"};
   // Réservés aux abonnés (le reste est gratuit). Le blocage ne s'applique que si l'abonnement est activé (GFSubscriptions).
-  var TIER={c:{encre:"plus",prune:"plus",terre:"pro",sable:"pro"},s:{classique:"plus",italique:"plus",machine:"plus",calligraphie:"pro",gothique:"pro"}};
+  var TIER={c:{encre:"plus",prune:"plus",terre:"pro",sable:"pro"},s:{condensee:"plus",machine:"plus",calligraphie:"pro",gothique:"pro"}};
   var TRANK={plus:1,pro:2};
   function tierOf(id){var p=String(id||"").split("."),a=TIER.c[p[0]],b=TIER.s[LEGACY[p[1]]||p[1]];return (TRANK[b]||0)>(TRANK[a]||0)?b:(a||b||null);}
   function badge(t){var b=document.createElement("span");b.className="gfa-tier is-"+t;b.textContent=t==="pro"?"Pro":"Plus";b.setAttribute("aria-hidden","true");return b;}
