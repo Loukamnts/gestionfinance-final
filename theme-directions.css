@@ -1023,7 +1023,9 @@ body[data-theme="moulin"] .app-page { padding-bottom:calc(108px + env(safe-area-
 body[data-theme="moulin"] #dashboardPage .home-toolbar { background:transparent !important; }
 body[data-theme="moulin"][data-page="dashboard"] #homeButton,
 body[data-theme="moulin"][data-page="sheet"] #sheetButton,
-body[data-theme="moulin"][data-page="sharing"] #personalNavButton { background:var(--accent-fill); color:var(--on-accent-fill); }
+body[data-theme="moulin"][data-page="sharing"] #personalNavButton,
+body[data-theme="moulin"][data-page="objectives"] #personalNavButton,
+body[data-theme="moulin"][data-page="updates"] #personalNavButton { background:var(--accent-fill); color:var(--on-accent-fill); }
 
 body[data-theme="moulin"] #dashboardPage .chart-panel, body[data-theme="moulin"] #dashboardPage .panel { background:transparent !important; border:0 !important; border-top:1px solid var(--line) !important; border-radius:0 !important; padding-left:0 !important; padding-right:0 !important; }
 body[data-theme="moulin"] .empty-state.empty-dashboard { background:transparent !important; border:0 !important; box-shadow:none !important; padding-left:0 !important; padding-right:0 !important; }
