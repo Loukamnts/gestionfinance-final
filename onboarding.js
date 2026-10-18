@@ -609,9 +609,19 @@
       page: "sheet",
     },
     {
+      title: "Mon espace",
+      text: "Tes objectifs, le partage avec tes proches et les nouveautés de Meuniance.",
+      // Sur ordinateur, Mon espace s'ouvre depuis le menu Profil (barre en haut) ou le menu latéral.
+      textFor: { "#profileMenuButton": "Ouvre ce menu pour retrouver Mon espace : tes objectifs, le partage avec tes proches et les nouveautés.", ".studio-sidebar-nav [data-page='sharing']": "Mon espace est dans ce menu : Objectifs, Partage et amis, Nouveautés." },
+      target: ".bottom-nav #personalNavButton, .studio-sidebar-nav [data-page='sharing'], #profileMenuButton",
+      action: "Suivant",
+      page: "sheet",
+    },
+    {
       title: "Paramètres",
-      text: "Ton compte, ton abonnement, l’apparence et tes données.",
-      target: ".bottom-nav [data-page='settings'], .desktop-nav [data-page='settings'], .studio-sidebar-nav [data-page='settings']",
+      text: "L’engrenage : ton compte, l’apparence, les notifications et tes données.",
+      textFor: { ".desktop-nav [data-page='settings']": "Paramètres : ton compte, l’apparence, les notifications et tes données.", ".studio-sidebar-nav [data-page='settings']": "Paramètres : ton compte, l’apparence, les notifications et tes données." },
+      target: ".mobile-settings-button, .desktop-nav [data-page='settings'], .studio-sidebar-nav [data-page='settings']",
       action: "Terminer",
       isLast: true,
     },
@@ -692,6 +702,7 @@
       // Ne jamais guider vers un bouton masqué, inerte ou sorti de l'écran.
       if (r.width > 20 && r.height > 20 && r.right > 0 && r.left < window.innerWidth && style.display !== "none" && style.visibility !== "hidden" && !el.closest("[hidden], [inert]")) {
         target = el;
+        step._matched = selectors[i].trim();
         break;
       }
     }
@@ -710,6 +721,7 @@
     }
 
     // La bulle est construite d'abord : sa hauteur décide de la place laissée à l'élément expliqué
+    step._rescrolled = false;
     buildTutorialTooltip(overlay, step);
     scrollTutorialTarget(target, overlay);
     setTimeout(function() {
@@ -751,7 +763,7 @@
       if (i === tutorialIndex) cls += " active";
       return '<span class="' + cls + '"></span>';
     }).join("");
-    var text = document.body.dataset.interface === "studio" && window.innerWidth <= 780 && step.isLast ? "Ouvre la navigation pour retrouver ton profil et les réglages." : step.text;
+    var text = document.body.dataset.interface === "studio" && window.innerWidth <= 780 && step.isLast ? "Ouvre la navigation pour retrouver ton profil et les réglages." : (step.textFor && step._matched && step.textFor[step._matched]) || step.text;
     tooltip.innerHTML =
       '<div class="tutorial-head"><span class="tutorial-count">' + (tutorialEn() ? 'Step ' + (tutorialIndex + 1) + ' of ' + total : 'Étape ' + (tutorialIndex + 1) + ' sur ' + total) + '</span>' +
       '<button class="tutorial-skip" id="tutorialSkip" type="button" aria-label="' + (tutorialEn() ? 'Close the tour' : 'Fermer le tutoriel') + '">×</button></div>' +
@@ -802,6 +814,15 @@
     var padding = 6;
     var docked = tutorialDocked();
     var tooltipTop = docked ? tutorialTooltipTop(tooltip) : 0;
+    // Au démarrage, la page se verrouille pendant le premier défilement et l'annule : si l'élément
+    // n'est pas entièrement visible au-dessus de la bulle, on refait défiler une fois.
+    var limit = docked ? tooltipTop - 10 : window.innerHeight - tutorialNavHeight() - 10;
+    if (!tutorialIsInNav(target) && !step._rescrolled && rect.height < limit - 16 && (rect.top < 8 || rect.bottom > limit)) {
+      step._rescrolled = true;
+      scrollTutorialTarget(target, overlay);
+      setTimeout(function () { positionTutorialElements(overlay, target, step); }, 420);
+      return;
+    }
 
     // Zone éclairée : l'élément, coupé à la place disponible pour ne jamais passer sous la bulle
     var top = rect.top - padding, bottom = rect.bottom + padding;
@@ -823,12 +844,24 @@
       tooltip.style.left = "12px";
       tooltip.style.top = tooltipTop + "px";
     } else {
-      var tooltipWidth = tooltip.offsetWidth;
-      tooltip.style.left = Math.max(20, Math.min(window.innerWidth - tooltipWidth - 20, rect.left + rect.width / 2 - tooltipWidth / 2)) + "px";
-      var tooltipHeight = tooltip.offsetHeight;
-      var below = rect.bottom + padding + 14;
-      var above = rect.top - tooltipHeight - padding - 14;
-      tooltip.style.top = (below + tooltipHeight <= window.innerHeight - 16 ? below : above >= 16 ? above : Math.max(16, (window.innerHeight - tooltipHeight) / 2)) + "px";
+      // Dessous, sinon dessus, sinon à droite, sinon à gauche de l'élément ; jamais par-dessus.
+      var tw = tooltip.offsetWidth, th = tooltip.offsetHeight, W = window.innerWidth, H = window.innerHeight;
+      var centeredLeft = Math.max(20, Math.min(W - tw - 20, rect.left + rect.width / 2 - tw / 2));
+      var sideTop = Math.max(16, Math.min(H - th - 16, rect.top + rect.height / 2 - th / 2));
+      var below = rect.bottom + padding + 14, above = rect.top - th - padding - 14;
+      var right = rect.right + padding + 14, left = rect.left - tw - padding - 14;
+      var place;
+      if (below + th <= H - 16) place = [centeredLeft, below];
+      else if (above >= 16) place = [centeredLeft, above];
+      else if (right + tw <= W - 16) place = [right, sideTop];
+      else if (left >= 16) place = [left, sideTop];
+      else {
+        // Élément trop grand de tous côtés : bulle en bas à droite, zone éclairée coupée au-dessus d'elle.
+        place = [W - tw - 20, H - th - 16];
+        spotlight.style.height = Math.max(24, Math.min(bottom, place[1] - 10) - top) + "px";
+      }
+      tooltip.style.left = place[0] + "px";
+      tooltip.style.top = place[1] + "px";
     }
     tooltip.classList.add("is-placed");
   }

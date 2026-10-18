@@ -185,3 +185,7 @@ body[data-theme="moulin"] #objectivesPage .objective-stat span{white-space:norma
 /* Liens dans les pages de lecture des Paramètres : couleur du thème, pas le bleu du navigateur */
 .settings-reading-page a{color:var(--text);font-weight:600;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--accent) 70%,transparent);text-decoration-thickness:1.5px;text-underline-offset:3px}
 .settings-reading-page a:hover{text-decoration-color:var(--accent)}
+
+/* Profil hors connexion : silhouette au lieu d'un « ? » */
+.profile-avatar.is-guest{color:var(--on-accent-fill,var(--button-primary-text,#17261F))!important}
+.profile-trigger .profile-avatar.is-guest svg{width:20px;height:20px;display:block;color:inherit}
