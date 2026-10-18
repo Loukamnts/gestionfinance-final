@@ -62,6 +62,8 @@
     else if(Notification.permission==="denied"&&!on)blocked=t2("Les notifications sont bloquées pour Meuniance. Autorise-les dans les réglages de ton appareil.","Notifications are blocked for Meuniance. Allow them in your device settings.");
     hint.textContent=blocked||(on?t2("Activé sur cet appareil.","On for this device."):t2("Désactivé.","Off."));
     if(blocked){sw.disabled=true;sw.setAttribute("aria-checked","false");freq.hidden=true;acts.hidden=true;}
+    // Sur iPhone dans Safari : le guide d'installation, directement depuis ce message.
+    var how=null;if(blocked&&account().user&&isIOS()&&!standalone()&&window.GFInstall){how=el("button","gfh-link gfr-how",t2("Voir comment faire","Show me how"));how.type="button";how.addEventListener("click",function(){window.GFInstall.open();});}
     sw.addEventListener("click",async function(){
       if(busy)return;busy=true;sw.disabled=true;msg.textContent="";
       try{if(sw.getAttribute("aria-checked")==="true")await disable();else await enable(Number(sel.value)||7);}
@@ -70,7 +72,7 @@
     });
     sel.addEventListener("change",async function(){if(busy)return;busy=true;msg.textContent="";try{await enable(Number(sel.value));msg.textContent=t2("C’est noté.","Saved.");}catch(e){msg.textContent=errorText(e);}busy=false;});
     test.addEventListener("click",async function(){try{var reg=await registration();await reg.showNotification("Meuniance",{body:t2("Les rappels sont bien activés.","Reminders are on."),icon:"/app-icon-180.png",tag:"meuniance-test"});}catch(e){msg.textContent=errorText(e);}});
-    box.replaceChildren(h,intro,row,freq,acts,msg);
+    box.replaceChildren.apply(box,[h,intro,row].concat(how?[how]:[],[freq,acts,msg]));
   }
   function schedule(){clearTimeout(schedule.t);schedule.t=setTimeout(function(){render().catch(function(){});},150);}
   window.addEventListener("authStateChanged",schedule);
@@ -107,7 +109,7 @@
     var tx=el("div","gfr-invite-tx");tx.append(el("strong","",t2("Active les rappels","Turn on reminders")),el("span","",ios?t2("Ajoute Meuniance à ton écran d’accueil pour être prévenu si tu oublies de noter tes dépenses.","Add Meuniance to your Home Screen to be reminded when you forget to log expenses."):t2("Une notification si tu oublies de noter tes dépenses.","A notification if you forget to log your expenses.")));
     var later=el("button","gfr-invite-later",t2("Plus tard","Later")),go=el("button","gfr-invite-go",ios?t2("Voir comment","Show me"):t2("Activer","Turn on"));later.type=go.type="button";
     later.addEventListener("click",function(){setInviteState({next:Date.now()+(7+Math.random()*7)*864e5});hideInvite();});
-    go.addEventListener("click",function(){setInviteState({next:Date.now()+3*864e5});hideInvite();openReminderSettings();});
+    go.addEventListener("click",function(){setInviteState({next:Date.now()+3*864e5});hideInvite();if(ios&&window.GFInstall)window.GFInstall.open();else openReminderSettings();});
     var acts=el("div","gfr-invite-acts");acts.append(later,go);c.append(ic,tx,acts);document.body.append(c);
     requestAnimationFrame(function(){c.classList.add("is-on");});
   }

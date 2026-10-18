@@ -16,13 +16,13 @@
   }
   function syncViews(){var sel=byId("viewSelect");document.querySelectorAll("#gfcViews button").forEach(function(b){b.setAttribute("aria-pressed",String(sel&&sel.value===b.dataset.view));});}
 
-  /* 2. Barre du bas : Accueil, Tableur, Mon espace (Partage, Objectifs, Nouveautés).
-     Paramètres est l'engrenage en haut, à gauche du profil. */
+  /* 2. Navigation : Accueil, Tableur, Mon espace (Partage, Objectifs, Nouveautés), en bas sur
+     téléphone et en haut sur ordinateur. Paramètres est l'engrenage, à gauche du profil. */
   var SPACE=["sharing","objectives","updates"];
   function bottomNav(){var b=byId("personalNavButton");if(b)b.dataset.space="1";}
   function navPage(x){var page=document.body.dataset.page;return x.dataset.page===page||(x.dataset.space==="1"&&SPACE.indexOf(page)>=0);}
   function syncBottom(){
-    document.querySelectorAll(".bottom-nav .bottom-nav-btn").forEach(function(x){var on=navPage(x);x.classList.toggle("is-active",on);if(on)x.setAttribute("aria-current","page");else x.removeAttribute("aria-current");});
+    document.querySelectorAll(".bottom-nav .bottom-nav-btn, .desktop-nav .desktop-nav-link").forEach(function(x){var on=navPage(x);x.classList.toggle("is-active",on);if(on)x.setAttribute("aria-current","page");else x.removeAttribute("aria-current");});
     document.querySelectorAll(".mobile-settings-button").forEach(function(x){x.classList.toggle("is-active",document.body.dataset.page==="settings");});
   }
 
