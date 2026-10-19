@@ -16,7 +16,7 @@
     "2026-10-19-ensemble":[
       {id:"year",title:["Ton bilan de l’année","Your year in review"],text:["Ton année en quelques écrans, avec tes propres chiffres.","Your year in a few screens, with your own numbers."],run:function(){goHome(function(){if(window.GFYear)window.GFYear.open(new Date().getFullYear());});}},
       {id:"split",title:["Partage une dépense entre amis","Split an expense with friends"],text:["Qui a payé, qui doit combien : les comptes se font tout seuls.","Who paid, who owes what: the maths is done for you."],run:function(){openPage("sharing",function(){return document.querySelector(".sfx-overview .sf-button")||document.querySelector("#sharingPage .sf-toolbar-actions .sf-primary")||document.querySelector("#sharingPage .sf-empty-onboarding .sf-primary");},["Note une dépense partagée : chacun voit ce qu’il doit, et tu marques quand c’est remboursé.","Log a shared expense: everyone sees what they owe, and you mark it when it’s paid back."]);}},
-      {id:"alerts",title:["Prévenu avant le plafond","Warned before your limit"],text:["Une alerte à 80 % puis à 100 % du plafond d’une ligne.","An alert at 80% then 100% of a row’s limit."],run:function(){openPage("settings",function(){return byId("gfrBudget");},["Les alertes de plafond se règlent ici. Fixe un plafond en touchant une ligne de « Où part ton argent » sur l’accueil.","Limit alerts are set here. Set a limit by tapping a row in “Where your money goes” on Home."],function(){var h=document.querySelector('[data-settings-view="notifications"]');if(h)h.click();});}},
+      {id:"alerts",title:["Prévenu avant le plafond","Warned before your limit"],text:["Une alerte à 80 % puis à 100 % du plafond d’une ligne.","An alert at 80% then 100% of a row’s limit."],run:function(){openPage("settings",budgetTarget,["Les alertes de plafond se règlent ici. Fixe un plafond en touchant une ligne de « Où part ton argent » sur l’accueil.","Limit alerts are set here. Set a limit by tapping a row in “Where your money goes” on Home."],function(){var h=document.querySelector('[data-settings-view="notifications"]');if(h)h.click();});}},
       {id:"subs",title:["Tes abonnements, repérés","Your subscriptions, spotted"],text:["Importe un relevé : les prélèvements réguliers sont listés sur l’accueil.","Import a statement: recurring payments are listed on Home."],run:function(){if(byId("gfsPanel")){goHome(function(){var n=byId("gfsPanel");if(n){n.scrollIntoView({block:"center"});setTimeout(function(){coach(n,t2("Tes abonnements et leur coût sur un an. Touche « Tout voir et gérer » pour en retirer un.","Your subscriptions and their yearly cost. Tap “See and manage all” to remove one."));},350);}});return;}openPage("sheet",function(){return byId("btnSheetImport");},["Importe le relevé CSV de ta banque : les abonnements repérés apparaîtront sur l’accueil.","Import your bank’s CSV statement: the subscriptions found will show on Home."]);}}
     ],
     "2026-10-15-bilan":[
@@ -37,6 +37,9 @@
   function state(){var r=release(),s=read();if(!r)return null;if(s.v!==r.version)s={v:r.version,tried:[],hidden:false};if(!Array.isArray(s.tried))s.tried=[];return s;}
   function markSeen(){var r=release();try{if(r&&store())store().setItem("personalFinanceDashboard.lastSeenRelease",r.version);}catch(e){}}
 
+  // reminders.js a fondu l’ancien bloc #gfrBudget dans les notifications : on vise la ligne « plafond »
+  // si elle est visible (dépliée), sinon tout le bloc des notifications.
+  function budgetTarget(){var box=byId("gfrReminders"),row=box&&box.querySelector(".gfr-kind.is-budget");return row&&row.getClientRects().length?row:box;}
   function goHome(after){if(typeof window.setPage==="function")window.setPage("dashboard");setTimeout(after,120);}
   function openPage(page,find,caption,before){
     if(typeof window.setPage==="function")window.setPage(page);
@@ -65,7 +68,9 @@
   }
   /* opts (facultatif) : {step, total, last, onNext} pour enchaîner plusieurs repères (« Suivant », 1/3…). */
   function coach(node,text,opts){
-    closeCoach();if(!node)return;
+    closeCoach();
+    // Élément absent ou caché : on passe sans bloquer (étape suivante s’il y en a une).
+    if(!node||!node.isConnected||!node.getClientRects().length){if(opts&&!opts.last&&opts.onNext)setTimeout(opts.onNext,60);return;}
     // Place l'élément au centre de la zone visible, au-dessus de la barre de navigation du bas
     var r=node.getBoundingClientRect(),visible=window.innerHeight-bottomBar(),y=window.scrollY+r.top-Math.max(16,(visible-r.height)/2);
     // En bas de page, on ajoute un peu d'espace le temps du repère pour pouvoir centrer l'élément
