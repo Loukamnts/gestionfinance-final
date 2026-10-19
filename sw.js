@@ -59,7 +59,8 @@ self.addEventListener("fetch", function (event) {
 self.addEventListener("push", function (event) {
   var data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = { body: event.data ? event.data.text() : "" }; }
-  var url = typeof data.url === "string" && data.url.charAt(0) === "/" ? data.url : "/tableur";
+  // Chemin du site seulement : « //autre-site.fr » ouvrirait un autre site.
+  var url = typeof data.url === "string" && data.url.charAt(0) === "/" && data.url.charAt(1) !== "/" && data.url.charAt(1) !== "\\" ? data.url : "/tableur";
   event.waitUntil(self.registration.showNotification(String(data.title || "Meuniance"), {
     body: String(data.body || "Pense à noter tes dépenses."),
     icon: "/app-icon-180.png",
@@ -72,7 +73,8 @@ self.addEventListener("push", function (event) {
 
 self.addEventListener("notificationclick", function (event) {
   event.notification.close();
-  var url = new URL((event.notification.data && event.notification.data.url) || "/tableur", self.location.origin).href;
+  var url = new URL((event.notification.data && event.notification.data.url) || "/tableur", self.location.origin);
+  url = url.origin === self.location.origin ? url.href : new URL("/tableur", self.location.origin).href;
   event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (list) {
     for (var i = 0; i < list.length; i++) {
       var client = list[i];

@@ -319,3 +319,4 @@ body[data-theme="moulin"] #sharingContainer .sf-privacy{margin-top:20px;padding:
   .sfx-overview { flex-direction: column; align-items: stretch; padding: 16px 18px; }
   .sfx-overview > .sf-button { width: 100%; }
 }
+.sfx-hint { flex-basis: 100%; margin: 2px 0 0; font-size: .8125rem; line-height: 1.4; color: var(--muted); }

@@ -31,6 +31,7 @@
     if(/invalid_amount/.test(m))return"Le montant doit être compris entre 0,01 € et 10 000 €.";
     if(/too_many/.test(m))return"Beaucoup de dépenses ajoutées aujourd’hui. Réessaie demain.";
     if(/nothing_to_settle/.test(m))return"Vous êtes déjà quittes.";
+    if(/only_creditor/.test(m))return"C’est la personne remboursée qui confirme le remboursement.";
     if(/does not exist|could not find the function|pgrst202/.test(m))return"Les dépenses partagées ne sont pas encore disponibles. Réessaie plus tard.";
     return"L’action n’a pas abouti. Vérifie ta connexion puis réessaie.";
   }
@@ -97,7 +98,9 @@
     status.setAttribute("translate","no");
     acts.append(u.action("Ajouter une dépense",function(){openAdd([friend],friend);},"secondary","plus"));
     if(b.entries)acts.append(u.action("Historique",function(){openHistory(friend);},"text"));
-    if(net!==0)acts.append(u.action("Marquer comme remboursé",function(){openSettle(friend,net);},"text"));
+    // Seule la personne remboursée confirme le remboursement (celle qui doit ne peut pas effacer sa dette).
+    if(net>0)acts.append(u.action("Marquer comme remboursé",function(){openSettle(friend,net);},"text"));
+    else if(net<0){var hint=u.el("small","sfx-hint","Quand tu l’auras remboursé, "+name+" le marquera de son côté.");hint.setAttribute("translate","no");acts.append(hint);}
     slot.replaceChildren(head,status,acts);
   }
 

@@ -215,5 +215,7 @@
   if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){
     window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js",{scope:"/"}).catch(function(){});});
   }
-  window.GFReminders={render:schedule,notifyMe:notifyMe,pushReady:pushReady,_invite:showInvite};
+  // Déconnexion : cet appareil arrête de recevoir les notifications du compte (la personne suivante ne les verra pas).
+  function forgetDevice(){return Promise.race([disable().catch(function(){}),new Promise(function(r){setTimeout(r,3000);})]);}
+  window.GFReminders={render:schedule,notifyMe:notifyMe,pushReady:pushReady,forgetDevice:forgetDevice,_invite:showInvite};
 })();

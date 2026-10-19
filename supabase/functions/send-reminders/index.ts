@@ -35,6 +35,12 @@ Deno.serve(async (request) => {
   if (!url || !serviceRoleKey) return new Response("Server misconfigured", { status: 500 });
   const admin = createClient(url, serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
+  // Seule la tâche planifiée (secret partagé) peut déclencher un envoi ; un appel inconnu s'arrête ici, sans rien lire.
+  const secret = request.headers.get("x-reminder-secret") || "";
+  if (secret.length < 32 || secret.length > 256) return new Response("Unauthorized", { status: 401 });
+  const { data: allowed } = await admin.rpc("reminder_cron_check", { p_secret: secret });
+  if (allowed !== true) return new Response("Unauthorized", { status: 401 });
+
   // Les clés existent avant tout envoi (le site en a besoin pour s'abonner) ; les créer est sans risque.
   let { data: keys } = await admin.rpc("reminder_vapid_keys");
   if (!keys?.public || !keys?.private) {
@@ -42,10 +48,6 @@ Deno.serve(async (request) => {
     await admin.rpc("reminder_vapid_init", { p_public: fresh.public, p_private: fresh.private });
     ({ data: keys } = await admin.rpc("reminder_vapid_keys"));
   }
-
-  const secret = request.headers.get("x-reminder-secret") || "";
-  const { data: allowed } = await admin.rpc("reminder_cron_check", { p_secret: secret });
-  if (allowed !== true) return new Response(JSON.stringify({ ready: !!keys?.public }), { status: 401 });
 
   webpush.setVapidDetails("mailto:louka.meunier1@gmail.com", keys.public, keys.private);
 

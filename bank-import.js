@@ -482,6 +482,8 @@
   /* Renvoie true si le fichier était un relevé bancaire (importé ou annulé), false sinon. */
   function handle(file){
     if(!file||!/\.(csv|txt)$/i.test(file.name||""))return Promise.resolve(false);
+    // Un relevé fait quelques centaines de Ko : au-delà de 10 Mo, ce n'est pas un relevé (et l'onglet gèlerait).
+    if(file.size>10*1024*1024){toast(t2("Ce fichier est trop lourd pour un relevé bancaire (10 Mo au plus).","This file is too large for a bank statement (10 MB max)."));return Promise.resolve(true);}
     return file.arrayBuffer().then(function(buf){
       var ops=parse(decode(buf));if(!ops)return false;
       var summary=summarize(ops);if(!summary.groups.length)return false;

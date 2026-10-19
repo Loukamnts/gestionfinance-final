@@ -17,6 +17,9 @@
   function snapshot(){try{return window.FinanceSheet&&window.FinanceSheet.getSnapshot?window.FinanceSheet.getSnapshot():null;}catch(e){return null;}}
   function yearOf(sheet){var match=String(sheet&&sheet.name||"").match(/(19\d{2}|20\d{2}|21\d{2})/);return match?Number(match[1]):0;}
   function idOf(sheet,index){return String(sheet&&sheet.id||("sheet-"+index));}
+  // Nom d'une ligne réduit à des lettres et chiffres : un partage suit la ligne par son nom, pas par sa position
+  // (un import ou une suppression déplace les lignes ; l'ami ne doit jamais voir une autre ligne que celle choisie).
+  function rowKeyLabel(sheet,row){return normal(sheet&&sheet.rowHeaders&&sheet.rowHeaders[row]||"").replace(/[^a-z0-9]/g,"").slice(0,40);}
   function labelOf(sheet,row){var value=String(sheet&&sheet.rowHeaders&&sheet.rowHeaders[row]||"").trim();return "Ligne "+(row+1)+(value?" — "+value:"");}
   function headerOf(sheet,column){return String(sheet&&sheet.headers&&sheet.headers[column]||MONTHS[column]||column+1);}
   function rowHasData(sheet,row){if(String(sheet.rowHeaders&&sheet.rowHeaders[row]||"").trim())return true;return Object.keys(sheet.cells||{}).some(function(key){return key.indexOf(row+",")===0;});}
@@ -59,13 +62,19 @@
     try{var result=await client.rpc("remove_friendship",{p_friendship_id:id});if(result.error)return{error:errorText(result.error)};invalidate();return{success:true};}catch(e){return{error:errorText(e)};}
   }
   async function loadRules(friendId){var client=sb(),me=user();if(!client||!me)throw new Error("Non connecté");var result=await client.from("share_permissions").select("year,month,row_key,allowed").eq("owner_id",me.id).eq("friend_id",friendId);if(result.error)throw result.error;return(result.data||[]).filter(function(rule){return rule.year!==null||rule.month!==null||rule.row_key!==null;});}
-  function selectionFromRules(data,rules){var selection={};((data&&data.sheets)||[]).forEach(function(sheet,index){var id=idOf(sheet,index),year=yearOf(sheet);selection[id]={months:new Set(),rows:new Set()};(rules||[]).forEach(function(rule){if(!rule.allowed||Number(rule.year||0)!==year||String(rule.row_key||"").indexOf(id+":")!==0)return;selection[id].months.add(Number(rule.month)-1);var row=Number(String(rule.row_key).slice((id+":").length));if(Number.isInteger(row)&&row>=0)selection[id].rows.add(row);});});return selection;}
+  // legacy : pour les anciennes règles sans nom de ligne, les noms déjà partagés (par feuille) ; une ligne dont le nom
+  // n'en fait pas partie n'est pas partagée. Sans legacy (affichage du réglage), l'ancienne position est montrée telle quelle.
+  function selectionFromRules(data,rules,legacy){var selection={};((data&&data.sheets)||[]).forEach(function(sheet,index){var id=idOf(sheet,index),year=yearOf(sheet);selection[id]={months:new Set(),rows:new Set()};(rules||[]).forEach(function(rule){if(!rule.allowed||Number(rule.year||0)!==year||String(rule.row_key||"").indexOf(id+":")!==0)return;
+    var parts=String(rule.row_key).slice((id+":").length).split(":"),row=Number(parts[0]),name=parts.slice(1).join(":");if(!Number.isInteger(row)||row<0)return;
+    if(name){if(rowKeyLabel(sheet,row)!==name){row=-1;var n=(sheet.rowHeaders||[]).length;for(var r=0;r<n;r++)if(rowKeyLabel(sheet,r)===name){row=r;break;}}if(row<0)return;}
+    else if(legacy){var known=legacy[String(sheet.name||"")];if(!known||!known.has(rowKeyLabel(sheet,row)))return;}
+    selection[id].months.add(Number(rule.month)-1);selection[id].rows.add(row);});});return selection;}
   function ruleCount(selection){return Object.keys(selection||{}).reduce(function(total,key){return total+selection[key].months.size*selection[key].rows.size;},0);}
-  function buildRules(data,selection){var rules=[];((data&&data.sheets)||[]).forEach(function(sheet,index){var chosen=selection[idOf(sheet,index)];if(!chosen||!chosen.months.size||!chosen.rows.size)return;chosen.rows.forEach(function(row){chosen.months.forEach(function(column){rules.push({year:yearOf(sheet),month:column+1,row_key:idOf(sheet,index)+":"+row,allowed:true});});});});return rules;}
+  function buildRules(data,selection){var rules=[];((data&&data.sheets)||[]).forEach(function(sheet,index){var chosen=selection[idOf(sheet,index)];if(!chosen||!chosen.months.size||!chosen.rows.size)return;chosen.rows.forEach(function(row){chosen.months.forEach(function(column){var name=rowKeyLabel(sheet,row);rules.push({year:yearOf(sheet),month:column+1,row_key:idOf(sheet,index)+":"+row+(name?":"+name:""),allowed:true});});});});return rules;}
   function recompute(sheet){try{return window.FinanceSheet&&window.FinanceSheet.recompute?window.FinanceSheet.recompute(sheet.cells||{}):{};}catch(e){return{};}}
   function cellValue(result){if(!result||result.error||result.value===undefined||result.value===null)return"";var value=result.value;if(typeof value==="number"&&Number.isFinite(value))return value;return String(value).slice(0,500);}
   function buildTablePayload(data,selection){var sheets=[];((data&&data.sheets)||[]).forEach(function(sheet,index){var chosen=selection[idOf(sheet,index)];if(!chosen||!chosen.months.size||!chosen.rows.size)return;var columns=Array.from(chosen.months).sort(function(a,b){return a-b;}),rows=Array.from(chosen.rows).sort(function(a,b){return a-b;}),values=recompute(sheet),shared={name:String(sheet.name||"Feuille"),headers:columns.map(function(c){return headerOf(sheet,c);}),rowHeaders:rows.map(function(r){return labelOf(sheet,r);}),rows:rows.length,cols:columns.length,cells:{}};rows.forEach(function(sourceRow,localRow){columns.forEach(function(sourceCol,localCol){var value=cellValue(values[sourceRow+","+sourceCol]);if(value!=="")shared.cells[localRow+","+localCol]={raw:String(value)};});});sheets.push(shared);});return{v:"shared-sheet-v2",updatedAt:Date.now(),sheets:sheets};}
-  function lineType(label){var value=normal(label);if(/epargne|livret|pea|placement|investissement/.test(value))return"savings";if(/salaire|revenu|prime|allocation|remuneration|paie|paye/.test(value))return"income";if(/depense|loyer|charge|facture|abonnement|course|frais|impot|taxe|assurance|transport|restaurant|achat|credit/.test(value))return"expense";return"other";}
+  function lineType(label){var d=window.GFClassifyRow&&window.GFClassifyRow(label);if(d==="Salaire")return"income";if(d==="Dépense")return"expense";if(d==="Épargne")return"savings";var value=" "+normal(label).replace(/[^a-z0-9]+/g," ")+" ";if(/ (epargne|livrets?|pea|placements?|investissements?) /.test(value))return"savings";if(/epargne|livret|pea|placement|investissement/.test(value))return"savings";if(/salaire|revenu|allocation|remuneration| paie | paye /.test(value))return"income";if(/depense|loyer|charge|facture|abonnement|course|frais|impot|taxe|assurance|transport|restaurant|achat|credit/.test(value))return"expense";return"other";}
   function numberValue(value){var result=typeof value==="number"?value:parseFloat(String(value).replace(",",".").replace(/[^0-9.-]/g,""));return Number.isFinite(result)?result:0;}
   function buildDashboardPayload(table){
     var months=[];
@@ -104,6 +113,16 @@
       invalidate();return{success:true};
     }catch(e){return{error:errorText(e,"l’enregistrement de cet accès")};}
   }
+  function ruleSet(rules){return(rules||[]).map(function(r){return r.year+"|"+r.month+"|"+r.row_key;}).sort().join(",");}
+  // Noms des lignes déjà partagées avec cet ami (dernier instantané), par feuille.
+  async function sharedLabels(client,meId,friendId){
+    var out={};
+    try{var res=await client.from("finance_shared_sheet_snapshots").select("payload").eq("owner_id",meId).eq("friend_id",friendId).maybeSingle();
+      var sheets=res&&res.data&&res.data.payload&&res.data.payload.sheets||[];
+      sheets.forEach(function(sh){var set=out[String(sh.name||"")]=new Set();(sh.rowHeaders||[]).forEach(function(h){set.add(normal(String(h||"").replace(/^Ligne \d+ — /,"")).replace(/[^a-z0-9]/g,"").slice(0,40));});});
+    }catch(e){}
+    return out;
+  }
   var syncPending=null;
   async function refreshMySharedSnapshots(){
     if(syncPending)return syncPending;
@@ -113,9 +132,16 @@
       for(var i=0;i<friends.friends.length;i++){
         try{
           var friend=friends.friends[i];if(!friend.permissions.can_view_sheet&&!friend.permissions.can_view_dashboard)continue;
-          var rules=await loadRules(friend.friendId),selection=selectionFromRules(data,rules),table=buildTablePayload(data,selection);
+          var rules=await loadRules(friend.friendId),legacy=null;
+          // Anciennes règles (position seule) : on ne garde que les lignes dont le nom était déjà dans le partage.
+          if(rules.some(function(r){return String(r.row_key||"").split(":").length<3;}))legacy=await sharedLabels(client,me.id,friend.friendId);
+          var selection=selectionFromRules(data,rules,legacy||{}),table=buildTablePayload(data,selection),next=buildRules(data,selection);
           if(!user()||user().id!==me.id)return;
-          var result=await client.rpc("refresh_friend_share_snapshots",{p_friend_id:friend.friendId,p_rules:buildRules(data,selection),p_sheet_payload:table,p_dashboard_payload:buildDashboardPayload(table)});
+          if(!next.length)continue;// plus aucune ligne reconnue : l'ancien partage reste tel quel, rien de nouveau n'est montré
+          var same=ruleSet(next)===ruleSet(rules.filter(function(r){return r.allowed;}));
+          // Lignes déplacées ou renommées : la sélection est réenregistrée avec les nouvelles positions.
+          var result=same?await client.rpc("refresh_friend_share_snapshots",{p_friend_id:friend.friendId,p_rules:next,p_sheet_payload:table,p_dashboard_payload:buildDashboardPayload(table)})
+            :await client.rpc("save_friend_share_config",{p_friend_id:friend.friendId,p_can_view_dashboard:!!friend.permissions.can_view_dashboard,p_can_view_sheet:!!friend.permissions.can_view_sheet,p_rules:next,p_sheet_payload:friend.permissions.can_view_sheet?table:null,p_dashboard_payload:friend.permissions.can_view_dashboard?buildDashboardPayload(table):null});
           if(result.error)console.warn("Synchronisation du partage différée",result.error.code||"");
         }catch(e){console.warn("Synchronisation du partage différée",e);}
       }
@@ -385,7 +411,7 @@
     function chooseTab(name){selectedTab=name;friendPanel.hidden=name!=="friends";invitationPanel.hidden=name!=="invitations";[[friendsTab,"friends"],[invitesTab,"invitations"]].forEach(function(item){var active=item[1]===name;item[0].setAttribute("aria-selected",String(active));item[0].tabIndex=active?0:-1;});}
     chooseTab(selectedTab);container.replaceChildren(shell);container.dataset.sharingReady=me.id;container._sharingData=data;
   }
-  window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots,ui:{el:el,action:action,notice:notice,icon:icon,openDialog:openDialog}};
+  window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots,_rules:{select:selectionFromRules,build:buildRules},ui:{el:el,action:action,notice:notice,icon:icon,openDialog:openDialog}};
   // Lorsqu'on arrive directement sur /partage, le routeur est exécuté avant
   // ce fichier. On rend donc l'état initial ici, puis à chaque connexion.
   function refreshVisibleSharing(){var page=document.getElementById("sharingPage"),container=document.getElementById("sharingContainer");if(page&&!page.hidden&&container)renderSharing(container,{force:true});}

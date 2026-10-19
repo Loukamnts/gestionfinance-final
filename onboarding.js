@@ -947,6 +947,7 @@
         var previousOwner = window.__account && window.__account.user && window.__account.user.id;
         var sb = window.__account && window.__account.client;
         if (previousOwner && sb) {
+          try { if (window.GFReminders && window.GFReminders.forgetDevice) await window.GFReminders.forgetDevice(); } catch(e) {}
           try {
             var result = await sb.auth.signOut();
             if (result && result.error) throw result.error;
