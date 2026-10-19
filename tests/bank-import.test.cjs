@@ -63,3 +63,58 @@ test('Ligne déjà dans le tableur : pas de deuxième « Abonnements »',()=>{
   assert.equal(B2.existingRow('Abonnements',['Abonnements streaming et musique']),'Abonnements streaming et musique');
   assert.equal(B2.existingRow('Abonnements',['Abonnements TV','Abonnements sport']),null);
 });
+
+// ── Fiabilité : catégories, dates, relevés qui se chevauchent ──
+function setupSheet(rows){const mem={};let snap={sheets:[{id:'y',name:'2026',cells:{},rowHeaders:rows||[],rows:9,cols:12}]};
+  const c={window:{safeStore:{getItem:k=>mem[k]??null,setItem:(k,v)=>{mem[k]=String(v);}},FinanceSheet:{getSnapshot:()=>snap,loadSnapshot:s=>{snap=s;}}},TextDecoder,Intl,document:{}};
+  vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(__dirname,'..','bank-import.js'),'utf8'),c);
+  const B=c.window.GFBankImport;const imp=(csv,mode)=>{const s=B.summarize(B.parse(B._decode(enc(csv))));B.write(s,mode||'replace');return s;};
+  const cell=(name,mi)=>{const sh=snap.sheets.find(x=>x.name==='2026');const r=sh.rowHeaders.indexOf(name);const v=sh.cells[r+','+mi];return v?Number(v.raw):null;};
+  return {B,imp,cell};}
+test('Libellés piégeux : bonne catégorie',()=>{
+  const cat=l=>{const c=B.categorize({label:l,amount:-10},{});return c?c[0]:null;};
+  assert.equal(cat('VIR SEPA PAUL DURAND'),'Autres dépenses');
+  assert.equal(cat('CARTE 12/09 PAUL GARE DE LYON'),'Restaurants');
+  assert.equal(cat('PRLV BP ECHEANCE PRET'),'Autres dépenses');
+  assert.equal(cat('CARTE 03/09 BP STATION A6'),'Transports');
+  assert.equal(cat('CARTE 05/09 TOTALENERGIES PARIS'),'Transports');
+  assert.equal(cat('PRLV TOTALENERGIES ELECTRICITE'),'Énergie et eau');
+  assert.equal(cat('CARTE 06/09 HABITAT PARIS'),'Autres dépenses');
+  assert.equal(cat('PRLV OPH HABITAT 75'),'Loyer');
+  assert.equal(cat('CARTE KINEPOLIS LOMME'),'Autres dépenses');
+  assert.equal(cat('CARTE GERALDINE COIFFURE'),'Autres dépenses');
+  assert.equal(cat('VIR RESTOS DU COEUR DON'),'Autres dépenses');
+  assert.equal(cat('CARTE SEPHORA EAU DE PARFUM'),'Shopping');
+  assert.equal(cat('COTISATION MUTUELLE HARMONIE'),'Santé');
+  assert.equal(cat('COTISATION CARTE VISA PREMIER'),'Frais bancaires');
+  assert.equal(cat('CARTE AMAZON FRAIS DE PORT'),'Shopping');
+});
+test('Dates avec heure, format mois/jour, opérations annulées',()=>{
+  const ops=B.parse(B._decode(enc('Type,Started Date,Description,Amount,State\nCARD_PAYMENT,2026-09-05 10:12:33,Lidl,-20.00,COMPLETED\nCARD_PAYMENT,2026-09-06 11:00:00,Zara,-50.00,REVERTED\nCARD_PAYMENT,2026-09-07 09:00:00,Fnac,-30.00,PENDING\nTOPUP,2026-09-08 09:00:00,Top-up,100.00,COMPLETED\n')));
+  assert.equal(ops.length,2);assert.equal(ops[0].date.d,5);
+  const us=B.parse(B._decode(enc('Date,Description,Amount\n09/25/2026,Lidl,-20.00\n10/02/2026,Fnac,-30.00\n')));
+  assert.equal(us[0].date.m,8);assert.equal(us[0].date.d,25);assert.equal(us[1].date.m,9);
+});
+test('Débit différé : le total carte n’est pas compté en plus des paiements',()=>{
+  const ops=B.parse(B._decode(enc('Date;Libellé;Montant\n02/09/2026;CARTE 01/09 LIDL;-40,00\n03/09/2026;CARTE 02/09 FNAC;-60,00\n04/09/2026;CARTE 03/09 SNCF;-50,00\n30/09/2026;FACTURE CARTE DU 30/09;-150,00\n')));
+  assert.equal(ops.length,3);
+});
+test('Relevés qui se chevauchent : ni perte ni double compte',()=>{
+  const {imp,cell}=setupSheet();
+  imp('Date;Libellé;Montant\n02/09/2026;CARTE LIDL;-40,00\n20/09/2026;CARTE LIDL;-60,00\n05/10/2026;CARTE LIDL;-10,00\n');
+  assert.equal(cell('Courses',8),-100);
+  // 2e relevé : du 15 septembre au 31 octobre (septembre partiel)
+  const s=imp('Date;Libellé;Montant\n20/09/2026;CARTE LIDL;-60,00\n05/10/2026;CARTE LIDL;-10,00\n25/10/2026;CARTE LIDL;-30,00\n');
+  assert.equal(cell('Courses',8),-100);assert.equal(cell('Courses',9),-40);assert.equal(s.dup,2);
+  // Mode « Ajouter » : seules les nouvelles opérations s'ajoutent
+  imp('Date;Libellé;Montant\n25/10/2026;CARTE LIDL;-30,00\n28/10/2026;CARTE LIDL;-5,00\n','add');
+  assert.equal(cell('Courses',9),-45);
+});
+test('Marchand déplacé puis relevé réimporté : l’ancienne ligne est vidée',()=>{
+  const {B,imp,cell}=setupSheet();
+  imp('Date;Libellé;Montant\n05/09/2026;PRLV SEPA NETFLIX;-13,49\n06/09/2026;CARTE LIDL;-20,00\n');
+  assert.equal(cell('Abonnements',8),-13.49);
+  B.saveLearned({'netflix':['Loisirs','Dépense']});
+  imp('Date;Libellé;Montant\n05/09/2026;PRLV SEPA NETFLIX;-13,49\n06/09/2026;CARTE LIDL;-20,00\n');
+  assert.equal(cell('Loisirs',8),-13.49);assert.equal(cell('Abonnements',8),null);assert.equal(cell('Courses',8),-20);
+});
