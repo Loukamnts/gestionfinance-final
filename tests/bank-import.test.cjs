@@ -290,3 +290,29 @@ test('Renommer une ligne en 2026 ne touche pas 2025 ; renommer vers un nom exist
   const sh=d.snap().sheets[0];const total=[0,1].reduce((t,i)=>t+Number((sh.cells[i+',8']||{raw:0}).raw),0);
   assert.equal(Math.round(total*100)/100,-61);
 });
+
+// ── Cinquième relecture ──
+test('Ligne de sous-total ou « Dépenses globales » : la nouvelle ligne va au-dessus et entre dans la somme',()=>{
+  const {imp,snap}=setupSheet(['Salaire','Loyer','Courses','Dépenses globales']);
+  snap().sheets[0].cells={'0,8':{raw:'2000'},'1,8':{raw:'-800'},'2,8':{raw:'-100'},'3,8':{raw:'=SUM(I2:I3)'}};
+  imp('Date;Libellé;Montant\n05/09/2026;CB UBER EATS;-30,00\n06/09/2026;CB LIDL;-100,00\n');
+  let sh=snap().sheets[0];assert.deepEqual(JSON.parse(JSON.stringify(sh.rowHeaders)),['Salaire','Loyer','Courses','Restaurants','Dépenses globales']);assert.equal(sh.cells['4,8'].raw,'=SUM(I2:I4)');
+  const e=setupSheet(['Courses','Sous-total dépenses','Livret A']);e.snap().sheets[0].cells={'0,8':{raw:'-100'},'1,8':{raw:'=SUM(I1:I1)'}};
+  e.imp('Date;Libellé;Montant\n05/09/2026;CB UBER EATS;-30,00\n06/09/2026;CB LIDL;-100,00\n');
+  sh=e.snap().sheets[0];assert.equal(sh.rowHeaders.indexOf('Restaurants'),1);assert.equal(sh.cells['2,8'].raw,'=SUM(I1:I2)');
+});
+test('Deux lignes du même nom de types différents : la dépense va dans la ligne de dépense, l’autre n’est pas effacée',()=>{
+  const env=setupSheet(['Salaire','Divers','Loyer','Divers']);
+  env.snap().sheets[0].cells={'1,8':{raw:'50'},'3,8':{raw:'-40'}};
+  env.B.saveLearned({'chez marcel':['Divers','Dépense']});
+  const rules={};rules['divers']='Dépense';
+  env.imp('Date;Libellé;Montant\n05/09/2026;CARTE CHEZ MARCEL;-15,00\n06/09/2026;CB LIDL;-1,00\n');
+  const sh=env.snap().sheets[0];assert.equal(sh.cells['1,8'].raw,'50');
+});
+test('Nouvelle année sans feuille : suit le renommage de la dernière année',()=>{
+  const env=setupSheet(['Alimentation']);
+  env.imp('Date;Libellé;Montant\n05/09/2026;CB LIDL;-20,00\n06/09/2026;CB AUCHAN;-1,00\n');
+  env.snap().sheets[0].rowHeaders[0]='Bouffe';env.B.renameRow('Alimentation','Bouffe','2026');
+  env.imp('Date;Libellé;Montant\n05/01/2027;CB LIDL;-9,00\n06/01/2027;CB AUCHAN;-1,00\n');
+  const s27=env.snap().sheets.find(s=>s.name==='2027');assert.deepEqual(JSON.parse(JSON.stringify(s27.rowHeaders)),['Bouffe']);
+});

@@ -215,7 +215,7 @@
     shopping:["achats"],retraits:["retrait","especes","liquide"],fraisbancaires:["frais banque","banque","bank fees"],epargne:["savings"]};
   function sing(k){return k.replace(/(s|x)$/,"");}
   // Ligne de calcul (« Total dépenses », « Solde », « Reste à vivre ») : ni revenu, ni dépense, ni épargne.
-  function structural(h){h=String(h||"").trim();if(!h)return false;if(/^(solde|total|reste|disponible|balance|bilan|resultat)\b/.test(norm(h)))return true;
+  function structural(h){h=String(h||"").trim();if(!h)return false;var nh=norm(h);if(/^(solde|reste|disponible|balance|bilan|resultat)\b|\btotale?s?\b|^(depenses|revenus|epargne) (globales?|totales?|du mois)$/.test(nh))return true;
     var d=window.GFClassifyRow&&window.GFClassifyRow(h);return d==="Ignorer";}
   // Lignes du tableur. Avec une année : celles de cette année (ou de la dernière année existante si elle n'a pas encore de feuille).
   function sheetRows(year){
@@ -228,10 +228,16 @@
   }
   var ALIAS_KEY="personalFinanceDashboard.rowAliases";
   function aliases(){try{var v=JSON.parse(window.safeStore&&window.safeStore.getItem(ALIAS_KEY)||"{}");return v&&typeof v==="object"?v:{};}catch(e){return{};}}
+  // Année dont on suit les renommages : la sienne, ou la dernière année existante si elle n'a pas encore de feuille.
+  function aliasYear(year){
+    if(year==null)return null;var sheets=[];try{sheets=window.FinanceSheet.getSnapshot().sheets||[];}catch(e){}
+    if(sheets.some(function(sh){return String(sh.name).trim()===String(year);}))return String(year);
+    var yrs=sheets.map(function(sh){return String(sh.name).trim();}).filter(function(n){return /^\d{4}$/.test(n);}).sort();return yrs.length?yrs[yrs.length-1]:String(year);
+  }
   function existingRow(name,rows,year){
     var k=key(name);if(!k||!rows||!rows.length)return null;
     // Catégorie dont tu as renommé la ligne cette année-là (« Alimentation » → « Bouffe »)
-    var A=aliases(),al=year!=null&&A[String(year)]&&typeof A[String(year)]==="object"?A[String(year)][k]:null;
+    var A=aliases(),ay=aliasYear(year),al=ay!=null&&A[ay]&&typeof A[ay]==="object"?A[ay][k]:null;
     if(al){for(var a=0;a<rows.length;a++)if(key(rows[a])===key(al))return rows[a];}
     var hit=function(f){for(var i=0;i<rows.length;i++)if(f(key(rows[i])))return rows[i];return null;};
     var syn=(SYN[k]||[]).map(key);
@@ -378,12 +384,15 @@
         var p=mk.split("-"),y=p[0],mi=Number(p[1]),sh=snap.sheets.filter(function(s){return String(s.name).trim()===y;})[0];
         if(!sh){sh={id:"s"+y+"-"+Date.now().toString(36),name:y,cells:{},headers:MN.map(function(m){return m.charAt(0).toUpperCase()+m.slice(1);}),rowHeaders:[],rows:9,cols:12};snap.sheets.push(sh);}
         sh.rowHeaders=sh.rowHeaders||[];
-        var r=sh.rowHeaders.findIndex(function(h){return key(h)===key(g.name);});
+        var same=[];sh.rowHeaders.forEach(function(h,i){if(key(h)===key(g.name))same.push(i);});
+        var sameKind=same.filter(function(i){return kindIn(sh.rowHeaders[i])===g.kind;}),r=sameKind.length?sameKind[0]:same.length?same[0]:-1;
         if(r<0){
           // Nouvelle ligne : après la dernière ligne du même type ; un revenu en haut, une dépense avant l'épargne.
-          var lastSame=-1,firstAfter=-1;sh.rowHeaders.forEach(function(h,i){if(!String(h||"").trim()||structural(h))return;var k=ORDER[kindIn(h)];if(k===ORDER[g.kind]&&(isOtherRow(g.name)||!isOtherRow(h)))lastSame=i;else if(k>ORDER[g.kind]&&firstAfter<0)firstAfter=i;});
+          var sums=function(i){return Object.keys(sh.cells||{}).some(function(k){return k.split(",")[0]===String(i)&&/^=.*[A-Z]+\d+:[A-Z]+\d+/i.test(String((sh.cells[k]||{}).raw||""));});};
+          var calc=function(h,i){return structural(h)||sums(i);};
+          var lastSame=-1,firstAfter=-1;sh.rowHeaders.forEach(function(h,i){if(!String(h||"").trim()||calc(h,i))return;var k=ORDER[kindIn(h)];if(k===ORDER[g.kind]&&(isOtherRow(g.name)||!isOtherRow(h)))lastSame=i;else if(k>ORDER[g.kind]&&firstAfter<0)firstAfter=i;});
           // Sans ligne du même type : avant la première ligne d'un type suivant, sinon avant « Total »/« Solde », sinon en bas.
-          var used=-1,firstTotal=-1;sh.rowHeaders.forEach(function(h,i){h=String(h||"").trim();if(!h)return;used=i;if(firstTotal<0&&structural(h))firstTotal=i;});
+          var used=-1,firstTotal=-1;sh.rowHeaders.forEach(function(h,i){h=String(h||"").trim();if(!h)return;used=i;if(firstTotal<0&&calc(h,i))firstTotal=i;});
           r=lastSame>=0?lastSame+1:firstAfter>=0?firstAfter:firstTotal>=0?firstTotal:used+1;
           insertRow(sh,r,g.name,lastSame>=0&&r===lastSame+1);
         }
@@ -393,7 +402,7 @@
         else if(v===0&&mode!=="add")delete sh.cells[r+","+mi];
         else sh.cells[r+","+mi]={raw:String(v)};
         // Deux lignes du même nom (renommage) : le total est dans la première, l'autre ne doit pas le compter une 2e fois.
-        if(mode!=="add")sh.rowHeaders.forEach(function(h,i){if(i!==r&&key(h)===key(g.name))delete sh.cells[i+","+mi];});
+        if(mode!=="add")same.forEach(function(i){if(i!==r&&kindIn(sh.rowHeaders[i])===g.kind)delete sh.cells[i+","+mi];});
         last=sh;
       })();
     });});

@@ -2648,11 +2648,14 @@
     // ═══════════════════════════════════════════════════════════════════════
     function isMetaPropertyName(p){ return propertyNameMatches(p,[...PROPERTY_NAMES.month,...PROPERTY_NAMES.year,...PROPERTY_NAMES.expenses,...PROPERTY_NAMES.bigExpenses]); }
     function propertyNameMatches(name,list){ const n=normalizePropertyName(name); return list.some(item=>normalizePropertyName(item)===n); }
-    // Mot-clé court (4 lettres au plus : « ing », « pea », « rsa », « eau », « tv »…) ou « action » : mot entier seulement,
-    // sinon « Shopping » passerait pour la banque ING, « Anniversaire » pour le RSA et « Transactions » pour des actions.
+    // Ces mots-clés ne valent que comme mots entiers : sinon « Shopping » passerait pour la banque ING, « Péage » pour un PEA,
+    // « Netflix » pour un ETF, « Anniversaire » pour le RSA, « Cashback » pour du cash et « Transactions » pour des actions.
+    // Les autres restent cherchés dans le nom (« Freebox » → free, « UberEats » → uber).
+    // Idem pour les lignes à ignorer : « Aides » ne contient pas « id », ni « Séjour » « jour ».
+    const WHOLE_WORD_KEYWORDS=new Set(["ing","pea","etf","rsa","apl","cash","action","actions","id","ref","jour","mois","code","date","note","notes","name","label","bank"]);
     function matchesAnyKeyword(name,kw){
       const n=normalizePropertyName(name), words=String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-      return kw.some(k=>{ const nk=normalizePropertyName(k); if(!nk) return false; if(nk.length>4&&nk!=="action"&&nk!=="actions") return n.includes(nk); return words.some(w=>w===nk||w===nk+"s"||w===nk+"x"); });
+      return kw.some(k=>{ const nk=normalizePropertyName(k); if(!nk) return false; if(!WHOLE_WORD_KEYWORDS.has(nk)) return n.includes(nk); return words.some(w=>w===nk||w===nk+"s"||w===nk+"x"); });
     }
     function isNumberLikeProperty(p){ if(!p) return false; if(p.type==="number") return true; if(p.type==="formula") return p.formula?.type==="number"; if(p.type==="rollup") return p.rollup?.type==="number"; return false; }
     function getPropertyNumber(p){ if(!p) return 0; if(p.type==="number") return Number(p.number||0); if(p.type==="formula"){ if(p.formula?.type==="number") return Number(p.formula.number||0); if(p.formula?.type==="string") return extractFirstNumber(p.formula.string); } if(p.type==="rollup"&&p.rollup?.type==="number") return Number(p.rollup.number||0); if(p.type==="rich_text"||p.type==="title") return extractFirstNumber(getPropertyText(p)); return 0; }
@@ -2693,10 +2696,14 @@
     function isExplicitIgnorePattern(propName){
       const n=normalizePropertyName(propName); if(!n) return false;
       if(/reste.*apres.*depens/.test(n)||/apres.*depens.*reste/.test(n)) return true;
+      // Ligne de total (« Total », « Sous-total dépenses ») : déjà la somme d'autres lignes, ne pas la compter une 2e fois.
+      const w=String(propName||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+      if(w[0]==="total"||w[0]==="totaux"||w[0]==="soustotal"||(w[0]==="sous"&&w[1]==="total")) return true;
       return ["bourseaux","remboursement","viremententrant"].some(kw=>n.includes(kw));
     }
     // Utilisé aussi par l'import de relevé, pour ranger une ligne comme le tableau de bord la compte.
-    window.GFClassifyRow=function(name){ try{ const r=classifyFinancialPropertyEx(name); return r&&r.matched?r.rule:null; }catch(e){ return null; } };
+    // Ligne de calcul (« Dépenses globales »…) : « Ignorer », comme pour le tableau de bord.
+    window.GFClassifyRow=function(name){ try{ const r=classifyFinancialPropertyEx(name); if(!r||!r.matched) return null; return r.rule===null?"Ignorer":r.rule; }catch(e){ return null; } };
     function classifyFinancialPropertyEx(propName){
       if(isMetaPropertyName(propName)) return {rule:null, matched:true};
       const n=normalizePropertyName(propName);
@@ -6042,7 +6049,7 @@ function inferColumnType(header, samples){
   <script src="year-review.js?v=20261019-r5" defer></script>
   <script src="home.js?v=20261019-r12" defer></script>
   <script src="finishing.js?v=20261019-r1" defer></script>
-  <script src="bank-import.js?v=20261019-r14" defer></script>
+  <script src="bank-import.js?v=20261019-r15" defer></script>
   <script src="subs.js?v=20261019-r11" defer></script>
   <script src="reminders.js?v=20261019-r11" defer></script>
   <script src="backup.js?v=20261019-r6" defer></script>
