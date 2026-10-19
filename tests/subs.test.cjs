@@ -107,3 +107,8 @@ test('Ancien « pas un abonnement » sur Apple : ne cache pas iCloud qui arrive 
   let csv='Date;Libellé;Montant\n';for(const m of ['08','09','10'])csv+=`02/${m}/2026;APPLE.COM/BILL ICLOUD;-2,99\n`;
   W.GFSubs.ingest(ops(W,csv));assert.deepEqual(JSON.parse(JSON.stringify(W.GFSubs.list().map(i=>i.name))),['Apple iCloud']);
 });
+test('Prêt, URSSAF, pension alimentaire, recharge, Lydia, pharmacie : jamais des abonnements',()=>{
+  const W=setup();let csv='Date;Libellé;Montant\n';
+  for(const m of ['08','09','10'])csv+=`05/${m}/2026;PRLV URSSAF;-412,00\n06/${m}/2026;PRLV PENSION ALIMENTAIRE;-300,00\n07/${m}/2026;PRLV COFIDIS PRET;-250,00\n08/${m}/2026;IZLY RECHARGEMENT;-20,00\n09/${m}/2026;LYDIA M DUPONT;-15,00\n10/${m}/2026;CB PHARMACIE CENTRALE;-12,00\n`;
+  W.GFSubs.ingest(ops(W,csv));assert.deepEqual(JSON.parse(JSON.stringify(W.GFSubs.list().map(i=>i.name))),[]);
+});

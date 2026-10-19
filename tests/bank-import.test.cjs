@@ -75,7 +75,7 @@ test('Libellés piégeux : bonne catégorie',()=>{
   const cat=l=>{const c=B.categorize({label:l,amount:-10},{});return c?c[0]:null;};
   assert.equal(cat('VIR SEPA PAUL DURAND'),'Autres dépenses');
   assert.equal(cat('CARTE 12/09 PAUL GARE DE LYON'),'Restaurants');
-  assert.equal(cat('PRLV BP ECHEANCE PRET'),'Autres dépenses');
+  assert.equal(cat('PRLV BP ECHEANCE PRET'),'Crédits');
   assert.equal(cat('CARTE 03/09 BP STATION A6'),'Transports');
   assert.equal(cat('CARTE 05/09 TOTALENERGIES PARIS'),'Transports');
   assert.equal(cat('PRLV TOTALENERGIES ELECTRICITE'),'Énergie et eau');
@@ -320,4 +320,41 @@ test('« Total Energies » est un fournisseur, pas une ligne de total',()=>{
   const {imp,snap}=setupSheet(['Salaire','Total Energies','Courses','Total dépenses']);
   imp('Date;Libellé;Montant\n05/09/2026;CB UBER EATS;-30,00\n06/09/2026;CB LIDL;-10,00\n');
   assert.deepEqual(JSON.parse(JSON.stringify(snap().sheets[0].rowHeaders)),['Salaire','Total Energies','Courses','Restaurants','Total dépenses']);
+});
+
+// ── Audit CSV (toutes banques, toutes situations) ──
+test('Argent reçu d’un proche, retraites, Caisse d’Épargne, prêts',()=>{
+  const cat=(l,a)=>{const c=B.categorize({label:l,amount:a},{});return c?c[0]:'(ignoré)';};
+  assert.equal(cat('VIREMENT DE MAMAN',100),'Autres revenus');assert.equal(cat('VIR DE MARIE DUPONT',50),'Autres revenus');
+  assert.equal(cat('VIR VERS MATHIEU',-30),'Autres dépenses');assert.equal(cat('VIR VERS MON LIVRET A',-100),'Épargne');
+  assert.equal(cat('VIREMENT DE MON COMPTE COURANT',200),'(ignoré)');
+  assert.equal(cat('AGIRC ARRCO RETRAITE COMPLEMENTAIRE',412),'Salaire');assert.equal(cat('CARSAT PENSION RETRAITE',1200),'Salaire');
+  assert.equal(cat('RETRAIT DAB 12/09',-40),'Retraits');assert.equal(cat('PRLV PENSION ALIMENTAIRE',-300),'Autres dépenses');
+  assert.equal(cat('PRLV SEPA CAISSE D EPARGNE ECHEANCE PRET',-350),'Crédits');assert.equal(cat('FRAIS CAISSE D EPARGNE COTISATION',-12),'Frais bancaires');
+  assert.equal(cat('PRLV COFIDIS',-250),'Crédits');assert.equal(cat('COTISATION URSSAF',-412),'Impôts');assert.equal(cat('PRLV SEPA TAXE HABITATION',-600),'Impôts');
+  assert.equal(cat('CB UBER *EATS',-20),'Restaurants');assert.equal(cat('CB DISNEYLAND PARIS',-90),'Loisirs');assert.equal(cat('PRLV ACTION LOGEMENT',-150),'Loyer');
+  assert.equal(cat('AMZN MKTP FR',-30),'Shopping');assert.equal(cat('VIR CPAM REMBOURSEMENT',25),'Santé');assert.equal(cat('VIR SALARY ACME',2000),'Salaire');
+  assert.equal(cat('Top-Up by *1234',100),'(ignoré)');assert.equal(cat('Savings plan execution',-950),'Épargne');
+});
+test('Guillemet seul dans un libellé : la suite du fichier est gardée',()=>{
+  const o=B.parse(B._decode(enc('Date;Libellé;Montant\n04/09/2026;CB BRICO 1/2" RACCORD;-12,00\n05/09/2026;PRLV EDF;-60,00\n06/09/2026;PRLV LOYER;-850,00\n07/09/2026;"CB LIDL ""PROMO""";-20,00\n')));
+  assert.equal(o.length,4);assert.equal(o[3].label,'CB LIDL "PROMO"');
+});
+test('Devises, apostrophes suisses, signe moins typographique, sens D/C',()=>{
+  const B2=B;assert.equal(B2.parse(B2._decode(enc('Date,Description,Amount\n09/25/2026,Lidl,"$1,234.56"\n09/26/2026,Fnac,-$45.20\n')))[1].amount,-45.2);
+  const ch=B2.parse(B2._decode(enc("Date;Texte;Montant\n02.09.2026;Salaire;6'500.00\n03.09.2026;Loyer;-1'850.00\n")));assert.equal(ch[1].amount,-1850);
+  const mn=B2.parse(B2._decode(enc('Date;Libellé;Montant\n02/09/2026;CB LIDL;−45,20\n03/09/2026;CB FNAC;-1,00\n')));assert.equal(mn[0].amount,-45.2);
+  const dc=B2.parse(B2._decode(enc('Date;Libellé;Montant;Sens\n02/09/2026;CB LIDL;45,20;D\n03/09/2026;VIR SALAIRE;2000,00;C\n')));assert.equal(dc[0].amount,-45.2);assert.equal(dc[1].amount,2000);
+});
+test('KBC « Valeur » est une date, Revolut Business prend le montant en euros, PayPal « Brut »',()=>{
+  const k=B.parse(B._decode(enc('Date;Valeur;Montant;Description\n02/09/2026;02/09/2026;-12,50;DELHAIZE\n03/09/2026;03/09/2026;2000,00;SALAIRE\n')));assert.equal(k.length,2);assert.equal(k[0].amount,-12.5);
+  const rb=B.parse(B._decode(enc('Date started (UTC),Description,Orig amount,Orig currency,Amount,Payment currency\n2026-09-02,AWS,-120.00,USD,-110.50,EUR\n2026-09-03,Client,500.00,EUR,500.00,EUR\n')));assert.equal(rb[0].amount,-110.5);
+  const pp=B.parse(B._decode(enc('"Date","Heure","Nom","Type","État","Devise","Brut"\n"02/09/2026","10:00","Steam","Paiement Express Checkout","Terminé","EUR","-19,99"\n"03/09/2026","10:00","Vinted","Paiement","Refusé","EUR","-30,00"\n"04/09/2026","10:00","","Virement bancaire sur le compte PayPal","Terminé","EUR","25,00"\n')));
+  assert.equal(pp.length,1);assert.equal(pp[0].label,'Steam');assert.equal(pp.dropped.length,1);
+});
+test('Ligne de solde ignorée ; relevé d’une seule opération accepté ; UTF-16 BE',()=>{
+  assert.equal(B.parse(B._decode(enc('Date;Libellé;Montant\n02/09/2026;CB LIDL;-20,00\n30/09/2026;NOUVEAU SOLDE;1234,56\n'))).length,1);
+  assert.equal(B.parse(B._decode(enc('Date;Libellé;Montant\n02/09/2026;CB LIDL;-20,00\n'))).length,1);
+  const txt='Date;Libellé;Montant\n02/09/2026;CB LIDL;-20,00\n03/09/2026;CB FNAC;-5,00\n';const be=Buffer.alloc(2+txt.length*2);be[0]=0xFE;be[1]=0xFF;for(let i=0;i<txt.length;i++)be.writeUInt16BE(txt.charCodeAt(i),2+i*2);
+  assert.equal(B.parse(B._decode(be.buffer.slice(be.byteOffset,be.byteOffset+be.length))).length,2);
 });

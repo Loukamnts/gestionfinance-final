@@ -16,19 +16,36 @@
   function decode(buffer){
     var bytes=new Uint8Array(buffer);
     if(bytes[0]===0xFF&&bytes[1]===0xFE)return new TextDecoder("utf-16le").decode(bytes);
+    if(bytes[0]===0xFE&&bytes[1]===0xFF)return new TextDecoder("utf-16be").decode(bytes);
+    // UTF-16 sans marque : un octet sur deux est nul
+    var zEven=0,zOdd=0,n=Math.min(bytes.length,400);for(var b=0;b<n;b++){if(bytes[b]===0){if(b%2)zOdd++;else zEven++;}}
+    if(n>=8&&zOdd>n/4&&zEven<n/40)return new TextDecoder("utf-16le").decode(bytes);
+    if(n>=8&&zEven>n/4&&zOdd<n/40)return new TextDecoder("utf-16be").decode(bytes);
     try{return new TextDecoder("utf-8",{fatal:true}).decode(bytes).replace(/^﻿/,"");}
     catch(e){return new TextDecoder("windows-1252").decode(bytes);}
   }
   function splitLines(text){
     // Découpe en tenant compte des guillemets (un libellé peut contenir un retour à la ligne)
-    var rows=[],cur="",q=false;
-    for(var i=0;i<text.length;i++){var ch=text[i];if(ch==='"'){q=!q;cur+=ch;}else if((ch==="\n"||ch==="\r")&&!q){if(ch==="\r"&&text[i+1]==="\n")i++;rows.push(cur);cur="";}else cur+=ch;}
+    // Un guillemet n'ouvre un champ qu'en début de champ et ne le ferme qu'avant un séparateur ou une fin de ligne :
+    // un libellé comme « TV 55" OLED » ne doit pas avaler la suite du fichier.
+    var rows=[],cur="",q=false,SEP=/[;,\t|]/;
+    for(var i=0;i<text.length;i++){var ch=text[i];
+      if(ch==='"'){
+        if(!q){var prev=cur.replace(/[ \t]+$/,"");if(prev===""||SEP.test(prev.charAt(prev.length-1)))q=true;}
+        else if(text[i+1]==='"'){cur+=ch;i++;}
+        else{var nx=text.slice(i+1,i+40).match(/^[ \t]*([\s\S]?)/)[1];if(nx===""||SEP.test(nx)||nx==="\n"||nx==="\r")q=false;}
+        cur+=ch;
+      }else if((ch==="\n"||ch==="\r")&&!q){if(ch==="\r"&&text[i+1]==="\n")i++;rows.push(cur);cur="";}else cur+=ch;}
     if(cur)rows.push(cur);return rows.filter(function(r){return r.trim()!=="";});
   }
   function splitRow(line,sep){
     var out=[],cur="",q=false;
     for(var i=0;i<line.length;i++){var ch=line[i];
-      if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}
+      if(ch==='"'){
+        if(!q){if(cur.trim()==="")q=true;else cur+=ch;}
+        else if(line[i+1]==='"'){cur+='"';i++;}
+        else{var nx=line.slice(i+1).match(/^\s*([\s\S]?)/)[1];if(nx===""||nx===sep)q=false;else cur+=ch;}
+      }
       else if(ch===sep&&!q){out.push(cur.trim());cur="";}
       else cur+=ch;}
     out.push(cur.trim());return out;
@@ -42,7 +59,7 @@
 
   /* ── Valeurs ───────────────────────────────────────────────────────── */
   function parseAmount(v){
-    var s=String(v==null?"":v).replace(/[\s  €]|EUR/gi,"").replace(/^\+/,"");
+    var s=String(v==null?"":v).replace(/[\u2212\u2013]/g,"-").replace(/(\d)['\u2019](?=\d)/g,"$1").replace(/[\s\u00a0\u202f\u20ac$\u00a3\u00a5]|EUR|USD|GBP|CHF|CAD/gi,"").replace(/^\+/,"");
     if(!s)return null;var neg=/^\(.*\)$/.test(s)||/-$/.test(s);s=s.replace(/[()]/g,"").replace(/-$/,"");
     if(/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(s))s=s.replace(/\./g,"").replace(",",".");
     else if(/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(s))s=s.replace(/,/g,"");
@@ -64,27 +81,32 @@
     date:/^(date( de l.?)?( ?operation| ?op)?|date operation|date comptable|date de comptabilisation|dateop|date op\.?|booking date|transaction date|date)$/,
     value:/date de valeur|dateval|value date/,
     label:/libelle|description|detail|operation|nature|intitule|label|motif|beneficiaire|tiers|payee/,
-    amount:/^montant|amount|somme|valeur$/,
-    debit:/debit/,
-    credit:/credit/
+    amount:/^montant|amount|somme|^value$|betrag|bedrag|^brut$|^gross$|^net$/,
+    debit:/debit|paid out|money out|^sortie|^ausgang/,
+    credit:/credit|paid in|money in|^entree|^eingang/
   };
   function labelScore(c){
     if(!c||/date|montant|amount|debit|credit|categor|numero|^n( |$)|^no$|solde|balance|devise|currency|^type|pointage|statut|state|status|compte|account|iban|bic|exchange|fee|frais/.test(c))return 0;
     if(/libelle|intitule/.test(c))return 3;
-    if(/description|label|payee|beneficiaire|counterparty|contrepartie|tiers|merchant|commercant/.test(c))return 2;
-    if(/detail|motif|reference|nature|operation|communication/.test(c))return 1;
+    if(/description|label|payee|beneficiaire|counterparty|contrepartie|tiers|merchant|commercant|^nom$|^name$|texte|buchungstext|^text$|notification|avis/.test(c))return 2;
+    if(/detail|motif|reference|nature|operation|communication|transaction/.test(c))return 1;
     return 0;
   }
   function findColumns(lines,sep){
     for(var i=0;i<Math.min(lines.length,20);i++){
       var cells=splitRow(lines[i],sep).map(function(c){return norm(c).replace(/[^a-z ().]/g," ").replace(/\s+/g," ").trim();}),cols={},cand=[];
       cells.forEach(function(c,j){
-        if(cols.date==null&&H.date.test(c))cols.date=j;
-        else if(cols.date==null&&/date/.test(c)&&!H.value.test(c))cols.date=j;
+        // Date : « Date d'opération » plutôt que « Date de débit » ou « Date de valeur »
+        if(H.date.test(c)&&(cols.date==null||cols.dateLoose)){cols.date=j;cols.dateLoose=false;}
+        else if(cols.date==null&&/date/.test(c)&&!H.value.test(c)){cols.date=j;cols.dateLoose=/debit|valeur|value|reglement/.test(c);}
         var sc=labelScore(c);if(sc>0)cand.push([j,sc,c]);
-        if(cols.amount==null&&H.amount.test(c)&&!/date/.test(c))cols.amount=j;
-        if(cols.debit==null&&H.debit.test(c))cols.debit=j;
-        if(cols.credit==null&&H.credit.test(c)&&!/carte/.test(c))cols.credit=j;
+        // Montant : celui en euros, jamais le montant d'origine en devise ni le solde
+        var exact=/eur|^montant$|^amount$/;
+        if(H.amount.test(c)&&!/date|orig|devise|foreign|currency|solde|balance/.test(c)&&(cols.amount==null||(exact.test(c)&&!exact.test(cols.amountName)))){cols.amount=j;cols.amountName=c;}
+        // « Débit/Crédit » ou « Sens » : colonne qui donne le signe, pas deux colonnes de montants
+        if((H.debit.test(c)&&H.credit.test(c))||/^(sens|d ?c)$/.test(c)){if(cols.sense==null)cols.sense=j;}
+        else{if(cols.debit==null&&H.debit.test(c))cols.debit=j;
+        if(cols.credit==null&&H.credit.test(c)&&!/carte/.test(c))cols.credit=j;}
         if(cols.state==null&&/^(state|status|statut|etat)$/.test(c))cols.state=j;
         if(cols.account==null&&/^(account ?num(ber)?|account ?label|numero de compte|n de compte|compte|iban)$/.test(c))cols.account=j;
       });
@@ -94,7 +116,7 @@
         var avg=function(j){var t=0,n=0;lines.slice(i+1,i+41).forEach(function(l){var v=splitRow(l,sep)[j];if(v!=null){t+=String(v).length;n++;}});return n?t/n:0;};
         cand.forEach(function(x){x[3]=avg(x[0]);});
         cand.sort(function(a,b){return b[1]-a[1]||b[3]-a[3]||a[0]-b[0];});
-        if(cand.length){cols.label=cand[0][0];cols.extra=cand.slice(1).filter(function(x){return /detail|motif|reference|description|libelle/.test(x[2]);}).map(function(x){return x[0];});}
+        if(cand.length){cols.label=cand[0][0];cols.extra=cand.slice(1).filter(function(x){return /detail|motif|reference|description|libelle|communication|transaction|texte/.test(x[2]);}).map(function(x){return x[0];});}
         return{header:i,cols:cols};
       }
     }
@@ -124,7 +146,7 @@
     return rest.replace(/\s+/g,"").length===0;
   }
   // Opération annulée, refusée ou pas encore passée (Revolut, N26… ont une colonne d'état).
-  var NOT_DONE=/revert|declin|cancel|annul|refus|rejet|failed|echou|pending|en attente|en cours/;
+  var NOT_DONE=/revert|revers|declin|denied|cancel|annul|refus|rejet|failed|echou|pending|en attente|en cours/;
   function parse(text){
     var lines=splitLines(text);if(lines.length<2)return null;
     MONTH_FIRST=false;
@@ -139,18 +161,22 @@
       if(c.amount!=null)amt=parseAmount(r[c.amount]);
       if(amt==null&&(c.debit!=null||c.credit!=null)){var db=parseAmount(r[c.debit]),cr=parseAmount(r[c.credit]);if(db)amt=-Math.abs(db);else if(cr)amt=Math.abs(cr);}
       if(amt==null||amt===0)continue;
+      // Colonne de sens (D/C, Débit/Crédit) avec des montants sans signe
+      if(c.sense!=null){var sv=norm(r[c.sense]).trim();if(/^(d|db|deb|debit)$/.test(sv))amt=-Math.abs(amt);else if(/^(c|cr|cred|credit)$/.test(sv))amt=Math.abs(amt);}
       var osrc=c.account!=null&&String(r[c.account]||"").trim()?hash(String(r[c.account]).trim()):"";
       if(c.state!=null&&NOT_DONE.test(norm(r[c.state]))){dropped.push({date:d,amount:Math.round(amt*100)/100,label:String(c.label!=null?r[c.label]:"").replace(/\s+/g," ").trim(),src:osrc});continue;}
       var label=c.label!=null?r[c.label]:r.filter(function(x,j){return j!==c.date&&j!==c.amount&&j!==c.debit&&j!==c.credit&&j!==c.state;}).join(" ");
       label=String(label||"").replace(/\s+/g," ").trim();
       var detail=(c.extra||[]).map(function(j){return String(r[j]||"").replace(/\s+/g," ").trim();}).filter(function(x){return x&&norm(label).indexOf(norm(x))<0;}).join(" ");
       if(!label&&detail){label=detail;detail="";}
+      // Ligne de solde (« NOUVEAU SOLDE », ligne sans libellé en fin de relevé) : ce n'est pas une opération
+      if(!label||/^(ancien |nouveau )?solde\b|^solde (crediteur|debiteur|au|final|initial)\b/.test(norm(label)))continue;
       if(/\b(carte|cb)\b/.test(norm(label))&&!isDeferred(label))cards++;
       var op={date:d,amount:Math.round(amt*100)/100,label:label,src:osrc};if(detail)op.detail=detail;ops.push(op);
     }
     // Si le fichier détaille les paiements par carte, la ligne de total du débit différé ferait compter deux fois.
     if(cards>=3)ops=ops.filter(function(op){var drop=op.amount<0&&isDeferred(op.label);if(drop)dropped.push(op);return !drop;});
-    if(ops.length<2)return null;
+    if(ops.length<(found.header>=0?1:2))return null;
     ops.dropped=dropped;// pour retirer du registre ce qui avait été compté lors d'un import précédent
     return ops;
   }
@@ -158,25 +184,26 @@
   /* ── Catégories ────────────────────────────────────────────────────── */
   // [libellé de ligne FR, EN, type, motifs]. L'ordre compte : le premier motif trouvé l'emporte.
   var CATS=[
-    ["Épargne","Savings","Épargne",/livret|ldds|lep\b|\bpel\b|\bcel\b|epargne|assurance vie|\bpea\b|versement programme|virement vers.*(livret|epargne)/],
-    ["Salaire","Salary","Salaire",/salaire|paie\b|\bpaye\b|remuneration|payroll|traitement mensuel/],
-    ["Aides (CAF)","Benefits (CAF)","Salaire",/\bcaf\b|\bapl\b|allocation|pole emploi|france travail|\brsa\b|prime d.activite/],
-    ["Loyer","Rent","Dépense",/loyer|foncia|nexity|bailleur|^(?!.*\b(carte|cb)\b).*habitat|immobiliere|\bopac\b|\bhlm\b/],
-    ["Courses","Groceries","Dépense",/carrefour|leclerc|auchan|lidl|intermarche|super u|hyper u|\bu express|monoprix|franprix|\bcasino\b(?!.*(jeux|barriere|partouche|poker|\bbet\b|betclic|winamax))|\baldi\b|\bpicard\b|biocoop|netto|grand frais|naturalia|\bspar\b|\bmatch\b(?! (point|foot|de))|\bcora\b|g20|coccinelle|marche\b(?! (public|financier))/],
-    ["Restaurants","Restaurants","Dépense",/restaurant|\bresto\b(?!s? du coeur)|mcdo|mc donald|mcdonald|burger king|\bkfc\b|uber ?eats|deliveroo|just ?eat|starbucks|boulangerie|brasserie|sushi|pizza|kebab|cafe\b|bistro|o.?tacos|subway|five guys|\b(carte|cb)\b.*\bpaul\b/],
-    ["Transports","Transport","Dépense",/sncf|\bratp\b|navigo|\buber\b|bolt|blablacar|totalenergies station|total access|\besso\b|\bshell\b|\b(carte|cb)\b.*\b(bp|total ?energies)\b|\bavia\b|\bstation(nement)?\b(?! f\b)|paybyphone|carburant|essence|peage|autoroute|vinci|sanef|\baprr\b|parking|indigo|tisseo|\btcl\b|\brtm\b|keolis|transdev|\blime\b|velib|trainline|ouigo|tgv/],
-    ["Abonnements","Subscriptions","Dépense",/netflix|spotify|deezer|disney|canal\+?|amazon prime|prime video|apple\.com|icloud|google (one|storage|play)|youtube|free mobile|free telecom|freebox|\borange\b(?! ?(boutique|store|shop|magasin))|\bsosh\b|\bsfr\b|bouygues|b ?& ?you|red by|basic.?fit|fitness park|keep cool|crunch|audible|chatgpt|openai/],
+    ["Épargne","Savings","Épargne",/livret|ldds|lep\b|\bpel\b|\bcel\b|epargne|assurance vie|\bpea\b|versement programme|savings plan|plan d.?epargne|sparplan|virement vers.*(livret|epargne)/],
+    ["Salaire","Salary","Salaire",/salaire|salary|retraite|pension(?! alimentaire)|carsat|\bcnav\b|agirc|arrco|paie\b|\bpaye\b|remuneration|payroll|traitement mensuel/],
+    ["Aides (CAF)","Benefits (CAF)","Salaire",/\bcaf\b|\bcnaf\b|\bmsa\b|chomage|\bapl\b|allocation|pole emploi|france travail|\brsa\b|prime d.activite/],
+    ["Loyer","Rent","Dépense",/loyer|foncia|nexity|bailleur|^(?!.*\b(carte|cb)\b).*habitat\b|action logement|immobiliere|\bopac\b|\bhlm\b/],
+    ["Crédits","Loans","Dépense",/echeance (de |du )?pret|\bpret (immo|perso|auto|etudiant)|credit (immo|conso|auto)|remboursement (de |du )?pret|cofidis|cetelem|sofinco|franfinance|younited|\boney\b|\bfloa\b|\bdiac\b|carrefour banque|\bpret\b/],
+    ["Courses","Groceries","Dépense",/carrefour|\bcoop\b|migros|\bmonop\b|leclerc|auchan|lidl|intermarche|super u|hyper u|\bu express|monoprix|franprix|\bcasino\b(?!.*(jeux|barriere|partouche|poker|\bbet\b|betclic|winamax))|\baldi\b|\bpicard\b|biocoop|netto|grand frais|naturalia|\bspar\b|\bmatch\b(?! (point|foot|de))|\bcora\b|g20|coccinelle|marche\b(?! (public|financier))/],
+    ["Restaurants","Restaurants","Dépense",/restaurant|\bresto\b(?!s? du coeur)|mcdo|mc donald|mcdonald|burger king|\bkfc\b|uber\W*eats|deliveroo|just ?eat|starbucks|boulangerie|brasserie|sushi|pizza|kebab|cafe\b|bistro|o.?tacos|subway|five guys|\b(carte|cb)\b.*\bpaul\b/],
+    ["Transports","Transport","Dépense",/sncf|\bg7\b|heetch|free ?now|\bratp\b|navigo|\buber\b|bolt|blablacar|totalenergies station|total access|\besso\b|\bshell\b|\b(carte|cb)\b.*\b(bp|total ?energies)\b|\bavia\b|\bstation(nement)?\b(?! f\b)|paybyphone|carburant|essence|peage|autoroute|vinci|sanef|\baprr\b|parking|indigo|tisseo|\btcl\b|\brtm\b|keolis|transdev|\blime\b|velib|trainline|ouigo|tgv/],
+    ["Abonnements","Subscriptions","Dépense",/netflix|spotify|deezer|disney ?(\+|plus)|disneyplus|primevideo|canal\+?|amazon prime|prime video|apple\.com|icloud|google (one|storage|play)|youtube|free mobile|free telecom|freebox|\borange\b(?! ?(boutique|store|shop|magasin))|\bsosh\b|\bsfr\b|bouygues|b ?& ?you|red by|basic.?fit|fitness park|keep cool|crunch|audible|chatgpt|openai/],
     ["Énergie et eau","Energy and water","Dépense",/\bedf\b|engie|total ?energies|ekwateur|\beau de (paris|.*(ville|agglo|metropole|syndicat))|\bsyndicat des eaux|veolia|suez|saur\b|gaz\b|electricite|mint energie|octopus/],
     ["Assurances","Insurance","Dépense",/assurance|\baxa\b|maif|macif|matmut|allianz|groupama|\bgmf\b|\bmma\b|generali|\bapril\b(?! \d)|luko|lovys/],
-    ["Santé","Health","Dépense",/pharmacie|docteur|medecin|dentiste|laboratoire|opticien|doctolib|hopital|clinique|\bkine\b|kinesi|mutuelle|harmonie|ameli/],
-    ["Shopping","Shopping","Dépense",/amazon|fnac|darty|decathlon|zara|h ?& ?m\b|ikea|leroy merlin|castorama|boulanger|cdiscount|shein|vinted|\baction\b|primark|kiabi|sephora|nocibe|uniqlo|zalando|temu|aliexpress|apple store|galeries lafayette|printemps/],
-    ["Loisirs","Leisure","Dépense",/cinema|\bugc\b|pathe|gaumont|mk2|steam|playstation|nintendo|xbox|concert|ticketmaster|fnac spectacles|bowling|musee|theatre|\bescape\b|\bparc\b(?! (auto|de stationnement))/],
+    ["Santé","Health","Dépense",/pharmacie|docteur|medecin|dentiste|laboratoire|opticien|doctolib|hopital|clinique|\bkine\b|kinesi|mutuelle|harmonie|ameli|\bcpam\b|\bcnam\b|\bmgen\b|\balan\b/],
+    ["Shopping","Shopping","Dépense",/amazon|\bamzn\b|brico|cultura|fnac|darty|decathlon|zara|h ?& ?m\b|ikea|leroy merlin|castorama|boulanger|cdiscount|shein|vinted|\baction\b(?! logement)|primark|kiabi|sephora|nocibe|uniqlo|zalando|temu|aliexpress|apple store|galeries lafayette|printemps/],
+    ["Loisirs","Leisure","Dépense",/cinema|disneyland|asterix|\bugc\b|pathe|gaumont|mk2|steam|playstation|nintendo|xbox|concert|ticketmaster|fnac spectacles|bowling|musee|theatre|\bescape\b|\bparc\b(?! (auto|de stationnement))/],
     ["Voyages","Travel","Dépense",/airbnb|booking|hotel|air france|easyjet|ryanair|vueling|transavia|expedia|abritel|club med|camping/],
-    ["Retraits","Cash withdrawals","Dépense",/retrait|\bdab\b|distributeur|\bgab\b|withdrawal/],
+    ["Retraits","Cash withdrawals","Dépense",/\bretraits?\b|\bdab\b|distributeur|\bgab\b|withdrawal/],
+    ["Impôts","Taxes","Dépense",/impot|urssaf|\bsie\b|\bcfe\b|cotisations? sociales|cipav|dgfip|tresor public|taxe|finances publiques|amende|antai/],
     ["Frais bancaires","Bank fees","Dépense",/\bfrais\b(?! de (port|livraison|dossier|scolarite|garde))|commission|cotisation(?! (syndicale|club|association|asso|sport|licence|adhesion))|agios|interets debiteurs|tenue de compte|carte bancaire/],
-    ["Impôts","Taxes","Dépense",/impot|dgfip|tresor public|taxe|finances publiques|amende|antai/]
   ];
-  var OTHER_OUT=["Autres dépenses","Other expenses","Dépense"],OTHER_IN=["Autres revenus","Other income","Salaire"],TRANSFER=/virement interne|vir(ement)? (de|vers) (mon|ma|compte)|transfert interne/;
+  var OTHER_OUT=["Autres dépenses","Other expenses","Dépense"],OTHER_IN=["Autres revenus","Other income","Salaire"],TRANSFER=/virement interne|vir(ement)? (de|vers) (mon|ma|mes) (compte|livret|epargne|ldds|pel)\b|vir(ement)? (de|vers) compte\b|transfert interne|\btop ?-?up\b|exchanged to|converted \d|^(to|from) [a-z]{3} (savings|main|pocket)|recharge (depuis|par) (carte|cb)|virement bancaire sur le compte paypal|bank deposit to pp/;
   /* Marchand d'une opération : le libellé sans le bruit bancaire (« CARTE 01/09 », « PRLV SEPA », numéros…).
      « CARTE 01/09/26 CARREFOUR CITY » → « carrefour city ». Sert de clé pour retenir tes choix. */
   var NOISE=/\b(paiement|paiemt|carte|cb|prlv|prelevement|prelev|sepa|vir|virement|achat|facture|fact|retrait|dab|gab|en votre faveur|votre|faveur|recu|emis|inst|instantane|de|du|des|le|la|les|par|pour|chez|ref|reference|mandat|ech|echeance|eu|fr|sas|sa|sarl|ltd|inc)\b/g;
@@ -193,7 +220,8 @@
   function categorize(op,rules){
     var m=merchantOf(op.label),r=rules&&Object.prototype.hasOwnProperty.call(rules,m)?rules[m]:null;
     if(r){if(r[1]==="Ignorer")return null;return [r[0],r[0],r[1]];}
-    var l=norm(op.label+(op.detail?" "+op.detail:""));
+    // « Caisse d'Épargne » est le nom d'une banque : son prêt ou ses frais ne sont pas de l'épargne.
+    var l=norm(op.label+(op.detail?" "+op.detail:"")).replace(/caisse d.?epargne/g,"caisse banque");
     if(TRANSFER.test(l)&&!CATS[0][3].test(l))return null; // simple mouvement entre tes comptes : ignoré
     // Un virement à une personne (« VIR SEPA M PICARD ») n'est pas un achat en magasin : seules les catégories
     // qui se paient par virement (loyer, épargne, salaire, aides, impôts, assurances, santé, énergie) restent possibles.
@@ -212,7 +240,7 @@
     restaurants:["restaurant","restos","resto","sorties resto"],transports:["transport","essence","carburant","voiture"],loyer:["logement","rent"],
     energieeteau:["energie","electricite","edf","eau","gaz","factures energie"],assurances:["assurance","insurance"],sante:["medecin","pharmacie","health"],
     loisirs:["sorties","leisure"],voyages:["vacances","voyage","travel"],impots:["impot","taxes","taxe"],salaire:["salaires","paie","salary"],
-    shopping:["achats"],retraits:["retrait","especes","liquide"],fraisbancaires:["frais banque","banque","bank fees"],epargne:["savings"]};
+    shopping:["achats"],credits:["credit","emprunt","emprunts","pret","prets","loans"],retraits:["retrait","especes","liquide"],fraisbancaires:["frais banque","banque","bank fees"],epargne:["savings"]};
   function sing(k){return k.replace(/(s|x)$/,"");}
   // Ligne de calcul (« Total dépenses », « Solde », « Reste à vivre ») : ni revenu, ni dépense, ni épargne.
   function structural(h){h=String(h||"").trim();if(!h)return false;var nh=norm(h);if(/^(solde|reste|disponible|balance|bilan|resultat)\b|^(sous ?-?)?(total|totaux)( (des?|du|general|generale|mensuel|annuel|depenses?|revenus?|epargnes?|charges?|sorties?|entrees?|mois|annee|fixes?|variables?)\b|$)|^(depenses|revenus|epargne) (globales?|totales?|du mois)$/.test(nh))return true;
@@ -270,7 +298,7 @@
       var c=categorize(op,rules);if(!c){ignored++;return;}
       var rows=rowsOf(op.date.y),mo=merchantOf(op.label),own=!Object.prototype.hasOwnProperty.call(rules,mo)&&c[2]==="Dépense"&&op.amount<0?merchantRow(mo,rows):null;
       if(!own&&c[2]==="Épargne")own=savingsRow(op,rows);
-      var isOther=!own&&(c===OTHER_OUT||c===OTHER_IN),name=own||existingRow(en()?c[1]:c[0],rows,op.date.y)||(en()?c[1]:c[0]),kind=c[2],g=groups[name]||(groups[name]={name:name,kind:kind,count:0,total:0,byMonth:{},merchants:{}});if(isOther)g.other=true;
+      var isOther=!own&&(c===OTHER_OUT||c===OTHER_IN),name=own||existingRow(en()?c[1]:c[0],rows,op.date.y)||existingRow(en()?c[0]:c[1],rows,op.date.y)||(en()?c[1]:c[0]),kind=c[2],g=groups[name]||(groups[name]={name:name,kind:kind,count:0,total:0,byMonth:{},merchants:{}});if(isOther)g.other=true;
       // Dépenses et épargne comptées en positif ; un remboursement vient en déduction
       var v=kind==="Salaire"?op.amount:-op.amount,mk=op.date.y+"-"+op.date.m;
       g.count++;g.total+=v;g.byMonth[mk]=(g.byMonth[mk]||0)+v;months[mk]=op.date;
@@ -420,88 +448,151 @@
   // Lignes proposées pour classer un marchand : catégories connues, lignes déjà dans ton tableur, « autres », ignorer.
   function targets(){
     var out=[],seen={};function add(name,kind,group){var k=key(name);if(!name||seen[k])return;seen[k]=1;out.push({name:name,kind:kind,group:group});}
-    CATS.forEach(function(c){add(en()?c[1]:c[0],c[2],"cat");});
+    // Une catégorie déjà présente dans le tableur sous un autre nom (« Alimentation » pour Courses) n'est proposée qu'une fois.
+    var rowsNow=sheetRows();CATS.forEach(function(c){if(existingRow(c[0],rowsNow)||existingRow(c[1],rowsNow))return;add(en()?c[1]:c[0],c[2],"cat");});
     try{var snap=window.FinanceSheet&&window.FinanceSheet.getSnapshot&&window.FinanceSheet.getSnapshot();(snap&&snap.sheets||[]).forEach(function(sh){(sh.rowHeaders||[]).forEach(function(h){h=String(h||"").trim();if(h&&!structural(h))add(h,kindOf(h),"sheet");});});}catch(e){}
     add(en()?OTHER_OUT[1]:OTHER_OUT[0],"Dépense","other");add(en()?OTHER_IN[1]:OTHER_IN[0],"Salaire","other");
     return out;
   }
-  function pretty(m){return m.split(" ").map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(" ");}
+  function pretty(m){var w=m.split(" ");while(w.length>1&&/^(vers|de|du|m|mme|mr|monsieur|madame|mlle)$/.test(w[0]))w.shift();return w.map(function(x){return x.charAt(0).toUpperCase()+x.slice(1);}).join(" ");}
+  // Mois de l'import qui ont déjà des montants dans les lignes visées (pour ne demander « Remplacer / Ajouter » qu'en cas de besoin).
+  function conflictMonths(summary){
+    var out=[],seen={};
+    try{var snap=window.FinanceSheet.getSnapshot();
+      summary.groups.forEach(function(g){Object.keys(g.byMonth).forEach(function(mk){if(seen[mk])return;var p=mk.split("-"),sh=(snap.sheets||[]).filter(function(x){return String(x.name).trim()===p[0];})[0];if(!sh)return;
+        var r=(sh.rowHeaders||[]).findIndex(function(h){return key(h)===key(g.name);});if(r<0)return;var c=sh.cells&&sh.cells[r+","+p[1]];
+        if(c&&String(c.raw||"").trim()!==""){seen[mk]=1;out.push(summary.months.filter(function(d){return d.y+"-"+d.m===mk;})[0]||{y:+p[0],m:+p[1]});}});});
+    }catch(e){}
+    return out.sort(function(a,b){return a.y-b.y||a.m-b.m;});
+  }
   function preview(ops){
     return new Promise(function(resolve){
-      var extra={},opened={},summary=summarize(ops),T=targets();
+      var extra={},opened={},showAll={},summary=summarize(ops),T=targets(),rowsNow=sheetRows(),lastMove=null;
       var otherNames=[en()?OTHER_OUT[1]:OTHER_OUT[0],en()?OTHER_IN[1]:OTHER_IN[0]];
       var d=el("dialog","gfh-dialog gfb-dialog");d.setAttribute("aria-labelledby","gfbTitle");
-      var h=el("h2","",t2("Relevé bancaire","Bank statement"));h.id="gfbTitle";
-      var lead=el("p","gfb-lead"),list=el("div","gfb-list"),note=el("p","gfb-note");
-      var tip=el("p","gfb-tip",t2("Touche une catégorie pour voir ses marchands et en déplacer un : Meuniance s’en souviendra aux prochains imports.","Tap a category to see its merchants and move one: Meuniance will remember it next time."));
+      var head=el("div","gfb-head"),h=el("h2","",t2("Relevé bancaire","Bank statement"));h.id="gfbTitle";h.tabIndex=-1;
+      var x=el("button","gfb-x");x.type="button";x.setAttribute("aria-label",t2("Fermer","Close"));x.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+      head.append(h,x);
+      var lead=el("p","gfb-lead"),totals=el("p","gfb-totals"),list=el("div","gfb-list"),flash=el("p","gfb-flash"),note=el("p","gfb-note");
+      flash.setAttribute("role","status");flash.setAttribute("aria-live","polite");flash.hidden=true;
+      var tip=el("p","gfb-tip",t2("Ouvre une catégorie pour voir ses opérations et ranger un marchand ailleurs : Meuniance s’en souviendra aux prochains imports.","Open a category to see its transactions and move a merchant elsewhere: Meuniance will remember it next time."));
+      var signed=function(kind,v){return kind==="Salaire"?(v<0?"−":"+")+eur(Math.abs(v)):kind==="Dépense"?(v>0?"−":"+")+eur(Math.abs(v)):eur(v);};
       function selectFor(m,current){
         var sel=document.createElement("select");sel.className="gfb-move";sel.setAttribute("aria-label",t2("Ranger « ","File “")+pretty(m.key)+t2(" » dans","” under"));
         var groups={cat:t2("Catégories","Categories"),sheet:t2("Lignes de ton tableur","Your spreadsheet rows"),other:t2("Autres","Other")};
         Object.keys(groups).forEach(function(g){var og=document.createElement("optgroup");og.label=groups[g];T.filter(function(t){return t.group===g;}).forEach(function(t){var o=new Option(t.name,t.name+"|"+t.kind);if(key(t.name)===key(current))o.selected=true;og.append(o);});if(og.children.length)sel.append(og);});
         var ig=new Option(t2("Ignorer (virement entre mes comptes)","Ignore (transfer between my accounts)"),"|Ignorer");sel.append(ig);
-        sel.addEventListener("change",function(){var v=sel.value.split("|");extra[m.key]=v[1]==="Ignorer"?["","Ignorer"]:[v[0],v[1]];if(v[1]!=="Ignorer")opened[v[0]]=true;draw();});
+        // Au clavier, chaque flèche change la valeur : on applique le choix quand le menu est quitté ou validé.
+        var apply=function(){var v=sel.value.split("|"),prev=Object.prototype.hasOwnProperty.call(extra,m.key)?extra[m.key]:undefined;
+          if(key(v[0])===key(current)&&v[1]!=="Ignorer")return;
+          extra[m.key]=v[1]==="Ignorer"?["","Ignorer"]:[v[0],v[1]];if(v[1]!=="Ignorer")opened[v[0]]=true;
+          lastMove={key:m.key,prev:prev,label:pretty(m.key),to:v[1]==="Ignorer"?t2("ignoré","ignored"):v[0]};draw(true);};
+        sel.addEventListener("change",function(){if(!sel.matches(":focus-visible")||sel.dataset.kbd!=="1")apply();});
+        sel.addEventListener("keydown",function(e){sel.dataset.kbd="1";if(e.key==="Enter"){e.preventDefault();apply();}});
+        sel.addEventListener("blur",function(){if(sel.dataset.kbd==="1"){sel.dataset.kbd="";apply();}});
         return sel;
       }
-      function draw(){
+      function draw(keepPlace){
+        var top=d.scrollTop,ltop=list.scrollTop;
         summary=summarize(ops,extra);
-        var first=summary.months[0],lastM=summary.months[summary.months.length-1];
-        lead.textContent=summary.count+t2(" opérations, "," transactions, ")+(first===lastM?monthLabel(first):t2("de ","from ")+monthLabel(first)+t2(" à "," to ")+monthLabel(lastM))+t2(". Elles sont regroupées par catégorie, une ligne du tableur chacune.",". They are grouped by category, one spreadsheet row each.");
+        var first=summary.months[0],lastM=summary.months[summary.months.length-1],years={};summary.months.forEach(function(m){years[m.y]=1;});
+        var yl=Object.keys(years).join(", ");
+        lead.textContent=summary.count+t2(" opérations, "," transactions, ")+(first===lastM?monthLabel(first):t2("de ","from ")+monthLabel(first)+t2(" à "," to ")+monthLabel(lastM))+t2(". Elles vont dans la feuille "+yl+" : une ligne par catégorie, une colonne par mois.",". They go into the "+yl+" sheet: one row per category, one column per month.");
+        var tot={"Salaire":0,"Dépense":0,"Épargne":0};summary.groups.forEach(function(g){tot[g.kind]+=g.total;});
+        totals.replaceChildren();[["Salaire",t2("Revenus","Income")],["Dépense",t2("Dépenses","Expenses")],["Épargne",t2("Épargne","Savings")]].forEach(function(k,i){if(!tot[k[0]])return;var sp=el("span","gfb-tot");sp.append(document.createTextNode(k[1]+" "),el("b","gf-amount",signed(k[0],tot[k[0]])));totals.append(sp);});
         var titles={"Salaire":t2("Revenus","Income"),"Dépense":t2("Dépenses","Expenses"),"Épargne":t2("Épargne","Savings")},lastKind="",nodes=[];
         var isTodo=function(g){return g.other||otherNames.indexOf(g.name)>=0;};
-        var todo=summary.groups.filter(isTodo);
-        var rest=summary.groups.filter(function(g){return !isTodo(g);});
-        function groupNode(g,isTodo){
-          var det=document.createElement("details");det.className="gfb-group"+(isTodo?" is-todo":"");if(isTodo||opened[g.name])det.open=true;
+        var todo=summary.groups.filter(isTodo),rest=summary.groups.filter(function(g){return !isTodo(g);});
+        function groupNode(g,todoGroup){
+          var det=document.createElement("details");det.className="gfb-group"+(todoGroup?" is-todo":"");if(todoGroup||opened[g.name])det.open=true;
           det.addEventListener("toggle",function(){opened[g.name]=det.open;});
-          var sum=document.createElement("summary");sum.className="gfb-row";sum.append(el("span","gfb-name",g.name),el("span","gfb-count",g.count+t2(" op."," tx")),el("b","gf-amount",eur(Math.abs(g.total))));det.append(sum);
+          var sum=document.createElement("summary");sum.className="gfb-row";var nm=el("span","gfb-name",g.name);
+          if(!rowsNow.some(function(r){return key(r)===key(g.name);}))nm.append(el("small","gfb-new",t2("nouvelle ligne","new row")));
+          sum.append(nm,el("span","gfb-count",g.count+(g.count>1?t2(" opérations"," transactions"):t2(" opération"," transaction"))),el("b","gf-amount",signed(g.kind,g.total)));det.append(sum);
           var ms=Object.keys(g.merchants).map(function(k){return g.merchants[k];}).sort(function(a,b){return Math.abs(b.total)-Math.abs(a.total);});
-          var box=el("div","gfb-merchants");
-          ms.slice(0,25).forEach(function(m){var row=el("div","gfb-merchant");var nm=el("span","gfb-mname",m.key?pretty(m.key):m.label);nm.setAttribute("translate","no");nm.title=m.label;row.append(nm,el("b","gf-amount",eur(Math.abs(m.total))));if(m.key&&merchantOf(m.label)===m.key)row.append(selectFor(m,g.name));box.append(row);});
-          if(ms.length>25)box.append(el("small","gfb-more","+ "+(ms.length-25)+t2(" autres marchands"," more merchants")));
+          var box=el("div","gfb-merchants"),lim=showAll[g.name]?ms.length:25;
+          ms.slice(0,lim).forEach(function(m){var row=el("div","gfb-merchant");var mn=el("span","gfb-mname",m.key?pretty(m.key):m.label);mn.setAttribute("translate","no");mn.title=m.label;row.append(mn,el("b","gf-amount",eur(Math.abs(m.total))));if(m.key&&merchantOf(m.label)===m.key)row.append(selectFor(m,g.name));box.append(row);});
+          if(ms.length>lim){var more=el("button","gfh-link gfb-more",t2("Afficher les "+(ms.length-lim)+" autres","Show the other "+(ms.length-lim)));more.type="button";more.addEventListener("click",function(){showAll[g.name]=true;draw(true);});box.append(more);}
           det.append(box);return det;
         }
-        if(todo.length){nodes.push(el("div","gfb-kind gfb-todo-title",t2("À classer","To sort")));todo.forEach(function(g){nodes.push(groupNode(g,true));});}
+        if(todo.length){nodes.push(el("div","gfb-kind gfb-todo-title",t2("À classer","To sort")));nodes.push(el("p","gfb-todo-help",t2("Meuniance n’a pas reconnu ces opérations. Range-les maintenant, ou laisse-les dans «\u00a0Autres\u00a0».","Meuniance didn’t recognise these transactions. Sort them now, or leave them in “Other”.")));todo.forEach(function(g){nodes.push(groupNode(g,true));});}
         rest.forEach(function(g){if(g.kind!==lastKind){nodes.push(el("div","gfb-kind",titles[g.kind]));lastKind=g.kind;}nodes.push(groupNode(g,false));});
         list.replaceChildren.apply(list,nodes);
-        note.textContent=t2("Le fichier reste sur ton appareil : seuls ces totaux sont ajoutés au tableur.","The file stays on your device: only these totals are added to the spreadsheet.")+(summary.ignored?" "+summary.ignored+t2(" virement(s) entre tes comptes ignoré(s)."," transfer(s) between your accounts ignored."):"");
+        if(lastMove){flash.hidden=false;flash.replaceChildren(document.createTextNode("«\u00a0"+lastMove.label+"\u00a0» → "+lastMove.to+" · "));var undo=el("button","gfh-link",t2("Annuler","Undo"));undo.type="button";
+          undo.addEventListener("click",function(){var mv=lastMove;if(!mv)return;if(mv.prev===undefined)delete extra[mv.key];else extra[mv.key]=mv.prev;lastMove=null;flash.hidden=true;draw(true);});flash.append(undo);}
+        note.textContent=t2("Le fichier reste sur ton appareil : seuls ces totaux sont ajoutés au tableur.","The file stays on your device: only these totals are added to the spreadsheet.")+(summary.ignored?" "+summary.ignored+t2(" virement(s) entre tes comptes ignoré(s) (tu peux les ranger ailleurs à un prochain import)."," transfer(s) between your accounts ignored."):"");
+        var conf=conflictMonths(summary);modeBox.hidden=!conf.length;
+        legend.textContent=conf.length?t2("Tu as déjà des montants pour ","You already have amounts for ")+conf.map(monthLabel).join(", ")+t2(". Que faire ?",". What should happen?"):"";
         ok.disabled=!summary.groups.length;
+        if(keepPlace){d.scrollTop=top;list.scrollTop=ltop;}
       }
-      var modeBox=el("fieldset","gfb-mode");modeBox.append(el("legend","",t2("Si un mois contient déjà ces lignes","If a month already has these rows")));
-      [["replace",t2("Remplacer leurs montants (recommandé si tu réimportes le même relevé)","Replace their amounts (recommended if you re-import the same statement)")],["add",t2("Ajouter aux montants existants","Add to existing amounts")]].forEach(function(o,i){var lab=el("label","gfb-opt"),r=document.createElement("input");r.type="radio";r.name="gfbMode";r.value=o[0];r.checked=i===0;lab.append(r,el("span","",o[1]));modeBox.append(lab);});
+      var modeBox=el("fieldset","gfb-mode"),legend=el("legend","");modeBox.append(legend);
+      [["replace",t2("Remplacer par ceux du relevé (les chiffres tapés à la main dans ces lignes, pour ces mois, seront remplacés)","Replace with the statement’s (amounts typed by hand in these rows, for these months, will be replaced)")],["add",t2("Les ajouter à mes chiffres","Add them to my amounts")]].forEach(function(o,i){var lab=el("label","gfb-opt"),r=document.createElement("input");r.type="radio";r.name="gfbMode";r.value=o[0];r.checked=i===0;lab.append(r,el("span","",o[1]));modeBox.append(lab);});
       var acts=el("div","gfb-actions"),cancel=el("button","gfh-btn",t2("Annuler","Cancel")),ok=el("button","gfh-btn is-primary",t2("Importer","Import"));cancel.type="button";ok.type="submit";acts.append(cancel,ok);
-      var form=document.createElement("form");form.append(h,lead,tip,list,modeBox,note,acts);d.append(form);draw();
+      var body=el("div","gfb-body");body.append(lead,totals,tip,flash,list,modeBox,note);
+      var form=document.createElement("form");form.className="gfb-form";form.append(head,body,acts);d.append(form);draw();
       var done=false;function finish(v){if(done)return;done=true;d.close();resolve(v);}
-      cancel.addEventListener("click",function(){finish(null);});
-      form.addEventListener("submit",function(e){e.preventDefault();var m=form.querySelector('input[name="gfbMode"]:checked');finish({mode:m?m.value:"replace",summary:summary,extra:extra});});
+      cancel.addEventListener("click",function(){finish(null);});x.addEventListener("click",function(){finish(null);});
+      form.addEventListener("submit",function(e){e.preventDefault();var m=form.querySelector('input[name="gfbMode"]:checked');finish({mode:modeBox.hidden?"replace":(m?m.value:"replace"),summary:summary,extra:extra});});
       d.addEventListener("close",function(){if(!done){done=true;resolve(null);}d.remove();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();});
       document.body.append(d);d.showModal();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();
+      try{h.focus({preventScroll:true});}catch(e){}
     });
   }
-  function toast(text){var t=document.getElementById("gfhToast");if(!t){t=el("div","gfh-toast");t.id="gfhToast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");document.body.append(t);}t.textContent=text;t.classList.add("is-on");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove("is-on");},3600);}
+  // Fichier qui n'est pas un relevé : on le dit, et on propose de l'importer comme un simple tableau.
+  function notStatement(empty){
+    return new Promise(function(resolve){
+      var d=el("dialog","gfh-dialog gfb-dialog gfb-small");d.setAttribute("aria-labelledby","gfbNsTitle");
+      var h=el("h2","",empty?t2("Le fichier est vide","The file is empty"):t2("Ce n’est pas un relevé bancaire","This isn’t a bank statement"));h.id="gfbNsTitle";h.tabIndex=-1;
+      var p=el("p","gfb-lead",empty?t2("Il ne contient aucune ligne. Télécharge à nouveau le relevé depuis l’espace client de ta banque.","It has no rows. Download the statement again from your bank’s website."):t2("Meuniance n’y trouve pas de colonnes date, libellé et montant. Pour un relevé, télécharge le fichier CSV de ta banque (espace client › comptes › télécharger › CSV) ; le PDF n’est pas lu.","Meuniance can’t find date, description and amount columns. For a statement, download your bank’s CSV file (online banking › accounts › download › CSV); PDF isn’t supported."));
+      var acts=el("div","gfb-actions"),close=el("button","gfh-btn"+(empty?" is-primary":""),t2("Fermer","Close"));close.type="button";acts.append(close);
+      var asTable=null;if(!empty){asTable=el("button","gfh-btn",t2("L’importer comme tableau","Import it as a table"));asTable.type="button";acts.prepend(asTable);}
+      var done=false;function finish(v){if(done)return;done=true;d.close();resolve(v);}
+      close.addEventListener("click",function(){finish(true);});if(asTable)asTable.addEventListener("click",function(){finish(false);});
+      d.addEventListener("close",function(){if(!done){done=true;resolve(true);}d.remove();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();});
+      d.append(h,p,acts);document.body.append(d);d.showModal();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();try{h.focus({preventScroll:true});}catch(e){}
+    });
+  }
+  function toast(text,ms){var t=document.getElementById("gfhToast");if(!t){t=el("div","gfh-toast");t.id="gfhToast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");document.body.append(t);}t.textContent=text;t.classList.add("is-on");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove("is-on");},ms||3600);}
 
   /* Renvoie true si le fichier était un relevé bancaire (importé ou annulé), false sinon. */
   function handle(file){
-    if(!file||!/\.(csv|txt)$/i.test(file.name||""))return Promise.resolve(false);
+    var name=String(file&&file.name||""),excel=/\.(xlsx|xls|xlsm|ods)$/i.test(name);
+    if(!file||!(excel||/\.(csv|txt)$/i.test(name)))return Promise.resolve(false);
     // Un relevé fait quelques centaines de Ko : au-delà de 10 Mo, ce n'est pas un relevé (et l'onglet gèlerait).
-    if(file.size>10*1024*1024){toast(t2("Ce fichier est trop lourd pour un relevé bancaire (10 Mo au plus).","This file is too large for a bank statement (10 MB max)."));return Promise.resolve(true);}
+    if(file.size>10*1024*1024){if(excel)return Promise.resolve(false);toast(t2("Ce fichier est trop lourd pour un relevé bancaire (10 Mo au plus).","This file is too large for a bank statement (10 MB max)."));return Promise.resolve(true);}
     return file.arrayBuffer().then(function(buf){
-      var ops=parse(decode(buf));if(!ops)return false;
-      var summary=summarize(ops);if(!summary.groups.length)return false;
+      var ops=null,text="";
+      if(excel){
+        // Relevé en Excel (Crédit Agricole, LCL…) : la première feuille est lue comme un CSV ; sinon import Excel classique.
+        try{if(!window.XLSX)return false;var wb=window.XLSX.read(new Uint8Array(buf),{type:"array",cellDates:false,sheetRows:20000});var ws=wb.Sheets[wb.SheetNames[0]];
+          text=window.XLSX.utils.sheet_to_csv(ws,{FS:";",blankrows:false,rawNumbers:false});}catch(e){return false;}
+        ops=parse(text);if(!ops)return false;
+      }else{
+        text=decode(buf);
+        if(!text.replace(/[\s;,]/g,""))return notStatement(true);
+        ops=parse(text);
+        if(!ops)return notStatement(false);
+      }
+      var summary=summarize(ops);if(!summary.groups.length)return excel?false:notStatement(false);
       return preview(ops).then(function(res){
         if(!res)return true;
         // Les choix faits dans l'aperçu sont retenus pour les prochains imports.
         if(Object.keys(res.extra).length)saveLearned(res.extra);
         var summary=res.summary;
         if(write(summary,res.mode)){
-          var n=summary.months.length,subs=0;try{subs=window.GFSubs?window.GFSubs.ingest(ops):0;}catch(e){}
-          var msg=res.mode==="add"&&summary.count&&!summary.fresh?t2("Rien de nouveau : ces "+summary.count+" opérations étaient déjà importées.","Nothing new: these "+summary.count+" transactions were already imported.")
-            :t2("Relevé importé : ","Statement imported: ")+summary.count+t2(" opérations sur "," transactions over ")+n+t2(" mois."," month(s).")+(summary.dup?t2(" "+summary.dup+" déjà importée"+(summary.dup>1?"s":"")+", pas comptée"+(summary.dup>1?"s":"")+" deux fois."," "+summary.dup+" already imported, not counted twice."):"");
-          toast(msg+(subs?t2(" "+subs+" abonnement"+(subs>1?"s":"")+" repéré"+(subs>1?"s":"")+" : retrouve-les sur l’accueil."," "+subs+" subscription"+(subs>1?"s":"")+" found: see them on Home."):""));
+          var subs=0;try{subs=window.GFSubs?window.GFSubs.ingest(ops):0;}catch(e){}
+          var first=summary.months[0],last=summary.months[summary.months.length-1],years={};summary.months.forEach(function(m){years[m.y]=1;});
+          var when=first===last?monthLabel(first):t2("de ","from ")+monthLabel(first)+t2(" à "," to ")+monthLabel(last);
+          var msg=summary.count&&!summary.fresh?(res.mode==="add"?t2("Rien de nouveau : ces "+summary.count+" opérations étaient déjà importées.","Nothing new: these "+summary.count+" transactions were already imported."):t2("Déjà à jour : ce relevé avait déjà été importé.","Already up to date: this statement was already imported."))
+            :t2("Relevé importé : ","Statement imported: ")+summary.count+t2(" opérations, "," transactions, ")+when+t2(", dans la feuille ",", in the ")+Object.keys(years).join(", ")+t2("."," sheet.")+(summary.dup?t2(" "+summary.dup+" déjà importée"+(summary.dup>1?"s":"")+", pas comptée"+(summary.dup>1?"s":"")+" deux fois."," "+summary.dup+" already imported, not counted twice."):"");
+          toast(msg+(subs?t2(" "+subs+" abonnement"+(subs>1?"s":"")+" repéré"+(subs>1?"s":"")+" : retrouve-les sur l’accueil."," "+subs+" subscription"+(subs>1?"s":"")+" found: see them on Home."):""),7000);
           if(window.setPage)window.setPage("sheet");
         }
         return true;
       });
     });
   }
+
   window.GFBankImport={transferLabel:transferLabel,renameRow:renameRow,handle:handle,parse:parse,summarize:summarize,write:write,existingRow:existingRow,categorize:categorize,merchantOf:merchantOf,learned:learned,saveLearned:saveLearned,_decode:decode};
 })();

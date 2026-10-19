@@ -285,12 +285,28 @@ body.gf-hide-amounts :is(.gfh-big,.gfh-foot .v,.gfh-foot small,.gfh-cat .gfh-row
 @media(prefers-reduced-motion:reduce){body.gf-hide-amounts *{transition:none}}
 
 /* Import de relevé bancaire : aperçu */
-.gfb-dialog{max-height:calc(100dvh - 32px);overflow:auto}
+/* Relevé bancaire : titre en haut, boutons toujours visibles en bas, seule la liste défile */
+.gfb-dialog{max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px));overflow:hidden;display:flex;flex-direction:column;padding:0!important}
+.gfb-form{display:flex;flex-direction:column;min-height:0;flex:1}
+.gfb-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px 6px}
+.gfb-head h2:focus{outline:none}
+.gfb-x{flex:none;display:grid;place-items:center;width:44px;height:44px;margin:-8px -10px -8px 0;padding:0;border:0;border-radius:12px;background:transparent;color:var(--muted);cursor:pointer}
+.gfb-x svg{width:20px;height:20px}
+.gfb-x:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.gfb-body{display:grid;gap:12px;min-height:0;flex:1;overflow:auto;padding:0 20px 12px;overscroll-behavior:contain}
+.gfb-dialog .gfb-actions{flex:none;padding:12px 20px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--panel-solid,var(--bg))}
+.gfb-small{max-width:440px}.gfb-small h2,.gfb-small>.gfb-lead{padding:0 20px}.gfb-small h2{padding-top:18px}
+.gfb-totals{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0;font-size:14px;color:var(--muted)}
+.gfb-tot b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+.gfb-new{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--text);font:500 11px/1.6 var(--font-body);vertical-align:middle}
+.gfb-flash{margin:0;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--accent) 12%,transparent);font-size:14px}
+.gfb-todo-help{margin:0 0 4px;font-size:13px;line-height:1.45;color:var(--muted)}
+body.gf-hide-amounts .gfb-tot b{filter:blur(6px)}
 .gfb-dialog h2{margin-bottom:0}
 .gfb-lead,.gfb-note{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
-.gfb-list{display:grid;max-height:min(42dvh,360px);overflow:auto;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.gfb-kind{position:sticky;top:0;padding:10px 0 4px;background:var(--panel-solid,var(--bg));font:600 12px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.gfb-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:baseline;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+.gfb-list{display:grid;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.gfb-kind{position:sticky;top:0;z-index:1;padding:10px 0 4px;background:var(--panel-solid,var(--bg));font:600 12px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.gfb-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:12px;min-height:44px;padding:6px 0;border-top:1px solid var(--line);font-size:15px}
 .gfb-kind+.gfb-row{border-top:0}
 .gfb-name{min-width:0;overflow-wrap:break-word;hyphens:auto}
 .gfb-count{font-size:12px;color:var(--muted)}
@@ -360,7 +376,7 @@ body.gf-hide-amounts .gfb-row b{filter:blur(7px)}
 .gfb-merchant{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 10px;padding:6px 0;font-size:14px}
 .gfb-mname{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gfb-merchant b{font-weight:500;font-variant-numeric:tabular-nums;color:var(--muted)}
-.gfb-move{grid-column:1/-1;min-height:38px;width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--input-bg,transparent);color:var(--text);font:500 14px var(--font-body)}
+.gfb-move{grid-column:1/-1;min-height:44px;width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--input-bg,transparent);color:var(--text);font:500 14px var(--font-body)}
 .gfb-move:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .gfb-more{padding:4px 0;color:var(--muted)}
 .gfb-todo-title{color:var(--accent)}
