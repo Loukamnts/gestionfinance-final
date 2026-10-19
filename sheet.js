@@ -307,7 +307,39 @@
       default: throw new Error("Fonction inconnue: " + node.name);
     }
   }
-  function toNum(v) { if (typeof v === "number") return v; const n = parseFloat(String(v).replace(",", ".").replace(/[^0-9.\-]/g, "")); return isNaN(n) ? NaN : n; }
+  // Montant tapé → nombre, NaN si ce n'est pas un nombre. « 1 234,56 », « 1.234,56 » et « 1,234.56 »
+  // donnent 1234.56 ; un séparateur seul est la virgule décimale (« 12,5 ») ou le point décimal des
+  // valeurs écrites par le code (« 12.345 » = String(12.345)). « 12 % » vaut 0,12 comme dans un tableur.
+  function parseAmount(v) {
+    if (typeof v === "number") return Number.isFinite(v) ? v : NaN;
+    let s = String(v == null ? "" : v).replace(/[\s  ']/g, "").replace(/[−–—]/g, "-");
+    let neg = false, pct = false;
+    const paren = s.match(/^\((.*)\)$/); if (paren) { neg = true; s = paren[1]; }
+    if (s.endsWith("%")) { pct = true; s = s.slice(0, -1); }
+    s = s.replace(/^([+-]?)€/, "$1").replace(/€$/, "");
+    const m = s.match(/^([+-]?)([0-9.,]*[0-9][0-9.,]*)$/);
+    if (!m) return NaN;
+    if (m[1] === "-") neg = !neg;
+    let body = m[2];
+    const dot = body.lastIndexOf("."), comma = body.lastIndexOf(",");
+    const groups = (txt, sep) => txt.split(sep).every((g, i) => i === 0 ? /^\d{1,3}$/.test(g) : /^\d{3}$/.test(g));
+    if (dot >= 0 && comma >= 0) {
+      const dec = dot > comma ? "." : ",", th = dec === "." ? "," : ".";
+      const at = body.lastIndexOf(dec), int = body.slice(0, at), frac = body.slice(at + 1);
+      if (int.indexOf(dec) >= 0 || frac.indexOf(th) >= 0 || !groups(int, th)) return NaN;
+      body = int.split(th).join("") + "." + frac;
+    } else {
+      const sep = dot >= 0 ? "." : comma >= 0 ? "," : "";
+      const count = sep ? body.split(sep).length - 1 : 0;
+      if (count > 1) { if (!groups(body, sep)) return NaN; body = body.split(sep).join(""); }
+      else if (count === 1) body = body.replace(",", ".");
+    }
+    const n = Number(body);
+    if (!Number.isFinite(n)) return NaN;
+    const out = (neg ? -n : n) / (pct ? 100 : 1);
+    return out === 0 ? 0 : out;
+  }
+  function toNum(v) { return parseAmount(v); }
   function num0(v) { const n = toNum(v); return isNaN(n) ? 0 : n; }
 
   // recompute accepte un objet cells (defaut: feuille active) pour pouvoir
@@ -323,9 +355,8 @@
       if (!cell || cell.raw === "") { cache[k] = { value: "" }; return cache[k]; }
       const raw = cell.raw;
       if (raw[0] !== "=") {
-        const cleaned = String(raw).replace(/\s/g, "");
-        const num = parseFloat(cleaned.replace(",", ".").replace(/[^0-9.\-]/g, ""));
-        if (!isNaN(num) && cleaned !== "" && /^-?[0-9.,]+%?$/.test(cleaned)) cache[k] = { value: num };
+        const num = parseAmount(raw);
+        if (!isNaN(num)) cache[k] = { value: num };
         else cache[k] = { value: raw };
         return cache[k];
       }
@@ -1396,9 +1427,11 @@
     cancel.addEventListener("click", close);
     save.addEventListener("click", () => {
       const rawAmount = amount.value.trim();
-      const normalizedAmount = rawAmount.replace(/\s/g, "").replace(",", ".");
+      // Toujours enregistré au format « 1234.56 » : les lecteurs du profil utilisent parseFloat.
+      const parsedAmount = rawAmount && !/%/.test(rawAmount) ? parseAmount(rawAmount) : NaN;
+      const normalizedAmount = rawAmount ? String(parsedAmount) : "";
       const rawMonth = month.value;
-      if (rawAmount && !Number.isFinite(Number(normalizedAmount))) { amount.focus(); return; }
+      if (rawAmount && !Number.isFinite(parsedAmount)) { amount.focus(); return; }
       if (rawAmount && !/^\d{4}-\d{2}$/.test(rawMonth)) { month.focus(); return; }
       profile.startingCash = normalizedAmount;
       profile.currentAmount = normalizedAmount;
@@ -1616,27 +1649,6 @@
     showCurrentYearOnce();
   }
 
-  // === Charge des données démo sans persister (pour le tutoriel) ===
-  function loadDemoData(demoData) {
-    var sheet = activeSheet();
-    if (!sheet) return;
-    sheet.cells = {};
-    sheet.headers = demoData.headers.slice();
-    sheet.rowHeaders = demoData.rowHeaders.slice();
-    sheet.rows = demoData.rowHeaders.length;
-    sheet.cols = Math.max(sheet.cols || 8, demoData.headers.length + 1);
-    for (var r = 0; r < demoData.values.length; r++) {
-      for (var c = 0; c < demoData.values[r].length; c++) {
-        var key = r + "," + c;
-        sheet.cells[key] = { raw: String(demoData.values[r][c]) };
-      }
-    }
-    buildTable();
-    renderValues();
-    renderTabs();
-    // NE PAS appeler notifyDashboard — les données démo ne doivent pas entrer dans le dashboard
-  }
-
   // === Crée les feuilles par défaut avec les années ===
   function getDefaultYearNames() {
     var currentYear = new Date().getFullYear();
@@ -1694,7 +1706,7 @@
     var changed = false;
     var amount = profile.currentAmount;
     if (amount === "" || amount === undefined || amount === null) amount = profile.startingCash;
-    if (amount !== "" && amount !== undefined && amount !== null && Number.isFinite(Number(String(amount).replace(",", ".")))) {
+    if (amount !== "" && amount !== undefined && amount !== null && Number.isFinite(parseAmount(amount))) {
       var initialRow = ensureRow("Solde initial");
       var monthIndex = yearMatch ? Math.max(0, Math.min(11, Number(yearMatch[2]) - 1)) : 0;
       target.cells[cellKey(initialRow, monthIndex)] = { raw: String(amount) };
@@ -1849,7 +1861,7 @@
     }
   }
 
-  window.FinanceSheet = { init, recompute, saveNow, openCalculator, openStartingBalance, getSnapshot, loadSnapshot, switchFinancialOwner, buildWorkbook, buildTables, importXlsx, exportXlsx, loadDemoData, clearDemoDataFS, updateSheetBalanceCards, getObjectiveSources, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
+  window.FinanceSheet = { init, recompute, saveNow, openCalculator, openStartingBalance, getSnapshot, loadSnapshot, switchFinancialOwner, buildWorkbook, buildTables, importXlsx, exportXlsx, clearDemoDataFS, parseAmount, updateSheetBalanceCards, getObjectiveSources, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
   // Hook appelé après import / édition / création de feuille pour rafraîchir le dashboard.
   let dashTimer = null;
   function notifyDashboard() {

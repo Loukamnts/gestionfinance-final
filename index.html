@@ -5193,7 +5193,7 @@ function inferColumnType(header, samples){
                 if(desc === undefined || desc === null || desc === "") continue;
                 var descStr = String(desc).trim();
                 if(amt === undefined || amt === null || amt === "") continue;
-                var amtNum = typeof amt === "number" ? amt : parseFloat(String(amt).replace(/[^\d.,-]/g, "").replace(",", ".")) || 0;
+                var amtNum = typeof amt === "number" ? amt : (window.FinanceSheet.parseAmount ? window.FinanceSheet.parseAmount(amt) : parseFloat(String(amt).replace(",", "."))) || 0;
                 if(!grouped[descStr]) grouped[descStr] = 0;
                 grouped[descStr] += amtNum;
                 // Détecter le mois depuis la colonne date
@@ -5208,12 +5208,11 @@ function inferColumnType(header, samples){
               tKeys.forEach(function(k){
                 // Classification automatique basée sur le signe et les mots-clés
                 var totalAmt = grouped[k];
-                var autoRule = classifyFinancialProperty(k);
-                if(!autoRule || autoRule === "Ignorer"){
-                  // Si pas reconnu par mots-clés, utiliser le signe du montant
-                  autoRule = totalAmt < 0 ? "Dépense" : "Salaire";
-                }
-                tProps[k] = { type: "number", number: totalAmt, _autoRule: autoRule, _autoConfidence: 0.6 };
+                var classified = classifyFinancialPropertyEx(k);
+                var autoRule = classified.rule || "Ignorer";
+                // Le signe ne décide que pour un libellé inconnu (à vérifier) : « Total », « Solde »… restent ignorés.
+                if(!classified.matched) autoRule = totalAmt < 0 ? "Dépense" : "Salaire";
+                tProps[k] = { type: "number", number: totalAmt, _autoRule: autoRule, _autoConfidence: 0.6, _needsReview: !classified.matched };
                 tNonEmpty++;
               });
               if(monthFromTransactions){ tProps["Mois"] = wrapSheetValue(monthFromTransactions); }
@@ -5444,7 +5443,7 @@ function inferColumnType(header, samples){
     }
     init();
   </script>
-  <script src="sheet.js?v=20261019-r2"></script>
+  <script src="sheet.js?v=20261019-r3"></script>
   <script src="onboarding.js?v=20261018-r4"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
   <script src="shared-expenses.js?v=20261019-r1"></script>
@@ -6059,7 +6058,7 @@ function inferColumnType(header, samples){
   <script src="ios-fix.js?v=20261013-r2" defer></script>
   <script src="plans.js?v=20261019-r1" defer></script>
   <script src="year-review.js?v=20261019-r5" defer></script>
-  <script src="home.js?v=20261019-r12" defer></script>
+  <script src="home.js?v=20261019-r13" defer></script>
   <script src="finishing.js?v=20261019-r1" defer></script>
   <script src="bank-import.js?v=20261019-r16" defer></script>
   <script src="subs.js?v=20261019-r11" defer></script>
