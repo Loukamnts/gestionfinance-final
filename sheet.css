@@ -17,14 +17,7 @@
 }
 .sheet-bar-left { display: flex; align-items: center; gap: 10px; }
 .sheet-bar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.sheet-menu { position: relative; }
-.sheet-menu-btn { padding: 8px 14px; font-size: 1.15rem; line-height: 1; min-width: 40px; }
-.sheet-menu-list { position: absolute; right: 0; top: calc(100% + 6px); min-width: 230px; background: var(--panel-solid, var(--panel-bg, #fff)); border: 1px solid var(--line-strong, var(--line)); border-radius: 14px; box-shadow: var(--shadow, 0 8px 24px rgba(0,0,0,0.12)); padding: 6px; z-index: 50; }
-.sheet-menu-list[hidden] { display: none; }
-.sheet-menu-list button { display: block; width: 100%; text-align: left; padding: 10px 12px; border: none; background: transparent; color: var(--text); font: inherit; border-radius: 10px; cursor: pointer; }
-.sheet-menu-list button:focus-visible { background: var(--input-focus-bg, rgba(0,0,0,0.05)); }
-@media (hover:hover) {
-.sheet-menu-list button:hover { background: var(--input-focus-bg, rgba(0,0,0,0.05)); } }
+
 .sheet-bar .sheet-title {
   font-family: var(--font-heading, inherit); font-weight: 800;
   font-size: 1.1rem; letter-spacing: -0.01em; color: var(--text);
@@ -166,9 +159,6 @@
 @media (hover:hover) {
 .sheet-addrows .button:hover { opacity: 1; } }
 
-.sheet-nav-btn { font-size: 0.92rem; padding: 10px 18px; border-color: var(--accent); }
-.sheet-nav-btn svg { width: 20px; height: 20px; flex: 0 0 20px; }
-
 /* Lisible même en Brutalisme */
 body[data-theme="brutal"] .sheet-table td.cell, body[data-theme="brutal"] .sheet-table .row-head, body[data-theme="brutal"] .sheet-table thead th { background: var(--panel-solid) !important; color: var(--text) !important; }
 
@@ -180,7 +170,6 @@ body[data-theme="brutal"] .sheet-modal,
 body[data-theme="brutal"] .sheet-calc-display,
 body[data-theme="brutal"] .sheet-calc-btn,
 body[data-theme="brutal"] .sheet-toast,
-body[data-theme="brutal"] .sheet-nav-btn,
 body[data-theme="brutal"] .sheet-bar .button,
 body[data-theme="brutal"] .sheet-addrows .button,
 body[data-theme="brutal"] .sheet-status .dot { border-radius: 0 !important; }
@@ -188,7 +177,7 @@ body[data-theme="brutal"] .sheet-bar,
 body[data-theme="brutal"] .sheet-wrap,
 body[data-theme="brutal"] .sheet-modal { box-shadow: 6px 6px 0 var(--line-strong, #fff); }
 body[data-theme="brutal"] .sheet-table th, body[data-theme="brutal"] .sheet-table td { border-width: 2px; }
-body[data-theme="brutal"] .sheet-tab, body[data-theme="brutal"] .sheet-tab-rename, body[data-theme="brutal"] .sheet-tab-x, body[data-theme="brutal"] .sheet-tab.add { border-radius: 0 !important; }
+body[data-theme="brutal"] .sheet-tab, body[data-theme="brutal"] .sheet-tab-x, body[data-theme="brutal"] .sheet-tab.add { border-radius: 0 !important; }
 body[data-theme="brutal"] .sheet-calc-btn { border-width: 2px; box-shadow: 3px 3px 0 var(--line-strong, #fff); }
 body[data-theme="brutal"] .sheet-divider { background: var(--line-strong, #fff); width: 2px; }
 
@@ -229,7 +218,6 @@ body[data-theme="brutal"] .sheet-divider { background: var(--line-strong, #fff);
 .sheet-modal-actions { display: flex; flex-direction: column; gap: 8px; }
 .sheet-modal-actions .button { width: 100%; justify-content: center; text-align: center; white-space: nowrap; }
 
-
 /* Toast */
 .sheet-toast {
   position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 10000;
@@ -249,8 +237,7 @@ body[data-theme="brutal"] .sheet-divider { background: var(--line-strong, #fff);
   .sheet-bar .button { min-height: 38px; padding: 7px 10px; font-size: 0.8rem; }
   .sheet-bar .icon-btn { padding: 7px 9px; }
   .sheet-bar .icon-btn svg { width: 17px; height: 17px; flex: 0 0 17px; }
-  .sheet-bar .hide-sm { display: none; }
-  .sheet-table th, .sheet-table td { min-width: 104px; }
+    .sheet-table th, .sheet-table td { min-width: 104px; }
   .sheet-table .corner-head, .sheet-table .row-head { min-width: 164px; width: 164px; }
   .sheet-table .row-head .rh-number { width: 24px; min-width: 24px; margin-left: 6px; margin-right: 5px; }
   .sheet-table .row-head .rh-label { max-width: calc(100% - 70px); padding-right: 30px; font-size: .82rem; }
@@ -358,13 +345,12 @@ body[data-theme="brutal"] .bottom-nav-btn { border-radius: 0; }
 .sheet-tab:hover { color: var(--text); border-color: var(--accent); } }
 .sheet-tab.active { background: var(--bg); color: var(--text); border-color: var(--accent); border-bottom: 1px solid var(--bg); position: relative; z-index: 1; }
 .sheet-tab-name { background: none; border: none; color: inherit; font: inherit; padding: 0; cursor: pointer; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
-.sheet-tab-rename, .sheet-tab-x { background: none; border: none; color: var(--muted); font-size: 0.95rem; line-height: 1; min-width: 30px; min-height: 28px; padding: 4px 6px; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; }
+.sheet-tab-x { background: none; border: none; color: var(--muted); font-size: 0.95rem; line-height: 1; min-width: 30px; min-height: 28px; padding: 4px 6px; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; }
 @media (hover:hover) {
-.sheet-tab-rename:hover, .sheet-tab-x:hover { color: var(--accent); background: var(--button-active-bg); } }
+.sheet-tab-x:hover { color: var(--accent); background: var(--button-active-bg); } }
 .sheet-tab.add { border-style: solid; border-radius: 999px; min-width: 30px; padding: 4px 0; font-size: 1.1rem; line-height: 1; color: var(--muted); justify-content: center; }
 @media (hover:hover) {
 .sheet-tab.add:hover { color: var(--accent); border-color: var(--accent); background: var(--button-active-bg); } }
-.sheet-tab.add.add-before { margin-right: 4px; }
 .row-head { cursor: pointer; user-select: none; }
 .row-head .rh-label { display: inline-block; }
 .row-head .rh-edit-btn {
@@ -382,19 +368,10 @@ body[data-theme="brutal"] .bottom-nav-btn { border-radius: 0; }
 .settings-intro strong { display: block; font-size: 0.95rem; margin-bottom: 4px; color: var(--text); }
 .settings-intro p { margin: 0; color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
 .settings-field label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; }
-.settings-input-row { display: flex; gap: 8px; }
-.settings-input-row input { flex: 1; min-width: 0; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-solid); color: var(--text); font-size: 0.85rem; }
-.settings-input-row input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-.settings-hint { margin: 0; font-size: 0.78rem; line-height: 1.5; color: var(--muted); }
-.settings-hint code { background: var(--button-active-bg); padding: 1px 6px; border-radius: 6px; font-size: 0.78rem; color: var(--text); }
-.settings-hint strong { color: var(--text); }
 
 /* Sections des paramètres et du tableur */
 body { padding-bottom: 0; }
-.config-section { position: static; }
-.config-section .panel-title { margin-bottom: 12px; }
 .sheet-rules-section { margin-top: 18px; }
-.dashboard-page .content { max-width: 100%; }
 #dashboardPage .content { gap: 18px; }
 
 /* Bouton Recharger (dashboard) */
@@ -412,11 +389,6 @@ body { padding-bottom: 0; }
 .sync-sheet-btn:hover { filter: brightness(1.08); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(192,132,87,0.4); } }
 .sync-sheet-btn:active { transform: translateY(0); filter: brightness(0.95); }
 .sync-sheet-btn:disabled { opacity: 0.6; cursor: wait; transform: none; filter: none; box-shadow: none; }
-.sync-spinner {
-  display: inline-block; width: 14px; height: 14px;
-  border: 2px solid currentColor; border-top-color: transparent;
-  border-radius: 50%; animation: syncSpin 0.6s linear infinite;
-}
 @keyframes syncSpin { to { transform: rotate(360deg); } }
 
 /* === Section Compte (Supabase auth) === */
@@ -434,7 +406,6 @@ body { padding-bottom: 0; }
 .account-hint code { background: var(--panel-bg, rgba(0,0,0,0.06)); padding: 1px 5px; border-radius: 4px; font-size: 0.82em; }
 
 /* === Boutons de compte stylés === */
-.account-actions-row { display: flex; flex-direction: column; gap: 8px; }
 .account-btn-primary {
   width: 100%; padding: 12px 20px; border: none; border-radius: 12px;
   background: linear-gradient(135deg, #c08457, #8FA0B5);
@@ -469,13 +440,6 @@ body { padding-bottom: 0; }
 }
 .account-user-info p { margin: 0; font-size: 0.78rem; color: var(--muted, rgba(226,232,255,0.5)); }
 .account-user-info strong { display: block; font-size: 0.9rem; color: var(--text, #e2e8ff); }
-.account-btn-danger {
-  width: 100%; padding: 10px 20px; border: 1px solid rgba(239,68,68,0.3);
-  border-radius: 12px; background: transparent; color: #f87171;
-  font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.15s;
-}
-@media (hover:hover) {
-.account-btn-danger:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.5); } }
 
 /* Les composants historiques utilisent désormais les mêmes variables que les
    trois thèmes. Aucun violet fixe ne doit survivre à un changement de thème. */
@@ -485,12 +449,10 @@ body { padding-bottom: 0; }
 @media (hover:hover) {
 .account-btn-secondary:hover { background: var(--button-active-bg); border-color: var(--accent); } }
 .account-user-avatar { background: var(--button-primary-bg); color: var(--button-primary-text); border-radius: var(--control-radius, 50%); }
-.account-btn-danger { color: var(--red); border-color: color-mix(in srgb, var(--red), transparent 56%); background: color-mix(in srgb, var(--red), transparent 92%); border-radius: var(--control-radius, 12px); }
 body[data-theme="brutal"] .balance-card,
 body[data-theme="brutal"] .account-btn-primary,
 body[data-theme="brutal"] .account-btn-secondary,
-body[data-theme="brutal"] .account-user-avatar,
-body[data-theme="brutal"] .account-btn-danger { border-radius: 0 !important; }
+body[data-theme="brutal"] .account-user-avatar { border-radius: 0 !important; }
 @media (max-width: 720px) { body { padding-bottom: 66px; } }
 
 /* Les intitulés restent lisibles : la largeur suit le plus long intitulé,
@@ -526,15 +488,6 @@ body[data-theme="brutal"] .account-btn-danger { border-radius: 0 !important; }
 }
 
 /* === Sync status badge === */
-.sync-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
-  background: rgba(192,132,87,0.1); border: 1px solid rgba(192,132,87,0.2);
-  color: var(--text, #e2e8ff);
-}
-.sync-badge.offline { background: rgba(234,179,8,0.1); border-color: rgba(234,179,8,0.2); color: #eab308; }
-.sync-badge.syncing { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.2); color: #3b82f6; }
-.sync-badge.synced { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.2); color: #22c55e; }
 
 /* Numéro, intitulé et crayon sont trois zones distinctes. Le titre peut
    revenir à la ligne sans jamais se décaler ni passer sous le bouton. */
@@ -995,7 +948,6 @@ body.sheet-modal-open { position:fixed; top:var(--sheet-modal-scroll-y,0px); lef
 .sheet-modal-overlay { overscroll-behavior:contain; touch-action:pan-y; }
 
 /* ───── Barre mobile : actions visibles, position sûre, aucune découpe ───── */
-.sheet-mobile-more,.sheet-mobile-tools { display:none; }
 @media (max-width:720px) {
   #sheetPage { overflow-x:clip; scroll-padding-top:calc(92px + env(safe-area-inset-top,0px)); }
   .sheet-bar,
@@ -1050,26 +1002,7 @@ body.sheet-modal-open { position:fixed; top:var(--sheet-modal-scroll-y,0px); lef
   .sheet-bar-right > .sheet-divider,
   .sheet-bar-right > #btnSheetDeleteRow,
   .sheet-bar-right > #btnSheetClear { display:none !important; }
-  .sheet-bar .sheet-mobile-more { display:inline-flex; }
-  .sheet-mobile-tools {
-    position:absolute;
-    top:calc(100% + 11px);
-    right:0;
-    z-index:100;
-    width:min(232px,calc(100vw - 36px));
-    grid-template-columns:1fr;
-    gap:3px;
-    padding:6px;
-    border:1px solid var(--line-strong);
-    border-radius:var(--control-radius);
-    background:var(--panel-solid);
-    box-shadow:var(--shadow);
-  }
-  .sheet-mobile-tools:not([hidden]) { display:grid; }
-  .sheet-mobile-tools button { min-height:42px; padding:9px 11px; border:0; border-radius:calc(var(--control-radius) - 3px); background:transparent; color:var(--text); text-align:left; font:700 .84rem/1.2 var(--font-body); }
-  .sheet-mobile-tools button:focus-visible { background:var(--button-active-bg); color:var(--accent); }
-  @media (hover:hover) {
-  .sheet-mobile-tools button:hover { background:var(--button-active-bg); color:var(--accent); } }
+
   .balance-help,
   .sheet-balance-cards .balance-help {
     position:absolute !important;
@@ -1351,10 +1284,6 @@ body[data-theme="brutal"] .sheet-bar #btnSheetCalc {
   body[data-theme="editorial"] .sheet-bar #btnSheetCalc,
   body[data-theme="brutal"] .sheet-bar #btnSheetCalc { min-width:126px !important; }
 }
-body[data-theme="editorial"] .sheet-mobile-tools { border-radius:3px; }
-body[data-theme="editorial"] .sheet-mobile-tools button { border-radius:2px; }
-body[data-theme="brutal"] .sheet-mobile-tools,
-body[data-theme="brutal"] .sheet-mobile-tools button { border-radius:0; }
 
 body[data-theme="brutal"] .sheet-bar,
 body[data-theme="brutal"] :is(.sheet-bar-left,.sheet-bar-file-actions),
@@ -1501,7 +1430,6 @@ body[data-theme="brutal"] .sheet-bar {
   body[data-theme="editorial"] .sheet-bar,
   body[data-theme="brutal"] .sheet-bar { width:100%; padding-inline:0; }
 }
-
 
 /* ───────────────────────────────────────────────────────────────
    Barre du tableur : un rail compact, jamais étiré sur toute la
@@ -1723,7 +1651,6 @@ body[data-theme="brutal"] .sheet-bar #btnSheetCalc {
   flex:0 0 auto !important;
   padding-inline:12px !important;
 }
-.sheet-mobile-more,.sheet-mobile-tools { display:none !important; }
 @media (max-width:720px) {
   .sheet-bar,
   body[data-theme="glass"] .sheet-bar,

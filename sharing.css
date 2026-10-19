@@ -10,11 +10,6 @@
   font: 400 1rem/1.5 var(--font-body);
 }
 :is(#sharingPage,#sharingAccessPage) > .content { display: block; width: 100%; max-width: 1240px; margin: 0 auto; padding: 18px 0 32px; min-width: 0; }
-.sf-page-head { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
-.sf-page-head h2 { color: var(--text); font: 700 clamp(1.65rem,3vw,2.15rem)/1.2 var(--font-heading); letter-spacing: -.035em; }
-.sf-page-head p { color: var(--muted); margin-top: 8px; font-size: .9375rem; }
-.sf-page-head .sf-back { flex-shrink: 0; }
-.sf-page-head .sf-back::before { content: "←"; display: inline-block; font-size: 22px; line-height: 1; }
 :is(#sharingPage,#sharingAccessPage) [hidden], .sf-dialog [hidden] { display: none !important; }
 :is(#sharingPage,#sharingAccessPage,.sf-dialog) button { text-transform: none; letter-spacing: normal; }
 .sf-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 42px; max-width: 100%; padding: 10px 15px; border: 1px solid var(--sf-border); border-radius: var(--sf-control); color: var(--text); background: var(--sf-surface); font: 600 .875rem/1.35 var(--font-body); cursor: pointer; text-decoration: none; transition: background .16s, border-color .16s, opacity .16s; }
@@ -160,13 +155,6 @@
 .sf-view-header h2 { font: 650 1.5rem var(--font-heading); color: var(--text); }
 .sf-kicker { font-size: .875rem; color: var(--muted); margin-bottom: 6px; }
 .sf-sheet-heading { font: 600 1rem var(--font-heading); margin-top: 10px; }
-.sf-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
-.sf-metric { display: grid; gap: 12px; padding: 22px; border: 1px solid var(--sf-border); border-radius: var(--sf-radius); background: var(--panel-bg); }
-.sf-metric strong { font: 650 clamp(1.25rem,2vw,1.75rem) var(--font-heading); font-variant-numeric: tabular-nums; }
-.sf-months { border: 1px solid var(--sf-border); border-radius: var(--sf-radius); overflow: hidden; }
-.sf-month { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 24px; align-items: center; padding: 18px 20px; background: var(--panel-bg); font-size: .875rem; }
-.sf-month + .sf-month { border-top: 1px solid var(--sf-border); }
-.sf-month > :last-child { min-width: 110px; text-align: right; font-variant-numeric: tabular-nums; }
 .sf-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }
 body[data-theme="editorial"] :is(.sf-friend,.sf-section,.sf-summary,.sf-dialog) { border-top: 3px solid var(--accent); }
 body[data-theme="brutal"] :is(.sf-friend,.sf-section,.sf-summary,.sf-dialog) { border: 2px solid var(--line); box-shadow: 3px 3px 0 var(--line); }
@@ -181,10 +169,7 @@ body[data-theme="brutal"] :is(#sharingPage,#sharingAccessPage,.sf-dialog) { --sf
 }
 @media (max-width: 720px) {
   :is(#sharingPage,#sharingAccessPage) > .content { padding-top: 12px; padding-bottom: 28px; }
-  .sf-page-head { align-items: flex-start; gap: 12px; margin-bottom: 24px; }
-  .sf-page-head p { font-size: .875rem; }
-  .sf-page-head > .sf-back { font-size: 0; padding: 0; width: 38px; min-width: 38px; gap: 0; }
-  .sf-toolbar { gap: 16px; flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 0; }
+        .sf-toolbar { gap: 16px; flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 0; }
   .sf-tabs { order: 2; width: 100%; gap: 26px; }
   .sf-tab { padding-bottom: 16px; font-size: .875rem; }
   .sf-tab[aria-selected="true"]::after { bottom: -1px; }
@@ -219,13 +204,8 @@ body[data-theme="brutal"] :is(#sharingPage,#sharingAccessPage,.sf-dialog) { --sf
   .sf-privacy { line-height: 1.5; }
   .sf-empty { padding: 36px 20px; }
   .sf-dialog { padding: 22px; }
-  .sf-metrics { grid-template-columns: minmax(0,1fr); gap: 10px; }
-  .sf-metric { grid-template-columns: 1fr auto; gap: 10px; padding: 18px; align-items: center; }
-  .sf-view-header { align-items: flex-start; flex-wrap: wrap; }
-  .sf-month { grid-template-columns: minmax(0,1fr) auto; gap: 6px 12px; padding: 16px; }
-  .sf-month > .sf-muted { grid-column: 1; grid-row: 2; font-size: .75rem; }
-  .sf-month > :last-child { grid-column: 2; grid-row: 1 / 3; min-width: auto; }
-}
+      .sf-view-header { align-items: flex-start; flex-wrap: wrap; }
+      }
 @media (prefers-reduced-motion: reduce) {
   :is(#sharingPage,#sharingAccessPage,.sf-dialog) * { transition: none !important; scroll-behavior: auto !important; }
 }
@@ -253,7 +233,6 @@ body[data-theme="brutal"] .sf-onboarding-step,body[data-theme="brutal"] .sf-onbo
   .sf-onboarding-steps { grid-template-columns:1fr; }
   .sf-onboarding-actions > .sf-button { flex:1 1 150px; padding-inline:10px; gap:7px; white-space:nowrap; }
 }
-
 
 /* Partage (Le Moulin) : pas de cadre autour de toute la page — chaque carte a déjà le sien.
    L'ancien cadre sans marge intérieure coupait les boutons et collait au contenu. */
