@@ -21,16 +21,37 @@ test('Retirer un abonnement le sort de la liste et du total',()=>{
   assert.deepEqual(JSON.parse(JSON.stringify(W.GFSubs.list().map(i=>i.name))),['Netflix']);assert.equal(W.GFSubs.totals(W.GFSubs.list()).month,15.99);
   assert.equal(W.GFSubs.list(true).length,2);
 });
-test('Un abonnement connu est repéré dès le premier mois ; réimporter ne double pas',()=>{
-  const W=setup();const one='Date;Libellé;Montant\n07/10/2026;PRLV SEPA SPOTIFY;-11,12\n08/10/2026;CARTE 08/10 BOULANGERIE;-3,20\n';
-  W.GFSubs.ingest(ops(W,one));W.GFSubs.ingest(ops(W,one));
+test('Un seul prélèvement ne suffit pas, même d’un service connu ; réimporter ne double pas',()=>{
+  const W=setup();const one='Date;Libellé;Montant\n07/10/2026;PRLV SEPA SPOTIFY;-11,12\n08/10/2026;CARTE 08/10 ORANGE BOUTIQUE;-29,00\n';
+  W.GFSubs.ingest(ops(W,one));assert.equal(W.GFSubs.list().length,0);
+  const two='Date;Libellé;Montant\n07/09/2026;PRLV SEPA SPOTIFY;-11,12\n'+one.split('\n').slice(1).join('\n');
+  W.GFSubs.ingest(ops(W,two));W.GFSubs.ingest(ops(W,two));
   const l=W.GFSubs.list();assert.deepEqual(JSON.parse(JSON.stringify(l.map(i=>i.name))),['Spotify']);assert.equal(l[0].amount,11.12);
 });
+test('Une référence qui change chaque mois ne crée pas de doublon',()=>{
+  const W=setup();W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n05/08/2026;PRLV SEPA NETFLIX.COM 8YHZQ;-13,49\n05/09/2026;CB NETFLIX.COM AMSTERDAM KQPLW;-13,49\n05/10/2026;PRLV NETFLIX INTERNATIONAL BV MZRT;-13,49\n'));
+  const l=W.GFSubs.list();assert.deepEqual(JSON.parse(JSON.stringify(l.map(i=>i.name))),['Netflix']);assert.equal(l[0].since,3);
+});
+test('Achats répétés au même endroit : pas des abonnements',()=>{
+  const W=setup();W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n'+
+    '12/08/2026;CARTE BOULANGERIE DUPONT;-4,20\n12/09/2026;CARTE BOULANGERIE DUPONT;-4,20\n12/10/2026;CARTE BOULANGERIE DUPONT;-4,20\n'+// restaurants
+    '15/08/2026;CARTE TOTAL ACCESS;-60,00\n15/09/2026;CARTE TOTAL ACCESS;-60,00\n15/10/2026;CARTE TOTAL ACCESS;-60,00\n'+// essence
+    '20/09/2026;CARTE LIBRAIRIE MOLLAT;-18,00\n20/10/2026;CARTE LIBRAIRIE MOLLAT;-18,00\n'+// 2 mois seulement
+    '03/08/2026;CARTE CAVISTE NICOLAS;-25,00\n03/09/2026;CARTE CAVISTE NICOLAS;-41,00\n03/10/2026;CARTE CAVISTE NICOLAS;-12,00\n'));// montant qui change
+  assert.equal(W.GFSubs.list().length,0);
+});
+test('Ancienne mémoire : doublons fusionnés, choix « retiré » gardé',()=>{
+  const W=setup();W.safeStore.setItem('personalFinanceDashboard.subscriptions',JSON.stringify({v:1,items:{
+    'netflix com':{name:'Netflix Com',known:true,months:{'24320':[13.49,1]},hidden:false},
+    'netflix':{name:'Netflix',known:true,months:{'24321':[13.49,1]},hidden:false},
+    'orange':{name:'Orange',known:true,months:{'24321':[29,1]},hidden:true}}}));
+  const l=W.GFSubs.list(true);assert.deepEqual(JSON.parse(JSON.stringify(l.map(i=>i.name))),['Netflix']);assert.equal(l[0].since,2);
+});
 test('Un abonnement plus prélevé depuis 2 mois sort du total',()=>{
-  const W=setup();W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n05/06/2026;PRLV SEPA DEEZER;-10,99\n05/07/2026;PRLV SEPA DEEZER;-10,99\n05/10/2026;PRLV SEPA NETFLIX;-13,49\n'));
+  const W=setup();W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n05/06/2026;PRLV SEPA DEEZER;-10,99\n05/07/2026;PRLV SEPA DEEZER;-10,99\n05/09/2026;PRLV SEPA NETFLIX;-13,49\n05/10/2026;PRLV SEPA NETFLIX;-13,49\n'));
   const l=W.GFSubs.list();const dz=l.find(i=>i.name==='Deezer');assert.equal(dz.active,false);assert.equal(W.GFSubs.totals(l).month,13.49);
 });
 test('Le loyer, les impôts et l’épargne ne sont pas des abonnements',()=>{
-  const W=setup();W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n04/09/2026;PRLV SEPA LOYER FONCIA;-850,00\n04/10/2026;PRLV SEPA LOYER FONCIA;-850,00\n15/09/2026;PRLV DGFIP IMPOT;-120,00\n15/10/2026;PRLV DGFIP IMPOT;-120,00\n20/09/2026;VIR VERS LIVRET A;-100,00\n20/10/2026;VIR VERS LIVRET A;-100,00\n06/09/2026;PRLV SEPA EDF CLIENTS;-64,00\n06/10/2026;PRLV SEPA EDF CLIENTS;-64,00\n'));
+  const W=setup();W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n04/09/2026;PRLV SEPA LOYER FONCIA;-850,00\n04/10/2026;PRLV SEPA LOYER FONCIA;-850,00\n15/09/2026;PRLV DGFIP IMPOT;-120,00\n15/10/2026;PRLV DGFIP IMPOT;-120,00\n20/09/2026;VIR VERS LIVRET A;-100,00\n20/10/2026;VIR VERS LIVRET A;-100,00\n06/08/2026;PRLV SEPA EDF CLIENTS;-64,00\n06/09/2026;PRLV SEPA EDF CLIENTS;-64,00\n06/10/2026;PRLV SEPA EDF CLIENTS;-64,00\n'));
   assert.deepEqual(JSON.parse(JSON.stringify(W.GFSubs.list().map(i=>i.name))),['Edf Clients']);
 });

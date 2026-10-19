@@ -115,7 +115,7 @@
     ["Courses","Groceries","Dépense",/carrefour|leclerc|auchan|lidl|intermarche|super u|hyper u|\bu express|monoprix|franprix|casino|aldi|picard|biocoop|netto|grand frais|naturalia|spar\b|match\b|cora\b|g20|coccinelle|marche/],
     ["Restaurants","Restaurants","Dépense",/restaurant|resto|mcdo|mc donald|mcdonald|burger king|\bkfc\b|uber ?eats|deliveroo|just ?eat|starbucks|boulangerie|brasserie|sushi|pizza|kebab|cafe\b|bistro|o.?tacos|subway|five guys|\bpaul\b/],
     ["Transports","Transport","Dépense",/sncf|\bratp\b|navigo|\buber\b|bolt|blablacar|totalenergies station|total access|\besso\b|\bshell\b|\bbp\b|avia\b|station|carburant|essence|peage|autoroute|vinci|sanef|\baprr\b|parking|indigo|tisseo|\btcl\b|\brtm\b|keolis|transdev|lime\b|velib|trainline|ouigo|tgv/],
-    ["Abonnements","Subscriptions","Dépense",/netflix|spotify|deezer|disney|canal\+?|amazon prime|prime video|apple\.com|icloud|google (one|storage|play)|youtube|free mobile|free telecom|freebox|\borange\b|\bsosh\b|\bsfr\b|bouygues|b ?& ?you|red by|basic.?fit|fitness park|keep cool|crunch|audible|chatgpt|openai/],
+    ["Abonnements","Subscriptions","Dépense",/netflix|spotify|deezer|disney|canal\+?|amazon prime|prime video|apple\.com|icloud|google (one|storage|play)|youtube|free mobile|free telecom|freebox|\borange\b(?! ?(boutique|store|shop|magasin))|\bsosh\b|\bsfr\b|bouygues|b ?& ?you|red by|basic.?fit|fitness park|keep cool|crunch|audible|chatgpt|openai/],
     ["Énergie et eau","Energy and water","Dépense",/\bedf\b|engie|total ?energies|ekwateur|eau de|veolia|suez|saur\b|gaz\b|electricite|mint energie|octopus/],
     ["Assurances","Insurance","Dépense",/assurance|\baxa\b|maif|macif|matmut|allianz|groupama|gmf\b|mma\b|generali|april\b|luko|lovys/],
     ["Santé","Health","Dépense",/pharmacie|docteur|medecin|dentiste|laboratoire|opticien|doctolib|hopital|clinique|kine|mutuelle|harmonie|ameli/],
@@ -150,11 +150,33 @@
       return c;}}
     return op.amount>0?OTHER_IN:OTHER_OUT;
   }
+  /* Ligne du tableur qui correspond déjà à une catégorie : même nom, singulier/pluriel, ou nom voisin
+     (« Abonnement », « Abos » pour « Abonnements »…). Évite de créer une deuxième ligne pour la même chose. */
+  var SYN={abonnements:["abonnement","abos","abo","subscriptions","subscription"],courses:["alimentation","supermarche","nourriture","groceries"],
+    restaurants:["restaurant","restos","resto","sorties resto"],transports:["transport","essence","carburant","voiture"],loyer:["logement","rent"],
+    energieeteau:["energie","electricite","edf","eau","gaz","factures energie"],assurances:["assurance","insurance"],sante:["medecin","pharmacie","health"],
+    loisirs:["sorties","leisure"],voyages:["vacances","voyage","travel"],impots:["impot","taxes","taxe"],salaire:["salaires","paie","salary"],
+    shopping:["achats"],retraits:["retrait","especes","liquide"],fraisbancaires:["frais banque","banque","bank fees"],epargne:["savings"]};
+  function sing(k){return k.replace(/(s|x)$/,"");}
+  function sheetRows(){var out=[];try{var snap=window.FinanceSheet&&window.FinanceSheet.getSnapshot&&window.FinanceSheet.getSnapshot();(snap&&snap.sheets||[]).forEach(function(sh){(sh.rowHeaders||[]).forEach(function(h){h=String(h||"").trim();if(h&&!/^(solde|total)/i.test(h)&&out.indexOf(h)<0)out.push(h);});});}catch(e){}return out;}
+  function existingRow(name,rows){
+    var k=key(name);if(!k||!rows||!rows.length)return null;
+    var hit=function(f){for(var i=0;i<rows.length;i++)if(f(key(rows[i])))return rows[i];return null;};
+    var syn=(SYN[k]||[]).map(key);
+    var exact=hit(function(r){return r===k;})||hit(function(r){return sing(r)===sing(k);})||hit(function(r){return syn.indexOf(r)>=0||syn.indexOf(sing(r))>=0;});
+    if(exact)return exact;
+    // « Abonnements streaming et musique » : une seule ligne qui commence par le nom de la catégorie
+    var stem=sing(k);if(stem.length<5)return null;
+    var starts=rows.filter(function(r){return key(r).indexOf(stem)===0;});return starts.length===1?starts[0]:null;
+  }
+  // Marchand qui a déjà sa propre ligne (une ligne « Netflix » dans le tableur) : on la remplit au lieu de « Abonnements ».
+  function merchantRow(m,rows){var w=String(m||"").split(" ")[0];if(!w||w.length<4)return null;for(var i=0;i<rows.length;i++){var r=key(rows[i]);if(r===key(w)||r===key(m))return rows[i];}return null;}
   function summarize(ops,extra){
-    var groups={},months={},ignored=0,rules=learned();Object.keys(extra||{}).forEach(function(k){rules[k]=extra[k];});
+    var groups={},months={},ignored=0,rules=learned(),rows=sheetRows();Object.keys(extra||{}).forEach(function(k){rules[k]=extra[k];});
     ops.forEach(function(op){
       var c=categorize(op,rules);if(!c){ignored++;return;}
-      var name=en()?c[1]:c[0],kind=c[2],g=groups[name]||(groups[name]={name:name,kind:kind,count:0,total:0,byMonth:{},merchants:{}});
+      var mo=merchantOf(op.label),own=!Object.prototype.hasOwnProperty.call(rules,mo)&&c[2]==="Dépense"&&op.amount<0?merchantRow(mo,rows):null;
+      var name=own||existingRow(en()?c[1]:c[0],rows)||(en()?c[1]:c[0]),kind=c[2],g=groups[name]||(groups[name]={name:name,kind:kind,count:0,total:0,byMonth:{},merchants:{}});
       // Dépenses et épargne comptées en positif ; un remboursement vient en déduction
       var v=kind==="Salaire"?op.amount:-op.amount,mk=op.date.y+"-"+op.date.m;
       g.count++;g.total+=v;g.byMonth[mk]=(g.byMonth[mk]||0)+v;months[mk]=op.date;
@@ -247,7 +269,7 @@
           var sum=document.createElement("summary");sum.className="gfb-row";sum.append(el("span","gfb-name",g.name),el("span","gfb-count",g.count+t2(" op."," tx")),el("b","gf-amount",eur(Math.abs(g.total))));det.append(sum);
           var ms=Object.keys(g.merchants).map(function(k){return g.merchants[k];}).sort(function(a,b){return Math.abs(b.total)-Math.abs(a.total);});
           var box=el("div","gfb-merchants");
-          ms.slice(0,25).forEach(function(m){var row=el("div","gfb-merchant");var nm=el("span","gfb-mname",m.key?pretty(m.key):m.label);nm.title=m.label;row.append(nm,el("b","gf-amount",eur(Math.abs(m.total))));if(m.key&&merchantOf(m.label)===m.key)row.append(selectFor(m,g.name));box.append(row);});
+          ms.slice(0,25).forEach(function(m){var row=el("div","gfb-merchant");var nm=el("span","gfb-mname",m.key?pretty(m.key):m.label);nm.setAttribute("translate","no");nm.title=m.label;row.append(nm,el("b","gf-amount",eur(Math.abs(m.total))));if(m.key&&merchantOf(m.label)===m.key)row.append(selectFor(m,g.name));box.append(row);});
           if(ms.length>25)box.append(el("small","gfb-more","+ "+(ms.length-25)+t2(" autres marchands"," more merchants")));
           det.append(box);return det;
         }
@@ -290,5 +312,5 @@
       });
     });
   }
-  window.GFBankImport={handle:handle,parse:parse,summarize:summarize,categorize:categorize,merchantOf:merchantOf,learned:learned,saveLearned:saveLearned,_decode:decode};
+  window.GFBankImport={handle:handle,parse:parse,summarize:summarize,existingRow:existingRow,categorize:categorize,merchantOf:merchantOf,learned:learned,saveLearned:saveLearned,_decode:decode};
 })();

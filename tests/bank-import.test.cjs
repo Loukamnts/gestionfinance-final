@@ -52,3 +52,14 @@ test('Un choix fait une fois classe le marchand aux imports suivants',()=>{
   B.saveLearned(extra);const s2=B.summarize(ops);assert.equal(total(s2,'Restaurants'),33);assert.equal(s2.ignored,1);
   delete ctx.window.safeStore;
 });
+
+test('Ligne déjà dans le tableur : pas de deuxième « Abonnements »',()=>{
+  const c2={window:{FinanceSheet:{getSnapshot:()=>({sheets:[{name:'2026',rowHeaders:['Salaire','Abonnement','Alimentation','Netflix']}]})}},TextDecoder,Intl,document:{}};vm.createContext(c2);
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'..','bank-import.js'),'utf8'),c2);const B2=c2.window.GFBankImport;
+  const s=B2.summarize(B2.parse(B2._decode(enc('Date;Libellé;Montant\n05/09/2026;PRLV SEPA SPOTIFY;-11,12\n06/09/2026;PRLV SEPA NETFLIX.COM;-13,49\n07/09/2026;CARTE LIDL;-30,00\n08/09/2026;VIR SALAIRE ACME;2000,00\n'))));
+  const names=s.groups.map(g=>g.name).sort();
+  assert.deepEqual(JSON.parse(JSON.stringify(names)),['Abonnement','Alimentation','Netflix','Salaire']);
+  assert.equal(B2.existingRow('Abonnements',['Abos']),'Abos');assert.equal(B2.existingRow('Courses',['Loyer']),null);
+  assert.equal(B2.existingRow('Abonnements',['Abonnements streaming et musique']),'Abonnements streaming et musique');
+  assert.equal(B2.existingRow('Abonnements',['Abonnements TV','Abonnements sport']),null);
+});
