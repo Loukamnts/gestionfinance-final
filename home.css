@@ -437,3 +437,13 @@ body[data-mode="dark"] .gfr-kind.is-goals .gfr-ic{color:#CDA8DA}
 .gfr-card-body .gfr-btn{margin-top:12px}
 .gfr-hero+.gfr-card,.gfr-hero+.gfr-kinds{margin-top:14px}
 @media(max-width:360px){.gfr-card-body{padding:0 8px 10px}.gfr-chips{padding:0 10px 12px}.gfr-chip{padding:0 1px;font-size:12px;letter-spacing:-.01em}.gfr-chip-row{gap:2px;padding:2px}}
+
+/* Ajout rapide : catégories proposées en pastilles quand il n'y en a pas encore */
+.gfh-suggest{display:flex;flex-wrap:wrap;gap:7px}
+.gfh-suggest[hidden]{display:none}
+.gfh-chip{min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:99px;background:transparent;color:var(--text);font:500 14.5px var(--font-body);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:none}
+.gfh-chip[aria-pressed="true"]{background:var(--accent-fill,#E3A82B);border-color:transparent;color:var(--on-accent-fill,#17261F);font-weight:600}
+.gfh-chip.is-other{border-style:dashed;color:var(--muted)}
+.gfh-chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(hover:hover){.gfh-chip:not([aria-pressed="true"]):hover{background:color-mix(in srgb,var(--text) 5%,transparent)}}
+.gfh-pick[hidden]{display:none}

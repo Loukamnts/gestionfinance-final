@@ -155,21 +155,22 @@
     var KINDS=[["Dépense",t2("Dépense","Expense"),-1,t2("Dépenses","Expenses")],["Salaire",t2("Revenu","Income"),1,t2("Revenus","Income")],["Épargne",t2("Épargne","Savings"),-1,t2("Épargne","Savings")]];
     var kind=KINDS[0],chosen="",creating=false;
     var d=el("dialog","gfh-dialog gfh-quick");d.setAttribute("aria-labelledby","gfhQuickTitle");
-    var h=el("h2","",t2("Ajouter au tableur","Add to spreadsheet"));h.id="gfhQuickTitle";
+    var h=el("h2","",t2("Ajouter","Add"));h.id="gfhQuickTitle";
     var typeRow=el("div","gfh-type-row"),seg=el("div","gfh-seg");seg.setAttribute("role","group");seg.setAttribute("aria-label",t2("Type","Type"));
-    var newBtn=el("button","gfh-new-line");newBtn.type="button";newBtn.setAttribute("aria-label",t2("Créer une nouvelle ligne","Create a new row"));newBtn.title=t2("Nouvelle ligne","New row");
+    var newBtn=el("button","gfh-new-line");newBtn.type="button";newBtn.setAttribute("aria-label",t2("Créer une nouvelle catégorie","Create a new category"));newBtn.title=t2("Nouvelle catégorie","New category");
     newBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
     KINDS.forEach(function(k){var b=el("button","",k[1]);b.type="button";b.dataset.kind=k[0];b.setAttribute("aria-pressed",String(k===kind));b.addEventListener("click",function(){setKind(k,true);});seg.append(b);});
     typeRow.append(seg,newBtn);
     var amtL=el("label","gfh-field"),amt=document.createElement("input");amtL.append(el("span","",t2("Montant","Amount")));amt.type="text";amt.inputMode="decimal";amt.placeholder="0,00 €";amt.autocomplete="off";amtL.append(amt);
     // Ligne : vrai menu déroulant
-    var lineBox=el("div","gfh-field"),lineLab=el("span","",t2("Ligne du tableur","Spreadsheet row"));lineLab.id="gfhLineLab";
+    var lineBox=el("div","gfh-field"),lineLab=el("span","",t2("Catégorie","Category"));lineLab.id="gfhLineLab";
     var pick=el("button","gfh-pick");pick.type="button";pick.setAttribute("aria-haspopup","listbox");pick.setAttribute("aria-expanded","false");pick.setAttribute("aria-labelledby","gfhLineLab");
-    var pickTxt=el("span","gfh-pick-txt",t2("Choisir une ligne","Choose a row"));pick.append(pickTxt);
+    var pickTxt=el("span","gfh-pick-txt",t2("Choisir une catégorie","Choose a category"));pick.append(pickTxt);
     var menu=el("div","gfh-menu");menu.hidden=true;menu.setAttribute("role","listbox");
-    var newWrap=el("label","gfh-field gfh-newline"),newInp=document.createElement("input");newWrap.hidden=true;newInp.type="text";newInp.autocomplete="off";newInp.maxLength=40;newInp.placeholder=t2("Ex. Restaurant, Netflix…","E.g. Restaurant…");
+    var newWrap=el("label","gfh-field gfh-newline"),newInp=document.createElement("input");newWrap.hidden=true;newInp.type="text";newInp.autocomplete="off";newInp.maxLength=40;newInp.placeholder=t2("Ex. Restaurant, Netflix…","E.g. Restaurant, Netflix…");
     var newLab=el("span","");newWrap.append(newLab,newInp);
-    lineBox.append(lineLab,pick,menu);
+    var chips=el("div","gfh-suggest");chips.setAttribute("role","group");chips.setAttribute("aria-labelledby","gfhLineLab");chips.hidden=true;
+    lineBox.append(lineLab,pick,menu,chips);
     var monL=el("label","gfh-field"),mon=document.createElement("select");monL.append(el("span","",t2("Mois","Month")),mon);
     for(var i=0;i<12;i++){var o=new Option(cap(mname(i))+" "+ctx.year,String(i));if(i===ctx.mi)o.selected=true;mon.append(o);}
     if(window.GFSelect)setTimeout(function(){window.GFSelect.enhance(mon);},0);
@@ -178,16 +179,28 @@
     var form=document.createElement("form");form.append(h,typeRow,amtL,lineBox,newWrap,monL,err,row);d.append(form);
 
     function allLines(){var seen={},out=[];knownLabels().forEach(function(l){var k=lineKind(l);if(k&&!seen[normKey(l)]){seen[normKey(l)]=1;out.push({label:l,kind:k});}});(ctx.expenseLines||[]).forEach(function(l){if(!seen[normKey(l)]){seen[normKey(l)]=1;out.push({label:l,kind:"Dépense"});}});return out;}
-    function setKind(k,fromUser){kind=k;seg.querySelectorAll("button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.kind===k[0]));});newLab.textContent=t2("Nom de la nouvelle ligne (","New row name (")+k[1].toLowerCase()+")";if(fromUser&&chosen&&lineKind(chosen)!==k[0]&&!creating){chosen="";pickTxt.textContent=t2("Choisir une ligne","Choose a row");pick.classList.remove("has-value");}buildMenu();}
-    function setCreating(on){creating=on;newWrap.hidden=!on;newBtn.setAttribute("aria-pressed",String(on));lineBox.hidden=on;if(on){chosen="";setTimeout(function(){newInp.focus();},20);}}
+    function setKind(k,fromUser){kind=k;seg.querySelectorAll("button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.kind===k[0]));});newLab.textContent=t2("Nom de la catégorie (","Category name (")+k[1].toLowerCase()+")";if(fromUser&&chosen&&lineKind(chosen)!==k[0]&&!creating){chosen="";pickTxt.textContent=t2("Choisir une catégorie","Choose a category");pick.classList.remove("has-value");}buildMenu();buildChips();}
+    function setCreating(on){creating=on;newWrap.hidden=!on;newBtn.setAttribute("aria-pressed",String(on));lineBox.hidden=on;if(on){chosen="";setTimeout(function(){newInp.focus();},20);}else buildChips();}
+    // Catégories proposées quand on démarre (ou en plus des siennes), selon le type choisi.
+    var SUGGEST={"Dépense":[["Courses","Groceries"],["Loyer","Rent"],["Transports","Transport"],["Restaurants","Restaurants"],["Loisirs","Leisure"],["Abonnements","Subscriptions"],["Santé","Health"],["Shopping","Shopping"]],"Salaire":[["Salaire","Salary"],["Prime","Bonus"],["Aides","Benefits"],["Autres revenus","Other income"]],"Épargne":[["Livret A","Savings account"],["Épargne","Savings"],["Placements","Investments"]]};
+    function suggestions(){var have={};allLines().forEach(function(l){have[normKey(l.label)]=1;});return (SUGGEST[kind[0]]||[]).map(function(x){return t2(x[0],x[1]);}).filter(function(n){return !have[normKey(n)];});}
+    function choose(label){chosen=label;pickTxt.textContent=label;pick.classList.add("has-value");[].forEach.call(chips.querySelectorAll(".gfh-chip"),function(c){c.setAttribute("aria-pressed",String(c.dataset.label===label));});}
+    // Aucune catégorie de ce type encore : des pastilles à toucher, plutôt qu'une liste vide.
+    function buildChips(){
+      var mine=allLines().filter(function(l){return l.kind===kind[0];}),empty=!mine.length&&!creating;
+      chips.hidden=!empty;pick.hidden=empty;if(!empty){chips.replaceChildren();return;}
+      chips.replaceChildren();
+      suggestions().forEach(function(n){var c=el("button","gfh-chip",n);c.type="button";c.dataset.label=n;c.setAttribute("aria-pressed",String(n===chosen));c.addEventListener("click",function(){choose(n);amt.value?ok.focus():amt.focus();});chips.append(c);});
+      var other=el("button","gfh-chip is-other",t2("Autre…","Other…"));other.type="button";other.addEventListener("click",function(){setCreating(true);});chips.append(other);
+    }
     function buildMenu(){
       menu.replaceChildren();var lines=allLines(),mine=lines.filter(function(l){return l.kind===kind[0];}),others=lines.filter(function(l){return l.kind!==kind[0];});
       function group(title,items){if(!items.length)return;menu.append(el("div","gfh-menu-h",title));items.forEach(function(it){var b=el("button","gfh-menu-item"+(it.label===chosen?" is-on":""),it.label);b.type="button";b.setAttribute("role","option");b.setAttribute("aria-selected",String(it.label===chosen));
         var tag=KINDS.filter(function(k){return k[0]===it.kind;})[0];if(it.kind!==kind[0]&&tag)b.append(el("small","",tag[1]));
         b.addEventListener("click",function(){chosen=it.label;pickTxt.textContent=it.label;pick.classList.add("has-value");if(it.kind!==kind[0]){var k=KINDS.filter(function(x){return x[0]===it.kind;})[0];if(k)setKind(k,false);}closeMenu();amt.value?ok.focus():amt.focus();});menu.append(b);});}
-      group(kind[3],mine);group(t2("Autres lignes","Other rows"),others);
-      if(!lines.length)menu.append(el("p","gfh-menu-empty",t2("Aucune ligne pour l’instant.","No rows yet.")));
-      var add=el("button","gfh-menu-item gfh-menu-new","+ "+t2("Nouvelle ligne…","New row…"));add.type="button";add.addEventListener("click",function(){closeMenu();setCreating(true);});menu.append(add);
+      group(kind[3],mine);group(t2("Autres catégories","Other categories"),others);
+      var sug=suggestions().map(function(n){return{label:n,kind:kind[0]};});group(t2("Suggestions","Suggestions"),sug);
+      var add=el("button","gfh-menu-item gfh-menu-new","+ "+t2("Nouvelle catégorie…","New category…"));add.type="button";add.addEventListener("click",function(){closeMenu();setCreating(true);});menu.append(add);
     }
     function openMenu(){buildMenu();menu.hidden=false;pick.setAttribute("aria-expanded","true");var f=menu.querySelector(".is-on")||menu.querySelector(".gfh-menu-item");if(f)f.focus();}
     function closeMenu(){menu.hidden=true;pick.setAttribute("aria-expanded","false");}
@@ -202,7 +215,7 @@
       var v=parseFloat(String(amt.value).replace(/\s/g,"").replace("€","").replace(",","."));
       if(!isFinite(v)||v<=0){err.textContent=t2("Indique un montant positif.","Enter a positive amount.");amt.focus();return;}
       var lab=creating?String(newInp.value||"").trim():chosen;
-      if(!lab){err.textContent=creating?t2("Donne un nom à la nouvelle ligne.","Name the new row."):t2("Choisis une ligne, ou crée-en une avec +.","Pick a row, or create one with +.");(creating?newInp:pick).focus();return;}
+      if(!lab){err.textContent=creating?t2("Donne un nom à la catégorie.","Name the category."):t2("Choisis une catégorie.","Choose a category.");(creating?newInp:(pick.hidden?chips.querySelector(".gfh-chip")||pick:pick)).focus();return;}
       var mi=Number(mon.value);
       writeEntries([{year:ctx.year,mi:mi,label:lab,amount:kind[2]*v,kind:kind[0]}]);
       d.close();toast(t2("Ajouté : ","Added: ")+eur(v)+" · "+lab+" · "+mname(mi));
@@ -273,6 +286,18 @@
   }
 
   /* ── Alertes de plafond : 80 % puis 100 %, une fois par seuil et par mois ─────── */
+  /* Une seule carte flottante à la fois (alerte de plafond, installation, rappels, bravo…) :
+     les autres attendent qu'elle soit fermée. */
+  var POPUPS="#gfhBudgetAlert,#gfiCard,#gfrInvite,#gfhToast.is-on,.gfd-coach";
+  function popupBusy(self){
+    if(document.hidden)return true;
+    return [].some.call(document.querySelectorAll(POPUPS+",dialog[open]"),function(e){return e!==self&&!e.hidden&&e.getClientRects().length>0;});
+  }
+  window.GFPopup={busy:popupBusy,selector:POPUPS};
+  function whenFree(fn,tries){tries=tries||0;if(!popupBusy()){fn();return;}if(tries>40)return;setTimeout(function(){whenFree(fn,tries+1);},1500);}
+  function closeAlert(){var c=byId("gfhBudgetAlert");if(!c)return;c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}
+  // L'alerte appartient à l'accueil : elle se ferme quand on change de page.
+  if(window.MutationObserver)new MutationObserver(function(){if(document.body.dataset.page!=="dashboard")closeAlert();}).observe(document.body,{attributes:true,attributeFilter:["data-page"]});
   var ALERT_KEY="personalFinanceDashboard.budgetAlerts",ALERT_ON="personalFinanceDashboard.budgetAlertsOn",quietAlerts=false;
   function alertsOn(){return lsGet(ALERT_ON)!=="0";}
   function checkBudgets(all){
@@ -291,7 +316,7 @@
     lsSet(ALERT_KEY,JSON.stringify(state));
     // Juste après avoir fixé un plafond, on note le niveau actuel sans prévenir.
     if(quietAlerts){quietAlerts=false;return;}
-    if(fresh.length)budgetAlert(fresh.sort(function(a,b){return b.lvl-a.lvl||b.spent/b.bud-a.spent/a.bud;}));
+    if(fresh.length){var sorted=fresh.sort(function(a,b){return b.lvl-a.lvl||b.spent/b.bud-a.spent/a.bud;});pushNow(sorted);whenFree(function(){if(document.body.dataset.page==="dashboard")budgetAlert(sorted);});}
   }
   function alertText(a){return a.lvl>=100?t2(a.name+" : plafond atteint ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": limit reached ("+eur(a.spent)+" / "+eur(a.bud)+")"):t2(a.name+" : 80 % du plafond ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": 80% of the limit ("+eur(a.spent)+" / "+eur(a.bud)+")");}
   function budgetAlert(list){
@@ -301,11 +326,11 @@
     var c=el("div","gfr-invite gfh-alert"+(first.lvl>=100?" is-over":""));c.id="gfhBudgetAlert";c.setAttribute("role","status");
     var ic=el("span","gfr-invite-ic");ic.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4L12 4Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 10v4.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.1" fill="currentColor"/></svg>';
     var tx=el("div","gfr-invite-tx");tx.append(el("strong","",title),el("span","",body));
-    var ok=el("button","gfr-invite-go",t2("Compris","Got it"));ok.type="button";ok.addEventListener("click",function(){c.classList.remove("is-on");setTimeout(function(){c.remove();},250);});
+    var ok=el("button","gfr-invite-go",t2("Compris","Got it"));ok.type="button";ok.addEventListener("click",closeAlert);
     var acts=el("div","gfr-invite-acts");acts.append(ok);c.append(ic,tx,acts);document.body.append(c);requestAnimationFrame(function(){c.classList.add("is-on");});
     setTimeout(function(){if(c.isConnected){c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}},9000);
-    pushBudget(list,title,body);
   }
+  function pushNow(list){var first=list[0],more=list.length-1,title=first.lvl>=100?t2("Plafond atteint","Limit reached"):t2("Bientôt au plafond","Close to the limit");pushBudget(list,title,alertText(first)+(more?t2(" · et "+more+" autre"+(more>1?"s":""),", and "+more+" more"):""));}
   /* Notification sur tous mes appareils (compte connecté et notifications activées), même app fermée.
      Sinon, notification de cet appareil seulement si elle a déjà été autorisée (jamais de demande surprise). */
   function pushBudget(list,title,body){
@@ -340,7 +365,7 @@
     lsSet(GOALS_KEY,JSON.stringify(seen));
     if(!fresh.length)return;
     var f=fresh[0],title=t2("Bravo, objectif atteint !","Well done, goal reached!"),name=String(f.g.title||t2("Ton objectif","Your goal"));
-    toast(title+" « "+name+" »");
+    whenFree(function(){toast(title+" « "+name+" »");});
     var R=window.GFReminders;if(!R||!R.notifyMe)return;
     fresh.forEach(function(x){
       var nm=String(x.g.title||t2("Ton objectif","Your goal")).slice(0,60);

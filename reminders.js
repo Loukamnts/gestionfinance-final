@@ -185,6 +185,7 @@
     if(!account().user||document.hidden||document.body.dataset.page!=="dashboard"||(window.__gfCoachUntil||0)>Date.now())return false;
     // Rien d'ouvert à l'écran (fenêtre, tutoriel, repère, chargement) : on ne dérange pas.
     if([].some.call(document.querySelectorAll("dialog[open],.sheet-modal-overlay,.tutorial-overlay,.gfd-coach,.meuni-loader"),function(e){return !e.hidden&&e.getClientRects().length>0;}))return false;
+    if(window.GFPopup&&window.GFPopup.busy(byId("gfrInvite")))return false;
     var a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return false;
     if(!supported()&&!(isIOS()&&!standalone()))return false;
     if("Notification" in window&&Notification.permission==="denied")return false;
