@@ -833,7 +833,9 @@ const dictionary=Object.freeze({
   "Aucune donnée n’est partagée sans ton autorisation explicite.": "No data is shared without your explicit permission.",
   "Connexion…": "Connecting…",
   "J’importe ton fichier…": "Importing your file…",
-  "Fichier importé.": "File imported."
+  "Fichier importé.": "File imported.",
+  "En cours": "In progress",
+  "Archivés": "Archived"
 });
 const months=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 const englishMonths=["January","February","March","April","May","June","July","August","September","October","November","December"];
