@@ -1901,10 +1901,10 @@
   <link rel="stylesheet" href="ui-polish.css?v=20261018-h1">
   <link rel="stylesheet" href="theme-directions.css?v=20261018-h1">
   <link rel="stylesheet" href="plans.css?v=20261018-h1">
-  <link rel="stylesheet" href="home.css?v=20261019-r8">
+  <link rel="stylesheet" href="home.css?v=20261019-r14">
   <link rel="stylesheet" href="year-review.css?v=20261019-r2">
   <link rel="stylesheet" href="sheet-balances.css?v=20261018-h1">
-  <link rel="stylesheet" href="finishing.css?v=20261019-r6">
+  <link rel="stylesheet" href="finishing.css?v=20261019-r7">
   <link rel="stylesheet" href="menus.css?v=20261018-h1">
   <link rel="stylesheet" href="discover.css?v=20261019-r1">
   <script src="i18n.js?v=20261019-r2"></script>
@@ -2009,7 +2009,7 @@
             </button>
           </div><button type="button" id="syncSheetButton" class="gf-button gf-refresh" title="Mettre à jour le tableau de bord depuis le tableur" aria-label="Synchroniser les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Actualiser</span></button></div></div>
           <div class="home-filter-grid is-pie">
-            <label class="home-filter home-filter-view"><span>Vue du graphique</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Camembert</option><option value="grouped">Comparatif annuel</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label>
+            <label class="home-filter home-filter-view"><span>Vue du graphique</span><select id="viewSelect" class="native-select-hidden"><option value="pie">Dépenses</option><option value="grouped">Comparatif annuel</option><option value="stacked">Épargne</option><option value="line">Évolution</option></select></label>
             <label class="home-filter home-filter-year" id="yearFilter"><span>Année</span><select id="yearSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
             <label class="home-filter home-filter-month" id="monthFilter"><span>Mois</span><select id="monthSelect" class="native-select-hidden" disabled><option value="">Aucune donnée chargée</option></select></label>
           </div>
@@ -2869,6 +2869,7 @@
       const usesTimeline=["grouped","stacked","line"].includes(state.currentView);
       if(chartScroll) chartScroll.classList.toggle("is-scrollable",usesTimeline&&visibleMonths.length>5);
       if(chartWrap) chartWrap.style.setProperty("--chart-min-width",usesTimeline?Math.max(760,(state.currentView==="grouped"?12*80:visibleMonths.length*128))+"px":"0px");
+      if(chartScroll) chartScroll.hidden=false; pieToggle(false); elements.customLegend.className="custom-legend";
       if(!visibleMonths.length){ elements.chartTitle.textContent="Répartition du mois"; elements.chartSubtitle.textContent="Importe une source financière pour afficher les graphiques."; elements.emptyState.classList.add("is-visible"); return; }
       if(typeof Chart!=="function"){
         if(window.GFVendors){
@@ -2887,7 +2888,10 @@
       }
       const config=getChartConfig(); elements.chartTitle.textContent=config.title; elements.chartSubtitle.textContent=config.subtitle; elements.emptyState.classList.remove("is-visible");
       if(window.GFI18n){ const tr=window.GFI18n.t; config.chart.data.labels=(config.chart.data.labels||[]).map(label=>tr(label)); config.chart.data.datasets.forEach(ds=>{ if(["Salaire","Dépense","Dépenses","Épargne"].includes(ds.label))ds.label=tr(ds.label); }); }
-      state.chart=new Chart(elements.chartCanvas,config.chart); generateCustomLegend(state.chart);
+      const pie=!!config.pieRows, collapsed=pie&&pieCollapsed();
+      pieToggle(pie,collapsed); if(chartScroll) chartScroll.hidden=collapsed; elements.customLegend.className="custom-legend";
+      if(collapsed){ renderPieLegend(config); return; }
+      state.chart=new Chart(elements.chartCanvas,config.chart); if(pie) renderPieLegend(config); else generateCustomLegend(state.chart);
     }
     function generateCustomLegend(chart,target=elements.customLegend){
       target.innerHTML="";
@@ -2902,13 +2906,58 @@
     function getChartConfig(context){ switch(context?.view||state.currentView){ case"grouped":return getGroupedBarConfig(context); case"stacked":return getStackedRulesConfig(context); case"line":return getLineConfig(context); default:return getPieConfig(context); } }
     function getActiveRules(){ return (state.availableRules?.length?state.availableRules:getAvailableRules()).filter(r=>r!=="Ignorer"&&r!=="Salaire"); }
     function getMonthRuleValue(month,rule){ return Math.abs(month?.ruleBreakdown?.find(i=>i.name===rule)?.value||0); }
+    // « Où va ton argent » : les dépenses du mois par catégorie (le salaire n'y figure plus : il écrasait tout).
+    // Sans catégories de dépense, on garde l'ancienne vue (salaire et règles).
+    function pieColors(){ return document.body.dataset.mode==="dark"?["#7FB39B","#F0C766","#E08A70","#A9C7A4","#9DB6E3","#D9A441","#CDA8DA","#D9C6A5"]:["#2F5D4E","#E3A82B","#B9553E","#8FB29A","#5B6F99","#C98F14","#7A5A86","#B8A588"]; }
     function getPieConfig(context){
       const visibleMonths=context?context.months:getVisibleMonths(); const month=context?(context.selected||visibleMonths[visibleMonths.length-1]):getSelectedMonth()||visibleMonths[visibleMonths.length-1]||state.months[state.months.length-1];
-      const items=(month?.ruleBreakdown||[]).filter(i=>i.value!==0);
+      let cats=((month?.ruleDetails||{})["Dépense"]||[]).map(i=>({name:String(i.name||""),value:Math.abs(Number(i.value)||0)})).filter(i=>i.value>0).sort((a,b)=>b.value-a.value);
+      if(cats.length>7){ const rest=cats.slice(6).reduce((a,i)=>a+i.value,0); cats=cats.slice(0,6).concat([{name:"Autres",value:rest,other:true}]); }
+      if(!cats.length){
+        const items=(month?.ruleBreakdown||[]).filter(i=>i.value!==0);
+        return{
+          title:`Répartition - ${month?.label||""}`, subtitle:"Salaire et règles appliquées au mois sélectionné.",
+          chart:{ type:"doughnut", data:{ labels:["Salaire",...items.map(i=>i.name)], datasets:[{ data:[Math.abs(month?.salary||0),...items.map(i=>Math.abs(i.value))], backgroundColor:[COLORS.salary,...items.map(i=>i.color||getRuleColor(i.name))], borderColor: "#000000", borderWidth: 2, hoverOffset:12 }] }, options:baseChartOptions({ cutout:"60%", layout:{padding:{top:10,bottom:10}}, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, animation:{animateRotate:true,animateScale:true,duration:1000,easing:"easeOutQuart"} }) }
+        };
+      }
+      const palette=pieColors(), total=cats.reduce((a,i)=>a+i.value,0), styles=getComputedStyle(document.body);
+      const rows=cats.map((c,i)=>({name:c.name,value:c.value,share:total?c.value/total:0,color:palette[i%palette.length]}));
+      const ink=readCssVar(styles,"--text","#17261F"), muted=readCssVar(styles,"--muted","#5b665f"), gap=readCssVar(styles,"--panel-solid",readCssVar(styles,"--bg","#F6F2E8"));
+      const label=String(month?.label||"").split(" ")[0].toLowerCase();
+      // Total au centre de l'anneau
+      const center={ id:"gfCenter", afterDraw(chart){ const a=chart.getDatasetMeta(0)?.data?.[0]; if(!a) return; const ctx=chart.ctx, x=a.x, y=a.y, r=a.innerRadius||0; if(r<30) return; ctx.save(); ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillStyle=ink; ctx.font=`700 ${Math.round(Math.min(34,r*0.42))}px "Bricolage Grotesque", system-ui, sans-serif`; ctx.fillText(document.body.classList.contains("gf-hide-amounts")?"••• €":eur0(total),x,y-r*0.1); ctx.fillStyle=muted; ctx.font=`500 ${Math.round(Math.min(15,r*0.18))}px "Instrument Sans", system-ui, sans-serif`; ctx.fillText(`dépensés en ${label}`,x,y+r*0.24); ctx.restore(); } };
       return{
-        title:`Répartition - ${month?.label||""}`, subtitle:"Salaire et règles appliquées au mois sélectionné.",
-        chart:{ type:"doughnut", data:{ labels:["Salaire",...items.map(i=>i.name)], datasets:[{ data:[Math.abs(month?.salary||0),...items.map(i=>Math.abs(i.value))], backgroundColor:[COLORS.salary,...items.map(i=>i.color||getRuleColor(i.name))], borderColor: "#000000", borderWidth: 2, hoverOffset:12 }] }, options:baseChartOptions({ cutout:"60%", layout:{padding:{top:10,bottom:10}}, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, animation:{animateRotate:true,animateScale:true,duration:1000,easing:"easeOutQuart"} }) }
+        title:`Où va ton argent · ${month?.label||""}`, subtitle:"Tes dépenses par catégorie.", pieRows:rows, pieTotal:total, pieMonth:label,
+        chart:{ type:"doughnut", data:{ labels:rows.map(r=>r.name), datasets:[{ data:rows.map(r=>r.value), backgroundColor:rows.map(r=>r.color), borderColor:gap, borderWidth:3, hoverOffset:8 }] }, plugins:[center], options:baseChartOptions({ cutout:"66%", layout:{padding:{top:8,bottom:8}}, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, animation:{animateRotate:true,animateScale:false,duration:700,easing:"easeOutQuart"} }) }
       };
+    }
+    // Liste sous l'anneau (catégorie, montant, part) ou, graphique replié, barres classées.
+    function eur0(v){ return new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(Math.round(v)).replace(/\u202f/g,"\u00a0"); }
+    const PIE_KEY="personalFinanceDashboard.pieCollapsed";
+    function pieCollapsed(){ try{ return safeStore.getItem(PIE_KEY)==="1"; }catch(e){ return false; } }
+    function renderPieLegend(config){
+      const box=elements.customLegend, collapsed=pieCollapsed(), rows=config.pieRows, max=rows[0]?rows[0].value:1;
+      box.className="custom-legend gf-pie-legend"+(collapsed?" is-bars":"");
+      const frag=document.createDocumentFragment();
+      if(collapsed){ const tot=document.createElement("div"); tot.className="gf-pie-total"; const b=document.createElement("b"); b.className="gf-amount"; b.textContent=eur0(config.pieTotal); const sm=document.createElement("span"); sm.textContent=`dépensés en ${config.pieMonth}`; tot.append(b,sm); frag.append(tot); }
+      rows.forEach(r=>{
+        const row=document.createElement("div"); row.className="gf-pie-row";
+        const sw=document.createElement("span"); sw.className="gf-pie-sw"; sw.style.background=r.color;
+        const name=document.createElement("span"); name.className="gf-pie-name"; name.textContent=r.name; name.setAttribute("translate","no");
+        const val=document.createElement("b"); val.className="gf-pie-val gf-amount"; val.textContent=eur0(r.value);
+        const pc=document.createElement("span"); pc.className="gf-pie-pc"; pc.textContent=Math.round(r.share*100)+"\u00a0%";
+        if(collapsed){ const top=document.createElement("div"); top.className="gf-pie-top"; top.append(name,val,pc); const tr=document.createElement("div"); tr.className="gf-pie-track"; const f=document.createElement("i"); f.style.width=Math.max(2,Math.round(r.value/max*100))+"%"; f.style.background=r.color; tr.append(f); row.append(top,tr); }
+        else row.append(sw,name,val,pc);
+        frag.append(row);
+      });
+      box.replaceChildren(frag);
+    }
+    function pieToggle(show,collapsed){
+      const head=document.querySelector("#dashboardPage .chart-head"); if(!head) return;
+      let btn=document.getElementById("gfPieToggle");
+      if(!show){ if(btn) btn.hidden=true; return; }
+      if(!btn){ btn=document.createElement("button"); btn.type="button"; btn.id="gfPieToggle"; btn.className="gf-pie-toggle"; btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'; btn.addEventListener("click",()=>{ try{ safeStore.setItem(PIE_KEY,pieCollapsed()?"0":"1"); }catch(e){} renderChart(); }); head.firstElementChild.after(btn); }
+      btn.hidden=false; btn.setAttribute("aria-expanded",String(!collapsed)); btn.setAttribute("aria-label",collapsed?"Afficher l’anneau":"Réduire l’anneau en barres"); btn.title=collapsed?"Afficher l’anneau":"Réduire en barres";
     }
     function getYearOverYearConfig(){
       // Comparatif : chaque mois de l'année choisie face au même mois de l'année précédente.
@@ -2951,7 +3000,7 @@
         const rules=Array.from(new Set(months.flatMap(month=>(month.ruleBreakdown||[]).map(item=>item.name)))).filter(rule=>rule!=="Salaire"&&rule!=="Ignorer");
         const result=getChartConfig({view:options.view,months,selected,rules,onMonthClick:options.onMonthClick});
         if(options.hideSalary){
-          if(result.chart.type==="doughnut"){result.chart.data.labels.shift();for(const dataset of result.chart.data.datasets){dataset.data.shift();dataset.backgroundColor.shift();}}
+          if(result.chart.type==="doughnut"){if(result.pieRows){}else{result.chart.data.labels.shift();for(const dataset of result.chart.data.datasets){dataset.data.shift();dataset.backgroundColor.shift();}}}
           else result.chart.data.datasets=result.chart.data.datasets.filter(dataset=>dataset.label!=="Salaire");
         }
         const tr=window.GFI18n?window.GFI18n.t:value=>value;
@@ -5377,7 +5426,7 @@ function inferColumnType(header, samples){
     }
     init();
   </script>
-  <script src="sheet.js?v=20261014-r4"></script>
+  <script src="sheet.js?v=20261019-r1"></script>
   <script src="onboarding.js?v=20261018-r4"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
   <script src="shared-expenses.js?v=20261019-r1"></script>
@@ -5983,13 +6032,13 @@ function inferColumnType(header, samples){
   <script src="ios-fix.js?v=20261013-r2" defer></script>
   <script src="plans.js?v=20261019-r1" defer></script>
   <script src="year-review.js?v=20261019-r5" defer></script>
-  <script src="home.js?v=20261019-r5" defer></script>
-  <script src="finishing.js?v=20261018-r2" defer></script>
+  <script src="home.js?v=20261019-r12" defer></script>
+  <script src="finishing.js?v=20261019-r1" defer></script>
   <script src="bank-import.js?v=20261019-r2" defer></script>
   <script src="subs.js?v=20261019-r3" defer></script>
-  <script src="reminders.js?v=20261019-r10" defer></script>
+  <script src="reminders.js?v=20261019-r11" defer></script>
   <script src="backup.js?v=20261019-r2" defer></script>
-  <script src="install.js?v=20261019-r1" defer></script>
+  <script src="install.js?v=20261019-r2" defer></script>
   <script src="avatars.js?v=20261019-r7" defer></script>
   <script src="menus.js?v=20261013-r1" defer></script>
   <script src="discover.js?v=20261019-r4" defer></script>

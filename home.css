@@ -28,7 +28,9 @@ body.gfh-ready[data-theme] #dashboardPage .home-toolbar .home-filter-grid{grid-t
 .gfh-mon{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:16px;margin-bottom:8px}
 .gfh-mon button{width:44px;height:44px;border:0;background:transparent;color:var(--text);font-size:24px;line-height:1;cursor:pointer;border-radius:14px}
 .gfh-mon button:disabled{opacity:.25;cursor:default}
-.gfh-mon span{flex:1;min-width:0;text-align:center;font:600 16px var(--font-body)}
+.gfh-mon>span{flex:1;min-width:0;text-align:center;font:600 16px var(--font-body);white-space:nowrap}
+.gfh-mon-s{display:none}
+@media(max-width:360px){.gfh-mon-l{display:none}.gfh-mon-s{display:inline}.gfh-mon button{width:30px}.gfh-mon>span{font-size:15px}}
 .gfh-hi{margin:18px 0 16px;color:var(--muted)}
 @media(min-width:960px){.gfh-hi{margin:22px 0 20px}}
 .gfh-home{margin-bottom:8px}
@@ -41,6 +43,8 @@ body.gfh-ready #dashboardPage .home-toolbar-top h2{font:600 18px var(--font-body
 body[data-mode="dark"] .gfh-card{border-color:var(--line)}
 .gfh-lab{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;color:var(--block-muted,#B7C2BB)}
 .gfh-big{margin:6px 0;font:700 clamp(46px,9vw,64px)/1.05 var(--font-heading);letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.gfh-big.is-long{font-size:clamp(38px,8vw,56px)}
+.gfh-big.is-xl{font-size:clamp(32px,7vw,50px)}
 .gfh-dl{font-size:14px;color:var(--block-muted,#B7C2BB)}
 .gfh-dl b{color:var(--accent-fill,#E3A82B);font-weight:600}
 .gfh-setup{margin-left:8px;border:0;background:none;padding:0;color:var(--block-text,#F6F2E8);font:600 13px var(--font-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
@@ -363,7 +367,21 @@ body.gf-hide-amounts .gfb-row b{filter:blur(7px)}
 .gfb-group.is-todo>summary .gfb-name{font-weight:600}
 body.gf-hide-amounts .gfb-merchant b,body.gf-hide-amounts .gfb-group summary b{filter:blur(7px)}
 @media(prefers-reduced-motion:reduce){.gfb-group>summary::before{transition:none}}
-.gfh-alert.is-over .gfr-invite-ic{background:var(--red,#C0503A);color:#fff}
+/* Alerte de plafond : bandeau fin d'une ligne */
+.gfh-banner{--b:var(--accent-fill,#E3A82B);position:fixed;left:12px;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:1500;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:10px;min-height:48px;padding:4px 4px 4px 14px;border:1px solid color-mix(in srgb,var(--b) 45%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--b) 12%,var(--panel-solid,var(--bg)));color:var(--text);box-shadow:0 8px 22px rgba(0,0,0,.14);font:500 14px/1.3 var(--font-body);opacity:0;transform:translateY(8px);transition:opacity .2s ease-out,transform .2s ease-out}
+.gfh-banner.is-over{--b:var(--red,#C0503A)}
+.gfh-banner.is-on{opacity:1;transform:none}
+.gfh-banner-ic{flex:none;display:grid;place-items:center;color:var(--b)}
+.gfh-banner-ic svg{width:18px;height:18px}
+.gfh-banner-tx{flex:1;min-width:0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
+.gfh-banner-tx b{font-weight:650}
+.gfh-banner-amt{font-variant-numeric:tabular-nums}
+.gfh-banner-x{flex:none;display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:10px;background:transparent;color:var(--muted,var(--text));cursor:pointer}
+.gfh-banner-x svg{width:18px;height:18px}
+.gfh-banner-x:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+body.gf-hide-amounts .gfh-banner-amt{filter:blur(6px)}
+@media(min-width:721px){.gfh-banner{bottom:24px;right:24px;left:auto;width:420px}}
+@media(prefers-reduced-motion:reduce){.gfh-banner{transition:none}}
 /* Abonnements détectés */
 .gfs-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 6px}
 .gfs-k{display:block;font-size:12px;color:var(--muted)}
@@ -437,3 +455,13 @@ body[data-mode="dark"] .gfr-kind.is-goals .gfr-ic{color:#CDA8DA}
 .gfr-card-body .gfr-btn{margin-top:12px}
 .gfr-hero+.gfr-card,.gfr-hero+.gfr-kinds{margin-top:14px}
 @media(max-width:360px){.gfr-card-body{padding:0 8px 10px}.gfr-chips{padding:0 10px 12px}.gfr-chip{padding:0 1px;font-size:12px;letter-spacing:-.01em}.gfr-chip-row{gap:2px;padding:2px}}
+
+/* Ajout rapide : catégories proposées en pastilles quand il n'y en a pas encore */
+.gfh-suggest{display:flex;flex-wrap:wrap;gap:7px}
+.gfh-suggest[hidden]{display:none}
+.gfh-chip{min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:99px;background:transparent;color:var(--text);font:500 14.5px var(--font-body);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:none}
+.gfh-chip[aria-pressed="true"]{background:var(--accent-fill,#E3A82B);border-color:transparent;color:var(--on-accent-fill,#17261F);font-weight:600}
+.gfh-chip.is-other{border-style:dashed;color:var(--muted)}
+.gfh-chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(hover:hover){.gfh-chip:not([aria-pressed="true"]):hover{background:color-mix(in srgb,var(--text) 5%,transparent)}}
+.gfh-pick[hidden]{display:none}

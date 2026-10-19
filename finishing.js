@@ -7,7 +7,7 @@
   function el(tag,cls,text){var n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;}
 
   /* 1. Vues du graphique : 4 boutons en haut à droite du graphique */
-  var VIEWS=[["pie","Camembert","Pie"],["grouped","Comparatif","Comparison"],["stacked","Épargne","Savings"],["line","Évolution","Trend"]];
+  var VIEWS=[["pie","Dépenses","Spending"],["grouped","Comparatif","Comparison"],["stacked","Épargne","Savings"],["line","Évolution","Trend"]];
   function chartViews(){
     var head=document.querySelector("#dashboardPage .chart-head"),sel=byId("viewSelect");if(!head||!sel)return;
     var box=byId("gfcViews");

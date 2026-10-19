@@ -452,7 +452,7 @@
       if (!res) { cv.textContent = ""; return; }
       if (res.error) { cv.textContent = window.GFI18n?window.GFI18n.t(res.error):res.error; td.classList.add("error"); return; }
       const v = res.value;
-      if (typeof v === "number" && Number.isFinite(v)) { cv.textContent = formatNumber(v); td.classList.add("num"); }
+      if (typeof v === "number" && Number.isFinite(v)) { cv.textContent = formatMoney(v); td.classList.add("num"); }
       else if (typeof v === "number") { cv.textContent = "#ERR!"; td.classList.add("error"); }
       else cv.textContent = String(v);
     });
@@ -460,10 +460,18 @@
     applySelectionStyle();
     updateSheetBalanceCards();
   }
+  // L'espace fine des milliers (U+202F) est invisible avec certaines polices : on prend l'espace insécable classique.
   function formatNumber(v) {
     if (typeof v !== "number" || !Number.isFinite(v)) return "#ERR!";
-    if (Number.isInteger(v)) return v.toLocaleString("fr-FR");
-    return (Math.round(v * 100) / 100).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+    const out = Number.isInteger(v) ? v.toLocaleString("fr-FR") : (Math.round(v * 100) / 100).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return out.replace(/\u202f/g, "\u00a0");
+  }
+  // Cellules du tableur : présentées comme des montants (« −1 450 € », « 2 102,50 € »).
+  function formatMoney(v) {
+    if (typeof v !== "number" || !Number.isFinite(v)) return "#ERR!";
+    const abs = Math.abs(v), whole = Math.abs(Math.round(abs * 100) - Math.round(abs) * 100) < 0.5;
+    const txt = abs.toLocaleString("fr-FR", whole ? { maximumFractionDigits: 0 } : { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\u202f/g, "\u00a0");
+    return (v < 0 && abs >= 0.005 ? "\u2212" : "") + txt + "\u00a0\u20ac";
   }
 
   // ═════════════════ Barre de formule (fx) ════════════════════════════════
