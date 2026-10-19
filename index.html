@@ -2735,7 +2735,7 @@
 
     function getRuleColor(rule){
       const n=normalizePropertyName(rule);
-      const sys={depense:COLORS.expenses,depenses:COLORS.expenses,epargne:COLORS.savings,ignore:"rgba(148,163,184,0.95)"};
+      const sys={depense:COLORS.expenses,depenses:COLORS.expenses,epargne:COLORS.savings,ignorer:"rgba(148,163,184,0.95)"};
       if(sys[n]) return sys[n];
       let hash=0; for(let i=0;i<n.length;i++) hash=(hash*131+n.charCodeAt(i))>>>0;
       const index=hash%8+1;
@@ -2939,23 +2939,26 @@
       const palette=pieColors(), total=cats.reduce((a,i)=>a+i.value,0), styles=getComputedStyle(document.body);
       const rows=cats.map((c,i)=>({name:c.name,value:c.value,share:total?c.value/total:0,color:palette[i%palette.length]}));
       const ink=readCssVar(styles,"--text","#17261F"), muted=readCssVar(styles,"--muted","#5b665f"), gap=readCssVar(styles,"--panel-solid",readCssVar(styles,"--bg","#F6F2E8"));
-      const label=String(month?.label||"").split(" ")[0].toLowerCase();
+      // Nom du mois dans la langue choisie (« janvier » / « January »).
+      const label=month?.date instanceof Date&&!isNaN(month.date)?new Intl.DateTimeFormat(pieEnglish()?"en-GB":"fr-FR",{month:"long"}).format(month.date):String(month?.label||"").split(" ")[0].toLowerCase();
       // Total au centre de l'anneau
-      const center={ id:"gfCenter", afterDraw(chart){ const a=chart.getDatasetMeta(0)?.data?.[0]; if(!a) return; const ctx=chart.ctx, x=a.x, y=a.y, r=a.innerRadius||0; if(r<30) return; ctx.save(); ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillStyle=ink; ctx.font=`700 ${Math.round(Math.min(34,r*0.42))}px "Bricolage Grotesque", system-ui, sans-serif`; ctx.fillText(document.body.classList.contains("gf-hide-amounts")?"••• €":eur0(total),x,y-r*0.1); ctx.fillStyle=muted; ctx.font=`500 ${Math.round(Math.min(15,r*0.18))}px "Instrument Sans", system-ui, sans-serif`; ctx.fillText(`dépensés en ${label}`,x,y+r*0.24); ctx.restore(); } };
+      const center={ id:"gfCenter", afterDraw(chart){ const a=chart.getDatasetMeta(0)?.data?.[0]; if(!a) return; const ctx=chart.ctx, x=a.x, y=a.y, r=a.innerRadius||0; if(r<30) return; ctx.save(); ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillStyle=ink; ctx.font=`700 ${Math.round(Math.min(34,r*0.42))}px "Bricolage Grotesque", system-ui, sans-serif`; ctx.fillText(document.body.classList.contains("gf-hide-amounts")?"••• €":eur0(total),x,y-r*0.1); ctx.fillStyle=muted; ctx.font=`500 ${Math.round(Math.min(15,r*0.18))}px "Instrument Sans", system-ui, sans-serif`; ctx.fillText(spentIn(label),x,y+r*0.24); ctx.restore(); } };
       return{
         title:`Où va ton argent · ${month?.label||""}`, subtitle:"Tes dépenses par catégorie.", pieRows:rows, pieTotal:total, pieMonth:label,
         chart:{ type:"doughnut", data:{ labels:rows.map(r=>r.name), datasets:[{ data:rows.map(r=>r.value), backgroundColor:rows.map(r=>r.color), borderColor:gap, borderWidth:3, hoverOffset:8 }] }, plugins:[center], options:baseChartOptions({ cutout:"66%", layout:{padding:{top:8,bottom:8}}, plugins:{tooltip:tooltipOptions(),legend:{display:false}}, animation:{animateRotate:true,animateScale:false,duration:700,easing:"easeOutQuart"} }) }
       };
     }
     // Liste sous l'anneau (catégorie, montant, part) ou, graphique replié, barres classées.
-    function eur0(v){ return new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(Math.round(v)).replace(/\u202f/g,"\u00a0"); }
+    function pieEnglish(){ return window.GFI18n?.getLanguage?.()==="en"; }
+    function spentIn(month){ return pieEnglish()?`spent in ${month}`:`dépensés en ${month}`; }
+    function eur0(v){ return new Intl.NumberFormat(pieEnglish()?"en-GB":"fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(Math.round(v)).replace(/\u202f/g,"\u00a0"); }
     const PIE_KEY="personalFinanceDashboard.pieCollapsed";
     function pieCollapsed(){ try{ return safeStore.getItem(PIE_KEY)==="1"; }catch(e){ return false; } }
     function renderPieLegend(config){
       const box=elements.customLegend, collapsed=pieCollapsed(), rows=config.pieRows, max=rows[0]?rows[0].value:1;
       box.className="custom-legend gf-pie-legend"+(collapsed?" is-bars":"");
       const frag=document.createDocumentFragment();
-      if(collapsed){ const tot=document.createElement("div"); tot.className="gf-pie-total"; const b=document.createElement("b"); b.className="gf-amount"; b.textContent=eur0(config.pieTotal); const sm=document.createElement("span"); sm.textContent=`dépensés en ${config.pieMonth}`; tot.append(b,sm); frag.append(tot); }
+      if(collapsed){ const tot=document.createElement("div"); tot.className="gf-pie-total"; const b=document.createElement("b"); b.className="gf-amount"; b.textContent=eur0(config.pieTotal); const sm=document.createElement("span"); sm.textContent=spentIn(config.pieMonth); tot.append(b,sm); frag.append(tot); }
       rows.forEach(r=>{
         const row=document.createElement("div"); row.className="gf-pie-row";
         const sw=document.createElement("span"); sw.className="gf-pie-sw"; sw.style.background=r.color;
@@ -3344,7 +3347,7 @@ function inferColumnType(header, samples){
     function hideMessage(){ clearMessageTimers(); messagePaused=false; messageDurationMs=15000; messageRemainingMs=15000; messageDeadline=0; if(!elements.messageBox) return; if(messageLeaveTimeoutId){ clearTimeout(messageLeaveTimeoutId); messageLeaveTimeoutId=null; } const finish=()=>{ elements.messageBox.classList.remove("is-visible","is-paused","is-leaving"); if(elements.messageText) elements.messageText.textContent=""; setMessageProgress(0); updateMessagePauseState(false); messageLeaveTimeoutId=null; }; if(!elements.messageBox.classList.contains("is-visible")){ finish(); return; } elements.messageBox.classList.remove("is-paused"); elements.messageBox.classList.add("is-leaving"); updateMessagePauseState(false); messageLeaveTimeoutId=setTimeout(finish, 300); }
     function pauseMessageTimer(){ if(!elements.messageBox?.classList.contains("is-visible")||messagePaused) return; messagePaused=true; messageRemainingMs=Math.max(0,messageDeadline-performance.now()); clearMessageTimers(); updateMessagePauseState(true); setMessageProgress(messageDurationMs?messageRemainingMs/messageDurationMs:0); }
     function resumeMessageTimer(){ if(!elements.messageBox?.classList.contains("is-visible")||!messagePaused) return; messagePaused=false; messageDeadline=performance.now()+messageRemainingMs; updateMessagePauseState(false); const tick=()=>{ if(!elements.messageBox?.classList.contains("is-visible")||messagePaused) return; const rem=Math.max(0,messageDeadline-performance.now()); messageRemainingMs=rem; setMessageProgress(messageDurationMs?rem/messageDurationMs:0); if(rem<=0){ hideMessage(); return; } messageRafId=requestAnimationFrame(tick); }; messageRafId=requestAnimationFrame(tick); messageTimeoutId=setTimeout(hideMessage,messageRemainingMs); }
-    function showMessage(msg,duration=15000){ if(!elements.messageBox) return; clearMessageTimers(); if(messageLeaveTimeoutId){ clearTimeout(messageLeaveTimeoutId); messageLeaveTimeoutId=null; } const text=String(msg||"").trim(); if(!text){ hideMessage(); return; } messageDurationMs=Math.max(15000,Number(duration)||15000); messageRemainingMs=messageDurationMs; messageDeadline=performance.now()+messageDurationMs; messagePaused=false; if(elements.messageText) elements.messageText.textContent=text; elements.messageBox.style.setProperty("--message-duration",`${messageDurationMs}ms`); elements.messageBox.classList.remove("is-leaving"); elements.messageBox.classList.remove("is-visible"); void elements.messageBox.offsetWidth; elements.messageBox.classList.add("is-visible"); updateMessagePauseState(false); setMessageProgress(1); const tick=()=>{ if(!elements.messageBox?.classList.contains("is-visible")||elements.messageBox?.classList.contains("is-leaving")||messagePaused) return; const rem=Math.max(0,messageDeadline-performance.now()); messageRemainingMs=rem; setMessageProgress(messageDurationMs?rem/messageDurationMs:0); if(rem<=0){ hideMessage(); return; } messageRafId=requestAnimationFrame(tick); }; messageRafId=requestAnimationFrame(tick); messageTimeoutId=setTimeout(hideMessage,messageDurationMs); }
+    function showMessage(msg,duration=15000){ if(!elements.messageBox) return; clearMessageTimers(); if(messageLeaveTimeoutId){ clearTimeout(messageLeaveTimeoutId); messageLeaveTimeoutId=null; } const text=String(msg||"").trim(); if(!text){ hideMessage(); return; } messageDurationMs=Math.max(4000,Number(duration)||15000); messageRemainingMs=messageDurationMs; messageDeadline=performance.now()+messageDurationMs; messagePaused=false; if(elements.messageText) elements.messageText.textContent=text; elements.messageBox.style.setProperty("--message-duration",`${messageDurationMs}ms`); elements.messageBox.classList.remove("is-leaving"); elements.messageBox.classList.remove("is-visible"); void elements.messageBox.offsetWidth; elements.messageBox.classList.add("is-visible"); updateMessagePauseState(false); setMessageProgress(1); const tick=()=>{ if(!elements.messageBox?.classList.contains("is-visible")||elements.messageBox?.classList.contains("is-leaving")||messagePaused) return; const rem=Math.max(0,messageDeadline-performance.now()); messageRemainingMs=rem; setMessageProgress(messageDurationMs?rem/messageDurationMs:0); if(rem<=0){ hideMessage(); return; } messageRafId=requestAnimationFrame(tick); }; messageRafId=requestAnimationFrame(tick); messageTimeoutId=setTimeout(hideMessage,messageDurationMs); }
     function setLoading(v){ try{ if(window.MeuniLoader){ if(v) window.MeuniLoader.start("J’analyse ton fichier…"); else window.MeuniLoader.done("Fichier importé."); return; } }catch(e){} elements.loader?.classList.toggle("is-visible",v); }
     function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
 
@@ -5102,7 +5105,7 @@ function inferColumnType(header, samples){
           return false;
         }
         const wb = tables ? { SheetNames: tables.map(t => t.name), Sheets: {}, tables: tables } : window.FinanceSheet.buildWorkbook();
-        if(!wb || !wb.SheetNames || !wb.SheetNames.length){ applyFinancePagesToState([], { source: "tableur", reset: true }); populateMonthSelect(); updateInterface(); if(!silent) showMessage("Le tableur est vide. Saisis des données dans l'onglet Tableur puis clique sur Recharger."); return false; }
+        if(!wb || !wb.SheetNames || !wb.SheetNames.length){ applyFinancePagesToState([], { source: "tableur", reset: true }); populateMonthSelect(); updateInterface(); if(!silent) showMessage("Le tableur est vide. Saisis tes données dans l’onglet Tableur, puis reviens sur l’accueil."); return false; }
         const pages = [];
         wb.SheetNames.forEach((sheetName, sheetIndex) => {
           let aoa;
@@ -5288,7 +5291,7 @@ function inferColumnType(header, samples){
           var catCount = (state.detectedProperties||[]).length;
           var monthCount = (state.months||[]).length;
           if(monthCount === 0){
-            showMessage("Le tableur ne contient pas encore de données. Saisis tes données dans l'onglet Tableur puis clique sur Recharger.", 8000);
+            showMessage("Le tableur ne contient pas encore de données. Saisis tes données dans l’onglet Tableur, puis reviens sur l’accueil.", 8000);
           } else {
             showMessage("Données rechargées : " + monthCount + " mois, " + catCount + " catégories détectées.", 5000);
           }
@@ -5658,7 +5661,7 @@ function inferColumnType(header, samples){
       el("passwordRecoveryDone").hidden=false;
       var signedOut=await sb.client.auth.signOut({ scope:"local" });
       if(signedOut.error)throw signedOut.error;
-      recoveryMessage("Mot de passe modifié. Tu peux maintenant te connecter à la console locale.","success");
+      recoveryMessage("Mot de passe modifié. Tu peux maintenant te connecter avec ton nouveau mot de passe.","success");
     }catch(error){recoveryMessage(passwordChanged?"Mot de passe modifié, mais la déconnexion a échoué. Clique sur Terminer pour réessayer.":translateAuthError(error),"error");}
     finally{submit.disabled=false;cancel.disabled=false;}
   }
@@ -6059,7 +6062,7 @@ function inferColumnType(header, samples){
   <script src="plans.js?v=20261019-r1" defer></script>
   <script src="year-review.js?v=20261019-r5" defer></script>
   <script src="home.js?v=20261019-r13" defer></script>
-  <script src="finishing.js?v=20261019-r1" defer></script>
+  <script src="finishing.js?v=20261019-r2" defer></script>
   <script src="bank-import.js?v=20261019-r16" defer></script>
   <script src="subs.js?v=20261019-r11" defer></script>
   <script src="reminders.js?v=20261019-r11" defer></script>
