@@ -20,3 +20,12 @@ test('les fichiers étrangers ou abîmés sont refusés',()=>{
   assert.throws(()=>B.parse(JSON.stringify({format:'meuniance-sauvegarde',version:1,tableur:{feuilles:[{name:'x',cells:{'A1':{raw:'1'}}}]}})));
   assert.throws(()=>B.parse(JSON.stringify({format:'meuniance-sauvegarde',version:1,tableur:{feuilles:[{name:'x',cells:{'0,0':{raw:'x'.repeat(3000)}}}]}})));
 });
+test('une feuille large garde ses colonnes et ses en-têtes',()=>{
+  const wide={id:'w',name:'Large',cells:{'0,14':{raw:'5'}},headers:['Jan','Fév','','Projet'],rowHeaders:['A'],rows:3,cols:16};
+  const s=B.parse(JSON.stringify({format:'meuniance-sauvegarde',version:1,tableur:{feuilles:[wide]}})).sheets[0];
+  assert.equal(s.cols,16);assert.deepEqual(Array.from(s.headers),['Jan','Fév','','Projet']);
+  const narrow=B.parse(JSON.stringify({format:'meuniance-sauvegarde',version:1,tableur:{feuilles:[{name:'x',cells:{'0,30':{raw:'1'}},cols:4,headers:[1,2]}]}})).sheets[0];
+  assert.equal(narrow.cols,31);assert.deepEqual(Array.from(narrow.headers),[]);// en-têtes non textuels ignorés
+  const huge=B.parse(JSON.stringify({format:'meuniance-sauvegarde',version:1,tableur:{feuilles:[{name:'x',cells:{},cols:5000}]}})).sheets[0];
+  assert.equal(huge.cols,100);
+});

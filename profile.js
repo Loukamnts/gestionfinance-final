@@ -130,5 +130,4 @@
     window.addEventListener("authStateChanged",()=>load(0));window.addEventListener("gf:languagechange",render);render();if(account().user)load(0);
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
-  window.GFProfile={reload:load};
 })();

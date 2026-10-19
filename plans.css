@@ -2,9 +2,9 @@
    Abonnements Meuniance — Free / Plus / Pro
    Hérite de l'identité « Le Moulin » : un seul bloc plein (Plus), filets ailleurs.
    ═══════════════════════════════════════════════ */
-.gfs-panel-head{display:grid;gap:6px;margin:4px 0 18px}
-.gfs-panel-head h3{margin:0;font:700 clamp(1.5rem,3.2vw,2rem)/1.1 var(--font-heading);letter-spacing:-.025em;color:var(--text)}
-.gfs-panel-head p{margin:0;color:var(--muted);font-size:.92rem;max-width:56ch}
+.gfplan-panel-head{display:grid;gap:6px;margin:4px 0 18px}
+.gfplan-panel-head h3{margin:0;font:700 clamp(1.5rem,3.2vw,2rem)/1.1 var(--font-heading);letter-spacing:-.025em;color:var(--text)}
+.gfplan-panel-head p{margin:0;color:var(--muted);font-size:.92rem;max-width:56ch}
 .gfs-current{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;padding:14px 0;margin:0 0 20px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .gfs-current-copy{display:grid;gap:2px}
 .gfs-current-copy small{color:var(--muted);font-size:.78rem}
@@ -52,14 +52,14 @@ body[data-mode="dark"] .gfs-card.is-featured{border-color:var(--accent)}
 .gfs-plans.is-compact .gfs-price b{font-size:1.8rem}
 .gfs-plans.is-compact ul{display:none}
 @media(min-width:620px){.gfs-plans.is-compact{grid-template-columns:repeat(3,minmax(0,1fr))}}
-/* Dialogue (paiement / fonction réservée) */
-.gfs-dialog{width:min(440px,calc(100vw - 32px));padding:24px;border:1px solid var(--line);border-radius:var(--panel-radius,20px);background:var(--panel-solid,var(--bg));color:var(--text);box-shadow:0 24px 60px rgba(0,0,0,.28)}
-.gfs-dialog::backdrop{background:rgba(10,16,13,.5)}
-.gfs-dialog h2{margin:0 0 8px;font:700 1.35rem/1.15 var(--font-heading);letter-spacing:-.02em}
-.gfs-dialog p{margin:0 0 16px;color:var(--muted);font-size:.9rem;line-height:1.5}
-.gfs-dialog .gfs-kicker{display:block;margin:0 0 8px;color:var(--accent);font:700 .72rem/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase}
-.gfs-dialog-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
-.gfs-dialog-actions .gfs-btn{width:auto}
+/* Dialogue (paiement / fonction réservée). Préfixe propre : subs.js utilise déjà .gfs-dialog / .gfs-panel. */
+.gfplan-dialog{width:min(480px,calc(100vw - 24px));padding:24px;border:1px solid var(--line);border-radius:var(--panel-radius,20px);background:var(--panel-solid,var(--bg));color:var(--text);box-shadow:0 24px 60px rgba(0,0,0,.28);max-height:calc(100dvh - 32px);overflow:auto}
+.gfplan-dialog::backdrop{background:rgba(10,16,13,.5)}
+.gfplan-dialog h2{margin:0 0 8px;font:700 1.35rem/1.15 var(--font-heading);letter-spacing:-.02em}
+.gfplan-dialog p{margin:0 0 16px;color:var(--muted);font-size:.9rem;line-height:1.5}
+.gfplan-dialog .gfs-kicker{display:block;margin:0 0 8px;color:var(--accent);font:700 .72rem/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase}
+.gfplan-dialog-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
+.gfplan-dialog-actions .gfs-btn{width:auto}
 /* Navigation : entrée « Abonnement » */
 .studio-sidebar-nav [data-open-plans].is-active{background:var(--button-active-bg);color:var(--text)}
 .studio-sidebar-nav [data-open-plans].is-active > span{color:var(--accent)}

@@ -3,7 +3,8 @@ import webpush from "npm:web-push@3.6.7";
 
 // Rappels de saisie (une fois par jour) et file de notifications (chaque minute), appelés par pg_cron.
 // Les clés de notification sont créées ici au premier appel puis rangées dans le coffre de la base :
-// elles ne quittent jamais Supabase. Le contenu d'un rappel ne contient aucun montant.
+// elles ne quittent jamais Supabase. Le rappel de saisie ne contient aucun montant ; les messages de la file
+// (plafonds, dépenses partagées…) peuvent en contenir, préparés par la base dans la langue de chacun.
 
 const b64u = (bytes: Uint8Array) =>
   btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -19,11 +20,14 @@ async function newVapidKeys() {
   return { public: b64u(pub), private: jwk.d! };
 }
 
-function message(days: number) {
+function message(days: number, lang: string) {
+  const en = lang === "en";
   return {
     title: "Meuniance",
     // Court : une notification n'affiche que deux lignes sur un téléphone.
-    body: days >= 14 ? "Ton tableur t’attend. 2 minutes suffisent." : "Pense à noter tes dernières dépenses.",
+    body: days >= 14
+      ? (en ? "Your spreadsheet is waiting. 2 minutes is enough." : "Ton tableur t’attend. 2 minutes suffisent.")
+      : (en ? "Remember to log your latest expenses." : "Pense à noter tes dernières dépenses."),
     url: "/tableur",
   };
 }
@@ -80,7 +84,9 @@ Deno.serve(async (request) => {
     });
   }
 
-  const { data: due, error } = await admin.rpc("due_reminders", { p_limit: 500 });
+  // due_reminders_lang renvoie aussi la langue ; tant qu'elle n'est pas installée, rappels en français.
+  let { data: due, error } = await admin.rpc("due_reminders_lang", { p_limit: 500 });
+  if (error) ({ data: due, error } = await admin.rpc("due_reminders", { p_limit: 500 }));
   if (error) return new Response("Unable to list reminders", { status: 500 });
 
   const sent: number[] = [];
@@ -89,7 +95,7 @@ Deno.serve(async (request) => {
     try {
       await webpush.sendNotification(
         { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth_key } },
-        JSON.stringify(message(row.every_days)),
+        JSON.stringify(message(row.every_days, row.lang || "fr")),
         { TTL: 60 * 60 * 24, urgency: "normal" },
       );
       sent.push(row.id);

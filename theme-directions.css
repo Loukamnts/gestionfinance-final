@@ -157,7 +157,6 @@ body :is(.sheet-status-dot,.status-dot).is-syncing,
 body :is(.sheet-status-dot,.status-dot).is-pending { background:#bd8219 !important; box-shadow:none !important; }
 body :is(.sheet-status-dot,.status-dot).not-loaded,
 body :is(.sheet-status-dot,.status-dot).is-empty { background:#bd4852 !important; box-shadow:none !important; }
-body .sync-badge.syncing { background:color-mix(in srgb,var(--accent-2),transparent 88%); border-color:color-mix(in srgb,var(--accent-2),transparent 55%); color:var(--accent-2); }
 body .account-btn-primary,body .account-user-avatar { background:var(--button-primary-bg); color:var(--button-primary-text); }
 body .account-btn-secondary { border-color:var(--line-strong); }
 @media (hover:hover) {
@@ -274,7 +273,6 @@ body[data-theme] .sheet-bar #btnSheetCalc {
 }
 body[data-theme="brutal"] .sheet-bar { border-width:2px !important; }
 body[data-theme="brutal"] .sheet-bar .button:not(#btnSheetCalc) { border-color:var(--line-strong) !important; }
-body[data-theme] .sheet-mobile-tools { background:var(--panel-solid) !important; color:var(--text) !important; }
 body[data-theme] #dashboardPage .home-toolbar { background:var(--panel-solid) !important; border-color:var(--line-strong) !important; box-shadow:none !important; }
 body[data-theme] #dashboardPage :is(.sheet-status-bar,.sheet-status-info,.sheet-status-dot) {
   background-image:none !important;
@@ -736,7 +734,7 @@ body[data-interface="studio"] :is(#sharingPage,#sharingAccessPage,#updatesPage,#
 }
 
 /* Dans Studio, le menu du profil contient Profil, Notes et l'état du tableur. */
-body[data-interface="studio"] .profile-popover :is(.profile-popover-account,#connectionStatus,#profilePersonalButton,#accountLogoutBtn) {
+body[data-interface="studio"] .profile-popover :is(.profile-popover-account,#connectionStatus,#profilePersonalButton) {
   display:none !important;
 }
 body[data-interface="studio"] .mobile-settings-button { display:none !important; }
@@ -819,7 +817,7 @@ body[data-theme="brutal"] .account-section :is(.identity-edit-button,.identity-f
 .identity-summary { display:flex; align-items:center; gap:17px; padding:18px; border:1px solid var(--line); border-radius:var(--control-radius); background:var(--input-bg); }
 .identity-avatar { display:grid; place-items:center; flex:0 0 58px; width:58px; height:58px; border:1px solid var(--line-strong); border-radius:var(--control-radius); background:var(--button-active-bg); color:var(--accent); font:800 1.5rem/1 var(--font-body); }
 .identity-summary > div:last-child { display:grid; gap:4px; min-width:0; }
-.identity-caption,.identity-facts span { font-size:.75rem; color:var(--muted); }
+.identity-facts span { font-size:.75rem; color:var(--muted); }
 .identity-summary strong { overflow-wrap:anywhere; font-size:clamp(1.1rem,2vw,1.5rem); }
 .identity-summary #identityChangeDate { font-size:.8rem; color:var(--muted); }
 .identity-form { display:grid; gap:9px; margin-top:25px; }
@@ -835,8 +833,7 @@ body[data-theme="brutal"] .account-section :is(.identity-edit-button,.identity-f
 .identity-facts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:26px; }
 .identity-facts > div { display:grid; align-content:center; gap:6px; min-height:76px; padding:13px 15px; border:1px solid var(--line); border-radius:var(--control-radius); background:var(--input-bg); }
 .identity-facts strong { font-size:.93rem; overflow-wrap:anywhere; }
-.identity-intro { padding:18px; border:1px solid var(--line); border-radius:var(--control-radius); background:var(--input-bg); }
-body[data-theme="brutal"] .identity-section :is(.identity-avatar,.identity-summary,.identity-facts > div,.identity-intro,.identity-form-row input) { border-radius:0; }
+body[data-theme="brutal"] .identity-section :is(.identity-avatar,.identity-summary,.identity-facts > div,.identity-form-row input) { border-radius:0; }
 
 /* Parcours de bienvenue du compte : offres fournies uniquement par le futur
    module de facturation activé, aucune fausse action d'achat ici. */

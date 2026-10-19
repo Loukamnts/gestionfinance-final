@@ -1,5 +1,5 @@
-/* Avatars Meuniance : ton initiale dans un rond plat, avec une couleur (8) et un style de lettre (5) au choix.
-   Les 5 styles utilisent les polices déjà chargées par le site. Pas de photos envoyées : aucune image stockée.
+/* Avatars Meuniance : ton initiale dans un rond plat, avec une couleur (8) et un style de lettre (7) au choix.
+   Les 7 styles utilisent les polices déjà chargées par le site. Pas de photos envoyées : aucune image stockée.
    Valeur enregistrée : « couleur.style » (ex. « seigle.moderne ») ; la base n'accepte que ces combinaisons. */
 (function(){
   "use strict";
@@ -56,7 +56,7 @@
         cx=(m.actualBoundingBoxRight-m.actualBoundingBoxLeft)/2;cy=(m.actualBoundingBoxAscent-m.actualBoundingBoxDescent)/2;}catch(e){ready=false;}
     }
     if(!ready||!(h>0)||!(w>0)){
-      var fb=FALLBACK[f[0]]||[70,70,0];h=fb[0];w=fb[1];cx=fb[2]+w/2-w/2;cy=h/2;
+      var fb=FALLBACK[f[0]]||[70,70,0];h=fb[0];w=fb[1];cx=fb[2];cy=h/2;
       if(document.fonts&&!WAIT[font]){WAIT[font]=1;document.fonts.load(font,l).then(function(){Object.keys(GEO).forEach(function(k){if(k.indexOf(f[0]+"|")===0)delete GEO[k];});redraw();}).catch(function(){});}
       var g0={s:Math.min(f[6]/h,f[7]/w)*100};g0.x=24-cx*g0.s/100;g0.y=24+cy*g0.s/100;return g0;
     }

@@ -48,7 +48,6 @@ body[data-theme="moulin"] #renameModal .modal-btn-save{border:1px solid var(--ac
   body[data-theme="moulin"] #sheetPage .category-row{grid-template-columns:minmax(0,1fr) minmax(130px,46%)!important}
 }
 
-
 /* Années du tableur (1 feuille = 1 année), en haut de la grille */
 body[data-theme="moulin"] #sheetPage .sheet-tabs.sheet-years{display:flex!important;align-items:center;gap:8px!important;margin:0 0 12px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow-x:auto;scrollbar-width:none;position:static!important}
 body[data-theme="moulin"] #sheetPage .sheet-years::-webkit-scrollbar{display:none}
@@ -60,7 +59,6 @@ body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab.active .sheet-tab-n
 body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x{width:32px;height:32px;margin-right:6px;border:0!important;border-radius:16px;background:transparent!important;color:var(--on-accent-fill,#17261F)!important;font-size:18px;line-height:1;opacity:.7;cursor:pointer;box-shadow:none!important}
 @media (hover:hover){
 body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x:hover{opacity:1;background:rgba(0,0,0,.08)!important}}
-body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-rename{display:none!important}
 body[data-theme="moulin"] #sheetPage .sheet-year-add{flex:none;height:44px;padding:0 14px;border:1px dashed var(--line-strong,var(--line));border-radius:22px;background:transparent;color:var(--muted);font:500 14px var(--font-body);cursor:pointer}
 @media (hover:hover){
 body[data-theme="moulin"] #sheetPage .sheet-year-add:hover{border-color:var(--text);color:var(--text)}}
