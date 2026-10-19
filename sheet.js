@@ -1141,7 +1141,7 @@
   async function importXlsx(file, options) {
     options = options || {};
     if (typeof XLSX === "undefined" && window.GFVendors) { try { await window.GFVendors.xlsx(); } catch (e) {} }
-    if (typeof XLSX === "undefined") { toast("Le module Excel n'a pas pu être préparé. Vérifiez votre connexion internet."); return false; }
+    if (typeof XLSX === "undefined") { toast("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet."); return false; }
     let wb;
     try { wb = await readWorkbook(file); }
     catch (err) { toast("Import impossible : " + (err && err.message ? err.message : "erreur")); return false; }
@@ -1192,10 +1192,10 @@
     if (typeof XLSX === "undefined") {
       if (window.GFVendors) {
         toast("Préparation de l'export…");
-        window.GFVendors.xlsx().then(exportXlsx).catch(function(){ toast("Le module Excel n'a pas pu être préparé. Vérifiez votre connexion internet."); });
+        window.GFVendors.xlsx().then(exportXlsx).catch(function(){ toast("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet."); });
         return;
       }
-      toast("Le module Excel n'a pas pu être préparé. Vérifiez votre connexion internet."); return;
+      toast("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet."); return;
     }
     try {
       const wb = buildExportWorkbook();
@@ -1418,7 +1418,7 @@
     monthLabel.appendChild(month);
 
     const helper = document.createElement("p"); helper.className = "sheet-modal-helper";
-    helper.textContent = "Laissez le montant vide puis enregistrez pour retirer ce réglage.";
+    helper.textContent = "Laisse le montant vide puis enregistre pour retirer ce réglage.";
     const actions = document.createElement("div"); actions.className = "sheet-modal-actions sheet-modal-actions-row";
     const cancel = document.createElement("button"); cancel.type = "button"; cancel.className = "button button-ghost"; cancel.textContent = "Annuler";
     const save = document.createElement("button"); save.type = "button"; save.className = "button button-primary"; save.textContent = "Enregistrer";

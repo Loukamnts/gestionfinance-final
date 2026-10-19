@@ -29,7 +29,7 @@
     /* Chargement différé des grosses bibliothèques : la page s'affiche sans les attendre.
        Les URLs sont réécrites vers les copies hébergées par le site au moment du build. */
     (function(){
-      var sources={chart:"https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js",xlsx:"https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"};
+      var sources={chart:"https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js",xlsx:"https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"};
       var integrities={xlsx:""};
       var pending={};
       function load(name){
@@ -2004,7 +2004,7 @@
               <span class="sheet-status-tooltip" id="sheetStatusHelp" role="tooltip">
                 <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--red,#fb7185)"></span> Aucune donnée pour l’instant</span>
                 <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:#3b82f6"></span> Données sur cet appareil uniquement</span>
-                <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--green,#2ed47a)"></span> Données sauvegardées sur votre compte</span>
+                <span class="sheet-status-tooltip-item"><span class="sheet-status-tooltip-dot" style="background:var(--green,#2ed47a)"></span> Données sauvegardées sur ton compte</span>
               </span>
             </button>
           </div><button type="button" id="syncSheetButton" class="gf-button gf-refresh" title="Mettre à jour le tableau de bord depuis le tableur" aria-label="Synchroniser les données"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 18px"><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Actualiser</span></button></div></div>
@@ -2105,21 +2105,6 @@
         </div>
       </section>
     </section>
-    <section class="app-page" id="personalPage" hidden>
-      <section class="content personal-shell">
-        <header class="personal-page-title"><span class="eyebrow">Mon espace</span><h2>Mon espace</h2><p>Garde tes projets, tes accès et tes notes au même endroit.</p></header>
-        <section class="panel personal-welcome">
-          <div class="personal-identity"><span class="personal-avatar" id="personalAvatar" aria-hidden="true">?</span><div><span class="eyebrow">Espace personnel</span><h3>Ton espace personnel</h3><p id="personalEmail">Tes objectifs, tes partages et tes notes restent à portée de main.</p></div></div>
-          <button class="personal-notes-button" id="personalNotesButton" type="button" data-open-notes><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Notes</span></button>
-        </section>
-        <section class="personal-destinations" aria-label="Mes raccourcis personnels">
-          <span class="personal-sidebar-label">Mon espace</span>
-          <button class="panel personal-destination" type="button" data-page="objectives"><span class="personal-destination-icon personal-destination-icon-goal" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><path d="m12 12 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><strong>Objectifs</strong><small id="personalObjectivesMeta">Crée et suis tes projets financiers.</small></span><span class="personal-destination-arrow" aria-hidden="true">→</span></button>
-          <button class="panel personal-destination" type="button" data-page="sharing"><span class="personal-destination-icon personal-destination-icon-sharing" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 10.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM17 10a3 3 0 0 1 0-6M21 20v-1.5a4 4 0 0 0-2.5-3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Partage et amis</strong><small>Gère tes invitations et les accès que tu accordes.</small></span><span class="personal-destination-arrow" aria-hidden="true">→</span></button>
-          <button class="panel personal-destination" type="button" data-page="updates"><span class="personal-destination-icon personal-destination-icon-updates" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m12 2 1.7 5.3L19 9l-5.3 1.7L12 16l-1.7-5.3L5 9l5.3-1.7L12 2ZM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span><span><strong>Nouveautés</strong><small>Découvre les dernières améliorations de Meuniance.</small></span><span class="personal-destination-arrow" aria-hidden="true">→</span></button>
-        </section>
-      </section>
-    </section>
     <section class="app-page" id="objectivesPage" hidden>
       <section class="content personal-workspace-layout">
         <h2 class="personal-workspace-title">Mon espace</h2>
@@ -2154,7 +2139,7 @@
       <div class="sheet-status-mobile-list">
         <p><span class="sheet-status-tooltip-dot" style="background:var(--red,#fb7185)"></span>Aucune donnée pour l’instant</p>
         <p><span class="sheet-status-tooltip-dot" style="background:#3b82f6"></span>Données sur cet appareil uniquement</p>
-        <p><span class="sheet-status-tooltip-dot" style="background:var(--green,#2ed47a)"></span>Données sauvegardées sur votre compte</p>
+        <p><span class="sheet-status-tooltip-dot" style="background:var(--green,#2ed47a)"></span>Données sauvegardées sur ton compte</p>
       </div>
     </dialog>
     <section class="sheet-page app-page" id="sheetPage" hidden>
@@ -2440,31 +2425,24 @@
         "bourso bank", "BoursoBank", "Boursobank", "Monseobank"
       ],
       expenseKeywords: [
-        "depense", "charge", "loyer", "facture", "abonnement", "course",
-        "transport", "vacance", "impot", "taxe", "assurance", "loisir",
-        "sortie", "sante", "credit", "pret", "reparation", "montant",
-        "amount", "debit", "transaction", "operation", "paiement", "payment",
-        "withdrawal", "retrait", "frais", "fee", "spend", "spent", "achat",
-        "purchase", "expense", "expenses", "restaurant", "repas", "nourriture",
-        "bouffe", "cafe", "bar", "essence", "carburant", "essence", "parking",
-        "telephone", "mobile", "internet", "electricite", "eau", "gaz", "chauffage",
-        "mazout", "sncf", "train", "uber", "taxi", "bv", "abonement", "tv", "netflix",
-        "spotify", "primevideo", "disney", "deezer", "cinema", "sport", "salle",
-        "voyage", "hotel", "hebergement", "logement", "electric", "gas", "rent",
-        "carrefour", "auchan", "leclerc", "intermarche", "casino", "lidl", "aldi",
-        "amazon", "cdiscount", "fnac", "darty", "ldlc", "boulanger", "decathlon",
-        "sephora", "pharmacie", "docteur", "dentiste", "veterinaire", "analyse",
-        "picard", "leaderprice", "franprix", "monoprix", "auchan", "kiabi", "zara",
-        "sephora", "nike", "adidas", "apple", "samsung", "free", "orange", "sfr", "bouygues",
-        "edf", "engie", "total", "essence", "carburant", "shell", "bp", "elf"
+        "depense", "charge", "loyer", "facture", "abonnement", "course", "transport", "vacance", "impot", "taxe",
+        "assurance", "loisir", "sortie", "sante", "credit", "pret", "reparation", "montant", "amount", "debit",
+        "transaction", "operation", "paiement", "payment", "withdrawal", "retrait", "frais", "fee", "spend", "spent",
+        "achat", "purchase", "expense", "expenses", "restaurant", "repas", "nourriture", "bouffe", "cafe", "bar",
+        "essence", "carburant", "parking", "telephone", "mobile", "internet", "electricite", "eau", "gaz", "chauffage",
+        "mazout", "sncf", "train", "uber", "taxi", "bv", "abonement", "tv", "netflix", "spotify",
+        "primevideo", "disney", "deezer", "cinema", "sport", "salle", "voyage", "hotel", "hebergement", "logement",
+        "electric", "gas", "rent", "carrefour", "auchan", "leclerc", "intermarche", "casino", "lidl", "aldi",
+        "amazon", "cdiscount", "fnac", "darty", "ldlc", "boulanger", "decathlon", "sephora", "pharmacie", "docteur",
+        "dentiste", "veterinaire", "analyse", "picard", "leaderprice", "franprix", "monoprix", "kiabi", "zara", "nike",
+        "adidas", "apple", "samsung", "free", "orange", "sfr", "bouygues", "edf", "engie", "total",
+        "shell", "bp", "elf"
       ],
       savingsKeywords: [
-        "epargne", "livret", "boursobank", "bourso", "monseo", "monseobank",
-        "placement", "pea", "ldds", "assurancevie", "assurance vie", "crypto",
-        "bourse", "action", "etf", "saving", "savings", "invest", "investment",
-        "portfolio", "patrimoine", "wallet", "revolut", "revolut", "n26",
-        "fortuneo", "ing", "bforbank", "helios", "cash", "fonds", "fund", "tesla",
-        "bitcoin", "ethereum", "celtiis", "psyfi", "mondrian", "lita"
+        "epargne", "livret", "boursobank", "bourso", "monseo", "monseobank", "placement", "pea", "ldds", "assurancevie",
+        "assurance vie", "crypto", "bourse", "action", "etf", "saving", "savings", "invest", "investment", "portfolio",
+        "patrimoine", "wallet", "revolut", "n26", "fortuneo", "ing", "bforbank", "helios", "cash", "fonds",
+        "fund", "tesla", "bitcoin", "ethereum", "celtiis", "psyfi", "mondrian", "lita"
       ],
       incomeKeywords: [
         "salaire", "revenu", "remuneration", "netapayer", "net payer",
@@ -2516,7 +2494,7 @@
 
     const elements = {
       dashboardPage: document.getElementById("dashboardPage"), settingsPage: document.getElementById("settingsPage"), sharingPage: document.getElementById("sharingPage"),
-      sharingAccessPage: document.getElementById("sharingAccessPage"), updatesPage: document.getElementById("updatesPage"), personalPage: document.getElementById("personalPage"),
+      sharingAccessPage: document.getElementById("sharingAccessPage"), updatesPage: document.getElementById("updatesPage"),
       objectivesPage: document.getElementById("objectivesPage"), sheetPage: document.getElementById("sheetPage"), themeButtons: document.querySelectorAll("[data-theme-option]"),
       paletteButtons: document.querySelectorAll("[data-palette-option]"), modeToggle: document.getElementById("modeToggle"), messageBox: document.getElementById("messageBox"),
       messageText: document.getElementById("messageText"), messageTimer: document.getElementById("messageTimer"), messageTimerProgress: document.getElementById("messageTimerProgress"),
@@ -2565,7 +2543,7 @@
       const container=elements.customRulesList; if(!container) return;
       container.innerHTML="";
       const rules=getCustomRules();
-      if(!rules.length){ const empty=document.createElement("div"); empty.className="hint"; empty.textContent="Aucune règle personnalisée pour le moment. Ajoutez-en une ci-dessus."; container.appendChild(empty); return; }
+      if(!rules.length){ const empty=document.createElement("div"); empty.className="hint"; empty.textContent="Aucune règle personnalisée pour le moment. Ajoutes-en une ci-dessus."; container.appendChild(empty); return; }
       rules.forEach(rule=>{
         const inUse=isRuleInUse(rule);
         const badge=document.createElement("div"); badge.className=`custom-rule-badge${inUse?" in-use":""}`;
@@ -2709,7 +2687,7 @@
       // Revenus / aides : classés en Salaire — vérifiés APRÈS les dépenses pour
       // ne pas confondre "Prime Video" (dépense) avec un revenu.
       if(matchesAnyKeyword(propName,CATEGORY_DETECTION.incomeKeywords)) return {rule:"Salaire", matched:true};
-      if(matchesAnyKeyword(propName,CATEGORY_DETECTION.ignoredKeywords)||isExplicitIgnorePattern(propName)) return {rule:"Ignorer", matched:true};
+      if(matchesAnyKeyword(propName,CATEGORY_DETECTION.ignoredKeywords)) return {rule:"Ignorer", matched:true};
       // Colonne numérique non reconnue : "À confirmer" — non comptée tant que l'utilisateur n'a pas choisi.
       return {rule:"Ignorer", matched:false};
     }
@@ -2880,7 +2858,7 @@
             elements.chartTitle.textContent="Graphique indisponible";
             elements.chartSubtitle.textContent="Le graphique n'a pas pu être préparé.";
             elements.emptyState.classList.add("is-visible");
-            showMessage("Le graphique n'a pas pu être préparé. Vérifiez votre connexion internet.");
+            showMessage("Le graphique n’a pas pu être préparé. Vérifie ta connexion internet.");
           });
           return;
         }
@@ -2950,7 +2928,7 @@
         const sw=document.createElement("span"); sw.className="gf-pie-sw"; sw.style.background=r.color;
         const name=document.createElement("span"); name.className="gf-pie-name"; name.textContent=r.name; name.setAttribute("translate","no");
         const val=document.createElement("b"); val.className="gf-pie-val gf-amount"; val.textContent=eur0(r.value);
-        const pc=document.createElement("span"); pc.className="gf-pie-pc"; pc.textContent=Math.round(r.share*100)+"\u00a0%";
+        const pc=document.createElement("span"); pc.className="gf-pie-pc"; pc.textContent=Math.round(r.share*100)+(pieEnglish()?"%":"\u00a0%");
         if(collapsed){ const top=document.createElement("div"); top.className="gf-pie-top"; top.append(name,val,pc); const tr=document.createElement("div"); tr.className="gf-pie-track"; const f=document.createElement("i"); f.style.width=Math.max(2,Math.round(r.value/max*100))+"%"; f.style.background=r.color; tr.append(f); row.append(top,tr); }
         else row.append(sw,name,val,pc);
         frag.append(row);
@@ -3112,7 +3090,6 @@
       if(elements.sharingPage) elements.sharingPage.hidden=state.page!=="sharing";
       if(elements.sharingAccessPage) elements.sharingAccessPage.hidden=state.page!=="sharingAccess";
       if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates";
-      if(elements.personalPage) elements.personalPage.hidden=true;
       if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives";
       if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet";
       document.querySelectorAll("button[data-page]").forEach(function(button){ button.classList.toggle("is-active",button.dataset.page===state.page); });
@@ -3140,8 +3117,8 @@
       dialog.addEventListener("close",function(){ trigger.setAttribute("aria-expanded","false"); });
     }
     initSheetStatusHelp();
-    const SETTINGS_VIEW_COPY={home:["Paramètres","Réglages","Choisis ce que tu souhaites régler."],account:["Paramètres","Profil","Pseudo, connexion et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],notifications:["Paramètres","Notifications","Choisis si et quand Meuniance te rappelle de noter tes dépenses."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."],plan:["Paramètres","Abonnement","Free, Plus ou Pro : choisis la formule qui te va."]};
-    function showSettingsView(view){ const next=view!=="home"&&Object.prototype.hasOwnProperty.call(SETTINGS_VIEW_COPY,view)?view:"account",copy=SETTINGS_VIEW_COPY[next],translate=window.GFI18n?window.GFI18n.t:function(value){return value;}; document.querySelectorAll("[data-settings-panel]").forEach(function(panel){ panel.hidden=panel.dataset.settingsPanel!==next; }); const kicker=document.getElementById("settingsKicker"),title=document.getElementById("settingsTitle"),subtitle=document.getElementById("settingsSubtitle"); if(kicker) kicker.textContent=translate(copy[0]); if(title) title.textContent=translate(copy[1]); if(subtitle) subtitle.textContent=translate(copy[2]); document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.setAttribute("aria-current",String(button.dataset.settingsView===next)); }); }
+    const SETTINGS_VIEW_COPY={account:["Paramètres","Profil","Pseudo, connexion et synchronisation de ton espace."],appearance:["Paramètres","Apparence","Choisis le thème et le mode qui te ressemblent."],notifications:["Paramètres","Notifications","Choisis si et quand Meuniance te rappelle de noter tes dépenses."],language:["Paramètres","Langue","Choisis la langue de l'interface, sans modifier tes données."],data:["Paramètres","Données et synchronisation","Gère la sauvegarde, la réinitialisation et tes données locales."],privacy:["Paramètres","Confidentialité & sécurité","Comprends simplement comment tes données sont protégées."],legal:["Paramètres","Mentions légales","Les informations importantes sur le service."],plan:["Paramètres","Abonnement","Free, Plus ou Pro : choisis la formule qui te va."]};
+    function showSettingsView(view){ const next=Object.prototype.hasOwnProperty.call(SETTINGS_VIEW_COPY,view)?view:"account",copy=SETTINGS_VIEW_COPY[next],translate=window.GFI18n?window.GFI18n.t:function(value){return value;}; document.querySelectorAll("[data-settings-panel]").forEach(function(panel){ panel.hidden=panel.dataset.settingsPanel!==next; }); const kicker=document.getElementById("settingsKicker"),title=document.getElementById("settingsTitle"),subtitle=document.getElementById("settingsSubtitle"); if(kicker) kicker.textContent=translate(copy[0]); if(title) title.textContent=translate(copy[1]); if(subtitle) subtitle.textContent=translate(copy[2]); document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.setAttribute("aria-current",String(button.dataset.settingsView===next)); }); }
     window.setPage = setPage;
     window.setTheme = setTheme;
     window.setMode = setMode;
@@ -3237,7 +3214,7 @@
       window.addEventListener("financeClearData", () => { resetDataState(); updateInterface(); });
       document.querySelectorAll("button[data-page]").forEach(function(button){ button.addEventListener("click",function(){ setPage(button.dataset.page); }); });
       initPageRouting();
-      var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profilePersonal=document.getElementById("profilePersonalButton"), profileNotes=document.getElementById("profileNotesButton");
+      var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileNotes=document.getElementById("profileNotesButton");
       let wasMobileLayout=window.matchMedia("(max-width:999px)").matches;
       window.addEventListener("resize",function(){const isMobileLayout=window.matchMedia("(max-width:999px)").matches;if(isMobileLayout!==wasMobileLayout){wasMobileLayout=isMobileLayout;placeProfileMenu();setStudioMobileMenu(false);}});
       const studioMenuButton=document.getElementById("studioMobileMenuButton"),studioScrim=document.getElementById("studioSidebarScrim");
@@ -3246,11 +3223,8 @@
       studioScrim?.addEventListener("click",function(){setStudioMobileMenu(false);});
       document.querySelectorAll(".studio-sidebar-nav [data-page]").forEach(function(button){button.addEventListener("click",function(){setStudioMobileMenu(false);});});
       if(profileButton && profilePopover){ profileButton.addEventListener("click",function(){ var open=profilePopover.hidden; profilePopover.hidden=!open; profileButton.setAttribute("aria-expanded",String(open)); }); document.addEventListener("click",function(event){ if(profileMenu && !profileMenu.contains(event.target)){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); document.addEventListener("keydown",function(event){ if(event.key==="Escape"){ profilePopover.hidden=true; profileButton.setAttribute("aria-expanded","false"); } }); }
-      if(profilePersonal){ profilePersonal.addEventListener("click",function(){ setPage("sharing"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); }); }
       if(profileNotes){ profileNotes.addEventListener("click",function(){ if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); window.GFObjectives?.setNotesOpen?.(true); setStudioMobileMenu(false); }); }
       document.getElementById("profileIdentityButton")?.addEventListener("click",function(){ setPage("settings"); showSettingsView("account"); if(profilePopover) profilePopover.hidden=true; if(profileButton) profileButton.setAttribute("aria-expanded","false"); setStudioMobileMenu(false); requestAnimationFrame(function(){ document.getElementById("identitySection")?.scrollIntoView({block:"start",behavior:"smooth"}); }); });
-      document.querySelectorAll("[data-settings-view]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView(button.dataset.settingsView); }); });
-      document.querySelectorAll("[data-settings-back]").forEach(function(button){ button.addEventListener("click",function(){ showSettingsView("account"); }); });
       document.addEventListener("click",function(event){ const viewButton=event.target.closest("[data-settings-view]"); if(viewButton){ showSettingsView(viewButton.dataset.settingsView); return; } const backButton=event.target.closest("[data-settings-back]"); if(backButton) showSettingsView("account"); });
       document.getElementById("chartDetailClose")?.addEventListener("click",closeChartMonthDetail);
       document.getElementById("chartDetailModal")?.addEventListener("click",function(event){ if(event.target===this) closeChartMonthDetail(); });
@@ -3666,11 +3640,11 @@
         if(!tables && (typeof window.XLSX === "undefined" || !window.XLSX?.utils?.sheet_to_json)){
           if(window.GFVendors){
             window.GFVendors.xlsx().then(function(){ syncDashboardFromFinanceSheet(opts); }).catch(function(){
-              if(!silent) showMessage("Le module de lecture Excel n'a pas pu être préparé. Vérifiez votre connexion internet.");
+              if(!silent) showMessage("Le module de lecture Excel n’a pas pu être préparé. Vérifie ta connexion internet.");
             });
             return false;
           }
-          if(!silent) showMessage("Le module de lecture Excel n'a pas pu être préparé. Vérifiez votre connexion internet.");
+          if(!silent) showMessage("Le module de lecture Excel n’a pas pu être préparé. Vérifie ta connexion internet.");
           return false;
         }
         const wb = tables ? { SheetNames: tables.map(t => t.name), Sheets: {}, tables: tables } : window.FinanceSheet.buildWorkbook();
@@ -3906,7 +3880,7 @@
     }
     init();
   </script>
-  <script src="sheet.js?v=20261019-r3"></script>
+  <script src="sheet.js?v=20261019-r4"></script>
   <script src="onboarding.js?v=20261018-r4"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
   <script src="shared-expenses.js?v=20261019-r1"></script>
@@ -3999,7 +3973,7 @@
         renderAuth();
         // Notifie les autres modules (amis, sync) du changement d'état
         window.dispatchEvent(new CustomEvent("authStateChanged", { detail: { user: sb.user, event: evt } }));
-        if(evt === "SIGNED_IN" && arrivedFromEmail){ msg("Email confirmé — vous êtes connecté.", "ok"); }
+        if(evt === "SIGNED_IN" && arrivedFromEmail){ msg("E-mail confirmé — tu es connecté.", "ok"); }
         if(evt === "SIGNED_IN" && !arrivedFromEmail && sb.lastWasSignup){ msg("Connexion réussie.", "ok"); }
         if(evt === "SIGNED_OUT"){ sb.user = null; renderAuth(); msg("Déconnecté."); }
         if(evt === "PASSWORD_RECOVERY") openPasswordRecovery();
@@ -4017,11 +3991,11 @@
         renderAuth();
       });
       // Si l'URL contient un code de confirmation, on informe l'utilisateur.
-      if(arrivedFromEmail){ msg("Validation de votre email en cours…"); }
+      if(arrivedFromEmail){ msg("Validation de ton e-mail en cours…"); }
     }catch(e){
       console.error("Supabase init error", e);
       if(el("accountStatus")) el("accountStatus").textContent = "Erreur de connexion";
-      if(el("accountHint")){ el("accountHint").style.display = ""; el("accountHint").innerHTML = "Impossible de se connecter au service d'authentification. Vérifiez votre connexion internet et réessayez."; }
+      if(el("accountHint")){ el("accountHint").style.display = ""; el("accountHint").innerHTML = "Impossible de joindre le service de connexion. Vérifie ta connexion internet et réessaie."; }
       renderAuth();
     }
   }
@@ -4143,7 +4117,7 @@
       });
       if(res.error){ msg(translateAuthError(res.error)); return; }
       sb.lastWasSignup = true;
-      if(res.data.session){ msg("Compte créé — vous êtes connecté.", "ok"); }
+      if(res.data.session){ msg("Compte créé — tu es connecté.", "ok"); }
       else {
         showEmailConfirmation(email);
         msg("Lien de confirmation envoyé. Vérifie ta boîte de réception.", "ok");
@@ -4186,7 +4160,7 @@
 
   async function checkEmailConfirmation(){
     setLoading(true); clearMsg();
-    try{var res=await sb.client.auth.getSession();if(res&&res.data&&res.data.session){sb.pendingSignupEmail="";msg("Adresse confirmée — vous êtes connecté.","ok");}else{msg("Le lien n’a pas encore été validé. Ouvre l’e-mail reçu puis clique sur le lien de confirmation.");}}
+    try{var res=await sb.client.auth.getSession();if(res&&res.data&&res.data.session){sb.pendingSignupEmail="";msg("Adresse confirmée — tu es connecté.","ok");}else{msg("Le lien n’a pas encore été validé. Ouvre l’e-mail reçu puis clique sur le lien de confirmation.");}}
     catch(e){msg(translateAuthError(e));}
     finally{setLoading(false);}
   }
