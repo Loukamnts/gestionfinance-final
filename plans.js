@@ -92,9 +92,9 @@
 
   /* ── Paiement ───────────────────────────────────── */
   function dialog(kicker,title,text,actions){
-    var d=el("dialog","gfs-dialog");d.setAttribute("aria-labelledby","gfsDialogTitle");
+    var d=el("dialog","gfplan-dialog");d.setAttribute("aria-labelledby","gfsDialogTitle");
     var h=el("h2","",title);h.id="gfsDialogTitle";
-    var row=el("div","gfs-dialog-actions");
+    var row=el("div","gfplan-dialog-actions");
     (actions||[]).forEach(function(a){var b=el("button","gfs-btn"+(a.primary?" is-primary":""),a.label);b.type="button";b.addEventListener("click",function(){d.close();if(a.run)a.run();});row.append(b);});
     d.append(el("span","gfs-kicker",kicker),h,el("p","",text),row);
     document.body.append(d);d.addEventListener("close",function(){d.remove();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();},{once:true});
@@ -141,14 +141,14 @@
     }
     if(!document.querySelector('[data-settings-panel="plan"]')){
       var after=document.querySelector('[data-settings-panel="account"]');if(!after)return;
-      var panel=el("section","settings-section panel gfs-panel");panel.dataset.settingsPanel="plan";panel.hidden=true;panel.setAttribute("aria-label",t2("Abonnement","Plan"));panel.id="gfsPlanPanel";
+      var panel=el("section","settings-section panel gfplan-panel");panel.dataset.settingsPanel="plan";panel.hidden=true;panel.setAttribute("aria-label",t2("Abonnement","Plan"));panel.id="gfsPlanPanel";
       after.parentNode.insertBefore(panel,after.nextSibling);
     }
   }
   function renderPanel(){
     var panel=byId("gfsPlanPanel");if(!panel)return;
     var back=el("button","settings-detail-back",t2("← Paramètres","← Settings"));back.type="button";back.setAttribute("data-settings-back","");
-    var head=el("div","gfs-panel-head");head.append(el("h3","",t2("Choisis ta formule. Garde ta vie privée.","Pick your plan. Keep your privacy.")),el("p","",t2("Commence gratuitement. Passe à Plus ou Pro quand tu veux partager ou aller plus loin.","Start for free. Move to Plus or Pro when you want to share or go further.")));
+    var head=el("div","gfplan-panel-head");head.append(el("h3","",t2("Choisis ta formule. Garde ta vie privée.","Pick your plan. Keep your privacy.")),el("p","",t2("Commence gratuitement. Passe à Plus ou Pro quand tu veux partager ou aller plus loin.","Start for free. Move to Plus or Pro when you want to share or go further.")));
     var current=el("div","gfs-current"),copy=el("div","gfs-current-copy"),plan=planById(state.plan);
     copy.append(el("small","",t2("Ta formule actuelle","Your current plan")),el("strong","",plan.name+(plan.price?" · "+price(plan.price)+t2(" / mois"," / month"):"")),el("span","",account().user?(state.since?t2("Abonné depuis le ","Subscribed since ")+date(state.since):t2("Aucun abonnement payant","No paid subscription")):t2("Connecte-toi pour retrouver ta formule sur tous tes appareils.","Sign in to keep your plan on every device.")));
     current.append(copy);
