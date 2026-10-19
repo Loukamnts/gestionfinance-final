@@ -12,7 +12,11 @@
     "personalFinanceDashboard.homeDemo": true,
     "personalFinanceDashboard.homeBlocks": true,
     "personalFinanceDashboard.budgets": true,
-    "personalFinanceDashboard.fixedDismissed": true
+    "personalFinanceDashboard.fixedDismissed": true,
+    // Tirés des relevés bancaires importés : propres à chaque compte
+    "personalFinanceDashboard.importLedger": true,
+    "personalFinanceDashboard.subscriptions": true,
+    "personalFinanceDashboard.merchantRules": true
   };
   var financialOwner = "anonymous";
   var firstAccount = null;

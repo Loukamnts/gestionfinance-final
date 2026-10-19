@@ -80,3 +80,10 @@ test('Home module never touches the raw browser storage directly',()=>{
   const home=fs.readFileSync(path.join(__dirname,'..','home.js'),'utf8');
   assert.doesNotMatch(home,/localStorage/);
 });
+test('Données tirées des relevés : propres à chaque compte',()=>{
+  const {safe}=store();safe.setFinancialOwner(A);
+  for(const k of ['personalFinanceDashboard.importLedger','personalFinanceDashboard.subscriptions','personalFinanceDashboard.merchantRules'])safe.setItem(k,'A');
+  safe.setFinancialOwner(B);
+  for(const k of ['personalFinanceDashboard.importLedger','personalFinanceDashboard.subscriptions','personalFinanceDashboard.merchantRules'])assert.equal(safe.getItem(k),null);
+  assert.equal(safe.clearFinancialOwnerData(A),true);safe.setFinancialOwner(A);assert.equal(safe.getItem('personalFinanceDashboard.importLedger'),null);
+});

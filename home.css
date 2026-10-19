@@ -292,7 +292,7 @@ body.gf-hide-amounts :is(.gfh-big,.gfh-foot .v,.gfh-foot small,.gfh-cat .gfh-row
 .gfb-kind{position:sticky;top:0;padding:10px 0 4px;background:var(--panel-solid,var(--bg));font:600 12px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .gfb-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:baseline;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
 .gfb-kind+.gfb-row{border-top:0}
-.gfb-name{min-width:0;overflow-wrap:anywhere}
+.gfb-name{min-width:0;overflow-wrap:break-word;hyphens:auto}
 .gfb-count{font-size:12px;color:var(--muted)}
 .gfb-row b{font-weight:600;font-variant-numeric:tabular-nums}
 .gfb-mode{display:grid;gap:4px;margin:0;padding:0;border:0}

@@ -23,26 +23,36 @@
   function norm(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();}
   function pretty(m){return String(m||"").split(" ").map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(" ");}
   // Services connus : [clé, nom affiché, motif]. Le nom sert de clé : « NETFLIX.COM 8YH2 » et « NETFLIX 77QK » = Netflix.
-  var BRANDS=[["netflix","Netflix",/netflix/],["spotify","Spotify",/spotify/],["deezer","Deezer",/deezer/],["disney","Disney+",/disney ?(plus|\+)?/],
+  var BRANDS=[["netflix","Netflix",/netflix/],["spotify","Spotify",/spotify/],["deezer","Deezer",/deezer/],["disney","Disney+",/disney ?(plus|\+)|disneyplus/],
     ["canal","Canal+",/canal ?\+|canalplus|canal plus/],["amazon prime","Amazon Prime",/amazon prime|prime video|amzn prime|primevideo/],
     ["apple","Apple",/apple\.com|itunes|icloud/],["google","Google",/google (one|storage|play)|youtube premium|youtube music/],
     ["free","Free",/free mobile|free telecom|freebox/],["orange","Orange",/\borange\b|\bsosh\b/],["sfr","SFR",/\bsfr\b|red by sfr/],
     ["bouygues","Bouygues Telecom",/bouygues|b ?& ?you/],["basic fit","Basic-Fit",/basic.?fit/],["fitness park","Fitness Park",/fitness park/],
     ["keep cool","Keep Cool",/keep cool/],["audible","Audible",/audible/],["chatgpt","ChatGPT",/chatgpt|openai/],["navigo","Navigo",/navigo|imagine ?r/]];
-  function brandOf(label){var l=norm(label);for(var i=0;i<BRANDS.length;i++)if(BRANDS[i][2].test(l))return BRANDS[i];return null;}
-  // Catégories où un prélèvement régulier d'un marchand inconnu peut être un abonnement.
-  var MAY_BE_SUB=/^(Abonnements|Subscriptions|Autres dépenses|Other expenses|Loisirs|Leisure|Énergie et eau|Energy and water|Assurances|Insurance|Santé|Health)$/;
+  // Un achat en boutique (« ORANGE BOUTIQUE », « APPLE STORE ») n'est pas un abonnement.
+  function brandOf(label){var l=norm(label);if(/\b(boutique|store|shop|magasin|agence)\b/.test(l))return null;for(var i=0;i<BRANDS.length;i++)if(BRANDS[i][2].test(l))return BRANDS[i];return null;}
+  // Apple et Google vendent plusieurs abonnements (iCloud, Music, TV, One…) : un par produit, ou par montant.
+  var PRODUCTS={apple:[["icloud","iCloud"],["music","Music"],["tv","TV"],["arcade","Arcade"],["fitness","Fitness"],["one","One"]],google:[["one","One"],["youtube","YouTube"],["storage","One"]]};
+  function slotOf(b,op){
+    if(!PRODUCTS[b[0]])return[b[0],b[1]];var l=norm(op.label+(op.detail?" "+op.detail:""));
+    for(var i=0;i<PRODUCTS[b[0]].length;i++){var pr=PRODUCTS[b[0]][i];if(new RegExp("\\b"+pr[0]+"\\b").test(l))return[b[0]+" "+pr[0],b[1]+" "+pr[1]];}
+    var a=Math.round(-op.amount);return[b[0]+" "+a,b[1]];
+  }
+  // Catégories où un prélèvement régulier n'est jamais un abonnement (une ligne créée par toi peut l'être).
+  var NOT_SUB_CAT=/^(Courses|Groceries|Restaurants|Transports|Transport|Shopping|Loyer|Rent|Impôts|Taxes|Retraits|Cash withdrawals|Frais bancaires|Bank fees|Voyages|Travel|Salaire|Salary|Épargne|Savings|Aides \(CAF\)|Benefits \(CAF\)|Autres revenus|Other income)$/;
   // Ancienne mémoire : clés recalculées (une marque = une clé) et doublons fusionnés.
   function load(){
     var d;try{d=JSON.parse(lsGet(KEY)||"{}");}catch(e){d=null;}if(!d||!d.items||typeof d.items!=="object")return{v:2,items:{}};
     if(d.v===2)return d;
     var items={};
     Object.keys(d.items).forEach(function(k){
-      var it=d.items[k],b=brandOf(k)||brandOf(it.name),nk=b?b[0]:k,cur=items[nk];
-      if(!cur){items[nk]={name:b?b[1]:it.name,known:!!b,cat:it.cat||null,months:{},hidden:!!it.hidden};cur=items[nk];}else cur.hidden=cur.hidden||!!it.hidden;
+      var it=d.items[k],b=brandOf(k)||brandOf(it.name),nk=b?b[0]:k,cur=items[nk],B=window.GFBankImport,cat=it.cat||null;
+      if(!b&&!cat&&B){try{var c=B.categorize({label:k,amount:-1},B.learned());cat=c?c[0]:null;}catch(e){}}
+      if(!b&&cat&&NOT_SUB_CAT.test(cat))return;// ancien relevé : courses, restaurants… ne sont pas repris
+      if(!cur){items[nk]={name:b?b[1]:it.name,known:!!b,cat:cat,months:{},hidden:!!it.hidden};cur=items[nk];}else cur.hidden=cur.hidden||!!it.hidden;
       Object.keys(it.months||{}).forEach(function(m){var v=it.months[m],o=cur.months[m];cur.months[m]=o?[Math.round((o[0]+v[0])*100)/100,o[1]+v[1]]:[v[0],v[1]];});
     });
-    return{v:2,items:items};
+    return{v:2,items:items,last:d.last||0};
   }
   function save(d){d.v=2;lsSet(KEY,JSON.stringify(d));}
 
@@ -50,12 +60,15 @@
   function ingest(ops){
     var B=window.GFBankImport;if(!B||!ops||!ops.length)return 0;
     var d=load(),per={};
+    // Dernier mois importé (même sans abonnement dedans) : sert à savoir qu'un abonnement s'est arrêté.
+    ops.forEach(function(op){if(op.date)d.last=Math.max(d.last||0,mk(op.date.y,op.date.m));});
     ops.forEach(function(op){
       if(!(op.amount<0))return;
       var c=B.categorize(op,B.learned());if(!c||c[2]!=="Dépense")return;// virement, revenu ou épargne
-      var b=brandOf(op.label),m=b?b[0]:B.merchantOf(op.label);if(!m)return;
-      if(!b&&!MAY_BE_SUB.test(c[0])&&!MAY_BE_SUB.test(c[1]))return;// courses, loyer, essence… reviennent chaque mois sans être des abonnements
-      var k=mk(op.date.y,op.date.m),slot=(per[m]=per[m]||{name:b?b[1]:pretty(m),known:!!b,cat:c[0],months:{}});
+      var b=brandOf(op.label+(op.detail?" "+op.detail:""));if(!b&&B.transferLabel&&B.transferLabel(op.label))return;// virement à une personne : jamais un abonnement
+      if(!b&&NOT_SUB_CAT.test(c[0]))return;// courses, loyer, essence… reviennent chaque mois sans être des abonnements
+      var sl=b?slotOf(b,op):null,m=sl?sl[0]:B.merchantOf(op.label);if(!m)return;
+      var k=mk(op.date.y,op.date.m),slot=(per[m]=per[m]||{name:sl?sl[1]:pretty(m),known:!!b,cat:c[0],months:{}});
       var cur=slot.months[k]||(slot.months[k]=[0,0]);cur[0]+=-op.amount;cur[1]++;
     });
     Object.keys(per).forEach(function(m){
@@ -77,7 +90,7 @@
     var n=ks.length;if(n<(it.known?2:3))return false;
     var vals=ks.map(function(k){return it.months[k][0];}),mx=Math.max.apply(null,vals),mn=Math.min.apply(null,vals);if(!(mn>0))return false;
     if(it.known)return ks.every(function(k){return it.months[k][1]<=2;})&&mx/mn<=2.5;
-    if(it.cat&&!MAY_BE_SUB.test(it.cat))return false;
+    if(it.cat&&NOT_SUB_CAT.test(it.cat))return false;
     if(!ks.every(function(k){return it.months[k][1]===1;}))return false;
     var gaps=0,changes=0;
     for(var i=1;i<n;i++){var g=ks[i]-ks[i-1];if(g>2)return false;if(g===2)gaps++;var a=vals[i-1],b=vals[i];if(Math.abs(b-a)>Math.max(0.5,a*0.03))changes++;}
@@ -86,7 +99,7 @@
 
   /* Abonnements détectés, du plus cher au moins cher. */
   function list(includeHidden){
-    var d=load(),latest=0,out=[];
+    var d=load(),latest=d.last||0,out=[];
     Object.keys(d.items).forEach(function(m){Object.keys(d.items[m].months).forEach(function(k){latest=Math.max(latest,Number(k));});});
     Object.keys(d.items).forEach(function(m){
       var it=d.items[m],ks=Object.keys(it.months).map(Number).sort(function(a,b){return a-b;});if(!ks.length)return;
@@ -161,6 +174,9 @@
   function afterRender(){
     if(lsGet(TUTO)==="1"||!byId("gfsPanel"))return;
     if(document.body.dataset.page!=="dashboard"||document.body.classList.contains("tutorial-active")||document.querySelector("dialog[open],.gfd-coach"))return;
+    // Une autre carte ou un message est affiché (« Relevé importé… ») : on attend qu'il parte.
+    if(window.GFPopup&&window.GFPopup.busy()){if((afterRender.n=(afterRender.n||0)+1)<20)setTimeout(afterRender,1500);return;}
+    afterRender.n=0;
     var D=window.GFDiscover;if(!D||!D.coach)return;
     lsSet(TUTO,"1");
     var steps=[

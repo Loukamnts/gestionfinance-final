@@ -54,7 +54,7 @@
   function parseDate(v){
     var s=String(v||"").trim(),m;
     if((m=s.match(/^(\d{4})[\-\/.](\d{1,2})[\-\/.](\d{1,2})(?:[ T]\d{1,2}:\d{2}(:\d{2})?.*)?$/)))return mk(+m[1],+m[2],+m[3]);
-    if((m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})(?:[ T]\d{1,2}:\d{2}(:\d{2})?)?$/))){var y=m[3].length===2?2000+Number(m[3]):+m[3];return MONTH_FIRST?mk(y,+m[1],+m[2]):mk(y,+m[2],+m[1]);}
+    if((m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})(?:[ T]\d{1,2}:\d{2}(:\d{2})?.*)?$/))){var y=m[3].length===2?2000+Number(m[3]):+m[3];return MONTH_FIRST?mk(y,+m[1],+m[2]):mk(y,+m[2],+m[1]);}
     return null;
     function mk(y,mo,d){return y>1990&&y<2100&&mo>=1&&mo<=12&&d>=1&&d<=31?{y:y,m:mo-1,d:d}:null;}
   }
@@ -68,19 +68,34 @@
     debit:/debit/,
     credit:/credit/
   };
+  function labelScore(c){
+    if(!c||/date|montant|amount|debit|credit|categor|numero|^n( |$)|^no$|solde|balance|devise|currency|^type|pointage|statut|state|status|compte|account|iban|bic|exchange|fee|frais/.test(c))return 0;
+    if(/libelle|intitule/.test(c))return 3;
+    if(/description|label|payee|beneficiaire|counterparty|contrepartie|tiers|merchant|commercant/.test(c))return 2;
+    if(/detail|motif|reference|nature|operation|communication/.test(c))return 1;
+    return 0;
+  }
   function findColumns(lines,sep){
     for(var i=0;i<Math.min(lines.length,20);i++){
-      var cells=splitRow(lines[i],sep).map(function(c){return norm(c).replace(/[^a-z ().]/g," ").replace(/\s+/g," ").trim();}),cols={};
+      var cells=splitRow(lines[i],sep).map(function(c){return norm(c).replace(/[^a-z ().]/g," ").replace(/\s+/g," ").trim();}),cols={},cand=[];
       cells.forEach(function(c,j){
         if(cols.date==null&&H.date.test(c))cols.date=j;
         else if(cols.date==null&&/date/.test(c)&&!H.value.test(c))cols.date=j;
-        if(cols.label==null&&H.label.test(c)&&!/date|montant|debit|credit/.test(c))cols.label=j;
+        var sc=labelScore(c);if(sc>0)cand.push([j,sc,c]);
         if(cols.amount==null&&H.amount.test(c)&&!/date/.test(c))cols.amount=j;
         if(cols.debit==null&&H.debit.test(c))cols.debit=j;
         if(cols.credit==null&&H.credit.test(c)&&!/carte/.test(c))cols.credit=j;
         if(cols.state==null&&/^(state|status|statut|etat)$/.test(c))cols.state=j;
       });
-      if(cols.date!=null&&(cols.amount!=null||cols.debit!=null||cols.credit!=null))return{header:i,cols:cols};
+      if(cols.date!=null&&(cols.amount!=null||cols.debit!=null||cols.credit!=null)){
+        // Libellé : la colonne la plus parlante (« Libellé » plutôt que « Catégorie » ou « Numéro d'opération ») ;
+        // les colonnes de détail (référence, motif…) complètent le libellé pour reconnaître la catégorie.
+        var avg=function(j){var t=0,n=0;lines.slice(i+1,i+41).forEach(function(l){var v=splitRow(l,sep)[j];if(v!=null){t+=String(v).length;n++;}});return n?t/n:0;};
+        cand.forEach(function(x){x[3]=avg(x[0]);});
+        cand.sort(function(a,b){return b[1]-a[1]||b[3]-a[3]||a[0]-b[0];});
+        if(cand.length){cols.label=cand[0][0];cols.extra=cand.slice(1).filter(function(x){return /detail|motif|reference|description|libelle/.test(x[2]);}).map(function(x){return x[0];});}
+        return{header:i,cols:cols};
+      }
     }
     // Sans en-tête : on devine sur le contenu (une date, un montant, le texte le plus long)
     var sample=lines.slice(0,40).map(function(l){return splitRow(l,sep);}),n=Math.max.apply(null,sample.map(function(r){return r.length;})),guess={};
@@ -92,18 +107,28 @@
     }
     return guess.date!=null&&guess.amount!=null?{header:-1,cols:guess}:null;
   }
-  function detectOrder(lines){
-    var dm=0,md=0;lines.slice(0,400).forEach(function(l){var re=/(?:^|[;,\t|"])\s*(\d{1,2})[\/.\-](\d{1,2})[\/.\-]\d{2,4}\b/g,m;while((m=re.exec(l))){if(+m[1]>12&&+m[2]<=12)dm++;else if(+m[2]>12&&+m[1]<=12)md++;}});
+  function detectOrder(lines,sep,found){
+    var dm=0,md=0;lines.slice(found.header+1,found.header+401).forEach(function(l){var v=String(splitRow(l,sep)[found.cols.date]||"").trim(),m=v.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-]\d{2,4}/);if(!m)return;if(+m[1]>12&&+m[2]<=12)dm++;else if(+m[2]>12&&+m[1]<=12)md++;});
     return md>0&&dm===0;
   }
   // Total du débit différé (« FACTURE CARTE », « RELEVE CARTE ») : déjà compté via chaque paiement par carte.
-  var DEFERRED=/(facture|releve|total|depenses|debit) (de )?(vos )?(carte|cb)s?\b|carte.*debit differe|debit differe/;
+  // Une ligne de total n'a pas de nom de commerçant : « FACTURE CARTE DU 010926 CARREFOUR » (BNP) est un paiement,
+  // « RELEVE CARTE 30/09 » ou « FACTURES CARTES DEBIT DIFFERE » est un total.
+  var DEFERRED=/\b(factures?|releves?|totale?s?|depenses|debit|operations?) (differee?s? )?(de |des )?(vos |mes )?(cartes?|cb)\b|debit differe/;
+  function isDeferred(label){
+    var l=norm(label);if(!DEFERRED.test(l))return false;
+    var rest=l.replace(/x{2,}\d*|\d+[\/.\-]?\d*([\/.\-]\d+)?/g," ").replace(/[^a-z ]/g," ")
+      .replace(/\b(factures?|releves?|totale?s?|depenses|debit|differee?s?|operations?|cartes?|cb|bleue|visa|mastercard|premier|gold|infinite|du|au|de|des|le|la|vos|mes|mois|mensuel(le)?|arrete|periode|numero|n|no|janvier|fevrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre)\b/g," ").trim();
+    // Il reste un nom, même court (« BP », « H&M ») : c'est un paiement chez un commerçant, pas un total.
+    return rest.replace(/\s+/g,"").length===0;
+  }
   // Opération annulée, refusée ou pas encore passée (Revolut, N26… ont une colonne d'état).
   var NOT_DONE=/revert|declin|cancel|annul|refus|rejet|failed|echou|pending|en attente|en cours/;
   function parse(text){
     var lines=splitLines(text);if(lines.length<2)return null;
-    MONTH_FIRST=detectOrder(lines);
+    MONTH_FIRST=false;
     var sep=guessSeparator(lines),found=findColumns(lines,sep);if(!found)return null;
+    MONTH_FIRST=detectOrder(lines,sep,found);
     var c=found.cols,ops=[],cards=0;
     for(var i=found.header+1;i<lines.length;i++){
       var r=splitRow(lines[i],sep),d=parseDate(r[c.date]);if(!d)continue;
@@ -113,11 +138,14 @@
       if(amt==null||amt===0)continue;
       if(c.state!=null&&NOT_DONE.test(norm(r[c.state])))continue;
       var label=c.label!=null?r[c.label]:r.filter(function(x,j){return j!==c.date&&j!==c.amount&&j!==c.debit&&j!==c.credit&&j!==c.state;}).join(" ");
-      label=String(label||"").replace(/\s+/g," ").trim();if(/\b(carte|cb)\b/.test(norm(label))&&!DEFERRED.test(norm(label)))cards++;
-      ops.push({date:d,amount:Math.round(amt*100)/100,label:label});
+      label=String(label||"").replace(/\s+/g," ").trim();
+      var detail=(c.extra||[]).map(function(j){return String(r[j]||"").replace(/\s+/g," ").trim();}).filter(function(x){return x&&norm(label).indexOf(norm(x))<0;}).join(" ");
+      if(!label&&detail){label=detail;detail="";}
+      if(/\b(carte|cb)\b/.test(norm(label))&&!isDeferred(label))cards++;
+      var op={date:d,amount:Math.round(amt*100)/100,label:label};if(detail)op.detail=detail;ops.push(op);
     }
     // Si le fichier détaille les paiements par carte, la ligne de total du débit différé ferait compter deux fois.
-    if(cards>=3)ops=ops.filter(function(op){return !(op.amount<0&&DEFERRED.test(norm(op.label)));});
+    if(cards>=3)ops=ops.filter(function(op){return !(op.amount<0&&isDeferred(op.label));});
     return ops.length>=2?ops:null;
   }
 
@@ -128,18 +156,18 @@
     ["Salaire","Salary","Salaire",/salaire|paie\b|\bpaye\b|remuneration|payroll|traitement mensuel/],
     ["Aides (CAF)","Benefits (CAF)","Salaire",/\bcaf\b|\bapl\b|allocation|pole emploi|france travail|\brsa\b|prime d.activite/],
     ["Loyer","Rent","Dépense",/loyer|foncia|nexity|bailleur|^(?!.*\b(carte|cb)\b).*habitat|immobiliere|\bopac\b|\bhlm\b/],
-    ["Courses","Groceries","Dépense",/carrefour|leclerc|auchan|lidl|intermarche|super u|hyper u|\bu express|monoprix|franprix|\bcasino\b(?!.*(jeux|barriere|partouche|poker|bet))|\baldi\b|\bpicard\b|biocoop|netto|grand frais|naturalia|\bspar\b|\bmatch\b(?! (point|foot|de))|\bcora\b|g20|coccinelle|\bmarche\b(?! (public|financier))/],
+    ["Courses","Groceries","Dépense",/carrefour|leclerc|auchan|lidl|intermarche|super u|hyper u|\bu express|monoprix|franprix|\bcasino\b(?!.*(jeux|barriere|partouche|poker|\bbet\b|betclic|winamax))|\baldi\b|\bpicard\b|biocoop|netto|grand frais|naturalia|\bspar\b|\bmatch\b(?! (point|foot|de))|\bcora\b|g20|coccinelle|marche\b(?! (public|financier))/],
     ["Restaurants","Restaurants","Dépense",/restaurant|\bresto\b(?!s? du coeur)|mcdo|mc donald|mcdonald|burger king|\bkfc\b|uber ?eats|deliveroo|just ?eat|starbucks|boulangerie|brasserie|sushi|pizza|kebab|cafe\b|bistro|o.?tacos|subway|five guys|\b(carte|cb)\b.*\bpaul\b/],
-    ["Transports","Transport","Dépense",/sncf|\bratp\b|navigo|\buber\b|bolt|blablacar|totalenergies station|total access|\besso\b|\bshell\b|\b(carte|cb)\b.*\b(bp|total ?energies)\b|\bavia\b|\bstation\b(?! f\b)|carburant|essence|peage|autoroute|vinci|sanef|\baprr\b|parking|indigo|tisseo|\btcl\b|\brtm\b|keolis|transdev|\blime\b|velib|trainline|ouigo|tgv/],
+    ["Transports","Transport","Dépense",/sncf|\bratp\b|navigo|\buber\b|bolt|blablacar|totalenergies station|total access|\besso\b|\bshell\b|\b(carte|cb)\b.*\b(bp|total ?energies)\b|\bavia\b|\bstation(nement)?\b(?! f\b)|paybyphone|carburant|essence|peage|autoroute|vinci|sanef|\baprr\b|parking|indigo|tisseo|\btcl\b|\brtm\b|keolis|transdev|\blime\b|velib|trainline|ouigo|tgv/],
     ["Abonnements","Subscriptions","Dépense",/netflix|spotify|deezer|disney|canal\+?|amazon prime|prime video|apple\.com|icloud|google (one|storage|play)|youtube|free mobile|free telecom|freebox|\borange\b(?! ?(boutique|store|shop|magasin))|\bsosh\b|\bsfr\b|bouygues|b ?& ?you|red by|basic.?fit|fitness park|keep cool|crunch|audible|chatgpt|openai/],
     ["Énergie et eau","Energy and water","Dépense",/\bedf\b|engie|total ?energies|ekwateur|\beau de (paris|.*(ville|agglo|metropole|syndicat))|\bsyndicat des eaux|veolia|suez|saur\b|gaz\b|electricite|mint energie|octopus/],
     ["Assurances","Insurance","Dépense",/assurance|\baxa\b|maif|macif|matmut|allianz|groupama|\bgmf\b|\bmma\b|generali|\bapril\b(?! \d)|luko|lovys/],
-    ["Santé","Health","Dépense",/pharmacie|docteur|medecin|dentiste|laboratoire|opticien|doctolib|hopital|clinique|\bkine\b|kinesitherapeute|mutuelle|harmonie|ameli/],
+    ["Santé","Health","Dépense",/pharmacie|docteur|medecin|dentiste|laboratoire|opticien|doctolib|hopital|clinique|\bkine\b|kinesi|mutuelle|harmonie|ameli/],
     ["Shopping","Shopping","Dépense",/amazon|fnac|darty|decathlon|zara|h ?& ?m\b|ikea|leroy merlin|castorama|boulanger|cdiscount|shein|vinted|\baction\b|primark|kiabi|sephora|nocibe|uniqlo|zalando|temu|aliexpress|apple store|galeries lafayette|printemps/],
-    ["Loisirs","Leisure","Dépense",/cinema|\bugc\b|pathe|gaumont|mk2|steam|playstation|nintendo|xbox|concert|ticketmaster|fnac spectacles|bowling|musee|theatre|escape game|\bparc\b(?! (auto|de stationnement))/],
+    ["Loisirs","Leisure","Dépense",/cinema|\bugc\b|pathe|gaumont|mk2|steam|playstation|nintendo|xbox|concert|ticketmaster|fnac spectacles|bowling|musee|theatre|\bescape\b|\bparc\b(?! (auto|de stationnement))/],
     ["Voyages","Travel","Dépense",/airbnb|booking|hotel|air france|easyjet|ryanair|vueling|transavia|expedia|abritel|club med|camping/],
     ["Retraits","Cash withdrawals","Dépense",/retrait|\bdab\b|distributeur|\bgab\b|withdrawal/],
-    ["Frais bancaires","Bank fees","Dépense",/\bfrais\b(?! de (port|livraison|dossier|scolarite|garde))|commission|cotisation (carte|cb|compte|offre|forfait|package)|agios|interets debiteurs|tenue de compte|carte bancaire/],
+    ["Frais bancaires","Bank fees","Dépense",/\bfrais\b(?! de (port|livraison|dossier|scolarite|garde))|commission|cotisation(?! (syndicale|club|association|asso|sport|licence|adhesion))|agios|interets debiteurs|tenue de compte|carte bancaire/],
     ["Impôts","Taxes","Dépense",/impot|dgfip|tresor public|taxe|finances publiques|amende|antai/]
   ];
   var OTHER_OUT=["Autres dépenses","Other expenses","Dépense"],OTHER_IN=["Autres revenus","Other income","Salaire"],TRANSFER=/virement interne|vir(ement)? (de|vers) (mon|ma|compte)|transfert interne/;
@@ -154,16 +182,18 @@
   var RULES_KEY="personalFinanceDashboard.merchantRules";
   function learned(){try{var v=JSON.parse(window.safeStore&&window.safeStore.getItem(RULES_KEY)||"{}");return v&&typeof v==="object"?v:{};}catch(e){return{};}}
   function saveLearned(extra){var all=learned();Object.keys(extra||{}).forEach(function(k){if(extra[k])all[k]=extra[k];else delete all[k];});var keys=Object.keys(all);if(keys.length>2000)keys.slice(0,keys.length-2000).forEach(function(k){delete all[k];});try{window.safeStore.setItem(RULES_KEY,JSON.stringify(all));}catch(e){}}
+  // Virement (vers ou depuis une personne ou un compte), reconnu au début du libellé.
+  function transferLabel(l){l=norm(l);return /^(vir|virement|vrt)\b/.test(l)||/\bvir(ement)? (sepa |inst |instantane )?(recu|emis|de|vers|a|en faveur)\b/.test(l);}
   function categorize(op,rules){
     var m=merchantOf(op.label),r=rules&&Object.prototype.hasOwnProperty.call(rules,m)?rules[m]:null;
     if(r){if(r[1]==="Ignorer")return null;return [r[0],r[0],r[1]];}
-    var l=norm(op.label);
+    var l=norm(op.label+(op.detail?" "+op.detail:""));
     if(TRANSFER.test(l)&&!CATS[0][3].test(l))return null; // simple mouvement entre tes comptes : ignoré
     // Un virement à une personne (« VIR SEPA M PICARD ») n'est pas un achat en magasin : seules les catégories
     // qui se paient par virement (loyer, épargne, salaire, aides, impôts, assurances, santé, énergie) restent possibles.
-    var isTransfer=/^(vir|virement|vrt)\b/.test(l)||/\bvir(ement)? (sepa |inst |instantane )?(recu|emis|de|vers|a|en faveur)\b/.test(l);
+    var isTransfer=transferLabel(l);
     for(var i=0;i<CATS.length;i++){var c=CATS[i];if(c[3].test(l)){
-      if(isTransfer&&!/^(Épargne|Salaire|Aides \(CAF\)|Loyer|Impôts|Assurances|Santé|Énergie et eau)$/.test(c[0]))continue;
+      if(isTransfer&&!/^(Épargne|Salaire|Aides \(CAF\)|Loyer|Impôts|Assurances|Santé|Énergie et eau|Abonnements)$/.test(c[0]))continue;
       if(op.amount>0&&c[2]==="Dépense")return c; // remboursement : vient en déduction de la catégorie
       if(op.amount>0&&c[2]==="Épargne")return c; // retrait d'épargne : diminue l'épargne du mois
       if(op.amount<0&&c[2]==="Salaire")return OTHER_OUT;
@@ -190,13 +220,15 @@
     var starts=rows.filter(function(r){return key(r).indexOf(stem)===0;});return starts.length===1?starts[0]:null;
   }
   // Marchand qui a déjà sa propre ligne (une ligne « Netflix » dans le tableur) : on la remplit au lieu de « Abonnements ».
-  function merchantRow(m,rows){var w=String(m||"").split(" ")[0];if(!w||w.length<4)return null;for(var i=0;i<rows.length;i++){var r=key(rows[i]);if(r===key(w)||r===key(m))return rows[i];}return null;}
+  var GENERIC=/^(prime|banque|bank|credit|carte|frais|total|service|services|paiement|achat|magasin|super|hyper|cafe|station|compte|pret|assurance|mutuelle|epargne|salaire|loyer|courses|impots?)$/;
+  function merchantRow(m,rows){var w=String(m||"").split(" ")[0];if(!w||w.length<4||GENERIC.test(w))return null;for(var i=0;i<rows.length;i++){var r=key(rows[i]);if((r===key(w)||r===key(m))&&kindOf(rows[i])==="Dépense")return rows[i];}return null;}
   function summarize(ops,extra){
-    var groups={},months={},ignored=0,rules=learned(),rows=sheetRows(),items=[],seenFp={};Object.keys(extra||{}).forEach(function(k){rules[k]=extra[k];});
+    var groups={},months={},ignored=0,rules=learned(),rows=sheetRows(),items=[],seenFp={},from=null,to=null;
+    ops.forEach(function(op){var n=dayNum(op.date);if(from===null||n<from)from=n;if(to===null||n>to)to=n;});Object.keys(extra||{}).forEach(function(k){rules[k]=extra[k];});
     ops.forEach(function(op){
       var c=categorize(op,rules);if(!c){ignored++;return;}
       var mo=merchantOf(op.label),own=!Object.prototype.hasOwnProperty.call(rules,mo)&&c[2]==="Dépense"&&op.amount<0?merchantRow(mo,rows):null;
-      var name=own||existingRow(en()?c[1]:c[0],rows)||(en()?c[1]:c[0]),kind=c[2],g=groups[name]||(groups[name]={name:name,kind:kind,count:0,total:0,byMonth:{},merchants:{}});
+      var isOther=!own&&(c===OTHER_OUT||c===OTHER_IN),name=own||existingRow(en()?c[1]:c[0],rows)||(en()?c[1]:c[0]),kind=c[2],g=groups[name]||(groups[name]={name:name,kind:kind,count:0,total:0,byMonth:{},merchants:{}});if(isOther)g.other=true;
       // Dépenses et épargne comptées en positif ; un remboursement vient en déduction
       var v=kind==="Salaire"?op.amount:-op.amount,mk=op.date.y+"-"+op.date.m;
       g.count++;g.total+=v;g.byMonth[mk]=(g.byMonth[mk]||0)+v;months[mk]=op.date;
@@ -206,7 +238,7 @@
     var list=Object.keys(groups).map(function(k){return groups[k];}).filter(function(g){return Math.abs(g.total)>=0.005;});
     var order={"Salaire":0,"Dépense":1,"Épargne":2};list.sort(function(a,b){return order[a.kind]-order[b.kind]||Math.abs(b.total)-Math.abs(a.total);});
     var mlist=Object.keys(months).map(function(k){return months[k];}).sort(function(a,b){return a.y-b.y||a.m-b.m;});
-    return{groups:list,months:mlist,count:ops.length-ignored,ignored:ignored,items:items};
+    return{groups:list,months:mlist,count:ops.length-ignored,ignored:ignored,items:items,from:from,to:to};
   }
 
   /* ── Écriture dans le tableur ───────────────────────────────────────── */
@@ -233,24 +265,38 @@
   /* Ce qu'il faut écrire, mois par mois et ligne par ligne.
      « Remplacer » : total de toutes les opérations connues du mois (anciennes + nouvelles), donc un relevé partiel
      ne fait pas disparaître le reste du mois. « Ajouter » : seulement les opérations jamais importées. */
+  function dayNum(d){return (d.y*12+d.m)*32+d.d;}
   function plan(summary,mode){
-    var L=ledger(),out={},dup=0,kinds={},before={};
-    // Lignes qui avaient des opérations ce mois-là : si elles n'en ont plus (marchand déplacé), on les remet à zéro.
-    (summary.items||[]).forEach(function(it){if(before[it.mk])return;var b=before[it.mk]={};Object.keys(L.m[it.mk]||{}).forEach(function(fp){var e=L.m[it.mk][fp];b[e[0]]=1;kinds[e[0]]=e[1];});});
-    (summary.items||[]).forEach(function(it){kinds[it.name]=it.kind;var M=L.m[it.mk]||(L.m[it.mk]={});
-      if(M[it.fp]){dup++;if(mode==="add")return;}
+    var L=ledger(),out={},dup=0,fresh=0,kinds={},before={},rows=sheetRows(),items=summary.items||[];
+    // Une ligne renommée dans le tableur (« Abonnements » → « Abos ») garde ses anciennes opérations.
+    var rowName=function(n){return existingRow(n,rows)||n;};
+    // Mois touchés : ceux du fichier, plus ceux du registre qui tombent dans la période du fichier.
+    var touched={};items.forEach(function(it){touched[it.mk]=1;});
+    if(mode!=="add"&&summary.from!=null)Object.keys(L.m).forEach(function(mk){Object.keys(L.m[mk]).forEach(function(fp){var p=fp.split("|")[0].split("-"),n=dayNum({y:+p[0],m:+p[1],d:+p[2]});if(n>=summary.from&&n<=summary.to)touched[mk]=1;});});
+    Object.keys(touched).forEach(function(mk){var b=before[mk]={};Object.keys(L.m[mk]||{}).forEach(function(fp){var e=L.m[mk][fp],n=rowName(e[0]);b[n]=1;kinds[n]=e[1];});});
+    if(mode!=="add"){
+      // Remplacer : dans la période du fichier, le fichier fait foi (une opération désormais ignorée ou
+      // déplacée disparaît) ; en dehors, les opérations déjà importées sont gardées.
+      var inFile={};items.forEach(function(it){inFile[it.fp]=1;});
+      Object.keys(touched).forEach(function(mk){var M=L.m[mk]||{};Object.keys(M).forEach(function(fp){var p=fp.split("|")[0].split("-"),n=dayNum({y:+p[0],m:+p[1],d:+p[2]});if(n>=summary.from&&n<=summary.to&&!inFile[fp])delete M[fp];});});
+    }
+    items.forEach(function(it){kinds[it.name]=it.kind;var M=L.m[it.mk]||(L.m[it.mk]={});
+      if(M[it.fp])dup++;else fresh++;
+      if(mode==="add"&&M[it.fp])return;
       M[it.fp]=[it.name,it.kind,Math.round(it.v*100)/100];
       if(mode==="add"){var o=out[it.mk]||(out[it.mk]={});o[it.name]=(o[it.name]||0)+it.v;}});
-    if(mode!=="add")Object.keys(summary.items.reduce(function(a,it){a[it.mk]=1;return a;},{})).forEach(function(mk){
-      var o=out[mk]={};Object.keys(before[mk]||{}).forEach(function(n){o[n]=0;});Object.keys(L.m[mk]).forEach(function(fp){var e=L.m[mk][fp];kinds[e[0]]=kinds[e[0]]||e[1];o[e[0]]=(o[e[0]]||0)+e[2];});});
-    return{cells:out,kinds:kinds,dup:dup,save:function(){saveLedger(L);}};
+    if(mode!=="add")Object.keys(touched).forEach(function(mk){
+      var o=out[mk]={};Object.keys(before[mk]||{}).forEach(function(n){o[n]=0;});
+      Object.keys(L.m[mk]||{}).forEach(function(fp){var e=L.m[mk][fp],n=rowName(e[0]);kinds[n]=kinds[n]||e[1];o[n]=(o[n]||0)+e[2];});
+      if(!Object.keys(L.m[mk]||{}).length)delete L.m[mk];});
+    return{cells:out,kinds:kinds,dup:dup,fresh:fresh,save:function(){saveLedger(L);}};
   }
   function write(summary,mode){
     var FS=window.FinanceSheet;if(!FS||!FS.getSnapshot)return false;
     var snap=JSON.parse(JSON.stringify(FS.getSnapshot()));snap.sheets=snap.sheets||[];
     var rules={};try{rules=JSON.parse(window.safeStore.getItem("personalFinanceDashboard.categoryRules")||"{}")||{};}catch(e){}
     var signs={"Salaire":signFor(snap,"Salaire"),"Dépense":signFor(snap,"Dépense"),"Épargne":signFor(snap,"Épargne")},last=null;
-    var P=plan(summary,mode);summary.dup=P.dup;
+    var P=plan(summary,mode);summary.dup=P.dup;summary.fresh=P.fresh;
     Object.keys(P.cells).forEach(function(mk){Object.keys(P.cells[mk]).forEach(function(name){
       var g={name:name,kind:P.kinds[name]||"Dépense"},amount=P.cells[mk][name];
       if(!rules[key(g.name)])rules[key(g.name)]=g.kind;
@@ -309,8 +355,9 @@
         var first=summary.months[0],lastM=summary.months[summary.months.length-1];
         lead.textContent=summary.count+t2(" opérations, "," transactions, ")+(first===lastM?monthLabel(first):t2("de ","from ")+monthLabel(first)+t2(" à "," to ")+monthLabel(lastM))+t2(". Elles sont regroupées par catégorie, une ligne du tableur chacune.",". They are grouped by category, one spreadsheet row each.");
         var titles={"Salaire":t2("Revenus","Income"),"Dépense":t2("Dépenses","Expenses"),"Épargne":t2("Épargne","Savings")},lastKind="",nodes=[];
-        var todo=summary.groups.filter(function(g){return otherNames.indexOf(g.name)>=0;});
-        var rest=summary.groups.filter(function(g){return otherNames.indexOf(g.name)<0;});
+        var isTodo=function(g){return g.other||otherNames.indexOf(g.name)>=0;};
+        var todo=summary.groups.filter(isTodo);
+        var rest=summary.groups.filter(function(g){return !isTodo(g);});
         function groupNode(g,isTodo){
           var det=document.createElement("details");det.className="gfb-group"+(isTodo?" is-todo":"");if(isTodo||opened[g.name])det.open=true;
           det.addEventListener("toggle",function(){opened[g.name]=det.open;});
@@ -353,12 +400,14 @@
         var summary=res.summary;
         if(write(summary,res.mode)){
           var n=summary.months.length,subs=0;try{subs=window.GFSubs?window.GFSubs.ingest(ops):0;}catch(e){}
-          toast(t2("Relevé importé : ","Statement imported: ")+summary.count+t2(" opérations sur "," transactions over ")+n+t2(" mois."," month(s).")+(summary.dup?t2(" "+summary.dup+" déjà importée"+(summary.dup>1?"s":"")+", pas comptée"+(summary.dup>1?"s":"")+" deux fois."," "+summary.dup+" already imported, not counted twice."):"")+(subs?t2(" "+subs+" abonnement"+(subs>1?"s":"")+" repéré"+(subs>1?"s":"")+" : retrouve-les sur l’accueil."," "+subs+" subscription"+(subs>1?"s":"")+" found: see them on Home."):""));
+          var msg=summary.count&&!summary.fresh?t2("Rien de nouveau : ces "+summary.count+" opérations étaient déjà importées.","Nothing new: these "+summary.count+" transactions were already imported.")
+            :t2("Relevé importé : ","Statement imported: ")+summary.count+t2(" opérations sur "," transactions over ")+n+t2(" mois."," month(s).")+(summary.dup?t2(" "+summary.dup+" déjà importée"+(summary.dup>1?"s":"")+", pas comptée"+(summary.dup>1?"s":"")+" deux fois."," "+summary.dup+" already imported, not counted twice."):"");
+          toast(msg+(subs?t2(" "+subs+" abonnement"+(subs>1?"s":"")+" repéré"+(subs>1?"s":"")+" : retrouve-les sur l’accueil."," "+subs+" subscription"+(subs>1?"s":"")+" found: see them on Home."):""));
           if(window.setPage)window.setPage("sheet");
         }
         return true;
       });
     });
   }
-  window.GFBankImport={handle:handle,parse:parse,summarize:summarize,write:write,existingRow:existingRow,categorize:categorize,merchantOf:merchantOf,learned:learned,saveLearned:saveLearned,_decode:decode};
+  window.GFBankImport={transferLabel:transferLabel,handle:handle,parse:parse,summarize:summarize,write:write,existingRow:existingRow,categorize:categorize,merchantOf:merchantOf,learned:learned,saveLearned:saveLearned,_decode:decode};
 })();

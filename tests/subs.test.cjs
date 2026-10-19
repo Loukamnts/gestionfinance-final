@@ -55,3 +55,27 @@ test('Le loyer, les impôts et l’épargne ne sont pas des abonnements',()=>{
   const W=setup();W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n04/09/2026;PRLV SEPA LOYER FONCIA;-850,00\n04/10/2026;PRLV SEPA LOYER FONCIA;-850,00\n15/09/2026;PRLV DGFIP IMPOT;-120,00\n15/10/2026;PRLV DGFIP IMPOT;-120,00\n20/09/2026;VIR VERS LIVRET A;-100,00\n20/10/2026;VIR VERS LIVRET A;-100,00\n06/08/2026;PRLV SEPA EDF CLIENTS;-64,00\n06/09/2026;PRLV SEPA EDF CLIENTS;-64,00\n06/10/2026;PRLV SEPA EDF CLIENTS;-64,00\n'));
   assert.deepEqual(JSON.parse(JSON.stringify(W.GFSubs.list().map(i=>i.name))),['Edf Clients']);
 });
+test('Un virement régulier à une personne n’est pas un abonnement',()=>{
+  const W=setup();W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n15/08/2026;VIR SEPA EMIS VERS PAUL DURAND;-40,00\n15/09/2026;VIR SEPA EMIS VERS PAUL DURAND;-40,00\n15/10/2026;VIR SEPA EMIS VERS PAUL DURAND;-40,00\n'));
+  assert.equal(W.GFSubs.list().length,0);
+});
+test('Apple : iCloud, Music et TV sont trois abonnements',()=>{
+  const W=setup();let csv='Date;Libellé;Montant\n';for(const m of ['08','09','10'])csv+=`02/${m}/2026;APPLE.COM/BILL ICLOUD;-2,99\n03/${m}/2026;APPLE.COM/BILL MUSIC;-10,99\n04/${m}/2026;APPLE.COM/BILL TV;-9,99\n`;
+  W.GFSubs.ingest(ops(W,csv));assert.deepEqual(JSON.parse(JSON.stringify(W.GFSubs.list().map(i=>i.name).sort())),['Apple Music','Apple TV','Apple iCloud']);
+});
+test('Achat en boutique Orange : ni abonnement, ni frein pour le vrai forfait',()=>{
+  const W=setup();W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n05/09/2026;PRLV SEPA ORANGE;-20,00\n05/10/2026;PRLV SEPA ORANGE;-20,00\n12/09/2026;CARTE ORANGE BOUTIQUE;-299,00\n12/10/2026;CARTE ORANGE BOUTIQUE;-15,00\n'));
+  const l=W.GFSubs.list();assert.deepEqual(JSON.parse(JSON.stringify(l.map(i=>i.name))),['Orange']);assert.equal(l[0].amount,20);
+});
+test('Marchand rangé dans une ligne à moi : détectable ; ancien bruit de courses écarté',()=>{
+  const W=setup();W.GFBankImport.saveLearned({'salle escalade':['Sport','Dépense']});
+  W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n05/08/2026;PRLV SALLE ESCALADE;-45,00\n05/09/2026;PRLV SALLE ESCALADE;-45,00\n05/10/2026;PRLV SALLE ESCALADE;-45,00\n'));
+  assert.deepEqual(JSON.parse(JSON.stringify(W.GFSubs.list().map(i=>i.name))),['Salle Escalade']);
+  const W2=setup();W2.safeStore.setItem('personalFinanceDashboard.subscriptions',JSON.stringify({v:1,items:{'boulangerie dupont':{name:'Boulangerie Dupont',known:false,months:{'24319':[4.2,1],'24320':[4.2,1],'24321':[4.2,1]},hidden:false}}}));
+  assert.equal(W2.GFSubs.list().length,0);
+});
+test('Abonnement arrêté : plus actif quand le relevé suivant ne le contient pas',()=>{
+  const W=setup();W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n05/08/2026;PRLV SEPA SPOTIFY;-11,12\n05/09/2026;PRLV SEPA SPOTIFY;-11,12\n'));
+  W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n05/12/2026;CARTE LIDL;-30,00\n06/12/2026;CARTE LIDL;-20,00\n'));
+  const l=W.GFSubs.list();assert.equal(l[0].active,false);assert.equal(W.GFSubs.totals(l).month,0);
+});

@@ -70,7 +70,7 @@ function setupSheet(rows){const mem={};let snap={sheets:[{id:'y',name:'2026',cel
   vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(__dirname,'..','bank-import.js'),'utf8'),c);
   const B=c.window.GFBankImport;const imp=(csv,mode)=>{const s=B.summarize(B.parse(B._decode(enc(csv))));B.write(s,mode||'replace');return s;};
   const cell=(name,mi)=>{const sh=snap.sheets.find(x=>x.name==='2026');const r=sh.rowHeaders.indexOf(name);const v=sh.cells[r+','+mi];return v?Number(v.raw):null;};
-  return {B,imp,cell};}
+  return {B,imp,cell,snap:()=>snap};}
 test('Libellés piégeux : bonne catégorie',()=>{
   const cat=l=>{const c=B.categorize({label:l,amount:-10},{});return c?c[0]:null;};
   assert.equal(cat('VIR SEPA PAUL DURAND'),'Autres dépenses');
@@ -117,4 +117,66 @@ test('Marchand déplacé puis relevé réimporté : l’ancienne ligne est vidé
   B.saveLearned({'netflix':['Loisirs','Dépense']});
   imp('Date;Libellé;Montant\n05/09/2026;PRLV SEPA NETFLIX;-13,49\n06/09/2026;CARTE LIDL;-20,00\n');
   assert.equal(cell('Loisirs',8),-13.49);assert.equal(cell('Abonnements',8),null);assert.equal(cell('Courses',8),-20);
+});
+test('BNP : colonne « Libellé opération » (pas « Catégorie »), paiements « FACTURE CARTE DU … » gardés',()=>{
+  const {s,ops}=sum('Compte de chèques ****1234;Solde au 14/10/2026;1234,56\n\nDate opération;Catégorie opération;Sous Catégorie opération;Libellé opération;Montant opération;Pointage opération\n02/09/2026;Alimentation;Supermarché;FACTURE CARTE DU 010926 CARREFOUR MARKET CARTE 4974XXXXXXXX1234;-45,20;0\n03/09/2026;Alimentation;Supermarché;FACTURE CARTE DU 020926 LIDL CARTE 4974XXXXXXXX1234;-30,00;0\n04/09/2026;Transports;Train;FACTURE CARTE DU 030926 SNCF CARTE 4974XXXXXXXX1234;-25,00;0\n05/09/2026;Revenus;Salaire;VIR SEPA RECU /DE ACME SAS /MOTIF SALAIRE SEPT;2 150,00;0\n');
+  assert.equal(ops.length,4);assert.equal(total(s,'Courses'),75.2);assert.equal(total(s,'Transports'),25);assert.equal(total(s,'Salaire'),2150);
+});
+test('Caisse d’Épargne : « Numéro d’opération » n’est pas le libellé ; N26 : la référence complète le libellé',()=>{
+  const ce=sum("Date;Numéro d'opération;Libellé;Débit;Crédit;Détail;\n02/09/26;123;CB AUCHAN FACT 010926;-58,30;;CB AUCHAN\n03/09/26;124;VIR SEPA SALAIRE;;2000,00;VIR\n");
+  assert.equal(total(ce.s,'Courses'),58.3);assert.equal(total(ce.s,'Salaire'),2000);
+  const n26=sum('"Date","Payee","Account number","Transaction type","Payment reference","Amount (EUR)"\n"2026-09-03","ACME SAS","FR76","Income","Salaire septembre","2000.0"\n"2026-09-05","Spotify","","MasterCard Payment","","-11.12"\n');
+  assert.equal(total(n26.s,'Salaire'),2000);assert.equal(total(n26.s,'Abonnements'),11.12);
+  assert.equal(n26.ops[0].label,'ACME SAS');
+});
+test('Débit différé : seules les lignes de total sans commerçant sont écartées',()=>{
+  const T=l=>B.parse(B._decode(enc('Date;Libellé;Montant\n02/09/2026;CARTE 01/09 LIDL;-40,00\n03/09/2026;CARTE 02/09 FNAC;-60,00\n04/09/2026;CARTE 03/09 SNCF;-50,00\n30/09/2026;'+l+';-150,00\n'))).length;
+  assert.equal(T('RELEVE CARTE 30/09'),3);assert.equal(T('FACTURES CARTES DEBIT DIFFERE'),3);assert.equal(T('TOTAL OPERATIONS CARTE VISA AU 30/09/2026'),3);
+  assert.equal(T('FACTURE CARTE DU 290926 DECATHLON'),4);assert.equal(T('CARTE 29/09 TOTAL ACCESS'),4);
+});
+
+// ── Points relevés par la relecture ──
+test('Total du débit différé : noms courts gardés, mois et « différé » reconnus',()=>{
+  const base='Date;Libellé;Montant\n02/09/2026;CARTE 01/09 LIDL;-40,00\n03/09/2026;CARTE 02/09 FNAC;-60,00\n04/09/2026;CARTE 03/09 SNCF;-50,00\n';
+  const n=l=>B.parse(B._decode(enc(base+'30/09/2026;'+l+';-150,00\n'))).length;
+  assert.equal(n('FACTURE CARTE DU 010926 BP CARTE 4974XXXXXXXX1234'),4);assert.equal(n('FACTURE CARTE DU 020926 H&M CARTE 4974XXXXXXXX1234'),4);
+  assert.equal(n('RELEVE CARTE SEPTEMBRE'),3);assert.equal(n('RELEVE DIFFERE CARTE 4974XXXXXXXX1234'),3);
+});
+test('Catégories qui marchaient avant',()=>{
+  const cat=(l,a)=>{const c=B.categorize({label:l,amount:a||-10},{});return c?c[0]:null;};
+  assert.equal(cat('CARTE SUPERMARCHE DU CENTRE'),'Courses');assert.equal(cat('CARTE 12/09 CASINO BETHUNE'),'Courses');assert.equal(cat('CB PETIT CASINO BETTON'),'Courses');
+  assert.equal(cat('CARTE PAYBYPHONE STATIONNEMENT'),'Transports');assert.equal(cat('PRLV SEPA COTISATION EUROCOMPTE CONFORT'),'Frais bancaires');
+  assert.equal(cat('COTISATION VISA PREMIER'),'Frais bancaires');assert.equal(cat('COTISATION JAZZ'),'Frais bancaires');
+  assert.equal(cat('CARTE CABINET KINESITHERAPIE'),'Santé');assert.equal(cat('CARTE ESCAPE HUNT'),'Loisirs');assert.equal(cat('VIR SEPA FREE MOBILE'),'Abonnements');
+});
+test('Dates : ordre lu sur la colonne de date seulement ; heure avec fuseau',()=>{
+  const o=B.parse(B._decode(enc('Date,Description,Amount\n09/05/2026,"12/25/2026 order",-10\n10/05/2026,shop,-5\n')));
+  assert.equal(o[0].date.m,4);assert.equal(o[0].date.d,9);
+  const t=B.parse(B._decode(enc('Date;Libellé;Montant\n03/09/2026T10:22:33Z;A;-1\n01/09/2026 10:00:00 +0200;B;-2\n')));
+  assert.equal(t.length,2);
+});
+test('BNP « Libellé court » + « Libellé opération » : le libellé détaillé est choisi',()=>{
+  const o=B.parse(B._decode(enc('Date operation;Libelle court;Type operation;Libelle operation;Montant operation\n02/09/2026;FACTURE CARTE;CB;FACTURE CARTE DU 010926 LIDL CARTE 4974XXXX;-40,00\n03/09/2026;FACTURE CARTE;CB;FACTURE CARTE DU 020926 FNAC CARTE 4974XXXX;-60,00\n')));
+  assert.match(o[0].label,/LIDL/);
+});
+test('Ligne de revenu au nom d’un marchand : pas utilisée pour une dépense',()=>{
+  const {imp,cell}=setupSheet(['Salaire','Prime','Courses']);
+  imp('Date;Libellé;Montant\n05/09/2026;PRLV SEPA PRIME VIDEO;-6,99\n06/09/2026;CARTE LIDL;-20,00\n');
+  assert.equal(cell('Prime',8),null);assert.equal(cell('Abonnements',8),-6.99);
+});
+test('Remplacer : une opération désormais ignorée sort du total',()=>{
+  const {B,imp,cell}=setupSheet();
+  imp('Date;Libellé;Montant\n05/09/2026;VIR SEPA M DUPONT;-100,00\n06/09/2026;CARTE LIDL;-20,00\n');
+  assert.equal(cell('Autres dépenses',8),-100);
+  assert.equal(B.merchantOf('VIR SEPA M DUPONT'),'dupont');B.saveLearned({'dupont':['','Ignorer']});
+  imp('Date;Libellé;Montant\n05/09/2026;VIR SEPA M DUPONT;-100,00\n06/09/2026;CARTE LIDL;-20,00\n');
+  assert.equal(cell('Autres dépenses',8),null);assert.equal(cell('Courses',8),-20);
+});
+test('Ligne renommée dans le tableur : pas recréée au prochain import',()=>{
+  const env=setupSheet();
+  env.imp('Date;Libellé;Montant\n05/09/2026;PRLV SEPA NETFLIX;-13,49\n06/09/2026;PRLV SEPA SPOTIFY;-11,12\n');
+  const sh=env.snap().sheets[0];sh.rowHeaders[sh.rowHeaders.indexOf('Abonnements')]='Abos';
+  env.imp('Date;Libellé;Montant\n06/09/2026;PRLV SEPA SPOTIFY;-11,12\n07/09/2026;PRLV SEPA DEEZER;-10,99\n');
+  assert.deepEqual(JSON.parse(JSON.stringify(env.snap().sheets[0].rowHeaders)),['Abos']);
+  assert.equal(env.cell('Abos',8),-35.6);
 });
