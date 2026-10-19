@@ -19,17 +19,13 @@
   /* 2. Navigation : Accueil, Tableur, Mon espace (Partage, Objectifs, Nouveautés), en bas sur
      téléphone et en haut sur ordinateur. Paramètres est l'engrenage, à gauche du profil. */
   var SPACE=["sharing","objectives","updates"];
-  function bottomNav(){var b=byId("personalNavButton");if(b)b.dataset.space="1";}
   function navPage(x){var page=document.body.dataset.page;return x.dataset.page===page||(x.dataset.space==="1"&&SPACE.indexOf(page)>=0);}
   function syncBottom(){
     document.querySelectorAll(".bottom-nav .bottom-nav-btn, .desktop-nav .desktop-nav-link").forEach(function(x){var on=navPage(x);x.classList.toggle("is-active",on);if(on)x.setAttribute("aria-current","page");else x.removeAttribute("aria-current");});
     document.querySelectorAll(".mobile-settings-button").forEach(function(x){x.classList.toggle("is-active",document.body.dataset.page==="settings");});
   }
 
-  /* 3. Paramètres : raccourcis vers Mon espace (accessible aussi par l'avatar) */
-
-
-  /* Objectifs : lien avec le tableur en deux choix simples (ligne, puis mois ou toute l'année). */
+  /* 3. Objectifs : lien avec le tableur en deux choix simples (ligne, puis mois ou toute l'année). */
   function goalLinkUI(){
     var form=byId("objectiveForm"),src=byId("objectiveSheetSource");if(!form||!src||byId("gfoLink"))return;
     var box=el("fieldset","gfo-link");box.id="gfoLink";
@@ -42,7 +38,7 @@
     var target=form.querySelector(".objective-plan-toggle");if(target)form.insertBefore(box,target);else form.append(box);
     var linkField=src.closest("label");if(linkField)linkField.style.display="none";
     function sources(){try{return window.FinanceSheet.getObjectiveSources()||[];}catch(e){return[];}}
-    function eurS(v){try{return new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(v);}catch(e){return v+" €";}}
+    function eurS(v){try{return new Intl.NumberFormat(t2("fr-FR","en-GB"),{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(v);}catch(e){return v+" €";}}
     function base(id){var p=String(id||"").split(":");return p.length>=2?p[0]+":"+p[1]:"";}
     function fillLines(sel){
       var list=sources().filter(function(s){return s.month==null||s.month<0;});
@@ -70,14 +66,16 @@
     if(window.MutationObserver)new MutationObserver(function(){if(!form.hidden)setTimeout(sync,0);}).observe(form,{attributes:true,attributeFilter:["hidden"]});
     sync();
   }
-  function shortLabels(){document.querySelectorAll('.personal-workspace-nav .personal-workspace-link[data-page="sharing"]').forEach(function(b){if(b.querySelector(".gfp-short"))return;b.innerHTML='<span class="gfp-long">'+t2("Partage et amis","Sharing and friends")+'</span><span class="gfp-short">'+t2("Partage","Sharing")+'</span>';});}
+  // Libellés courts posés ici : refaits à chaque changement de langue.
+  function shortLabels(){
+    var nb=byId("latestUpdateAllButton");if(nb){nb.textContent=t2("Voir","See");nb.setAttribute("aria-label",t2("Voir les nouveautés","See what’s new"));}
+    document.querySelectorAll('.personal-workspace-nav .personal-workspace-link[data-page="sharing"]').forEach(function(b){b.innerHTML='<span class="gfp-long">'+t2("Partage et amis","Sharing and friends")+'</span><span class="gfp-short">'+t2("Partage","Sharing")+'</span>';});}
   function start(){
     shortLabels();
     goalLinkUI();
-    chartViews();bottomNav();syncBottom();
+    chartViews();syncBottom();
     // Changement de page, d'où qu'il vienne : l'onglet du bas suit (Mon espace couvre ses trois pages).
     if(window.MutationObserver)new MutationObserver(syncBottom).observe(document.body,{attributes:true,attributeFilter:["data-page"]});
-    var nb=byId("latestUpdateAllButton");if(nb){nb.textContent=t2("Voir","See");nb.setAttribute("aria-label",t2("Voir les nouveautés","See what’s new"));}
     document.addEventListener("change",function(e){if(e.target&&e.target.id==="viewSelect")syncViews();});
     document.addEventListener("click",function(){setTimeout(syncBottom,0);});
     // Barre du bas : l'onglet touché prend sa couleur dès l'appui ; la nouvelle page n'est construite
@@ -98,7 +96,7 @@
       nav.addEventListener("animationend",function(e){if(e.target.classList&&e.target.classList.contains("gf-pop"))e.target.classList.remove("gf-pop");});
     }
     window.addEventListener("gf:dashboardupdate",function(){if(!byId("gfcViews"))chartViews();syncViews();});
-    window.addEventListener("gf:languagechange",function(){chartViews();});
+    window.addEventListener("gf:languagechange",function(){chartViews();shortLabels();});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
 })();

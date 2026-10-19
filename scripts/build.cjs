@@ -99,8 +99,14 @@ put('app.html',html);
 // Service worker : version = empreinte de la page, liste = fichiers publics référencés par la page.
 {
   const local=[...html.matchAll(/\s(?:src|href)="([^"#:]+)"/g)].map(m=>m[1]).filter(u=>!/^\/\//.test(u)&&!/^(mailto|tel|data|blob):/.test(u)).map(u=>'/'+u.replace(/^\.?\//,''));
-  const extra=['/app','/manifest.webmanifest','/app-icon-180.png','/app-icon-512.png','/vendor/fonts.css'];
-  const list=[...new Set([...extra,...local])].filter(u=>!/\/vendor\/xlsx\.js/.test(u));
+  // La config Supabase est copiée pour se connecter hors ligne (le SW reste « réseau d'abord »).
+  const extra=['/app','/manifest.webmanifest','/app-icon-180.png','/app-icon-512.png','/vendor/fonts.css','/supabase_config.json'];
+  // Les pages légales liées depuis l'app sont servies hors ligne : leurs styles doivent être copiés aussi.
+  const legal=local.filter(u=>['/confidentialite','/conditions','/mentions-legales'].includes(u)).flatMap(u=>{
+    const page=fs.readFileSync(path.join(root,u.slice(1)+'.html'),'utf8');
+    return [...page.matchAll(/<link\b[^>]*\shref="([^"#:]+)"/g)].map(m=>'/'+m[1].replace(/^\.?\//,'')).filter(h=>/\.css(\?|$)/.test(h));
+  });
+  const list=[...new Set([...extra,...local,...legal])].filter(u=>!/\/vendor\/xlsx\.js/.test(u));
   const version=crypto.createHash('sha256').update(html).digest('hex').slice(0,12);
   let sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
   if(!sw.includes('__BUILD_VERSION__')||!sw.includes('__PRECACHE_LIST__'))throw new Error('sw.js : marqueurs manquants');

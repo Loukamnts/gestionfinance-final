@@ -31,7 +31,8 @@ self.addEventListener("activate", function (event) {
 function cacheable(url, request) {
   if (url.origin !== self.location.origin) return false;
   if (url.pathname === "/sw.js") return false;
-  if (request.mode === "navigate") return APP_ROUTES.indexOf(url.pathname) >= 0;
+  // Pages de l'app (copie « /app ») et pages publiques précopiées (mentions légales…).
+  if (request.mode === "navigate") return APP_ROUTES.indexOf(url.pathname) >= 0 || KNOWN.has(url.pathname);
   return KNOWN.has(url.pathname + url.search) || url.pathname.indexOf("/vendor/") === 0;
 }
 
@@ -41,15 +42,17 @@ self.addEventListener("fetch", function (event) {
   var url = new URL(request.url);
   if (!cacheable(url, request)) return;
   var navigate = request.mode === "navigate";
+  // Toutes les routes de l'app partagent la même page ; une page publique garde sa propre copie.
+  var key = navigate ? (APP_ROUTES.indexOf(url.pathname) >= 0 ? "/app" : url.pathname) : url.pathname + url.search;
   event.respondWith(fetch(request).then(function (res) {
     if (res.ok && res.type === "basic") {
       var copy = res.clone();
-      caches.open(CACHE).then(function (cache) { return cache.put(navigate ? "/app" : url.pathname + url.search, copy); }).catch(function () {});
+      caches.open(CACHE).then(function (cache) { return cache.put(key, copy); }).catch(function () {});
     }
     return res;
   }).catch(function () {
     return caches.open(CACHE).then(function (cache) {
-      return cache.match(navigate ? "/app" : url.pathname + url.search).then(function (hit) {
+      return cache.match(key).then(function (hit) {
         return hit || (navigate ? new Response("<!doctype html><meta charset=utf-8><title>Meuniance</title><p style=\"font:16px system-ui;padding:24px\">Pas de connexion. Ouvre Meuniance une fois avec du réseau pour l’utiliser hors ligne.</p>", { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } }) : Response.error());
       });
     });
