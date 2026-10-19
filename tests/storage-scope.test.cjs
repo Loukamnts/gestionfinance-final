@@ -80,3 +80,22 @@ test('Home module never touches the raw browser storage directly',()=>{
   const home=fs.readFileSync(path.join(__dirname,'..','home.js'),'utf8');
   assert.doesNotMatch(home,/localStorage/);
 });
+test('Données tirées des relevés : propres à chaque compte',()=>{
+  const {safe}=store();safe.setFinancialOwner(A);
+  for(const k of ['personalFinanceDashboard.importLedger','personalFinanceDashboard.subscriptions','personalFinanceDashboard.merchantRules'])safe.setItem(k,'A');
+  safe.setFinancialOwner(B);
+  for(const k of ['personalFinanceDashboard.importLedger','personalFinanceDashboard.subscriptions','personalFinanceDashboard.merchantRules'])assert.equal(safe.getItem(k),null);
+  assert.equal(safe.clearFinancialOwnerData(A),true);safe.setFinancialOwner(A);assert.equal(safe.getItem('personalFinanceDashboard.importLedger'),null);
+});
+test('Abonnements et règles de marchands enregistrés avant la mise à jour : repris une fois',()=>{
+  const {safe,values}=store({'personalFinanceDashboard.subscriptions':'S','personalFinanceDashboard.merchantRules':'R'});
+  safe.setFinancialOwner(A);
+  assert.equal(safe.getItem('personalFinanceDashboard.subscriptions'),'S');assert.equal(safe.getItem('personalFinanceDashboard.merchantRules'),'R');
+  assert.equal(values.has('personalFinanceDashboard.subscriptions'),false);
+  safe.setFinancialOwner(B);assert.equal(safe.getItem('personalFinanceDashboard.subscriptions'),null);
+});
+test('Données d’avant la mise à jour lues déconnecté : gardées pour le compte',()=>{
+  const {safe}=store({'gf-private-v1:account-seen':'1','personalFinanceDashboard.merchantRules':'R'});
+  assert.equal(safe.getItem('personalFinanceDashboard.merchantRules'),null);
+  safe.setFinancialOwner(A);assert.equal(safe.getItem('personalFinanceDashboard.merchantRules'),'R');
+});

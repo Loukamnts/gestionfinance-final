@@ -55,7 +55,7 @@
       if(document.readyState==="complete") warm(); else window.addEventListener("load",warm);
     })();
   </script>
-  <script src="store-shim.js?v=20261014-r2"></script>
+  <script src="store-shim.js?v=20261019-r3"></script>
   <link rel="stylesheet" href="sheet.css?v=20261018-h1" />
   <link rel="stylesheet" href="onboarding.css?v=20261018-h1" />
   <style>
@@ -1901,7 +1901,7 @@
   <link rel="stylesheet" href="ui-polish.css?v=20261018-h1">
   <link rel="stylesheet" href="theme-directions.css?v=20261018-h1">
   <link rel="stylesheet" href="plans.css?v=20261018-h1">
-  <link rel="stylesheet" href="home.css?v=20261019-r15">
+  <link rel="stylesheet" href="home.css?v=20261019-r16">
   <link rel="stylesheet" href="year-review.css?v=20261019-r2">
   <link rel="stylesheet" href="sheet-balances.css?v=20261018-h1">
   <link rel="stylesheet" href="finishing.css?v=20261019-r8">
@@ -2648,7 +2648,15 @@
     // ═══════════════════════════════════════════════════════════════════════
     function isMetaPropertyName(p){ return propertyNameMatches(p,[...PROPERTY_NAMES.month,...PROPERTY_NAMES.year,...PROPERTY_NAMES.expenses,...PROPERTY_NAMES.bigExpenses]); }
     function propertyNameMatches(name,list){ const n=normalizePropertyName(name); return list.some(item=>normalizePropertyName(item)===n); }
-    function matchesAnyKeyword(name,kw){ const n=normalizePropertyName(name); return kw.some(k=>n.includes(normalizePropertyName(k))); }
+    // Ces mots-clés ne valent que comme mots entiers : sinon « Shopping » passerait pour la banque ING, « Péage » pour un PEA,
+    // « Netflix » pour un ETF, « Anniversaire » pour le RSA, « Cashback » pour du cash et « Transactions » pour des actions.
+    // Les autres restent cherchés dans le nom (« Freebox » → free, « UberEats » → uber).
+    // Idem pour les lignes à ignorer : « Aides » ne contient pas « id », ni « Séjour » « jour ».
+    const WHOLE_WORD_KEYWORDS=new Set(["ing","pea","etf","rsa","apl","cash","action","actions","id","ref","jour","mois","code","date","note","notes","name","label","bank"]);
+    function matchesAnyKeyword(name,kw){
+      const n=normalizePropertyName(name), words=String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+      return kw.some(k=>{ const nk=normalizePropertyName(k); if(!nk) return false; if(!WHOLE_WORD_KEYWORDS.has(nk)) return n.includes(nk); return words.some(w=>w===nk||w===nk+"s"||w===nk+"x"); });
+    }
     function isNumberLikeProperty(p){ if(!p) return false; if(p.type==="number") return true; if(p.type==="formula") return p.formula?.type==="number"; if(p.type==="rollup") return p.rollup?.type==="number"; return false; }
     function getPropertyNumber(p){ if(!p) return 0; if(p.type==="number") return Number(p.number||0); if(p.type==="formula"){ if(p.formula?.type==="number") return Number(p.formula.number||0); if(p.formula?.type==="string") return extractFirstNumber(p.formula.string); } if(p.type==="rollup"&&p.rollup?.type==="number") return Number(p.rollup.number||0); if(p.type==="rich_text"||p.type==="title") return extractFirstNumber(getPropertyText(p)); return 0; }
     function getPropertyText(p){ if(!p) return ""; switch(p.type){ case"title": return plainText(p.title); case"rich_text": return plainText(p.rich_text); case"date": return p.date?.start||""; case"number": return p.number==null?"":String(p.number); case"select": return p.select?.name||""; case"status": return p.status?.name||""; case"formula": return getFormulaText(p.formula); case"rollup": return getRollupText(p.rollup); default: return ""; } }
@@ -2688,15 +2696,23 @@
     function isExplicitIgnorePattern(propName){
       const n=normalizePropertyName(propName); if(!n) return false;
       if(/reste.*apres.*depens/.test(n)||/apres.*depens.*reste/.test(n)) return true;
+      // Ligne de total (« Total », « Sous-total dépenses ») : déjà la somme d'autres lignes, ne pas la compter une 2e fois.
+      const w=String(propName||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+      // « Total Energies », « Total Access » sont des fournisseurs, pas des totaux.
+      const rest=w[0]==="sous"&&w[1]==="total"?w.slice(2):(w[0]==="total"||w[0]==="totaux"||w[0]==="soustotal")?w.slice(1):null;
+      if(rest&&(!rest.length||/^(des?|du|general|generale|mensuel|annuel|depenses?|revenus?|epargnes?|charges?|sorties?|entrees?|mois|annee|fixes?|variables?|credits?|debits?)$/.test(rest[0]))) return true;
       return ["bourseaux","remboursement","viremententrant"].some(kw=>n.includes(kw));
     }
+    // Utilisé aussi par l'import de relevé, pour ranger une ligne comme le tableau de bord la compte.
+    // Ligne de calcul (« Dépenses globales »…) : « Ignorer », comme pour le tableau de bord.
+    window.GFClassifyRow=function(name){ try{ const r=classifyFinancialPropertyEx(name); if(!r||!r.matched) return null; return r.rule===null?"Ignorer":r.rule; }catch(e){ return null; } };
     function classifyFinancialPropertyEx(propName){
       if(isMetaPropertyName(propName)) return {rule:null, matched:true};
       const n=normalizePropertyName(propName);
       const custom=getCustomRules();
       for(const rule of custom) if(n.includes(normalizePropertyName(rule))) return {rule, matched:true};
       if(isExplicitIgnorePattern(propName)) return {rule:"Ignorer", matched:true};
-      const stockKw=["bourse","action","actions","etf","pea","crypto","bitcoin","ethereum","trading","invest","investissement","placement","portefeuille","bitcoin"];
+      const stockKw=["bourse","action","actions","etf","pea","crypto","bitcoin","ethereum","trading","invest","investissement","placement","portefeuille"];
       if(matchesAnyKeyword(propName,stockKw)) return {rule:"Épargne", matched:true};
       if(propertyNameMatches(propName,CATEGORY_DETECTION.exactSavingsNames)||matchesAnyKeyword(propName,CATEGORY_DETECTION.savingsKeywords)) return {rule:"Épargne", matched:true};
       if(propertyNameMatches(propName,CATEGORY_DETECTION.exactExpenseNames)||matchesAnyKeyword(propName,CATEGORY_DETECTION.expenseKeywords)) return {rule:"Dépense", matched:true};
@@ -5427,7 +5443,7 @@ function inferColumnType(header, samples){
     }
     init();
   </script>
-  <script src="sheet.js?v=20261019-r1"></script>
+  <script src="sheet.js?v=20261019-r2"></script>
   <script src="onboarding.js?v=20261018-r4"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
   <script src="shared-expenses.js?v=20261019-r1"></script>
@@ -6035,10 +6051,10 @@ function inferColumnType(header, samples){
   <script src="year-review.js?v=20261019-r5" defer></script>
   <script src="home.js?v=20261019-r12" defer></script>
   <script src="finishing.js?v=20261019-r1" defer></script>
-  <script src="bank-import.js?v=20261019-r2" defer></script>
-  <script src="subs.js?v=20261019-r3" defer></script>
+  <script src="bank-import.js?v=20261019-r16" defer></script>
+  <script src="subs.js?v=20261019-r11" defer></script>
   <script src="reminders.js?v=20261019-r11" defer></script>
-  <script src="backup.js?v=20261019-r2" defer></script>
+  <script src="backup.js?v=20261019-r6" defer></script>
   <script src="install.js?v=20261019-r2" defer></script>
   <script src="avatars.js?v=20261019-r7" defer></script>
   <script src="menus.js?v=20261013-r1" defer></script>
