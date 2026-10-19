@@ -47,7 +47,11 @@
       var c=s.cells&&typeof s.cells==="object"?s.cells:{},clean={};
       for(var k in c){if(!Object.prototype.hasOwnProperty.call(c,k))continue;if(!/^\d{1,4},\d{1,2}$/.test(k))return null;var raw=c[k]&&c[k].raw;if(raw==null||raw==="")continue;raw=String(raw);if(raw.length>2000)return null;clean[k]={raw:raw};if(++cells>200000)return null;}
       var rh=Array.isArray(s.rowHeaders)?s.rowHeaders.slice(0,2000).map(function(h){return String(h==null?"":h).slice(0,120);}):[];
-      out.push({id:String(s.id||"s"+i).replace(/[^\w-]/g,"").slice(0,60)||"s"+i,name:String(s.name||"Feuille").slice(0,40),cells:clean,headers:[],rowHeaders:rh,rows:Math.min(Math.max(Number(s.rows)||9,1),2000),cols:12});
+      // Une feuille peut dépasser 12 colonnes (cellules jusqu’à la colonne 99) : on garde sa largeur et ses en-têtes.
+      var maxCol=Object.keys(clean).reduce(function(m,k){return Math.max(m,Number(k.split(",")[1]));},-1);
+      var cols=Math.min(Math.max(Number(s.cols)||12,12,maxCol+1),100);
+      var hs=Array.isArray(s.headers)&&s.headers.length<=cols&&s.headers.every(function(h){return h==null||str(h,60);})?s.headers.map(function(h){return h==null?"":h;}):[];
+      out.push({id:String(s.id||"s"+i).replace(/[^\w-]/g,"").slice(0,60)||"s"+i,name:String(s.name||"Feuille").slice(0,40),cells:clean,headers:hs,rowHeaders:rh,rows:Math.min(Math.max(Number(s.rows)||9,1),2000),cols:cols});
     }
     return out;
   }
