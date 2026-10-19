@@ -4,7 +4,11 @@
 (function(){
   "use strict";
   var o,svg,spin,gw,tx,timer,shown=false,busy=false,reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var SEARCH="Je retrouve tes chiffres…",FOUND="Voilà.";
+  // Libellés lus à chaque affichage : la langue peut changer pendant la session.
+  function en(){return !!(window.GFI18n&&window.GFI18n.getLanguage&&window.GFI18n.getLanguage()==="en");}
+  function t2(fr,eng){return en()?eng:fr;}
+  function SEARCH(){return t2("Je retrouve tes chiffres…","Finding your figures…");}
+  function FOUND(){return t2("Voilà.","There you go.");}
   function build(){
     if(o)return;
     var boot=document.getElementById("meuniBoot");
@@ -16,14 +20,14 @@
   }
   function cancelAll(){[spin,gw].forEach(function(g){if(g&&g.getAnimations)g.getAnimations().forEach(function(a){a.cancel();});});}
   function show(label){
-    build();cancelAll();o.hidden=false;shown=true;busy=true;svg.classList.add("srch");tx.textContent=label||SEARCH;
+    build();cancelAll();o.hidden=false;shown=true;busy=true;svg.classList.add("srch");tx.textContent=label||SEARCH();
   }
   function start(label){clearTimeout(timer);if(shown){show(label);return;}timer=setTimeout(function(){show(label);},350);}
   function hide(){o.hidden=true;shown=false;busy=false;}
   function done(label){
     clearTimeout(timer);
     if(!shown||!o)return;
-    tx.textContent=label||FOUND;
+    tx.textContent=label||FOUND();
     if(reduce||!spin.getAnimations){setTimeout(hide,500);return;}
     var an=spin.getAnimations()[0],t=an?(an.currentTime%1100)/1100*360:0,d=450+(360-t)/360*400;
     if(an)an.cancel();svg.classList.remove("srch");
@@ -45,12 +49,14 @@
     function owner(){try{return window.safeStore&&window.safeStore.financialOwner?window.safeStore.financialOwner():"anonymous";}catch(e){return"anonymous";}}
     function localEmpty(){try{var sn=window.FinanceSheet&&window.FinanceSheet.getSnapshot();return !sn||!(sn.sheets||[]).some(function(x){return Object.keys(x.cells||{}).some(function(k){return String((x.cells[k]||{}).raw||"").trim()!=="";});});}catch(e){return true;}}
     function figuresReady(){try{var d=window.__gfHomeData&&window.__gfHomeData();return !!(d&&d.all&&d.all.length);}catch(e){return false;}}
+    var watcher=null;
     function leave(){
       if(finished)return;finished=true;
+      if(watcher)watcher.disconnect();// plus rien à surveiller une fois l’écran parti
       function fade(){boot.classList.add("is-leaving");setTimeout(function(){boot.hidden=true;boot.classList.remove("is-boot","is-leaving");shown=false;busy=false;},220);}
       // « Voilà. » seulement si l'attente a été perceptible, et brièvement : l'ouverture reste rapide.
       if(!window.performance||performance.now()<500){fade();return;}
-      if(tx)tx.textContent=FOUND;if(svg)svg.classList.remove("srch");
+      if(tx)tx.textContent=FOUND();if(svg)svg.classList.remove("srch");
       setTimeout(fade,380);
     }
     function check(){
@@ -60,7 +66,7 @@
     }
     window.addEventListener("gf:syncready",function(){synced=true;setTimeout(check,120);});
     window.addEventListener("gf:dashboardupdate",function(){setTimeout(check,30);});
-    if(window.MutationObserver)new MutationObserver(check).observe(document.body,{attributes:true,attributeFilter:["class"]});
+    if(window.MutationObserver){watcher=new MutationObserver(check);watcher.observe(document.body,{attributes:true,attributeFilter:["class"]});}
     setTimeout(leave,8000);
     check();
   })();

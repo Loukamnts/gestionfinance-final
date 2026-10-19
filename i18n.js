@@ -857,7 +857,20 @@ const dictionary=Object.freeze({
   "Partage et réglages simplifiés": "Simpler sharing and settings",
   "Tu peux maintenant consulter le tableur ou le tableau de bord partagé depuis la fiche d’un ami, sans lui donner le droit de modifier tes données.": "You can now view a shared spreadsheet or dashboard from a friend's card without giving them permission to change your data.",
   "Les accès se configurent ligne par ligne et mois par mois, uniquement en lecture. Les réglages et les pages de partage sont mieux organisés sur téléphone comme sur ordinateur.": "Access is configured row by row and month by month, in read-only mode. Settings and sharing pages are better organised on phone and desktop.",
-  "Enregistrement automatique sur cet appareil, puis dans ton compte lorsque tu es connecté.": "Saved automatically on this device, then to your account when you are signed in."
+  "Enregistrement automatique sur cet appareil, puis dans ton compte lorsque tu es connecté.": "Saved automatically on this device, then to your account when you are signed in.",
+  "ESPACE PRIVÉ": "PRIVATE SPACE",
+  "Partage tes finances, seulement quand tu le décides": "Share your finances, only when you decide to",
+  "Le partage reste désactivé par défaut. Connecte ton compte pour inviter une personne et choisir précisément les données qu’elle pourra consulter.": "Sharing stays off by default. Sign in to invite someone and choose exactly which data they can view.",
+  "Connecte ton espace": "Sign in to your space",
+  "Retrouve tes données et tes réglages sur tes appareils.": "Find your data and settings on all your devices.",
+  "Invite un proche": "Invite someone close",
+  "Son adresse doit déjà être associée à un compte Meuniance.": "Their address must already be linked to a Meuniance account.",
+  "Choisis ce qui est visible": "Choose what’s visible",
+  "Tu coches les lignes et les mois à partager, uniquement en lecture.": "You tick the rows and months to share, read only.",
+  "Aucune donnée n’est partagée sans ton autorisation explicite.": "No data is shared without your explicit permission.",
+  "Connexion…": "Connecting…",
+  "J’importe ton fichier…": "Importing your file…",
+  "Fichier importé.": "File imported."
 });
 const months=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 const englishMonths=["January","February","March","April","May","June","July","August","September","October","November","December"];
