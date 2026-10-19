@@ -32,11 +32,13 @@
   // Un achat en boutique (« ORANGE BOUTIQUE », « APPLE STORE ») n'est pas un abonnement.
   function brandOf(label){var l=norm(label);if(/\b(boutique|store|shop|magasin|agence)\b/.test(l))return null;for(var i=0;i<BRANDS.length;i++)if(BRANDS[i][2].test(l))return BRANDS[i];return null;}
   // Apple et Google vendent plusieurs abonnements (iCloud, Music, TV, One…) : un par produit, ou par montant.
-  var PRODUCTS={apple:[["icloud","iCloud"],["music","Music"],["tv","TV"],["arcade","Arcade"],["fitness","Fitness"],["one","One"]],google:[["one","One"],["youtube","YouTube"],["storage","One"]]};
+  var PRODUCTS={apple:[["icloud","iCloud"],["music","Music"],["tv","TV"],["arcade","Arcade"],["fitness","Fitness"],["one","One"]],google:[["one","One"],["youtube","YouTube"],["storage","One"]]},PKEY={storage:"one"};
   function slotOf(b,op){
     if(!PRODUCTS[b[0]])return[b[0],b[1]];var l=norm(op.label+(op.detail?" "+op.detail:""));
-    for(var i=0;i<PRODUCTS[b[0]].length;i++){var pr=PRODUCTS[b[0]][i];if(new RegExp("\\b"+pr[0]+"\\b").test(l))return[b[0]+" "+pr[0],b[1]+" "+pr[1]];}
-    var a=Math.round(-op.amount);return[b[0]+" "+a,b[1]];
+    for(var i=0;i<PRODUCTS[b[0]].length;i++){var pr=PRODUCTS[b[0]][i];if(new RegExp("\\b"+pr[0]+"\\b").test(l))return[b[0]+" "+(PKEY[pr[0]]||pr[0]),b[1]+" "+pr[1],false];}
+    // Libellé sans produit (« APPLE.COM/BILL ») : un seul « Apple », plusieurs prélèvements par mois acceptés,
+    // mais 3 mois au moins (des achats ponctuels ne doivent pas passer pour un abonnement).
+    return[b[0],b[1],true];
   }
   // Catégories où un prélèvement régulier n'est jamais un abonnement (une ligne créée par toi peut l'être).
   var NOT_SUB_CAT=/^(Courses|Groceries|Restaurants|Transports|Transport|Shopping|Loyer|Rent|Impôts|Taxes|Retraits|Cash withdrawals|Frais bancaires|Bank fees|Voyages|Travel|Salaire|Salary|Épargne|Savings|Aides \(CAF\)|Benefits \(CAF\)|Autres revenus|Other income)$/;
@@ -44,17 +46,21 @@
   function load(){
     var d;try{d=JSON.parse(lsGet(KEY)||"{}");}catch(e){d=null;}if(!d||!d.items||typeof d.items!=="object")return{v:2,items:{}};
     if(d.v===2)return d;
-    var items={};
+    var items={},hb={},B=window.GFBankImport;
+    // Les anciennes clés ont perdu la ponctuation (« apple com bill », « canal ») : on la remet pour reconnaître la marque.
+    var dotted=function(k){return String(k||"").replace(/ com\b/g,".com").replace(/^canal\b/,"canal+").replace(/\bb you\b/,"b&you");};
     Object.keys(d.items).forEach(function(k){
-      var it=d.items[k],b=brandOf(k)||brandOf(it.name),nk=b?b[0]:k,cur=items[nk],B=window.GFBankImport,cat=it.cat||null;
+      var it=d.items[k],b=brandOf(dotted(k))||brandOf(k)||brandOf(it.name),nk=b?b[0]:k,cur=items[nk],cat=it.cat||null;
+      if(b&&it.hidden)hb[b[0]]=true;
       if(!b&&!cat&&B){try{var c=B.categorize({label:k,amount:-1},B.learned());cat=c?c[0]:null;}catch(e){}}
       if(!b&&cat&&NOT_SUB_CAT.test(cat))return;// ancien relevé : courses, restaurants… ne sont pas repris
       if(!cur){items[nk]={name:b?b[1]:it.name,known:!!b,cat:cat,months:{},hidden:!!it.hidden};cur=items[nk];}else cur.hidden=cur.hidden||!!it.hidden;
       Object.keys(it.months||{}).forEach(function(m){var v=it.months[m],o=cur.months[m];cur.months[m]=o?[Math.round((o[0]+v[0])*100)/100,o[1]+v[1]]:[v[0],v[1]];});
     });
-    return{v:2,items:items,last:d.last||0};
+    // Sans le module d'import (cas anormal), on ne fige pas une migration incomplète.
+    return{v:2,items:items,last:d.last||0,hb:hb,_noSave:!B};
   }
-  function save(d){d.v=2;lsSet(KEY,JSON.stringify(d));}
+  function save(d){if(d._noSave)return;d.v=2;lsSet(KEY,JSON.stringify(d));}
 
   /* Appelé après un import : mémorise, par service et par mois, le montant et le nombre de prélèvements. */
   function ingest(ops){
@@ -68,12 +74,13 @@
       var b=brandOf(op.label+(op.detail?" "+op.detail:""));if(!b&&B.transferLabel&&B.transferLabel(op.label))return;// virement à une personne : jamais un abonnement
       if(!b&&NOT_SUB_CAT.test(c[0]))return;// courses, loyer, essence… reviennent chaque mois sans être des abonnements
       var sl=b?slotOf(b,op):null,m=sl?sl[0]:B.merchantOf(op.label);if(!m)return;
-      var k=mk(op.date.y,op.date.m),slot=(per[m]=per[m]||{name:sl?sl[1]:pretty(m),known:!!b,cat:c[0],months:{}});
+      var k=mk(op.date.y,op.date.m),slot=(per[m]=per[m]||{name:sl?sl[1]:pretty(m),known:!!b,multi:!!(sl&&sl[2]),brand:b?b[0]:null,cat:c[0],months:{}});
       var cur=slot.months[k]||(slot.months[k]=[0,0]);cur[0]+=-op.amount;cur[1]++;
     });
     Object.keys(per).forEach(function(m){
-      var it=d.items[m]||(d.items[m]={name:per[m].name,known:false,months:{},hidden:false});
-      it.known=it.known||per[m].known;it.cat=per[m].cat;it.name=per[m].name;
+      var isNew=!d.items[m],it=d.items[m]||(d.items[m]={name:per[m].name,known:false,months:{},hidden:false});
+      it.known=it.known||per[m].known;it.cat=per[m].cat;it.name=per[m].name;it.multi=per[m].multi;
+      if(isNew&&per[m].brand&&d.hb&&d.hb[per[m].brand])it.hidden=true;// « Ce n'est pas un abonnement » choisi avant la mise à jour
       // Un mois réimporté remplace l'ancien (même relevé importé deux fois)
       Object.keys(per[m].months).forEach(function(k){var v=per[m].months[k];it.months[k]=[Math.round(v[0]*100)/100,v[1]];});
       // On garde 18 mois au plus
@@ -89,7 +96,7 @@
   function isSub(it,ks){
     var n=ks.length;if(n<(it.known?2:3))return false;
     var vals=ks.map(function(k){return it.months[k][0];}),mx=Math.max.apply(null,vals),mn=Math.min.apply(null,vals);if(!(mn>0))return false;
-    if(it.known)return ks.every(function(k){return it.months[k][1]<=2;})&&mx/mn<=2.5;
+    if(it.known){if(it.multi)return n>=3&&mx/mn<=2.5;return ks.every(function(k){return it.months[k][1]<=2;})&&mx/mn<=2.5;}
     if(it.cat&&NOT_SUB_CAT.test(it.cat))return false;
     if(!ks.every(function(k){return it.months[k][1]===1;}))return false;
     var gaps=0,changes=0;

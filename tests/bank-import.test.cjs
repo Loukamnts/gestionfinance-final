@@ -180,3 +180,29 @@ test('Ligne renommée dans le tableur : pas recréée au prochain import',()=>{
   assert.deepEqual(JSON.parse(JSON.stringify(env.snap().sheets[0].rowHeaders)),['Abos']);
   assert.equal(env.cell('Abos',8),-35.6);
 });
+
+// ── Deuxième relecture ──
+test('Deux comptes, même mois, mode Remplacer : rien n’est effacé',()=>{
+  const {imp,cell}=setupSheet();
+  imp('Date;Libellé;Montant\n01/09/2026;PRLV SEPA LOYER FONCIA;-850,00\n15/09/2026;CB LIDL;-40,00\n30/09/2026;CB FNAC;-25,00\n');
+  imp('Date;Libellé;Montant\n02/09/2026;CB CARREFOUR;-60,00\n28/09/2026;PRLV SEPA NETFLIX;-13,49\n');
+  assert.equal(cell('Courses',8),-100);assert.equal(cell('Loyer',8),-850);assert.equal(cell('Shopping',8),-25);
+  // export « cartes seulement » du même mois : le loyer reste
+  imp('Date;Libellé;Montant\n15/09/2026;CB LIDL;-40,00\n30/09/2026;CB FNAC;-25,00\n');
+  assert.equal(cell('Loyer',8),-850);assert.equal(cell('Courses',8),-100);
+});
+test('Débit différé : carte masquée « X1234 » et mois abrégé',()=>{
+  const base='Date;Libellé;Montant\n02/09/2026;CB LIDL;-40,00\n03/09/2026;CB FNAC;-60,00\n04/09/2026;CB SNCF;-50,00\n';
+  const n=l=>B.parse(B._decode(enc(base+'30/09/2026;'+l+';-300,00\n'))).length;
+  assert.equal(n('RELEVE CARTE X1234'),3);assert.equal(n('FACTURE CARTE X4567 DU 30/09'),3);assert.equal(n('DEBIT DIFFERE CARTE X1234 SEPT'),3);
+  assert.equal(n('CB XEFI INFORMATIQUE'),4);
+});
+test('Ligne du marchand supprimée par toi : pas recréée, va dans sa catégorie',()=>{
+  const env=setupSheet(['Netflix','Abonnements']);
+  env.imp('Date;Libellé;Montant\n05/09/2026;PRLV SEPA NETFLIX;-13,49\n06/09/2026;CB LIDL;-20,00\n');
+  assert.equal(env.cell('Netflix',8),-13.49);
+  const sh=env.snap().sheets[0];const ci=sh.rowHeaders.indexOf('Courses');sh.rowHeaders=['Abonnements','Courses'];sh.cells={'0,8':{raw:'-24.61'},'1,8':sh.cells[ci+',8']};
+  env.imp('Date;Libellé;Montant\n20/09/2026;PRLV SEPA DEEZER;-10,99\n21/09/2026;CB LIDL;-5,00\n');
+  assert.deepEqual(JSON.parse(JSON.stringify(env.snap().sheets[0].rowHeaders)),['Abonnements','Courses']);
+  assert.equal(env.cell('Abonnements',8),-24.48);
+});

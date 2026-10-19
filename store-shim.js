@@ -54,11 +54,21 @@
     }
   } catch (e) {}
   function privateName(k) { return privateKeys[k] ? "gf-private-v1:" + financialOwner + ":" + k : k; }
+  // Ces deux réglages étaient enregistrés sans compte avant le 19 octobre 2026 : repris une fois par le
+  // premier qui les lit sur cet appareil, puis effacés de l'emplacement commun.
+  var movedOnce = { "personalFinanceDashboard.subscriptions": true, "personalFinanceDashboard.merchantRules": true };
+  function adoptLegacy(k) {
+    if (!movedOnce[k]) return;
+    var legacy = rawGet(k); if (legacy === null) return;
+    if (rawGet(privateName(k)) === null) rawSet(privateName(k), legacy);
+    rawRemove(k);
+  }
   function rawGet(k) { if (nativeStore) { try { return nativeStore.getItem(k); } catch (e) {} } return Object.prototype.hasOwnProperty.call(mem,k) ? mem[k] : null; }
   function rawSet(k,v) { if (nativeStore) { try { nativeStore.setItem(k,String(v)); return; } catch (e) {} } mem[k]=String(v); }
   function rawRemove(k) { if (nativeStore) { try { nativeStore.removeItem(k); } catch (e) {} } delete mem[k]; }
   window.safeStore = {
     getItem: function (k) {
+      adoptLegacy(k);
       return rawGet(privateName(k));
     },
     setItem: function (k, v) {

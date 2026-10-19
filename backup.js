@@ -83,7 +83,7 @@
         if(!(await confirmRestore(b)))return;
         Object.keys(b.settings).forEach(function(k){store().setItem(k,b.settings[k]);});
         // Le registre des imports suit le tableur restauré : sans lui dans la sauvegarde, on repart de zéro.
-        if(!("personalFinanceDashboard.importLedger" in b.settings))try{store().removeItem("personalFinanceDashboard.importLedger");}catch(e){}
+        if(b.sheets&&!("personalFinanceDashboard.importLedger" in b.settings))try{store().removeItem("personalFinanceDashboard.importLedger");}catch(e){}
         if(b.sheets&&window.FinanceSheet){var ids=b.sheets.map(function(s){return s.id;});window.FinanceSheet.loadSnapshot({v:"restore",sheets:b.sheets,activeSheetId:ids.indexOf(b.active)>=0?b.active:ids[0]});window.FinanceSheet.saveNow&&window.FinanceSheet.saveNow();}
         toast(t2("Sauvegarde restaurée.","Backup restored."));
         setTimeout(function(){location.reload();},900);

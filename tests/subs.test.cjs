@@ -79,3 +79,20 @@ test('Abonnement arrêté : plus actif quand le relevé suivant ne le contient p
   W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n05/12/2026;CARTE LIDL;-30,00\n06/12/2026;CARTE LIDL;-20,00\n'));
   const l=W.GFSubs.list();assert.equal(l[0].active,false);assert.equal(W.GFSubs.totals(l).month,0);
 });
+test('Apple sans nom de produit : un seul abonnement, hausse de prix repérée ; achats ponctuels écartés',()=>{
+  const W=setup();W.GFSubs.ingest(ops(W,'Date;Libellé;Montant\n02/08/2026;PRLV APPLE.COM/BILL;-9,99\n02/09/2026;PRLV APPLE.COM/BILL;-9,99\n02/10/2026;PRLV APPLE.COM/BILL;-10,99\n02/11/2026;PRLV APPLE.COM/BILL;-10,99\n'));
+  const l=W.GFSubs.list(true);assert.equal(l.length,1);assert.equal(l[0].name,'Apple');assert.equal(l[0].active,true);
+  const W2=setup();W2.GFSubs.ingest(ops(W2,'Date;Libellé;Montant\n12/08/2026;APPLE.COM/BILL;-4,99\n14/09/2026;APPLE.COM/BILL;-4,99\n'));
+  assert.equal(W2.GFSubs.list().length,0);
+});
+test('Ancien choix « ce n’est pas un abonnement » gardé pour Apple / Canal+',()=>{
+  const W=setup();W.safeStore.setItem('personalFinanceDashboard.subscriptions',JSON.stringify({v:1,items:{'apple com bill':{name:'Apple Com Bill',known:true,months:{'24319':[2.99,1]},hidden:true},'canal':{name:'Canal',known:true,months:{'24319':[24.99,1]},hidden:true}}}));
+  let csv='Date;Libellé;Montant\n';for(const m of ['08','09','10'])csv+=`02/${m}/2026;APPLE.COM/BILL;-2,99\n03/${m}/2026;PRLV CANAL+ FRANCE;-24,99\n`;
+  W.GFSubs.ingest(ops(W,csv));assert.equal(W.GFSubs.list().length,0);assert.equal(W.GFSubs.list(true).length,2);
+});
+test('Sans le module d’import, l’ancienne mémoire n’est pas figée',()=>{
+  const mem={'personalFinanceDashboard.subscriptions':JSON.stringify({v:1,items:{'boulangerie dupont':{name:'Boulangerie Dupont',known:false,months:{'24319':[4.2,1]},hidden:false}}})};
+  const ctx={window:{safeStore:{getItem:k=>mem[k]??null,setItem:(k,v)=>{mem[k]=String(v);}}},TextDecoder,Intl,document:{}};vm.createContext(ctx);
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'..','subs.js'),'utf8'),ctx);ctx.window.GFSubs.setHidden('boulangerie dupont',true);
+  assert.equal(JSON.parse(mem['personalFinanceDashboard.subscriptions']).v,1);
+});

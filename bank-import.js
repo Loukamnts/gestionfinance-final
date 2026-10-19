@@ -117,8 +117,8 @@
   var DEFERRED=/\b(factures?|releves?|totale?s?|depenses|debit|operations?) (differee?s? )?(de |des )?(vos |mes )?(cartes?|cb)\b|debit differe/;
   function isDeferred(label){
     var l=norm(label);if(!DEFERRED.test(l))return false;
-    var rest=l.replace(/x{2,}\d*|\d+[\/.\-]?\d*([\/.\-]\d+)?/g," ").replace(/[^a-z ]/g," ")
-      .replace(/\b(factures?|releves?|totale?s?|depenses|debit|differee?s?|operations?|cartes?|cb|bleue|visa|mastercard|premier|gold|infinite|du|au|de|des|le|la|vos|mes|mois|mensuel(le)?|arrete|periode|numero|n|no|janvier|fevrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre)\b/g," ").trim();
+    var rest=l.replace(/\bx+\d*\b|x{2,}\d*|\d+[\/.\-]?\d*([\/.\-]\d+)?/g," ").replace(/[^a-z ]/g," ")
+      .replace(/\b(factures?|releves?|totale?s?|depenses|debit|differee?s?|operations?|cartes?|cb|bleue|visa|mastercard|premier|gold|infinite|du|au|de|des|le|la|vos|mes|mois|mensuel(le)?|arrete|periode|numero|n|no|janvier|fevrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre|janv|fev|fevr|avr|juil|sept|oct|nov|dec)\b/g," ").trim();
     // Il reste un nom, même court (« BP », « H&M ») : c'est un paiement chez un commerçant, pas un total.
     return rest.replace(/\s+/g,"").length===0;
   }
@@ -223,8 +223,9 @@
   var GENERIC=/^(prime|banque|bank|credit|carte|frais|total|service|services|paiement|achat|magasin|super|hyper|cafe|station|compte|pret|assurance|mutuelle|epargne|salaire|loyer|courses|impots?)$/;
   function merchantRow(m,rows){var w=String(m||"").split(" ")[0];if(!w||w.length<4||GENERIC.test(w))return null;for(var i=0;i<rows.length;i++){var r=key(rows[i]);if((r===key(w)||r===key(m))&&kindOf(rows[i])==="Dépense")return rows[i];}return null;}
   function summarize(ops,extra){
-    var groups={},months={},ignored=0,rules=learned(),rows=sheetRows(),items=[],seenFp={},from=null,to=null;
-    ops.forEach(function(op){var n=dayNum(op.date);if(from===null||n<from)from=n;if(to===null||n>to)to=n;});Object.keys(extra||{}).forEach(function(k){rules[k]=extra[k];});
+    var groups={},months={},ignored=0,rules=learned(),rows=sheetRows(),items=[],seenFp={},all=[];
+    // Empreinte de chaque opération du fichier, même ignorée : une opération désormais ignorée sort du registre.
+    ops.forEach(function(op){var fp=fingerprint(op),n=seenFp[fp]=(seenFp[fp]||0)+1;op._fp=fp+"#"+n;all.push({fp:op._fp,mk:op.date.y+"-"+op.date.m});});Object.keys(extra||{}).forEach(function(k){rules[k]=extra[k];});
     ops.forEach(function(op){
       var c=categorize(op,rules);if(!c){ignored++;return;}
       var mo=merchantOf(op.label),own=!Object.prototype.hasOwnProperty.call(rules,mo)&&c[2]==="Dépense"&&op.amount<0?merchantRow(mo,rows):null;
@@ -232,13 +233,13 @@
       // Dépenses et épargne comptées en positif ; un remboursement vient en déduction
       var v=kind==="Salaire"?op.amount:-op.amount,mk=op.date.y+"-"+op.date.m;
       g.count++;g.total+=v;g.byMonth[mk]=(g.byMonth[mk]||0)+v;months[mk]=op.date;
-      var fp=fingerprint(op),n=seenFp[fp]=(seenFp[fp]||0)+1;items.push({fp:fp+"#"+n,mk:mk,name:name,kind:kind,v:v});
+      items.push({fp:op._fp,mk:mk,name:name,cat:en()?c[1]:c[0],kind:kind,v:v});
       var mid=merchantOf(op.label)||norm(op.label).slice(0,24),mm=g.merchants[mid]||(g.merchants[mid]={key:mid,label:op.label,count:0,total:0});mm.count++;mm.total+=v;
     });
     var list=Object.keys(groups).map(function(k){return groups[k];}).filter(function(g){return Math.abs(g.total)>=0.005;});
     var order={"Salaire":0,"Dépense":1,"Épargne":2};list.sort(function(a,b){return order[a.kind]-order[b.kind]||Math.abs(b.total)-Math.abs(a.total);});
     var mlist=Object.keys(months).map(function(k){return months[k];}).sort(function(a,b){return a.y-b.y||a.m-b.m;});
-    return{groups:list,months:mlist,count:ops.length-ignored,ignored:ignored,items:items,from:from,to:to};
+    return{groups:list,months:mlist,count:ops.length-ignored,ignored:ignored,items:items,all:all};
   }
 
   /* ── Écriture dans le tableur ───────────────────────────────────────── */
@@ -265,29 +266,27 @@
   /* Ce qu'il faut écrire, mois par mois et ligne par ligne.
      « Remplacer » : total de toutes les opérations connues du mois (anciennes + nouvelles), donc un relevé partiel
      ne fait pas disparaître le reste du mois. « Ajouter » : seulement les opérations jamais importées. */
-  function dayNum(d){return (d.y*12+d.m)*32+d.d;}
   function plan(summary,mode){
     var L=ledger(),out={},dup=0,fresh=0,kinds={},before={},rows=sheetRows(),items=summary.items||[];
     // Une ligne renommée dans le tableur (« Abonnements » → « Abos ») garde ses anciennes opérations.
-    var rowName=function(n){return existingRow(n,rows)||n;};
+    var rowName=function(e){return existingRow(e[0],rows)||(e[3]&&existingRow(e[3],rows))||(rows.length&&e[3])||e[0];};
     // Mois touchés : ceux du fichier, plus ceux du registre qui tombent dans la période du fichier.
-    var touched={};items.forEach(function(it){touched[it.mk]=1;});
-    if(mode!=="add"&&summary.from!=null)Object.keys(L.m).forEach(function(mk){Object.keys(L.m[mk]).forEach(function(fp){var p=fp.split("|")[0].split("-"),n=dayNum({y:+p[0],m:+p[1],d:+p[2]});if(n>=summary.from&&n<=summary.to)touched[mk]=1;});});
-    Object.keys(touched).forEach(function(mk){var b=before[mk]={};Object.keys(L.m[mk]||{}).forEach(function(fp){var e=L.m[mk][fp],n=rowName(e[0]);b[n]=1;kinds[n]=e[1];});});
+    var touched={};(summary.all||items).forEach(function(it){touched[it.mk]=1;});
+    Object.keys(touched).forEach(function(mk){var b=before[mk]={};Object.keys(L.m[mk]||{}).forEach(function(fp){var e=L.m[mk][fp],n=rowName(e);b[n]=1;kinds[n]=e[1];});});
     if(mode!=="add"){
-      // Remplacer : dans la période du fichier, le fichier fait foi (une opération désormais ignorée ou
-      // déplacée disparaît) ; en dehors, les opérations déjà importées sont gardées.
-      var inFile={};items.forEach(function(it){inFile[it.fp]=1;});
-      Object.keys(touched).forEach(function(mk){var M=L.m[mk]||{};Object.keys(M).forEach(function(fp){var p=fp.split("|")[0].split("-"),n=dayNum({y:+p[0],m:+p[1],d:+p[2]});if(n>=summary.from&&n<=summary.to&&!inFile[fp])delete M[fp];});});
+      // Remplacer : une opération de ce fichier désormais ignorée sort du registre. Les opérations venues
+      // d'un autre fichier (autre compte, export filtré) sont gardées.
+      var kept={};items.forEach(function(it){kept[it.fp]=1;});
+      (summary.all||[]).forEach(function(a){if(!kept[a.fp]&&L.m[a.mk])delete L.m[a.mk][a.fp];});
     }
     items.forEach(function(it){kinds[it.name]=it.kind;var M=L.m[it.mk]||(L.m[it.mk]={});
       if(M[it.fp])dup++;else fresh++;
       if(mode==="add"&&M[it.fp])return;
-      M[it.fp]=[it.name,it.kind,Math.round(it.v*100)/100];
+      M[it.fp]=[it.name,it.kind,Math.round(it.v*100)/100,it.cat];
       if(mode==="add"){var o=out[it.mk]||(out[it.mk]={});o[it.name]=(o[it.name]||0)+it.v;}});
     if(mode!=="add")Object.keys(touched).forEach(function(mk){
       var o=out[mk]={};Object.keys(before[mk]||{}).forEach(function(n){o[n]=0;});
-      Object.keys(L.m[mk]||{}).forEach(function(fp){var e=L.m[mk][fp],n=rowName(e[0]);kinds[n]=kinds[n]||e[1];o[n]=(o[n]||0)+e[2];});
+      Object.keys(L.m[mk]||{}).forEach(function(fp){var e=L.m[mk][fp],n=rowName(e);kinds[n]=kinds[n]||e[1];o[n]=(o[n]||0)+e[2];});
       if(!Object.keys(L.m[mk]||{}).length)delete L.m[mk];});
     return{cells:out,kinds:kinds,dup:dup,fresh:fresh,save:function(){saveLedger(L);}};
   }
@@ -400,7 +399,7 @@
         var summary=res.summary;
         if(write(summary,res.mode)){
           var n=summary.months.length,subs=0;try{subs=window.GFSubs?window.GFSubs.ingest(ops):0;}catch(e){}
-          var msg=summary.count&&!summary.fresh?t2("Rien de nouveau : ces "+summary.count+" opérations étaient déjà importées.","Nothing new: these "+summary.count+" transactions were already imported.")
+          var msg=res.mode==="add"&&summary.count&&!summary.fresh?t2("Rien de nouveau : ces "+summary.count+" opérations étaient déjà importées.","Nothing new: these "+summary.count+" transactions were already imported.")
             :t2("Relevé importé : ","Statement imported: ")+summary.count+t2(" opérations sur "," transactions over ")+n+t2(" mois."," month(s).")+(summary.dup?t2(" "+summary.dup+" déjà importée"+(summary.dup>1?"s":"")+", pas comptée"+(summary.dup>1?"s":"")+" deux fois."," "+summary.dup+" already imported, not counted twice."):"");
           toast(msg+(subs?t2(" "+subs+" abonnement"+(subs>1?"s":"")+" repéré"+(subs>1?"s":"")+" : retrouve-les sur l’accueil."," "+subs+" subscription"+(subs>1?"s":"")+" found: see them on Home."):""));
           if(window.setPage)window.setPage("sheet");
