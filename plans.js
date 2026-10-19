@@ -230,14 +230,10 @@
       if(!BILLING.enforce)return;
       var form=event.target;if(!form||!form.classList||!form.classList.contains("sf-invite-form"))return;
       var feature=!can("share")?"share":null;
-      if(!feature&&state.plan==="plus"){var data=window.FriendsSystem&&window.FriendsSystem._lastCount;if(typeof data==="number"&&data>=1)feature="share_multi";}
+      // Compteur tenu par friends.js lui-même : un enrobage de loadFriends ratait ses appels internes.
+      if(!feature&&state.plan==="plus"){var fs=window.FriendsSystem,count=fs&&typeof fs.friendCount==="function"?fs.friendCount():null;if(typeof count==="number"&&count>=1)feature="share_multi";}
       if(feature){event.preventDefault();event.stopImmediatePropagation();var d=form.closest("dialog");if(d)d.close();openUpgrade(feature);}
     },true);
-    if(window.FriendsSystem&&typeof window.FriendsSystem.loadFriends==="function"&&!window.FriendsSystem._gfsWrapped){
-      var original=window.FriendsSystem.loadFriends;
-      window.FriendsSystem.loadFriends=async function(){var r=await original.apply(this,arguments);try{window.FriendsSystem._lastCount=(r&&r.friends?r.friends.length:0)+(r&&r.sent?r.sent.length:0);}catch(e){}return r;};
-      window.FriendsSystem._gfsWrapped=true;
-    }
   }
 
   window.GFSubscriptions={enabled:false,plans:PLANS,get plan(){return state.plan;},can:can,requires:requires,renderPlans:renderPlans,renderOnboardingOffer:renderOnboardingOffer,startCheckout:startCheckout,openPlans:function(){openSettings("plan");},reload:loadPlan,config:BILLING};

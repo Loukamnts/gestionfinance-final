@@ -3,7 +3,9 @@
   "use strict";
 
   var MONTHS=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-  var friendsList=[],pendingRequests=[],sentRequests=[];
+  // knownCount : amis acceptés + demandes envoyées au dernier chargement (null = pas encore chargé),
+  // lu par plans.js pour la limite de l’offre Plus, quel que soit l’appelant de loadFriends.
+  var friendsList=[],pendingRequests=[],sentRequests=[],knownCount=null;
   var cache={userId:"",data:null,pending:null};
 
   function sb(){try{return window.__account&&window.__account.client||null;}catch(e){return null;}}
@@ -28,7 +30,7 @@
   function errorText(error,step){var message=String(error&&error.message||error||"").toLowerCase(),where=step?" pour "+step:"";if(/user_not_found/.test(message))return"Aucun compte trouvé avec cet e-mail ou ce pseudo.";if(/too_many_friend_requests/.test(message))return"Trop de recherches d’amis en peu de temps. Réessaie dans une heure.";if(/request_cooldown/.test(message))return"Attends 24 heures avant de renvoyer une demande à cette personne.";if(/cannot_add_self/.test(message))return"Tu ne peux pas t’ajouter toi-même.";if(/request_already_sent/.test(message))return"La demande a déjà été envoyée.";if(/request_already_received/.test(message))return"Cette personne t’a déjà envoyé une demande.";if(/already_friends/.test(message))return"Vous êtes déjà amis.";if(/friendship_not_accepted/.test(message))return"Cet accès ne peut être configuré qu’après acceptation réciproque de l’amitié.";if(/share_selection_required/.test(message))return"Choisis au moins un mois et une ligne avant d’activer le partage.";if(/save_friend_share_config|function .* does not exist/.test(message))return"La mise à jour sécurisée du partage doit être appliquée dans Supabase avant de continuer.";if(/row-level security|permission denied/.test(message))return"La base a refusé l’action"+where+". Applique le correctif de partage sécurisé dans Supabase.";if(/finance_shared_(sheet|dashboard)_snapshots|relation .* does not exist/.test(message))return"La migration Supabase du partage sécurisé n’est pas encore appliquée.";return"Impossible d’enregistrer cette action"+where+". Réessaie dans un instant.";}
 
   async function loadFriends(options){
-    options=options||{};var client=sb(),me=user();if(!client||!me)return{friends:[],pending:[],sent:[]};
+    options=options||{};var client=sb(),me=user();if(!client||!me){knownCount=null;return{friends:[],pending:[],sent:[]};}
     if(!options.force&&cache.data&&cache.userId===me.id&&Date.now()-cache.loadedAt<30000)return cache.data;
     if(!options.force&&cache.pending&&cache.userId===me.id)return cache.pending;
     var work=(async function(){
@@ -48,7 +50,7 @@
           }else if(relation.status==="pending"){if(friend.isRequester)sent.push(friend);else pending.push(friend);}
         }));
         friends.sort(function(a,b){return a.displayName.localeCompare(b.displayName,"fr");});
-        var data={friends:friends,pending:pending,sent:sent};friendsList=friends;pendingRequests=pending;sentRequests=sent;cache={userId:me.id,data:data,pending:null,loadedAt:Date.now()};return data;
+        var data={friends:friends,pending:pending,sent:sent};friendsList=friends;pendingRequests=pending;sentRequests=sent;knownCount=friends.length+sent.length;cache={userId:me.id,data:data,pending:null,loadedAt:Date.now()};return data;
       }catch(e){console.warn("loadFriends",e);return{friends:[],pending:[],sent:[],error:errorText(e)};}
     })();
     cache={userId:me.id,data:null,pending:work};var loaded=await work;if(loaded.error)invalidate();return loaded;
@@ -62,19 +64,30 @@
     try{var result=await client.rpc("remove_friendship",{p_friendship_id:id});if(result.error)return{error:errorText(result.error)};invalidate();return{success:true};}catch(e){return{error:errorText(e)};}
   }
   async function loadRules(friendId){var client=sb(),me=user();if(!client||!me)throw new Error("Non connecté");var result=await client.from("share_permissions").select("year,month,row_key,allowed").eq("owner_id",me.id).eq("friend_id",friendId);if(result.error)throw result.error;return(result.data||[]).filter(function(rule){return rule.year!==null||rule.month!==null||rule.row_key!==null;});}
-  // legacy : pour les anciennes règles sans nom de ligne, les noms déjà partagés (par feuille) ; une ligne dont le nom
+  // Clé d'une règle : "feuille:ligne:nom". Nom "~" = ligne sans intitulé (suivie par sa seule position, tant qu'elle reste sans nom).
+  // Clé "feuille:ligne" (deux parties) = ancienne règle, position seule.
+  // legacy : pour ces anciennes règles, les noms déjà partagés (par feuille) ; une ligne dont le nom
   // n'en fait pas partie n'est pas partagée. Sans legacy (affichage du réglage), l'ancienne position est montrée telle quelle.
-  function selectionFromRules(data,rules,legacy){var selection={};((data&&data.sheets)||[]).forEach(function(sheet,index){var id=idOf(sheet,index),year=yearOf(sheet);selection[id]={months:new Set(),rows:new Set()};(rules||[]).forEach(function(rule){if(!rule.allowed||Number(rule.year||0)!==year||String(rule.row_key||"").indexOf(id+":")!==0)return;
-    var parts=String(rule.row_key).slice((id+":").length).split(":"),row=Number(parts[0]),name=parts.slice(1).join(":");if(!Number.isInteger(row)||row<0)return;
-    if(name){if(rowKeyLabel(sheet,row)!==name){row=-1;var n=(sheet.rowHeaders||[]).length;for(var r=0;r<n;r++)if(rowKeyLabel(sheet,r)===name){row=r;break;}}if(row<0)return;}
-    else if(legacy){var known=legacy[String(sheet.name||"")];if(!known||!known.has(rowKeyLabel(sheet,row)))return;}
-    selection[id].months.add(Number(rule.month)-1);selection[id].rows.add(row);});});return selection;}
+  var UNNAMED="~";
+  function parseRuleKey(id,key){var parts=String(key||"").slice((id+":").length).split(":"),row=Number(parts[0]);if(!parts[0]||!Number.isInteger(row)||row<0)return null;return{row:row,legacy:parts.length===1,name:parts.slice(1).join(":")};}
+  function selectionFromRules(data,rules,legacy){var selection={};((data&&data.sheets)||[]).forEach(function(sheet,index){
+    var id=idOf(sheet,index),year=yearOf(sheet),count=Math.max(Number(sheet.rows||0),(sheet.rowHeaders||[]).length),chosen=selection[id]={months:new Set(),rows:new Set()};
+    var mine=(rules||[]).filter(function(rule){return rule.allowed&&Number(rule.year||0)===year&&String(rule.row_key||"").indexOf(id+":")===0;});
+    mine.forEach(function(rule){var k=parseRuleKey(id,rule.row_key);if(!k)return;var row=k.row;
+      if(k.legacy){if(legacy){var known=legacy[String(sheet.name||"")];if(!known||!known.has(rowKeyLabel(sheet,row)))return;}}
+      else if(!k.name||k.name===UNNAMED){if(row>=count||rowKeyLabel(sheet,row)!=="")return;}// ligne sans nom : seulement si elle l'est toujours
+      else if(rowKeyLabel(sheet,row)!==k.name){
+        // Ligne déplacée : parmi les lignes du même nom, la plus proche de l'ancienne place ; à égalité, on ne devine pas.
+        var best=-1,bestDist=Infinity,tie=false;
+        for(var r=0;r<count;r++){if(rowKeyLabel(sheet,r)!==k.name)continue;var d=Math.abs(r-row);if(d<bestDist){best=r;bestDist=d;tie=false;}else if(d===bestDist)tie=true;}
+        if(best<0||tie)return;row=best;
+      }
+      chosen.months.add(Number(rule.month)-1);chosen.rows.add(row);});});return selection;}
   function ruleCount(selection){return Object.keys(selection||{}).reduce(function(total,key){return total+selection[key].months.size*selection[key].rows.size;},0);}
-  function buildRules(data,selection){var rules=[];((data&&data.sheets)||[]).forEach(function(sheet,index){var chosen=selection[idOf(sheet,index)];if(!chosen||!chosen.months.size||!chosen.rows.size)return;chosen.rows.forEach(function(row){chosen.months.forEach(function(column){var name=rowKeyLabel(sheet,row);rules.push({year:yearOf(sheet),month:column+1,row_key:idOf(sheet,index)+":"+row+(name?":"+name:""),allowed:true});});});});return rules;}
+  function buildRules(data,selection){var rules=[];((data&&data.sheets)||[]).forEach(function(sheet,index){var chosen=selection[idOf(sheet,index)];if(!chosen||!chosen.months.size||!chosen.rows.size)return;chosen.rows.forEach(function(row){chosen.months.forEach(function(column){rules.push({year:yearOf(sheet),month:column+1,row_key:idOf(sheet,index)+":"+row+":"+(rowKeyLabel(sheet,row)||UNNAMED),allowed:true});});});});return rules;}
   function recompute(sheet){try{return window.FinanceSheet&&window.FinanceSheet.recompute?window.FinanceSheet.recompute(sheet.cells||{}):{};}catch(e){return{};}}
   function cellValue(result){if(!result||result.error||result.value===undefined||result.value===null)return"";var value=result.value;if(typeof value==="number"&&Number.isFinite(value))return value;return String(value).slice(0,500);}
   function buildTablePayload(data,selection){var sheets=[];((data&&data.sheets)||[]).forEach(function(sheet,index){var chosen=selection[idOf(sheet,index)];if(!chosen||!chosen.months.size||!chosen.rows.size)return;var columns=Array.from(chosen.months).sort(function(a,b){return a-b;}),rows=Array.from(chosen.rows).sort(function(a,b){return a-b;}),values=recompute(sheet),shared={name:String(sheet.name||"Feuille"),headers:columns.map(function(c){return headerOf(sheet,c);}),rowHeaders:rows.map(function(r){return labelOf(sheet,r);}),rows:rows.length,cols:columns.length,cells:{}};rows.forEach(function(sourceRow,localRow){columns.forEach(function(sourceCol,localCol){var value=cellValue(values[sourceRow+","+sourceCol]);if(value!=="")shared.cells[localRow+","+localCol]={raw:String(value)};});});sheets.push(shared);});return{v:"shared-sheet-v2",updatedAt:Date.now(),sheets:sheets};}
-  function lineType(label){var d=window.GFClassifyRow&&window.GFClassifyRow(label);if(d==="Salaire")return"income";if(d==="Dépense")return"expense";if(d==="Épargne")return"savings";var value=" "+normal(label).replace(/[^a-z0-9]+/g," ")+" ";if(/ (epargne|livrets?|pea|placements?|investissements?) /.test(value))return"savings";if(/epargne|livret|pea|placement|investissement/.test(value))return"savings";if(/salaire|revenu|allocation|remuneration| paie | paye /.test(value))return"income";if(/depense|loyer|charge|facture|abonnement|course|frais|impot|taxe|assurance|transport|restaurant|achat|credit/.test(value))return"expense";return"other";}
   function numberValue(value){var result=typeof value==="number"?value:parseFloat(String(value).replace(",",".").replace(/[^0-9.-]/g,""));return Number.isFinite(result)?result:0;}
   function buildDashboardPayload(table){
     var months=[];
@@ -84,7 +97,8 @@
         for(var row=0;row<Number(sheet.rows||0);row++){
           var cell=sheet.cells&&sheet.cells[row+","+column];if(!cell)continue;
           var value=numberValue(cell.raw),label=String(sheet.rowHeaders&&sheet.rowHeaders[row]||("Ligne "+(row+1))).replace(/^Ligne \d+ — /,"");
-          var kind=lineType(label),rule=window.DashboardPresentation?window.DashboardPresentation.ruleForLabel(label):({income:"Salaire",expense:"Dépense",savings:"Épargne"}[kind]||"Ignorer");
+          // DashboardPresentation est défini avant ce script ; le classement brut ne sert que de garde-fou.
+          var rule=window.DashboardPresentation?window.DashboardPresentation.ruleForLabel(label):(window.GFClassifyRow&&window.GFClassifyRow(label))||"Ignorer";
           month.details.push({name:label,value:value,rule:rule||"Ignorer"});
           if(rule==="Salaire")month.salary+=value;else if(rule==="Dépense")month.expenses+=value;else if(rule==="Épargne")month.savingsTotal+=value;
         }
@@ -119,7 +133,8 @@
     var out={};
     try{var res=await client.from("finance_shared_sheet_snapshots").select("payload").eq("owner_id",meId).eq("friend_id",friendId).maybeSingle();
       var sheets=res&&res.data&&res.data.payload&&res.data.payload.sheets||[];
-      sheets.forEach(function(sh){var set=out[String(sh.name||"")]=new Set();(sh.rowHeaders||[]).forEach(function(h){set.add(normal(String(h||"").replace(/^Ligne \d+ — /,"")).replace(/[^a-z0-9]/g,"").slice(0,40));});});
+      // « Ligne N » seul = ligne publiée sans nom : retenue sous le nom vide.
+      sheets.forEach(function(sh){var set=out[String(sh.name||"")]=new Set();(sh.rowHeaders||[]).forEach(function(h){set.add(normal(String(h||"").replace(/^Ligne \d+( — |$)/,"")).replace(/[^a-z0-9]/g,"").slice(0,40));});});
     }catch(e){}
     return out;
   }
@@ -411,7 +426,7 @@
     function chooseTab(name){selectedTab=name;friendPanel.hidden=name!=="friends";invitationPanel.hidden=name!=="invitations";[[friendsTab,"friends"],[invitesTab,"invitations"]].forEach(function(item){var active=item[1]===name;item[0].setAttribute("aria-selected",String(active));item[0].tabIndex=active?0:-1;});}
     chooseTab(selectedTab);container.replaceChildren(shell);container.dataset.sharingReady=me.id;container._sharingData=data;
   }
-  window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots,_rules:{select:selectionFromRules,build:buildRules},ui:{el:el,action:action,notice:notice,icon:icon,openDialog:openDialog}};
+  window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots,friendCount:function(){return knownCount;},_rules:{select:selectionFromRules,build:buildRules},ui:{el:el,action:action,notice:notice,icon:icon,openDialog:openDialog}};
   // Lorsqu'on arrive directement sur /partage, le routeur est exécuté avant
   // ce fichier. On rend donc l'état initial ici, puis à chaque connexion.
   function refreshVisibleSharing(){var page=document.getElementById("sharingPage"),container=document.getElementById("sharingContainer");if(page&&!page.hidden&&container)renderSharing(container,{force:true});}
