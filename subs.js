@@ -80,7 +80,7 @@
     Object.keys(per).forEach(function(m){
       var isNew=!d.items[m],it=d.items[m]||(d.items[m]={name:per[m].name,known:false,months:{},hidden:false});
       it.known=it.known||per[m].known;it.cat=per[m].cat;it.name=per[m].name;it.multi=per[m].multi;
-      if(isNew&&per[m].brand&&d.hb&&d.hb[per[m].brand])it.hidden=true;// « Ce n'est pas un abonnement » choisi avant la mise à jour
+      if(isNew&&per[m].multi!==false&&m===per[m].brand&&d.hb&&d.hb[per[m].brand])it.hidden=true;// « Ce n'est pas un abonnement » choisi avant la mise à jour
       // Un mois réimporté remplace l'ancien (même relevé importé deux fois)
       Object.keys(per[m].months).forEach(function(k){var v=per[m].months[k];it.months[k]=[Math.round(v[0]*100)/100,v[1]];});
       // On garde 18 mois au plus
@@ -92,11 +92,15 @@
     save(d);return list().length;
   }
 
+  // Apple/Google sans produit : la plupart des mois (2 sur 3) au même montant, à 10 % près ; un achat ponctuel
+  // un mois donné ne compte pas, des petits achats au hasard non plus.
+  function median(v){var a=v.slice().sort(function(x,y){return x-y;}),h=Math.floor(a.length/2);return a.length%2?a[h]:(a[h-1]+a[h])/2;}
+  function steady(vals){var md=median(vals);return md>0&&vals.filter(function(v){return Math.abs(v-md)<=md*0.1;}).length>=Math.ceil(vals.length*2/3);}
   // Est-ce vraiment un abonnement ? (voir les règles en haut du fichier)
   function isSub(it,ks){
     var n=ks.length;if(n<(it.known?2:3))return false;
     var vals=ks.map(function(k){return it.months[k][0];}),mx=Math.max.apply(null,vals),mn=Math.min.apply(null,vals);if(!(mn>0))return false;
-    if(it.known){if(it.multi)return n>=3&&mx/mn<=2.5;return ks.every(function(k){return it.months[k][1]<=2;})&&mx/mn<=2.5;}
+    if(it.known){if(it.multi)return n>=3&&steady(vals);return ks.every(function(k){return it.months[k][1]<=2;})&&mx/mn<=2.5;}
     if(it.cat&&NOT_SUB_CAT.test(it.cat))return false;
     if(!ks.every(function(k){return it.months[k][1]===1;}))return false;
     var gaps=0,changes=0;
@@ -113,6 +117,7 @@
       if(!isSub(it,ks))return;
       var last=ks[ks.length-1],amount=it.months[last][0],prev=ks.length>1?it.months[ks[ks.length-2]][0]:null;
       var rise=prev!=null&&amount-prev>=0.5&&amount>prev*1.02?Math.round((amount-prev)*100)/100:0;
+      if(it.multi){amount=Math.round(median(ks.slice(-3).map(function(k){return it.months[k][0];}))*100)/100;rise=0;}// montant habituel, sans l'achat ponctuel
       var active=latest-last<=1;
       if(it.hidden&&!includeHidden)return;
       out.push({key:m,name:it.name,amount:amount,yearly:Math.round(amount*12*100)/100,rise:rise,active:active,hidden:!!it.hidden,since:ks.length,lastKey:last});

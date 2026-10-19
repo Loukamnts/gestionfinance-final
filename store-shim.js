@@ -16,7 +16,8 @@
     // Tirés des relevés bancaires importés : propres à chaque compte
     "personalFinanceDashboard.importLedger": true,
     "personalFinanceDashboard.subscriptions": true,
-    "personalFinanceDashboard.merchantRules": true
+    "personalFinanceDashboard.merchantRules": true,
+    "personalFinanceDashboard.rowAliases": true
   };
   var financialOwner = "anonymous";
   var firstAccount = null;
@@ -59,6 +60,8 @@
   var movedOnce = { "personalFinanceDashboard.subscriptions": true, "personalFinanceDashboard.merchantRules": true };
   function adoptLegacy(k) {
     if (!movedOnce[k]) return;
+    // Déconnecté sur un appareil où un compte s'est déjà connecté : on attend que ce compte les lise.
+    if (financialOwner === "anonymous" && accountSeen) return;
     var legacy = rawGet(k); if (legacy === null) return;
     if (rawGet(privateName(k)) === null) rawSet(privateName(k), legacy);
     rawRemove(k);

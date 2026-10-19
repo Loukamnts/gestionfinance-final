@@ -732,7 +732,9 @@
     let done = false;
     const finish = () => {
       if (done) return; done = true;
-      const v = input.value.trim(); state.rowHeaders[r] = v;
+      const v = input.value.trim(), before = String(state.rowHeaders[r] || ""); state.rowHeaders[r] = v;
+      // Les opérations importées d'un relevé suivent la ligne renommée.
+      if (before && v && before !== v) { try { window.GFBankImport && window.GFBankImport.renameRow && window.GFBankImport.renameRow(before, v, activeSheet() && activeSheet().name); } catch (e) {} }
       rebuildRowHeader(th, r);
       const table = th.closest(".sheet-table");
       if (table) table.style.setProperty("--sheet-row-header-width", Math.round(rowHeaderWidth(activeSheet())) + "px");

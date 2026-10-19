@@ -206,3 +206,43 @@ test('Ligne du marchand supprimée par toi : pas recréée, va dans sa catégori
   assert.deepEqual(JSON.parse(JSON.stringify(env.snap().sheets[0].rowHeaders)),['Abonnements','Courses']);
   assert.equal(env.cell('Abonnements',8),-24.48);
 });
+
+// ── Tableur propre ──
+test('Épargne : le virement va dans la ligne « Livret A » existante',()=>{
+  const {imp,cell,snap}=setupSheet(['Salaire','Courses','Livret A']);
+  imp('Date;Libellé;Montant\n20/09/2026;VIR VERS LIVRET A;-100,00\n21/09/2026;CB LIDL;-20,00\n');
+  assert.equal(cell('Livret A',8),-100);assert.equal(snap().sheets[0].rowHeaders.includes('Épargne'),false);
+});
+test('Nouvelles lignes rangées : revenus en haut, dépenses avant l’épargne, formules décalées',()=>{
+  const {imp,snap}=setupSheet(['Salaire','Courses','Livret A']);
+  const sh0=snap().sheets[0];sh0.cells={'1,0':{raw:'-30'},'2,0':{raw:'-50'},'3,0':{raw:'=A2+A3'}};sh0.rowHeaders.push('Total');
+  imp('Date;Libellé;Montant\n05/09/2026;CB UBER EATS;-15,00\n06/09/2026;VIR CAF ALLOCATIONS;100,00\n07/09/2026;CB LIDL;-20,00\n');
+  const sh=snap().sheets[0];
+  assert.deepEqual(JSON.parse(JSON.stringify(sh.rowHeaders)),['Salaire','Aides (CAF)','Courses','Restaurants','Livret A','Total']);
+  assert.equal(sh.cells['5,0'].raw,'=A3+A5');// « =A2+A3 » suit Courses (ligne 3) et Livret A (ligne 5)
+  assert.equal(sh.cells['4,0'].raw,'-50');
+  // tableur vide : salaire en premier, épargne en dernier
+  const e=setupSheet();e.imp('Date;Libellé;Montant\n05/09/2026;VIR VERS LIVRET A;-100,00\n06/09/2026;CB LIDL;-20,00\n07/09/2026;VIR SEPA SALAIRE ACME;2000,00\n08/09/2026;CB UBER EATS;-35,00\n');
+  assert.deepEqual(JSON.parse(JSON.stringify(e.snap().sheets[0].rowHeaders)),['Salaire','Restaurants','Courses','Épargne']);
+});
+test('Total différé déjà importé : retiré quand il est écarté au relevé suivant',()=>{
+  const {imp,cell}=setupSheet();
+  imp('Date;Libellé;Montant\n30/09/2026;RELEVE CARTE;-60,00\n12/09/2026;CB LIDL;-20,00\n15/09/2026;CB FNAC;-40,00\n');
+  assert.equal(cell('Autres dépenses',8),-60);
+  imp('Date;Libellé;Montant\n30/09/2026;RELEVE CARTE;-60,00\n12/09/2026;CB LIDL;-20,00\n15/09/2026;CB FNAC;-40,00\n20/09/2026;CB LIDL;-0,01\n');
+  assert.equal(cell('Autres dépenses',8),null);
+});
+test('Même opération sur deux comptes (colonne compte) : comptée deux fois',()=>{
+  const {imp,cell}=setupSheet();
+  const f=acc=>'dateOp;label;amount;accountNum\n05/09/2026;PRLV SEPA SPOTIFY;-11,12;'+acc+'\n06/09/2026;CB LIDL;-1,00;'+acc+'\n';
+  imp(f('0001'));imp(f('0002'));
+  assert.equal(cell('Abonnements',8),-22.24);
+  imp(f('0001'));assert.equal(cell('Abonnements',8),-22.24);
+});
+test('Ligne renommée librement : les opérations la suivent',()=>{
+  const env=setupSheet(['Alimentation']);
+  env.imp('Date;Libellé;Montant\n05/09/2026;CB LIDL;-20,00\n06/09/2026;CB AUCHAN;-1,00\n');
+  const sh=env.snap().sheets[0];sh.rowHeaders[0]='Bouffe';env.B.renameRow('Alimentation','Bouffe','2026');
+  env.imp('Date;Libellé;Montant\n15/09/2026;CB LIDL;-5,00\n16/09/2026;CB LIDL;-6,00\n');
+  assert.deepEqual(JSON.parse(JSON.stringify(env.snap().sheets[0].rowHeaders)),['Bouffe']);assert.equal(env.cell('Bouffe',8),-32);
+});

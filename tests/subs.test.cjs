@@ -96,3 +96,14 @@ test('Sans le module d’import, l’ancienne mémoire n’est pas figée',()=>{
   vm.runInContext(fs.readFileSync(path.join(__dirname,'..','subs.js'),'utf8'),ctx);ctx.window.GFSubs.setHidden('boulangerie dupont',true);
   assert.equal(JSON.parse(mem['personalFinanceDashboard.subscriptions']).v,1);
 });
+test('Apple : un achat ponctuel ne cache pas l’abonnement ; petits achats au hasard écartés',()=>{
+  const W=setup();let csv='Date;Libellé;Montant\n';for(const m of ['08','09','10'])csv+=`02/${m}/2026;APPLE.COM/BILL;-2,99\n03/${m}/2026;APPLE.COM/BILL;-9,99\n`;csv+='20/09/2026;APPLE.COM/BILL;-49,99\n';
+  W.GFSubs.ingest(ops(W,csv));const l=W.GFSubs.list();assert.equal(l.length,1);assert.equal(l[0].amount,12.98);
+  const W2=setup();W2.GFSubs.ingest(ops(W2,'Date;Libellé;Montant\n05/07/2026;APPLE.COM/BILL;-0,99\n05/08/2026;APPLE.COM/BILL;-1,99\n05/09/2026;APPLE.COM/BILL;-1,49\n'));
+  assert.equal(W2.GFSubs.list().length,0);
+});
+test('Ancien « pas un abonnement » sur Apple : ne cache pas iCloud qui arrive ensuite',()=>{
+  const W=setup();W.safeStore.setItem('personalFinanceDashboard.subscriptions',JSON.stringify({v:1,items:{'apple com bill':{name:'Apple',known:true,months:{'24319':[49.99,1]},hidden:true}}}));
+  let csv='Date;Libellé;Montant\n';for(const m of ['08','09','10'])csv+=`02/${m}/2026;APPLE.COM/BILL ICLOUD;-2,99\n`;
+  W.GFSubs.ingest(ops(W,csv));assert.deepEqual(JSON.parse(JSON.stringify(W.GFSubs.list().map(i=>i.name))),['Apple iCloud']);
+});

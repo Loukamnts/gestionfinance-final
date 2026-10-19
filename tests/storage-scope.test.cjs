@@ -94,3 +94,8 @@ test('Abonnements et règles de marchands enregistrés avant la mise à jour : r
   assert.equal(values.has('personalFinanceDashboard.subscriptions'),false);
   safe.setFinancialOwner(B);assert.equal(safe.getItem('personalFinanceDashboard.subscriptions'),null);
 });
+test('Données d’avant la mise à jour lues déconnecté : gardées pour le compte',()=>{
+  const {safe}=store({'gf-private-v1:account-seen':'1','personalFinanceDashboard.merchantRules':'R'});
+  assert.equal(safe.getItem('personalFinanceDashboard.merchantRules'),null);
+  safe.setFinancialOwner(A);assert.equal(safe.getItem('personalFinanceDashboard.merchantRules'),'R');
+});
