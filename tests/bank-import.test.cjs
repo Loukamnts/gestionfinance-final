@@ -316,3 +316,8 @@ test('Nouvelle année sans feuille : suit le renommage de la dernière année',(
   env.imp('Date;Libellé;Montant\n05/01/2027;CB LIDL;-9,00\n06/01/2027;CB AUCHAN;-1,00\n');
   const s27=env.snap().sheets.find(s=>s.name==='2027');assert.deepEqual(JSON.parse(JSON.stringify(s27.rowHeaders)),['Bouffe']);
 });
+test('« Total Energies » est un fournisseur, pas une ligne de total',()=>{
+  const {imp,snap}=setupSheet(['Salaire','Total Energies','Courses','Total dépenses']);
+  imp('Date;Libellé;Montant\n05/09/2026;CB UBER EATS;-30,00\n06/09/2026;CB LIDL;-10,00\n');
+  assert.deepEqual(JSON.parse(JSON.stringify(snap().sheets[0].rowHeaders)),['Salaire','Total Energies','Courses','Restaurants','Total dépenses']);
+});

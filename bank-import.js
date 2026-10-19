@@ -215,7 +215,7 @@
     shopping:["achats"],retraits:["retrait","especes","liquide"],fraisbancaires:["frais banque","banque","bank fees"],epargne:["savings"]};
   function sing(k){return k.replace(/(s|x)$/,"");}
   // Ligne de calcul (« Total dépenses », « Solde », « Reste à vivre ») : ni revenu, ni dépense, ni épargne.
-  function structural(h){h=String(h||"").trim();if(!h)return false;var nh=norm(h);if(/^(solde|reste|disponible|balance|bilan|resultat)\b|\btotale?s?\b|^(depenses|revenus|epargne) (globales?|totales?|du mois)$/.test(nh))return true;
+  function structural(h){h=String(h||"").trim();if(!h)return false;var nh=norm(h);if(/^(solde|reste|disponible|balance|bilan|resultat)\b|^(sous ?-?)?(total|totaux)( (des?|du|general|generale|mensuel|annuel|depenses?|revenus?|epargnes?|charges?|sorties?|entrees?|mois|annee|fixes?|variables?)\b|$)|^(depenses|revenus|epargne) (globales?|totales?|du mois)$/.test(nh))return true;
     var d=window.GFClassifyRow&&window.GFClassifyRow(h);return d==="Ignorer";}
   // Lignes du tableur. Avec une année : celles de cette année (ou de la dernière année existante si elle n'a pas encore de feuille).
   function sheetRows(year){
