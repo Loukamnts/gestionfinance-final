@@ -3041,7 +3041,8 @@
       if(state.page==="updates") renderUpdatesPage(updatesVisible);
       requestAnimationFrame(function(){ if(window.GFI18n) window.GFI18n.apply(document.body); window.GFCustomSelect?.refreshAll?.(); });
     });
-    function setTheme(theme){ if(!["moulin","glass","editorial","brutal"].includes(theme)) return; state.appearance.theme=theme; applyAppearance({persist:true,refreshChart:true}); }
+    // Seul « moulin » est stylé : les anciens thèmes (ex. défaut « glass » de l'onboarding) sont ignorés.
+    function setTheme(theme){ if(theme!=="moulin") return; state.appearance.theme="moulin"; applyAppearance({persist:true,refreshChart:true}); }
     function setPalette(palette){ if(!["ble","violet","bordeaux","gold"].includes(palette)) return; state.appearance.palette=palette; applyAppearance({persist:true,refreshChart:true}); }
     function setMode(mode){ if(!["dark","light"].includes(mode)) return; state.appearance.mode=mode; applyAppearance({persist:true,refreshChart:true}); }
     function setInterfaceLayout(layout){ state.appearance.interface=layout==="studio"?"studio":"classic"; applyAppearance({persist:true,refreshChart:false}); }
@@ -5476,13 +5477,15 @@ function inferColumnType(header, samples){
   async function loadConfig(){
     // La clé publishable est nécessaire côté navigateur, mais doit rester
     // distincte du code pour pouvoir changer de projet Supabase sans modifier l'app.
+    // Le service worker la garde en copie : hors ligne, la dernière config connue est servie.
+    sb.configOffline = false;
     try{
       var r = await fetch("supabase_config.json", { cache: "no-store" });
-      if(!r.ok) return null;
+      if(!r.ok){ sb.configOffline = !navigator.onLine; return null; }
       var c = await r.json();
       if(!c || !c.url || !c.anonKey) return null;
       return c;
-    }catch(e){ return null; }
+    }catch(e){ sb.configOffline = true; return null; }
   }
 
   // Stockage robuste : si localStorage est bloque (iframe sandbox / origin opaque),
@@ -5579,8 +5582,9 @@ function inferColumnType(header, samples){
       if(profileAvatar) setGuestAvatar(profileAvatar);
       if(profileLabel) profileLabel.textContent = "Profil";
       if(profileEmail) profileEmail.textContent = "Non connecté";
-      if(hint){ hint.style.display = ""; hint.innerHTML = "Pour activer la connexion par email, crée un projet Supabase gratuit puis renseigne son URL et sa clé publique (anon key) dans le fichier <code>supabase_config.json</code>."; }
-      if(status) status.textContent = "Non configuré";
+      // Message pour l'utilisateur, jamais d'instruction technique : hors ligne le plus souvent.
+      if(hint){ hint.style.display = ""; hint.textContent = sb.configOffline ? "Tu es hors ligne. La connexion à ton compte reviendra avec le réseau ; tes données restent disponibles sur cet appareil." : "La connexion aux comptes n’est pas disponible pour le moment. Réessaie plus tard ; tes données restent sur cet appareil."; }
+      if(status) status.textContent = sb.configOffline ? "Hors ligne" : "Indisponible";
       return;
     }
     if(sb.user){
@@ -5758,6 +5762,12 @@ function inferColumnType(header, samples){
   }
 
   async function start(){ wire(); sb.config = await loadConfig(); if(sb.config){ initClient(sb.config); } else { renderAuth(); } }
+  // Ouverte hors ligne sans copie de la config : on retente dès que le réseau revient.
+  window.addEventListener("online", async function(){
+    if(sb.client || !sb.configOffline) return;
+    var config = await loadConfig();
+    if(config && !sb.client){ sb.config = config; initClient(config); }
+  });
 
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
   else start();
