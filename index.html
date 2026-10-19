@@ -2648,7 +2648,12 @@
     // ═══════════════════════════════════════════════════════════════════════
     function isMetaPropertyName(p){ return propertyNameMatches(p,[...PROPERTY_NAMES.month,...PROPERTY_NAMES.year,...PROPERTY_NAMES.expenses,...PROPERTY_NAMES.bigExpenses]); }
     function propertyNameMatches(name,list){ const n=normalizePropertyName(name); return list.some(item=>normalizePropertyName(item)===n); }
-    function matchesAnyKeyword(name,kw){ const n=normalizePropertyName(name); return kw.some(k=>n.includes(normalizePropertyName(k))); }
+    // Mot-clé court (4 lettres au plus : « ing », « pea », « rsa », « eau », « tv »…) ou « action » : mot entier seulement,
+    // sinon « Shopping » passerait pour la banque ING, « Anniversaire » pour le RSA et « Transactions » pour des actions.
+    function matchesAnyKeyword(name,kw){
+      const n=normalizePropertyName(name), words=String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+      return kw.some(k=>{ const nk=normalizePropertyName(k); if(!nk) return false; if(nk.length>4&&nk!=="action"&&nk!=="actions") return n.includes(nk); return words.some(w=>w===nk||w===nk+"s"||w===nk+"x"); });
+    }
     function isNumberLikeProperty(p){ if(!p) return false; if(p.type==="number") return true; if(p.type==="formula") return p.formula?.type==="number"; if(p.type==="rollup") return p.rollup?.type==="number"; return false; }
     function getPropertyNumber(p){ if(!p) return 0; if(p.type==="number") return Number(p.number||0); if(p.type==="formula"){ if(p.formula?.type==="number") return Number(p.formula.number||0); if(p.formula?.type==="string") return extractFirstNumber(p.formula.string); } if(p.type==="rollup"&&p.rollup?.type==="number") return Number(p.rollup.number||0); if(p.type==="rich_text"||p.type==="title") return extractFirstNumber(getPropertyText(p)); return 0; }
     function getPropertyText(p){ if(!p) return ""; switch(p.type){ case"title": return plainText(p.title); case"rich_text": return plainText(p.rich_text); case"date": return p.date?.start||""; case"number": return p.number==null?"":String(p.number); case"select": return p.select?.name||""; case"status": return p.status?.name||""; case"formula": return getFormulaText(p.formula); case"rollup": return getRollupText(p.rollup); default: return ""; } }
@@ -2690,13 +2695,15 @@
       if(/reste.*apres.*depens/.test(n)||/apres.*depens.*reste/.test(n)) return true;
       return ["bourseaux","remboursement","viremententrant"].some(kw=>n.includes(kw));
     }
+    // Utilisé aussi par l'import de relevé, pour ranger une ligne comme le tableau de bord la compte.
+    window.GFClassifyRow=function(name){ try{ const r=classifyFinancialPropertyEx(name); return r&&r.matched?r.rule:null; }catch(e){ return null; } };
     function classifyFinancialPropertyEx(propName){
       if(isMetaPropertyName(propName)) return {rule:null, matched:true};
       const n=normalizePropertyName(propName);
       const custom=getCustomRules();
       for(const rule of custom) if(n.includes(normalizePropertyName(rule))) return {rule, matched:true};
       if(isExplicitIgnorePattern(propName)) return {rule:"Ignorer", matched:true};
-      const stockKw=["bourse","action","actions","etf","pea","crypto","bitcoin","ethereum","trading","invest","investissement","placement","portefeuille","bitcoin"];
+      const stockKw=["bourse","action","actions","etf","pea","crypto","bitcoin","ethereum","trading","invest","investissement","placement","portefeuille"];
       if(matchesAnyKeyword(propName,stockKw)) return {rule:"Épargne", matched:true};
       if(propertyNameMatches(propName,CATEGORY_DETECTION.exactSavingsNames)||matchesAnyKeyword(propName,CATEGORY_DETECTION.savingsKeywords)) return {rule:"Épargne", matched:true};
       if(propertyNameMatches(propName,CATEGORY_DETECTION.exactExpenseNames)||matchesAnyKeyword(propName,CATEGORY_DETECTION.expenseKeywords)) return {rule:"Dépense", matched:true};
@@ -6035,7 +6042,7 @@ function inferColumnType(header, samples){
   <script src="year-review.js?v=20261019-r5" defer></script>
   <script src="home.js?v=20261019-r12" defer></script>
   <script src="finishing.js?v=20261019-r1" defer></script>
-  <script src="bank-import.js?v=20261019-r13" defer></script>
+  <script src="bank-import.js?v=20261019-r14" defer></script>
   <script src="subs.js?v=20261019-r11" defer></script>
   <script src="reminders.js?v=20261019-r11" defer></script>
   <script src="backup.js?v=20261019-r6" defer></script>

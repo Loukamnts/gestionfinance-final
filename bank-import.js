@@ -131,15 +131,15 @@
     var sep=guessSeparator(lines),found=findColumns(lines,sep);if(!found)return null;
     MONTH_FIRST=detectOrder(lines,sep,found);
     var c=found.cols,ops=[],cards=0,dropped=[];
-    // Source : en-tête du fichier (+ numéro de compte s'il y en a un) ; une même opération sur deux comptes reste deux opérations.
-    var src=hash(found.header>=0?norm(lines[found.header]):"");
+    // Source : le numéro de compte quand le fichier en a un (une même opération sur deux comptes reste deux opérations).
+    // L'en-tête n'est pas utilisé : le même relevé exporté avec une colonne de plus ne doit pas compter deux fois.
     for(var i=found.header+1;i<lines.length;i++){
       var r=splitRow(lines[i],sep),d=parseDate(r[c.date]);if(!d)continue;
       var amt=null;
       if(c.amount!=null)amt=parseAmount(r[c.amount]);
       if(amt==null&&(c.debit!=null||c.credit!=null)){var db=parseAmount(r[c.debit]),cr=parseAmount(r[c.credit]);if(db)amt=-Math.abs(db);else if(cr)amt=Math.abs(cr);}
       if(amt==null||amt===0)continue;
-      var osrc=src+(c.account!=null?"-"+hash(String(r[c.account]||"")):"");
+      var osrc=c.account!=null&&String(r[c.account]||"").trim()?hash(String(r[c.account]).trim()):"";
       if(c.state!=null&&NOT_DONE.test(norm(r[c.state]))){dropped.push({date:d,amount:Math.round(amt*100)/100,label:String(c.label!=null?r[c.label]:"").replace(/\s+/g," ").trim(),src:osrc});continue;}
       var label=c.label!=null?r[c.label]:r.filter(function(x,j){return j!==c.date&&j!==c.amount&&j!==c.debit&&j!==c.credit&&j!==c.state;}).join(" ");
       label=String(label||"").replace(/\s+/g," ").trim();
@@ -214,13 +214,25 @@
     loisirs:["sorties","leisure"],voyages:["vacances","voyage","travel"],impots:["impot","taxes","taxe"],salaire:["salaires","paie","salary"],
     shopping:["achats"],retraits:["retrait","especes","liquide"],fraisbancaires:["frais banque","banque","bank fees"],epargne:["savings"]};
   function sing(k){return k.replace(/(s|x)$/,"");}
-  function sheetRows(){var out=[];try{var snap=window.FinanceSheet&&window.FinanceSheet.getSnapshot&&window.FinanceSheet.getSnapshot();(snap&&snap.sheets||[]).forEach(function(sh){(sh.rowHeaders||[]).forEach(function(h){h=String(h||"").trim();if(h&&!/^(solde|total)/i.test(h)&&out.indexOf(h)<0)out.push(h);});});}catch(e){}return out;}
+  // Ligne de calcul (« Total dépenses », « Solde », « Reste à vivre ») : ni revenu, ni dépense, ni épargne.
+  function structural(h){h=String(h||"").trim();if(!h)return false;if(/^(solde|total|reste|disponible|balance|bilan|resultat)\b/.test(norm(h)))return true;
+    var d=window.GFClassifyRow&&window.GFClassifyRow(h);return d==="Ignorer";}
+  // Lignes du tableur. Avec une année : celles de cette année (ou de la dernière année existante si elle n'a pas encore de feuille).
+  function sheetRows(year){
+    var out=[],sheets=[];try{var snap=window.FinanceSheet&&window.FinanceSheet.getSnapshot&&window.FinanceSheet.getSnapshot();sheets=snap&&snap.sheets||[];}catch(e){}
+    if(year!=null){var mine=sheets.filter(function(sh){return String(sh.name).trim()===String(year);});
+      if(!mine.length){var yrs=sheets.filter(function(sh){return /^\d{4}$/.test(String(sh.name).trim());}).sort(function(a,b){return Number(b.name)-Number(a.name);});mine=yrs.slice(0,1);}
+      if(mine.length)sheets=mine;}
+    sheets.forEach(function(sh){(sh.rowHeaders||[]).forEach(function(h){h=String(h||"").trim();if(h&&!structural(h)&&out.indexOf(h)<0)out.push(h);});});
+    return out;
+  }
   var ALIAS_KEY="personalFinanceDashboard.rowAliases";
   function aliases(){try{var v=JSON.parse(window.safeStore&&window.safeStore.getItem(ALIAS_KEY)||"{}");return v&&typeof v==="object"?v:{};}catch(e){return{};}}
-  function existingRow(name,rows){
+  function existingRow(name,rows,year){
     var k=key(name);if(!k||!rows||!rows.length)return null;
-    // Catégorie dont tu as renommé la ligne (« Alimentation » → « Bouffe »)
-    var al=aliases()[k];if(al){for(var a=0;a<rows.length;a++)if(key(rows[a])===key(al))return rows[a];}
+    // Catégorie dont tu as renommé la ligne cette année-là (« Alimentation » → « Bouffe »)
+    var A=aliases(),al=year!=null&&A[String(year)]&&typeof A[String(year)]==="object"?A[String(year)][k]:null;
+    if(al){for(var a=0;a<rows.length;a++)if(key(rows[a])===key(al))return rows[a];}
     var hit=function(f){for(var i=0;i<rows.length;i++)if(f(key(rows[i])))return rows[i];return null;};
     var syn=(SYN[k]||[]).map(key);
     var exact=hit(function(r){return r===k;})||hit(function(r){return sing(r)===sing(k);})||hit(function(r){return syn.indexOf(r)>=0||syn.indexOf(sing(r))>=0;});
@@ -232,22 +244,27 @@
   // Épargne : la ligne d'épargne dont le nom est dans le libellé (« VIR VERS LIVRET A » → « Livret A »),
   // ou la seule ligne d'épargne du tableur.
   function savingsRow(op,rows){
-    var l=key(op.label+(op.detail?" "+op.detail:"")),sv=rows.filter(function(h){return kindOf(h)==="Épargne";});
-    var named=sv.filter(function(h){var k=key(h);return k.length>=3&&l.indexOf(k)>=0;}).sort(function(a,b){return key(b).length-key(a).length;});
-    return named[0]||(sv.length===1?sv[0]:null);
+    var w=" "+norm(op.label+(op.detail?" "+op.detail:"")).replace(/[^a-z0-9]+/g," ")+" ",sv=rows.filter(function(h){return kindOf(h)==="Épargne";});
+    // Nom de la ligne en mots entiers dans le libellé (« Livret A », « PEL ») ; « CEL » ne doit pas trouver « Céline ».
+    var named=sv.filter(function(h){var n=norm(h).replace(/[^a-z0-9]+/g," ").trim();return n.length>=2&&w.indexOf(" "+n+" ")>=0;}).sort(function(a,b){return key(b).length-key(a).length;});
+    if(named[0])return named[0];
+    // Sinon, la seule ligne d'épargne si elle est générale (« Épargne », « Économies »), pas un produit précis (« PEA »).
+    var gen=sv.filter(function(h){return /^(epargne|economies?|savings?|mise de cote)\b/.test(norm(h).trim());});
+    return gen.length===1?gen[0]:null;
   }
   // Marchand qui a déjà sa propre ligne (une ligne « Netflix » dans le tableur) : on la remplit au lieu de « Abonnements ».
   var GENERIC=/^(prime|banque|bank|credit|carte|frais|total|service|services|paiement|achat|magasin|super|hyper|cafe|station|compte|pret|assurance|mutuelle|epargne|salaire|loyer|courses|impots?)$/;
   function merchantRow(m,rows){var w=String(m||"").split(" ")[0];if(!w||w.length<4||GENERIC.test(w))return null;for(var i=0;i<rows.length;i++){var r=key(rows[i]);if((r===key(w)||r===key(m))&&kindOf(rows[i])==="Dépense")return rows[i];}return null;}
   function summarize(ops,extra){
-    var groups={},months={},ignored=0,rules=learned(),rows=sheetRows(),items=[],seenFp={},all=[];
+    var groups={},months={},ignored=0,rules=learned(),rowsBy={},items=[],seenFp={},all=[];
+    var rowsOf=function(y){return rowsBy[y]||(rowsBy[y]=sheetRows(y));};
     // Empreinte de chaque opération du fichier, même ignorée : une opération désormais ignorée sort du registre.
     ops.concat(ops.dropped||[]).forEach(function(op){var fp=fingerprint(op),n=seenFp[fp]=(seenFp[fp]||0)+1;op._fp=fp+"#"+n;all.push({fp:op._fp,mk:op.date.y+"-"+op.date.m});});Object.keys(extra||{}).forEach(function(k){rules[k]=extra[k];});
     ops.forEach(function(op){
       var c=categorize(op,rules);if(!c){ignored++;return;}
-      var mo=merchantOf(op.label),own=!Object.prototype.hasOwnProperty.call(rules,mo)&&c[2]==="Dépense"&&op.amount<0?merchantRow(mo,rows):null;
+      var rows=rowsOf(op.date.y),mo=merchantOf(op.label),own=!Object.prototype.hasOwnProperty.call(rules,mo)&&c[2]==="Dépense"&&op.amount<0?merchantRow(mo,rows):null;
       if(!own&&c[2]==="Épargne")own=savingsRow(op,rows);
-      var isOther=!own&&(c===OTHER_OUT||c===OTHER_IN),name=own||existingRow(en()?c[1]:c[0],rows)||(en()?c[1]:c[0]),kind=c[2],g=groups[name]||(groups[name]={name:name,kind:kind,count:0,total:0,byMonth:{},merchants:{}});if(isOther)g.other=true;
+      var isOther=!own&&(c===OTHER_OUT||c===OTHER_IN),name=own||existingRow(en()?c[1]:c[0],rows,op.date.y)||(en()?c[1]:c[0]),kind=c[2],g=groups[name]||(groups[name]={name:name,kind:kind,count:0,total:0,byMonth:{},merchants:{}});if(isOther)g.other=true;
       // Dépenses et épargne comptées en positif ; un remboursement vient en déduction
       var v=kind==="Salaire"?op.amount:-op.amount,mk=op.date.y+"-"+op.date.m;
       g.count++;g.total+=v;g.byMonth[mk]=(g.byMonth[mk]||0)+v;months[mk]=op.date;
@@ -265,7 +282,11 @@
   function kindOf(label){
     var r={};try{r=JSON.parse(window.safeStore.getItem("personalFinanceDashboard.categoryRules")||"{}")||{};}catch(e){}
     var v=r[key(label)];if(v)return v==="Epargne"?"Épargne":v;
-    var k=key(label);if(/salaire|revenu|prime|paie|allocation|caf/.test(k))return"Salaire";if(/epargne|livret|pea|placement/.test(k))return"Épargne";return"Dépense";
+    // Même classement que le tableau de bord, pour ranger la ligne là où il la compte.
+    var d=window.GFClassifyRow&&window.GFClassifyRow(label);if(d==="Salaire"||d==="Dépense"||d==="Épargne")return d;
+    var w=" "+norm(label).replace(/[^a-z0-9]+/g," ")+" ";
+    if(/ (salaires?|revenus?|primes?|paie|paye|allocations?|caf|apl|rsa) /.test(w))return"Salaire";
+    if(/ (epargne|livrets?|pea|pel|cel|ldds|lep|placements?|assurance vie) /.test(w))return"Épargne";return"Dépense";
   }
   // Signe déjà utilisé dans le tableur pour ce type de ligne (dépenses en négatif ou en positif)
   function signFor(snap,kind){
@@ -285,12 +306,12 @@
      « Remplacer » : total de toutes les opérations connues du mois (anciennes + nouvelles), donc un relevé partiel
      ne fait pas disparaître le reste du mois. « Ajouter » : seulement les opérations jamais importées. */
   function plan(summary,mode){
-    var L=ledger(),out={},dup=0,fresh=0,kinds={},before={},rows=sheetRows(),items=summary.items||[];
+    var L=ledger(),out={},dup=0,fresh=0,kinds={},before={},rowsBy={},items=summary.items||[];
     // Une ligne renommée dans le tableur (« Abonnements » → « Abos ») garde ses anciennes opérations.
-    var rowName=function(e){return existingRow(e[0],rows)||(e[3]&&existingRow(e[3],rows))||(rows.length&&e[3])||e[0];};
+    var rowName=function(e,mk){var y=mk.split("-")[0],rows=rowsBy[y]||(rowsBy[y]=sheetRows(y));return existingRow(e[0],rows,y)||(e[3]&&existingRow(e[3],rows,y))||(rows.length&&e[3])||e[0];};
     // Mois touchés : ceux du fichier, plus ceux du registre qui tombent dans la période du fichier.
     var touched={};(summary.all||items).forEach(function(it){touched[it.mk]=1;});
-    Object.keys(touched).forEach(function(mk){var b=before[mk]={};Object.keys(L.m[mk]||{}).forEach(function(fp){var e=L.m[mk][fp],n=rowName(e);b[n]=1;kinds[n]=e[1];});});
+    Object.keys(touched).forEach(function(mk){var b=before[mk]={};Object.keys(L.m[mk]||{}).forEach(function(fp){var e=L.m[mk][fp],n=rowName(e,mk);b[n]=1;kinds[n]=e[1];});});
     if(mode!=="add"){
       // Remplacer : une opération de ce fichier désormais ignorée sort du registre. Les opérations venues
       // d'un autre fichier (autre compte, export filtré) sont gardées.
@@ -304,14 +325,19 @@
       if(mode==="add"){var o=out[it.mk]||(out[it.mk]={});o[it.name]=(o[it.name]||0)+it.v;}});
     if(mode!=="add")Object.keys(touched).forEach(function(mk){
       var o=out[mk]={};Object.keys(before[mk]||{}).forEach(function(n){o[n]=0;});
-      Object.keys(L.m[mk]||{}).forEach(function(fp){var e=L.m[mk][fp],n=rowName(e);kinds[n]=kinds[n]||e[1];o[n]=(o[n]||0)+e[2];});
+      Object.keys(L.m[mk]||{}).forEach(function(fp){var e=L.m[mk][fp],n=rowName(e,mk);kinds[n]=kinds[n]||e[1];o[n]=(o[n]||0)+e[2];});
       if(!Object.keys(L.m[mk]||{}).length)delete L.m[mk];});
     return{cells:out,kinds:kinds,dup:dup,fresh:fresh,save:function(){saveLedger(L);}};
   }
   // Insère une ligne à l'index r : les lignes dessous descendent, les formules du tableur suivent (B4 → B5).
-  function insertRow(sh,r,name){
+  // grow : la ligne prolonge le groupe juste au-dessus ; une plage qui finit sur ce groupe (=SUM(B2:B3)) s'étend à elle.
+  function insertRow(sh,r,name,grow){
+    var mv=function(col,row){return col.toUpperCase()+(Number(row)-1>=r?Number(row)+1:Number(row));};
     var shift=function(raw){if(typeof raw!=="string"||raw.charAt(0)!=="=")return raw;
-      return raw.split('"').map(function(part,i){return i%2?part:part.replace(/(\$?)\b([A-Z]{1,3})(\$?)(\d+)\b/gi,function(m,d1,col,d2,row){return Number(row)-1>=r?d1+col.toUpperCase()+d2+(Number(row)+1):m;});}).join('"');};
+      return raw.split('"').map(function(part,i){if(i%2)return part;
+        return part.replace(/\b([A-Z]{1,3})(\d+)(?::([A-Z]{1,3})(\d+))?\b/gi,function(m,c1,r1,c2,r2){
+          if(c2==null)return mv(c1,r1);
+          var end=Number(r2)===r&&grow&&Number(r1)<=r?c2.toUpperCase()+(r+1):mv(c2,r2);return mv(c1,r1)+":"+end;});}).join('"');};
     var next={};Object.keys(sh.cells||{}).forEach(function(k){var p=k.split(","),row=Number(p[0]),cell=sh.cells[k],nc=cell&&typeof cell==="object"?Object.assign({},cell,{raw:shift(cell.raw)}):cell;next[(row>=r?row+1:row)+","+p[1]]=nc;});
     sh.cells=next;
     while(sh.rowHeaders.length<r)sh.rowHeaders.push("");
@@ -319,12 +345,18 @@
   }
   // Ligne renommée dans le tableur : les opérations déjà importées et les choix de marchands la suivent.
   function renameRow(oldName,newName,year){
-    var o=key(oldName),n=String(newName||"").trim();if(!o||!n||o===key(n))return;
+    var o=key(oldName),n=String(newName||"").trim();if(!o||!n||o===key(n)||!/^\d{4}$/.test(String(year||"").trim()))return;year=String(year).trim();
     var L=ledger(),changed=false;Object.keys(L.m).forEach(function(mk){if(year&&mk.split("-")[0]!==String(year))return;Object.keys(L.m[mk]).forEach(function(fp){var e=L.m[mk][fp];if(key(e[0])===o){e[0]=n;changed=true;}});});
     if(changed)saveLedger(L);
     // Les catégories qui allaient dans cette ligne y vont toujours.
-    var A=aliases(),ach=false;CATS.concat([OTHER_OUT,OTHER_IN]).forEach(function(c){[c[0],c[1]].forEach(function(nm){var k=key(nm);if(A[k]?key(A[k])===o:existingRow(nm,[oldName])){A[k]=n;ach=true;}});});
+    var A=aliases(),Y=A[year]&&typeof A[year]==="object"?A[year]:(A[year]={}),ach=false,rowsNow=sheetRows(year);
+    CATS.concat([OTHER_OUT,OTHER_IN]).forEach(function(c){[c[0],c[1]].forEach(function(nm){var k=key(nm);
+      var live=Y[k]&&rowsNow.concat([n]).some(function(h){return key(h)===key(Y[k]);})?Y[k]:null;// alias dont la ligne a disparu : oublié
+      if(live?key(live)===o:existingRow(nm,[oldName])){Y[k]=n;ach=true;}else if(Y[k]&&!live){delete Y[k];ach=true;}});});
     if(ach)try{window.safeStore.setItem(ALIAS_KEY,JSON.stringify(A));}catch(e){}
+    // Choix de marchands : suivent le nouveau nom seulement si l'ancien n'existe plus dans aucune autre année.
+    var elsewhere=false;try{(window.FinanceSheet.getSnapshot().sheets||[]).forEach(function(sh){if(String(sh.name).trim()!==year&&(sh.rowHeaders||[]).some(function(h){return key(h)===o;}))elsewhere=true;});}catch(e){}
+    if(elsewhere)return;
     var R=learned(),upd={};Object.keys(R).forEach(function(m){if(R[m]&&key(R[m][0])===o)upd[m]=[n,R[m][1]];});if(Object.keys(upd).length)saveLearned(upd);
   }
   function write(summary,mode){
@@ -349,17 +381,19 @@
         var r=sh.rowHeaders.findIndex(function(h){return key(h)===key(g.name);});
         if(r<0){
           // Nouvelle ligne : après la dernière ligne du même type ; un revenu en haut, une dépense avant l'épargne.
-          var lastSame=-1,firstAfter=-1;sh.rowHeaders.forEach(function(h,i){if(!String(h||"").trim()||/^(solde|total)/i.test(String(h).trim()))return;var k=ORDER[kindIn(h)];if(k===ORDER[g.kind]&&(isOtherRow(g.name)||!isOtherRow(h)))lastSame=i;else if(k>ORDER[g.kind]&&firstAfter<0)firstAfter=i;});
+          var lastSame=-1,firstAfter=-1;sh.rowHeaders.forEach(function(h,i){if(!String(h||"").trim()||structural(h))return;var k=ORDER[kindIn(h)];if(k===ORDER[g.kind]&&(isOtherRow(g.name)||!isOtherRow(h)))lastSame=i;else if(k>ORDER[g.kind]&&firstAfter<0)firstAfter=i;});
           // Sans ligne du même type : avant la première ligne d'un type suivant, sinon avant « Total »/« Solde », sinon en bas.
-          var used=-1,firstTotal=-1;sh.rowHeaders.forEach(function(h,i){h=String(h||"").trim();if(!h)return;used=i;if(firstTotal<0&&/^(solde|total)/i.test(h))firstTotal=i;});
+          var used=-1,firstTotal=-1;sh.rowHeaders.forEach(function(h,i){h=String(h||"").trim();if(!h)return;used=i;if(firstTotal<0&&structural(h))firstTotal=i;});
           r=lastSame>=0?lastSame+1:firstAfter>=0?firstAfter:firstTotal>=0?firstTotal:used+1;
-          insertRow(sh,r,g.name);
+          insertRow(sh,r,g.name,lastSame>=0&&r===lastSame+1);
         }
         sh.rows=Math.max(Number(sh.rows)||0,sh.rowHeaders.length+2);
         var v=Math.round(amount*signs[g.kind]*100)/100,cell=sh.cells[r+","+mi],old=cell&&String(cell.raw||"").trim();
         if(mode==="add"&&old){var n=Number(old.replace(",","."));sh.cells[r+","+mi]={raw:old.charAt(0)!=="="&&isFinite(n)?String(Math.round((n+v)*100)/100):"="+(old.charAt(0)==="="?old.slice(1):old)+(v<0?"-":"+")+Math.abs(v)};}
         else if(v===0&&mode!=="add")delete sh.cells[r+","+mi];
         else sh.cells[r+","+mi]={raw:String(v)};
+        // Deux lignes du même nom (renommage) : le total est dans la première, l'autre ne doit pas le compter une 2e fois.
+        if(mode!=="add")sh.rowHeaders.forEach(function(h,i){if(i!==r&&key(h)===key(g.name))delete sh.cells[i+","+mi];});
         last=sh;
       })();
     });});
@@ -378,7 +412,7 @@
   function targets(){
     var out=[],seen={};function add(name,kind,group){var k=key(name);if(!name||seen[k])return;seen[k]=1;out.push({name:name,kind:kind,group:group});}
     CATS.forEach(function(c){add(en()?c[1]:c[0],c[2],"cat");});
-    try{var snap=window.FinanceSheet&&window.FinanceSheet.getSnapshot&&window.FinanceSheet.getSnapshot();(snap&&snap.sheets||[]).forEach(function(sh){(sh.rowHeaders||[]).forEach(function(h){h=String(h||"").trim();if(h&&!/^(solde|total)/i.test(h))add(h,kindOf(h),"sheet");});});}catch(e){}
+    try{var snap=window.FinanceSheet&&window.FinanceSheet.getSnapshot&&window.FinanceSheet.getSnapshot();(snap&&snap.sheets||[]).forEach(function(sh){(sh.rowHeaders||[]).forEach(function(h){h=String(h||"").trim();if(h&&!structural(h))add(h,kindOf(h),"sheet");});});}catch(e){}
     add(en()?OTHER_OUT[1]:OTHER_OUT[0],"Dépense","other");add(en()?OTHER_IN[1]:OTHER_IN[0],"Salaire","other");
     return out;
   }

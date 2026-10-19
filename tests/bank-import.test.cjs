@@ -246,3 +246,47 @@ test('Ligne renommée librement : les opérations la suivent',()=>{
   env.imp('Date;Libellé;Montant\n15/09/2026;CB LIDL;-5,00\n16/09/2026;CB LIDL;-6,00\n');
   assert.deepEqual(JSON.parse(JSON.stringify(env.snap().sheets[0].rowHeaders)),['Bouffe']);assert.equal(env.cell('Bouffe',8),-32);
 });
+
+// ── Quatrième relecture ──
+test('Même relevé, en-tête différent : pas compté deux fois',()=>{
+  const {imp,cell}=setupSheet();
+  imp('Date;Libellé;Montant\n05/09/2026;CB LIDL;-20,00\n06/09/2026;CB FNAC;-30,00\n');
+  imp('"Date";"Libellé";"Montant";"Solde"\n05/09/2026;CB LIDL;-20,00;100\n06/09/2026;CB FNAC;-30,00;70\n');
+  assert.equal(cell('Courses',8),-20);assert.equal(cell('Shopping',8),-30);
+});
+test('Ligne « Total dépenses » : la nouvelle ligne de dépense entre dans sa somme',()=>{
+  const {imp,snap}=setupSheet(['Salaire','Loyer','Courses','Total dépenses']);
+  const sh0=snap().sheets[0];sh0.cells={'1,8':{raw:'-800'},'2,8':{raw:'-100'},'3,8':{raw:'=SUM(I2:I3)'},'0,8':{raw:'2000'}};
+  imp('Date;Libellé;Montant\n05/09/2026;CB UBER EATS;-30,00\n06/09/2026;CB LIDL;-100,00\n');
+  const sh=snap().sheets[0];
+  assert.deepEqual(JSON.parse(JSON.stringify(sh.rowHeaders)),['Salaire','Loyer','Courses','Restaurants','Total dépenses']);
+  assert.equal(sh.cells['4,8'].raw,'=SUM(I2:I4)');
+});
+test('Formules : références et plages décalées une seule fois',()=>{
+  const {imp,snap}=setupSheet(['Salaire','Courses','Livret A','Reste']);
+  const sh0=snap().sheets[0];sh0.cells={'0,0':{raw:'2000'},'1,0':{raw:'-50'},'2,0':{raw:'-100'},'3,0':{raw:'=A1+SUM(A2:A3)-a3'}};
+  imp('Date;Libellé;Montant\n05/09/2026;CB UBER EATS;-30,00\n06/09/2026;CB LIDL;-10,00\n');
+  // Restaurants arrive après Courses (ligne 3) : Livret A passe en 4, Reste en 5
+  const sh=snap().sheets[0];assert.equal(sh.rowHeaders.indexOf('Restaurants'),2);
+  assert.equal(sh.cells['4,0'].raw,'=A1+SUM(A2:A4)-A4');
+});
+test('« Péage » n’est pas une ligne d’épargne ; « CEL » ne trouve pas « Céline »',()=>{
+  const {imp,cell,snap}=setupSheet(['Salaire','Péage','Loyer']);
+  imp('Date;Libellé;Montant\n20/09/2026;VIR VERS LIVRET A;-200,00\n21/09/2026;CB LIDL;-1,00\n');
+  assert.equal(cell('Péage',8),null);assert.equal(cell('Épargne',8),-200);
+  const e=setupSheet(['Salaire','CEL']);e.imp('Date;Libellé;Montant\n20/09/2026;VIR VERS EPARGNE CELINE;-50,00\n21/09/2026;CB LIDL;-1,00\n');
+  assert.equal(e.cell('CEL',8),null);
+});
+test('Renommer une ligne en 2026 ne touche pas 2025 ; renommer vers un nom existant ne compte pas deux fois',()=>{
+  const env=setupSheet(['Alimentation']);const sn=env.snap();sn.sheets.push({id:'y25',name:'2025',cells:{},rowHeaders:['Alimentation'],rows:9,cols:12});
+  env.imp('Date;Libellé;Montant\n05/09/2026;CB LIDL;-20,00\n06/09/2025;CB LIDL;-7,00\n');
+  sn.sheets[0].rowHeaders[0]='Bouffe';env.B.renameRow('Alimentation','Bouffe','2026');
+  env.imp('Date;Libellé;Montant\n15/09/2025;CB LIDL;-10,00\n16/09/2025;CB AUCHAN;-0,50\n');
+  const s25=env.snap().sheets.find(s=>s.name==='2025');assert.deepEqual(JSON.parse(JSON.stringify(s25.rowHeaders)),['Alimentation']);
+  assert.equal(Number(s25.cells['0,8'].raw),-17.5);
+  const d=setupSheet(['Courses','Restaurants']);d.imp('Date;Libellé;Montant\n05/09/2026;CB LIDL;-20,00\n06/09/2026;CB UBER EATS;-30,00\n');
+  d.snap().sheets[0].rowHeaders[0]='Restaurants';d.B.renameRow('Courses','Restaurants','2026');
+  d.imp('Date;Libellé;Montant\n15/09/2026;CB LIDL;-5,00\n16/09/2026;CB LIDL;-6,00\n');
+  const sh=d.snap().sheets[0];const total=[0,1].reduce((t,i)=>t+Number((sh.cells[i+',8']||{raw:0}).raw),0);
+  assert.equal(Math.round(total*100)/100,-61);
+});
