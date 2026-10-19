@@ -13,6 +13,8 @@
   function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
   function el(tag,cls,text){var n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;}
   var FMT=null,FMT_L="";
+  // Chiffres du bas de la carte : arrondis à l'euro au-delà de 1 000 € pour tenir sur petit écran.
+  function eurS(v){return Math.abs(v)>=1000?eur(Math.round(v)):eur(v);}
   function eur(v){var l=en()?"en-IE":"fr-FR";if(!FMT||FMT_L!==l){FMT=new Intl.NumberFormat(l,{style:"currency",currency:"EUR",maximumFractionDigits:0});FMT2=new Intl.NumberFormat(l,{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:2});FMT_L=l;}return Math.round(v)===Math.round(v*100)/100?FMT.format(v):FMT2.format(v);}
   var FMT2=null;
   function pct(a,b){var v=(a-b)/Math.abs(b||1)*100;return(v>=0?"+":"−")+Math.abs(v).toLocaleString(en()?"en-IE":"fr-FR",{maximumFractionDigits:1})+(en()?"%":" %");}
@@ -319,16 +321,18 @@
     if(fresh.length){var sorted=fresh.sort(function(a,b){return b.lvl-a.lvl||b.spent/b.bud-a.spent/a.bud;});pushNow(sorted);whenFree(function(){if(document.body.dataset.page==="dashboard")budgetAlert(sorted);});}
   }
   function alertText(a){return a.lvl>=100?t2(a.name+" : plafond atteint ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": limit reached ("+eur(a.spent)+" / "+eur(a.bud)+")"):t2(a.name+" : 80 % du plafond ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": 80% of the limit ("+eur(a.spent)+" / "+eur(a.bud)+")");}
+  // Bandeau fin au-dessus de la barre du bas : une ligne, une croix. Se ferme seul, ou en changeant de page.
   function budgetAlert(list){
-    var first=list[0],more=list.length-1,title=first.lvl>=100?t2("Plafond atteint","Limit reached"):t2("Bientôt au plafond","Close to the limit");
-    var body=alertText(first)+(more?t2(" · et "+more+" autre"+(more>1?"s":""),", and "+more+" more"):"");
+    var first=list[0],more=list.length-1,over=first.lvl>=100;
     var old=byId("gfhBudgetAlert");if(old)old.remove();
-    var c=el("div","gfr-invite gfh-alert"+(first.lvl>=100?" is-over":""));c.id="gfhBudgetAlert";c.setAttribute("role","status");
-    var ic=el("span","gfr-invite-ic");ic.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4L12 4Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 10v4.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.1" fill="currentColor"/></svg>';
-    var tx=el("div","gfr-invite-tx");tx.append(el("strong","",title),el("span","",body));
-    var ok=el("button","gfr-invite-go",t2("Compris","Got it"));ok.type="button";ok.addEventListener("click",closeAlert);
-    var acts=el("div","gfr-invite-acts");acts.append(ok);c.append(ic,tx,acts);document.body.append(c);requestAnimationFrame(function(){c.classList.add("is-on");});
-    setTimeout(function(){if(c.isConnected){c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}},9000);
+    var c=el("div","gfh-banner"+(over?" is-over":""));c.id="gfhBudgetAlert";c.setAttribute("role","status");
+    var ic=el("span","gfh-banner-ic");ic.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4L12 4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4.4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.2" fill="currentColor"/></svg>';
+    var tx=el("span","gfh-banner-tx");
+    tx.append(el("b","",first.name),document.createTextNode(" · "+(over?t2("plafond atteint","limit reached"):t2("80 % du plafond","80% of the limit"))+" · "),el("span","gfh-banner-amt",eur(Math.round(first.spent))+" / "+eur(Math.round(first.bud))));
+    if(more)tx.append(document.createTextNode(t2(" · +"+more+" autre"+(more>1?"s":"")," · +"+more+" more")));
+    var x=el("button","gfh-banner-x");x.type="button";x.setAttribute("aria-label",t2("Fermer","Close"));x.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';x.addEventListener("click",closeAlert);
+    c.append(ic,tx,x);document.body.append(c);requestAnimationFrame(function(){c.classList.add("is-on");});
+    setTimeout(function(){if(c.isConnected)closeAlert();},9000);
   }
   function pushNow(list){var first=list[0],more=list.length-1,title=first.lvl>=100?t2("Plafond atteint","Limit reached"):t2("Bientôt au plafond","Close to the limit");pushBudget(list,title,alertText(first)+(more?t2(" · et "+more+" autre"+(more>1?"s":""),", and "+more+" more"):""));}
   /* Notification sur tous mes appareils (compte connecté et notifications activées), même app fermée.
@@ -505,7 +509,9 @@
     pb.type=nb.type="button";pb.setAttribute("aria-label",t2("Mois précédent","Previous month"));nb.setAttribute("aria-label",t2("Mois suivant","Next month"));
     pb.disabled=idx===0;nb.disabled=idx===all.length-1;
     pb.addEventListener("click",function(){select(all[idx-1]);});nb.addEventListener("click",function(){select(all[idx+1]);});
-    mon.append(pb,el("span","",cap(mname(sel.mi))+" "+sel.year),nb);
+    var mlab=el("span"),mshort=el("span","gfh-mon-s",cap(new Intl.DateTimeFormat(en()?"en-GB":"fr-FR",{month:"short"}).format(new Date(2020,sel.mi,1)))+" "+sel.year);
+    mshort.setAttribute("aria-hidden","true");mlab.append(el("span","gfh-mon-l",cap(mname(sel.mi))+" "+sel.year),mshort);
+    mon.append(pb,mlab,nb);
     if(Date.now()-flashMonth<1500)mon.classList.add("is-flash");
 
     // Salutation
@@ -516,7 +522,7 @@
     // Carte solde
     var card=el("div","gfh-card");
     var lab=el("div","gfh-lab");lab.append(el("span","",hasStart?t2("Solde disponible","Available balance"):t2("Solde calculé","Calculated balance")),eyeButton());card.append(lab);
-    card.append(el("div","gfh-big",eur(sd)));
+    var bigTxt=eur(sd); card.append(el("div","gfh-big"+(bigTxt.length>11?" is-xl":bigTxt.length>9?" is-long":""),bigTxt));
     var dl=el("div","gfh-dl");
     if(blank)dl.append(document.createTextNode(t2("Aucune donnée pour l’instant","No data yet")));
     else if(prev&&psd){dl.append(el("b","",pct(sd,psd)),document.createTextNode(" vs "+mname(prev.mi)));}
@@ -538,10 +544,10 @@
     if(!blank&&B.month){
       var foot=el("div","gfh-foot"),rest=flow(sel);
       var ep=all.filter(function(m){return m.year===sel.year&&m.mi<=sel.mi;}).reduce(function(s,m){return s+m.savings;},0);
-      var f1=el("div");f1.append(el("div","t",t2("Revenus","Income")),el("div","v"+(sel.salary?"":" none"),sel.salary?eur(sel.salary):"—"),el("small","",sel.salary?t2("Reste ","Left ")+eur(rest):t2("Non saisis","Not entered")));
-      var f2=el("div");f2.append(el("div","t",t2("Dépenses","Expenses")),el("div","v"+(sel.expenses?"":" none"),sel.expenses?eur(sel.expenses):"—"));
+      var f1=el("div");f1.append(el("div","t",t2("Revenus","Income")),el("div","v"+(sel.salary?"":" none"),sel.salary?eurS(sel.salary):"—"),el("small","",sel.salary?t2("Reste ","Left ")+eur(rest):t2("Non saisis","Not entered")));
+      var f2=el("div");f2.append(el("div","t",t2("Dépenses","Expenses")),el("div","v"+(sel.expenses?"":" none"),sel.expenses?eurS(sel.expenses):"—"));
       var d2=el("small");if(!sel.expenses)d2.textContent=t2("Aucune ce mois","None this month");else if(prev&&prev.expenses){d2.append(el("b",sel.expenses<=prev.expenses?"up":"down",pct(sel.expenses,prev.expenses)),document.createTextNode(" vs "+mname(prev.mi).slice(0,4)+"."));}else d2.textContent=t2("Ce mois","This month");f2.append(d2);
-      var f3=el("div");f3.append(el("div","t",t2("Épargne","Savings")),el("div","v"+(sel.savings?"":" none"),sel.savings?eur(sel.savings):"—"),el("small","",ep?t2("Cumul ","Total ")+eur(ep):t2("Rien de côté","Nothing saved")));
+      var f3=el("div");f3.append(el("div","t",t2("Épargne","Savings")),el("div","v"+(sel.savings?"":" none"),sel.savings?eurS(sel.savings):"—"),el("small","",ep?t2("Cumul ","Total ")+eur(ep):t2("Rien de côté","Nothing saved")));
       foot.append(f1,f2,f3);card.append(foot);
     }
 
