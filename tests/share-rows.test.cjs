@@ -45,3 +45,10 @@ test('friendCount : rien tant que la liste n’est pas chargée',()=>{
   vm.runInContext(fs.readFileSync(path.join(__dirname,'..','friends.js'),'utf8'),ctx);
   assert.equal(ctx.window.FriendsSystem.friendCount(),null);
 });
+test('Lignes aux noms non latins : chacune garde sa propre clé',()=>{
+  const R=load();const before=sheet(['Аренда','Еда','家賃']);
+  const rules=R.build(before,{s1:{months:new Set([0]),rows:new Set([0])}});
+  assert.equal(rules[0].row_key,'s1:0:аренда');
+  const moved=sheet(['Еда','Аренда','家賃']);assert.deepEqual([...R.select(moved,rules).s1.rows],[1]);
+  const gone=sheet(['Еда','家賃']);assert.equal(R.select(gone,rules).s1.rows.size,0);
+});

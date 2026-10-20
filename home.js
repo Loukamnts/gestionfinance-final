@@ -394,7 +394,7 @@
     Object.keys(Object.assign({},pm,cm)).forEach(function(n){var diff=(cm[n]||0)-(pm[n]||0);if(d<0?diff<0:diff>0){if(!best||Math.abs(diff)>Math.abs(best.diff))best={n:n,diff:diff};}});
     var pct1=Math.abs(d).toLocaleString(en()?"en-IE":"fr-FR",{maximumFractionDigits:0}),pmn=mname(prev.mi);
     if(Math.abs(d)<1)return t2("Tes dépenses sont stables par rapport à ","Your spending is stable compared with ")+pmn+"."+tail;
-    var why=best?(d<0?t2(", surtout grâce à «\u00a0",", mostly thanks to “"):t2(", surtout à cause de «\u00a0",", mostly because of “"))+best.n+t2("\u00a0» ("," (")+(best.diff<0?"−":"+")+eur(Math.abs(best.diff))+")":"";
+    var why=best?(d<0?t2(", surtout grâce à «\u00a0",", mostly thanks to “"):t2(", surtout à cause de «\u00a0",", mostly because of “"))+best.n+t2("\u00a0» (","” (")+(best.diff<0?"−":"+")+eur(Math.abs(best.diff))+")":"";
     return (d<0?t2("Tu as dépensé "+pct1+" % de moins qu’en "+pmn,"You spent "+pct1+"% less than in "+pmn):t2("Tu as dépensé "+pct1+" % de plus qu’en "+pmn,"You spent "+pct1+"% more than in "+pmn))+why+"."+tail;
   }
 

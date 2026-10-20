@@ -21,7 +21,10 @@
   function idOf(sheet,index){return String(sheet&&sheet.id||("sheet-"+index));}
   // Nom d'une ligne réduit à des lettres et chiffres : un partage suit la ligne par son nom, pas par sa position
   // (un import ou une suppression déplace les lignes ; l'ami ne doit jamais voir une autre ligne que celle choisie).
-  function rowKeyLabel(sheet,row){return normal(sheet&&sheet.rowHeaders&&sheet.rowHeaders[row]||"").replace(/[^a-z0-9]/g,"").slice(0,40);}
+  // Nom sans lettres latines (« Аренда », « 家賃 », « 🏠 Loyer ») : on garde toutes les lettres et chiffres, sinon deux lignes
+  // différentes auraient la même clé vide et l'une pourrait prendre la place de l'autre dans le partage.
+  function nameKey(text){var n=normal(text),k=n.replace(/[^a-z0-9]/g,"");if(!k)k=n.replace(/[^\p{L}\p{N}]/gu,"");return k.slice(0,40);}
+  function rowKeyLabel(sheet,row){return nameKey(sheet&&sheet.rowHeaders&&sheet.rowHeaders[row]||"");}
   function labelOf(sheet,row){var value=String(sheet&&sheet.rowHeaders&&sheet.rowHeaders[row]||"").trim();return "Ligne "+(row+1)+(value?" — "+value:"");}
   function headerOf(sheet,column){return String(sheet&&sheet.headers&&sheet.headers[column]||MONTHS[column]||column+1);}
   function rowHasData(sheet,row){if(String(sheet.rowHeaders&&sheet.rowHeaders[row]||"").trim())return true;return Object.keys(sheet.cells||{}).some(function(key){return key.indexOf(row+",")===0;});}
@@ -134,7 +137,7 @@
     try{var res=await client.from("finance_shared_sheet_snapshots").select("payload").eq("owner_id",meId).eq("friend_id",friendId).maybeSingle();
       var sheets=res&&res.data&&res.data.payload&&res.data.payload.sheets||[];
       // « Ligne N » seul = ligne publiée sans nom : retenue sous le nom vide.
-      sheets.forEach(function(sh){var set=out[String(sh.name||"")]=new Set();(sh.rowHeaders||[]).forEach(function(h){set.add(normal(String(h||"").replace(/^Ligne \d+( — |$)/,"")).replace(/[^a-z0-9]/g,"").slice(0,40));});});
+      sheets.forEach(function(sh){var set=out[String(sh.name||"")]=new Set();(sh.rowHeaders||[]).forEach(function(h){set.add(nameKey(String(h||"").replace(/^Ligne \d+( — |$)/,"")));});});
     }catch(e){}
     return out;
   }

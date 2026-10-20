@@ -363,3 +363,27 @@ test('Tableau de budget par mois : importé comme tableau, sans fenêtre « pas 
   const f={name:'budget.csv',size:40,arrayBuffer:async()=>enc('Ligne;Janvier;Février\nSalaire;2000;2000\nLoyer;-700;-700\n')};
   assert.equal(await c2.window.GFBankImport.handle(f),false);
 });
+test('Revue finale : soldes, sens +/-, montants, virements, prêts',()=>{
+  const cat=(l,a=-10)=>{const c=B.categorize({label:l,amount:a},{});return c?c[0]:null;};
+  // « Solde » seul ou avec une date : ligne de solde ; un libellé qui commence par « solde » mais parle d'autre chose est gardé
+  const {ops}=sum('Date;Libellé;Montant\n01/09/2026;SOLDE AU 01/09/2026;1200,00\n02/09/2026;SOLDES ETE ZARA;-30,00\n03/09/2026;CARTE MONOPRIX;-12,00\n30/09/2026;NOUVEAU SOLDE EN EUR;1158,00');
+  assert.equal(JSON.stringify(ops.map(o=>o.label)),JSON.stringify(['SOLDES ETE ZARA','CARTE MONOPRIX']));
+  const s2=sum('Date;Libellé;Montant;Sens\n02/09/2026;CARTE FNAC;25,00;-\n03/09/2026;VIR SALAIRE ACME;1800,00;+').ops;
+  assert.equal(JSON.stringify(s2.map(o=>o.amount)),'[-25,1800]');
+  assert.equal(B._amount('0,500'),0.5);assert.equal(B._amount('1.234,50'),1234.5);assert.equal(B._amount('1,234.50'),1234.5);
+
+  assert.notEqual(cat('CARTE 05/09 PRET A PORTER LYON'),'Crédits');
+  assert.equal(cat('PRLV ECHEANCE PRET IMMO HABITAT'),'Crédits');
+  assert.equal(cat('VIR SEPA COMPTE A COMPTE'),null);
+  assert.equal(cat('VIR VERS COMPTE JOINT'),null);
+  assert.notEqual(cat('VIR SEPA VERS COMPTE DUPONT'),null);// un virement à quelqu'un n'est pas un transfert interne
+  assert.notEqual(cat('CARTE TOP UP FITNESS'),null);
+  assert.equal(cat('Top-up by *1234',50),null);
+  assert.equal(cat('General Card Deposit',50),null);
+  assert.notEqual(cat('PRLV CAISSE RETRAITE COMPLEMENTAIRE'),'Salaire');
+});
+test('Tableau de budget repéré par des cellules de mois entières, pas par un libellé',()=>{
+  assert.equal(B._monthTable('Ligne;Janvier;Février;Mars\nLoyer;700;700;700'),true);
+  assert.equal(B._monthTable('Category;Jan 2026;Feb 2026\nRent;700;700'),true);
+  assert.equal(B._monthTable('Date;Libellé;Montant\n02/05/2026;CARTE MAISON DU MONDE MAI;-20\n03/05/2026;DECATHLON MARSEILLE;-30'),false);
+});

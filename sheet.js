@@ -1193,6 +1193,10 @@
   }
 
   // Lignes et colonnes d’une feuille exportée par l’app : correspondance directe (A1 = Janvier, ligne 1).
+  function nativeHeadersIntact(g) {
+    for (let c = 1; c <= 12; c++) { const x = gridCell(g, 0, c), m = x ? parseMonthHeader(x.v) : null; if (!m || m.m !== c - 1) return false; }
+    return true;
+  }
   function nativeSheetBlocks(g, key, meta) {
     const cols = Math.min(NATIVE_MAX_COLS, Math.max(12, (meta && meta.cols) || 12, g.nCols - 1));
     const block = { id: 0, header: { r: 0, months: [] }, r0: 1, r1: g.nRows - 1, colMap: {}, labelCol: 0, rows: [], keys: [key], ignored: [], native: true };
@@ -1396,7 +1400,9 @@
       return targets.get(key);
     };
     const analyses = sources.map((src) => {
-      const a = src.meta ? nativeSheetBlocks(src.g, "native:" + src.name, src.meta) : analyzeSheet(src.g, src.name, ctx);
+      // Export Meuniance relu tel quel seulement si ses en-têtes de mois sont encore à leur place
+      // (une colonne insérée dans Excel décalerait tous les mois) ; sinon lecture normale.
+      const a = src.meta && nativeHeadersIntact(src.g) ? nativeSheetBlocks(src.g, "native:" + src.name, src.meta) : analyzeSheet(src.g, src.name, ctx);
       a.src = src;
       summary.droppedCells += src.g.dropped;
       if (src.g.truncated) summary.droppedRows++;
