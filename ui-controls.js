@@ -22,7 +22,6 @@ const modalSelectors=[
   "dialog[open]",
   ".onboarding-overlay:not(.hidden)",
   ".tutorial-overlay:not(.hidden)",
-  ".wizard-blocker:not(.hidden)",
   ".tutorial-blocker:not(.hidden)",
   ".studio-sidebar.is-mobile-open"
 ];

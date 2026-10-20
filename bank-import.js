@@ -1,6 +1,8 @@
-/* Import d'un relevé bancaire (CSV) : le fichier est lu uniquement dans le navigateur.
+/* Import d'un relevé bancaire (CSV, ou Excel au même format) : le fichier est lu uniquement dans le navigateur.
    Les opérations sont regroupées par catégorie et par mois, puis écrites dans le tableur
-   (une ligne par catégorie, une colonne par mois). Rien d'autre que ces totaux n'est conservé. */
+   (une ligne par catégorie, une colonne par mois). Le fichier n'est pas gardé ; sur l'appareil restent les totaux,
+   une empreinte de chaque opération (pour ne rien compter deux fois), les choix de catégorie par marchand
+   et l'historique des abonnements repérés. */
 (function(){
   "use strict";
   var MN=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
