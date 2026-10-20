@@ -541,6 +541,11 @@
       try{h.focus({preventScroll:true});}catch(e){}
     });
   }
+  function looksLikeMonthTable(text){
+    var head=norm(String(text).split(/\r?\n/).slice(0,15).join(" "));
+    var n=0;["janv","fev","mars","avr","mai","juin","juil","aout","sept","oct","nov","dec","jan","feb","mar","apr","may","jun","jul","aug","sep"].forEach(function(m){if(new RegExp("\\b"+m).test(head))n++;});
+    return n>=2;
+  }
   // Fichier qui n'est pas un relevé : on le dit, et on propose de l'importer comme un simple tableau.
   function notStatement(empty){
     return new Promise(function(resolve){
@@ -574,6 +579,8 @@
         text=decode(buf);
         if(!text.replace(/[\s;,]/g,""))return notStatement(true);
         ops=parse(text);
+        // Tableau de budget (« Ligne ; Janvier ; Février… ») : c'est un tableau, pas un relevé, on l'importe comme tel.
+        if(!ops&&looksLikeMonthTable(text))return false;
         if(!ops)return notStatement(false);
       }
       var summary=summarize(ops);if(!summary.groups.length)return excel?false:notStatement(false);

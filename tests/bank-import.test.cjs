@@ -358,3 +358,8 @@ test('Ligne de solde ignorée ; relevé d’une seule opération accepté ; UTF-
   const txt='Date;Libellé;Montant\n02/09/2026;CB LIDL;-20,00\n03/09/2026;CB FNAC;-5,00\n';const be=Buffer.alloc(2+txt.length*2);be[0]=0xFE;be[1]=0xFF;for(let i=0;i<txt.length;i++)be.writeUInt16BE(txt.charCodeAt(i),2+i*2);
   assert.equal(B.parse(B._decode(be.buffer.slice(be.byteOffset,be.byteOffset+be.length))).length,2);
 });
+test('Tableau de budget par mois : importé comme tableau, sans fenêtre « pas un relevé »',async()=>{
+  const c2={window:{},TextDecoder,Intl,document:{}};vm.createContext(c2);vm.runInContext(fs.readFileSync(path.join(__dirname,'..','bank-import.js'),'utf8'),c2);
+  const f={name:'budget.csv',size:40,arrayBuffer:async()=>enc('Ligne;Janvier;Février\nSalaire;2000;2000\nLoyer;-700;-700\n')};
+  assert.equal(await c2.window.GFBankImport.handle(f),false);
+});
