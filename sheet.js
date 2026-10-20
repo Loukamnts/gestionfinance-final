@@ -922,280 +922,720 @@
   }
 
   // ═════════════════════ Import / Export .xlsx (multi-feuilles) ════
+  // Textes de l’import et de l’export : français, anglais si l’interface l’est.
+  function tr(fr, en) {
+    try { return window.GFI18n && typeof window.GFI18n.getLanguage === "function" && window.GFI18n.getLanguage() === "en" ? en : fr; } catch (e) { return fr; }
+  }
+  // Le modèle tient en 12 mois et quelques colonnes : un fichier creux (une cellule
+  // perdue en XFD5000) ou énorme gèlerait l’onglet sans rien apporter.
+  const IMPORT_MAX_BYTES = 15 * 1024 * 1024;
+  const IMPORT_MAX_ROWS = 2000;      // lignes gardées par année
+  const IMPORT_SRC_ROWS = 6000;      // lignes lues dans une feuille source
+  const IMPORT_SRC_COLS = 80;        // colonnes lues dans une feuille source
+  const NATIVE_MAX_COLS = 26;        // colonnes rendues pour un fichier exporté par l’app
+  // Feuille très masquée écrite à l’export : elle permet de relire le fichier sans perte
+  // (noms d’années, lignes vides, montants tapés « 2 500,50 »).
+  const META_SHEET = "_meuniance", META_TAG = "meuniance-export-1";
+  // Seules les fonctions que le tableur sait calculer restent des formules : le reste
+  // (HYPERLINK, WEBSERVICE, liens DDE…) est remplacé par sa valeur, jamais réexporté vivant.
+  const SAFE_FUNCS = new Set(["SUM", "SOMME", "AVERAGE", "MOYENNE", "MIN", "MAX", "COUNT", "NB"]);
+
   function sanitizeSheetName(name, idx, wb) {
-    let n = String(name || ("Feuille " + (idx + 1))).replace(/[:\\/?*[\]]/g, "").slice(0, 28).trim() || ("Feuille " + (idx + 1));
+    // Excel refuse : \ / ? * [ ], plus de 31 caractères et une apostrophe au bord.
+    let n = String(name || "").replace(/[:\\/?*[\]]/g, " ").replace(/\s+/g, " ").trim().replace(/^'+|'+$/g, "").slice(0, 31).trim();
+    if (!n || n.toLowerCase() === "history" || n === META_SHEET) n = "Feuille " + (idx + 1);
+    const taken = (x) => wb.SheetNames.some((s) => s.toLowerCase() === x.toLowerCase());
     let base = n, i = 1;
-    while (wb.SheetNames.indexOf(n) >= 0) { i++; n = base.slice(0, 25) + " (" + i + ")"; }
+    while (taken(n)) { i++; n = base.slice(0, 26).trim() + " (" + i + ")"; }
     return n;
   }
-  function shiftFormulaRows(formula, delta) {
-    // Décale les numéros de ligne des références de cellules (ex: B2 -> B1).
-    // Évite de corrompre les notations scientifiques en ignorant les chiffres
-    // non précédés d'une lettre. Ne touche pas aux noms de fonctions.
-    return String(formula).replace(/([A-Z]+)(\d+)/g, (m, col, row) => {
-      const r = parseInt(row, 10) + delta;
-      return col + (r < 1 ? 1 : r);
-    });
-  }
-  // Normalise un nom de mois vers la forme canonique (capitalisé)
-  function normalizeMonthHeader(label) {
-    if (!label) return null;
-    var s = String(label).trim().toLowerCase();
-    // Correspondance partielle : "janv", "jan", "janvier", etc.
-    var map = {
-      "janvier":"Janvier","janv":"Janvier","jan":"Janvier","fevrier":"Février","février":"Février","fev":"Février","fév":"Février",
-      "mars":"Mars","mar":"Mars","avril":"Avril","avr":"Avril","mai":"Mai","juin":"Juin","juil":"Juillet",
-      "juillet":"Juillet","aout":"Août","août":"Août","septembre":"Septembre","sept":"Septembre","sep":"Septembre",
-      "octobre":"Octobre","oct":"Octobre","novembre":"Novembre","nov":"Novembre","decembre":"Décembre","décembre":"Décembre","dec":"Décembre","déc":"Décembre"
-    };
-    return map[s] || null;
+
+  // ── Mois ──
+  const MONTH_WORDS = (function () {
+    const out = {};
+    [["janvier", "janv", "jan", "january"], ["fevrier", "fevr", "fev", "feb", "febr", "february"], ["mars", "mar", "march"],
+     ["avril", "avr", "apr", "april"], ["mai", "may"], ["juin", "jun", "june"], ["juillet", "juil", "jul", "july"],
+     ["aout", "aou", "aug", "august"], ["septembre", "sept", "sep", "september"], ["octobre", "oct", "october"],
+     ["novembre", "nov", "november"], ["decembre", "dec", "december"]]
+      .forEach((list, i) => list.forEach((w) => { out[w] = i; }));
+    return out;
+  })();
+  function plainText(v) { return String(v == null ? "" : v).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim(); }
+  function isYearNumber(y) { return Number.isInteger(y) && y >= 1990 && y <= 2100; }
+  // En-tête de mois → { m: 0-11, y: année ou null }. « Janvier », « janv. », « févr », « Sept »,
+  // « January », « Jan 2026 », « janv.-26 », « 01/2026 », « 2026-01 » ou une vraie date Excel.
+  function parseMonthHeader(v) {
+    if (v instanceof Date) {
+      if (isNaN(v.getTime())) return null;
+      // +12 h : une date « 1er du mois » lue en UTC ne bascule pas au mois précédent.
+      const d = new Date(v.getTime() + 12 * 3600 * 1000);
+      return { m: d.getMonth(), y: d.getFullYear() };
+    }
+    if (typeof v !== "string") return null;
+    const s = plainText(v).replace(/\./g, " ").replace(/\s+/g, " ").trim();
+    if (!s || s.length > 24) return null;
+    let x = s.match(/^(\d{1,2})[\/\-](\d{4})$/);
+    if (x) return +x[1] >= 1 && +x[1] <= 12 ? { m: +x[1] - 1, y: +x[2] } : null;
+    x = s.match(/^(\d{4})[\/\-](\d{1,2})(?:[\/\-]\d{1,2})?(?:t[\d:.z+\-]*)?$/);
+    if (x) return +x[2] >= 1 && +x[2] <= 12 ? { m: +x[2] - 1, y: +x[1] } : null;
+    x = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (x) return +x[2] >= 1 && +x[2] <= 12 && +x[1] >= 1 && +x[1] <= 31 ? { m: +x[2] - 1, y: +x[3] } : null;
+    x = s.match(/^([a-z]+)(?:[ \-']+(\d{4}|\d{2}))?$/);
+    if (x && Object.prototype.hasOwnProperty.call(MONTH_WORDS, x[1])) {
+      let y = x[2] ? +x[2] : null;
+      if (y !== null && y < 100) y += 2000;
+      return { m: MONTH_WORDS[x[1]], y: isYearNumber(y) ? y : null };
+    }
+    return null;
   }
 
-  // Détecte si la première colonne contient des titres de lignes (labels textuels)
-  function hasRowTitleColumn(aoa) {
-    if (!aoa || aoa.length < 2) return false;
-    // Vérifie si la première colonne a des valeurs textuelles dans la plupart des lignes
-    var textCount = 0, dataRows = 0;
-    for (var ri = 1; ri < aoa.length; ri++) {
-      var row = aoa[ri] || [];
-      var val = row[0];
-      if (val != null && String(val).trim() !== "") {
-        dataRows++;
-        if (typeof val === "string" || (typeof val === "number" && isNaN(val))) textCount++;
-        else if (typeof val === "number") {
-          // Les nombres dans la première colonne indiquent qu'il n'y a pas de titres de lignes
-          return false;
-        }
+  // ── Grille source : cellules { v, f } aux coordonnées exactes du fichier ──
+  function importCellValue(cell) {
+    if (!cell || cell.t === "e" || cell.v == null) return null;
+    const v = cell.v;
+    if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+    if (typeof v === "number") return Number.isFinite(v) ? v : null;
+    if (typeof v === "boolean") return v ? "VRAI" : "FAUX";
+    const s = String(v).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").trim();
+    return s === "" ? null : s.slice(0, 2000);
+  }
+  function emptyGrid() { return { rows: [], nRows: 0, nCols: 0, dropped: 0, truncated: false, transposed: false }; }
+  function gridPut(g, r, c, v, f) {
+    if (r >= IMPORT_SRC_ROWS || c >= IMPORT_SRC_COLS) { g.dropped++; return; }
+    (g.rows[r] || (g.rows[r] = []))[c] = { v, f: f || null };
+    if (r + 1 > g.nRows) g.nRows = r + 1;
+    if (c + 1 > g.nCols) g.nCols = c + 1;
+  }
+  function gridCell(g, r, c) { const row = g.rows[r]; return row ? row[c] || null : null; }
+  function gridFromWorksheet(ws) {
+    const g = emptyGrid();
+    if (!ws) return g;
+    g.truncated = !!(ws["!fullref"] && ws["!ref"] && ws["!fullref"] !== ws["!ref"]);
+    for (const addr in ws) {
+      if (addr.charAt(0) === "!") continue;
+      const rc = refToRC(addr), cell = ws[addr];
+      if (!rc || !cell) continue;
+      const v = importCellValue(cell);
+      if (v === null && !cell.f) continue;
+      gridPut(g, rc.r, rc.c, v, cell.f ? String(cell.f) : null);
+    }
+    return g;
+  }
+  function gridFromAoa(aoa) {
+    const g = emptyGrid();
+    (aoa || []).forEach((row, r) => (row || []).forEach((val, c) => {
+      const v = importCellValue({ v: val });
+      if (v !== null) gridPut(g, r, c, v, null);
+    }));
+    return g;
+  }
+  function transposeGrid(g) {
+    const t = emptyGrid();
+    for (let r = 0; r < g.nRows; r++) {
+      const row = g.rows[r]; if (!row) continue;
+      for (let c = 0; c < row.length; c++) if (row[c]) gridPut(t, c, r, row[c].v, row[c].f);
+    }
+    t.dropped += g.dropped; t.truncated = g.truncated; t.transposed = !g.transposed;
+    return t;
+  }
+  function isLeadingZeroCode(s) { return typeof s === "string" && /^[+-]?0\d/.test(s.trim()); }
+  function isNumericValue(v) {
+    if (typeof v === "number" || v instanceof Date) return true;
+    return typeof v === "string" && !isLeadingZeroCode(v) && Number.isFinite(parseAmount(v));
+  }
+  // Une cellule « compte » dans un SOMME Excel : nombre, date ou formule.
+  function cellCounts(cell) { return !!cell && (!!cell.f || typeof cell.v === "number" || cell.v instanceof Date); }
+  function labelText(v) {
+    if (v === null || v === undefined) return "";
+    if (v instanceof Date) return String(v.getDate()).padStart(2, "0") + "/" + String(v.getMonth() + 1).padStart(2, "0") + "/" + v.getFullYear();
+    return String(v).replace(/\s+/g, " ").trim().slice(0, 200);
+  }
+  // Valeur → contenu brut de cellule. Les montants écrits en texte (« 1.234,56 », « (45.00) »,
+  // « 2 500,00 € ») deviennent des nombres, comme le tableur et l’accueil les lisent.
+  function valueToRaw(v) {
+    if (v === null || v === undefined) return "";
+    if (typeof v === "number") return Number.isFinite(v) ? String(v === 0 ? 0 : v) : "";
+    if (v instanceof Date) return v.getFullYear() + "-" + String(v.getMonth() + 1).padStart(2, "0") + "-" + String(v.getDate()).padStart(2, "0");
+    const s = String(v);
+    if (!isLeadingZeroCode(s)) { const n = parseAmount(s); if (Number.isFinite(n)) return String(n); }
+    // Un texte « =… » deviendrait une formule : l’apostrophe le garde en texte, comme dans Excel.
+    return s.charAt(0) === "=" ? "'" + s : s;
+  }
+
+  // ── En-têtes ──
+  const LABEL_HEADER = /^(categories?|postes?|libelles?|intitules?|items?|labels?|descriptions?|designations?|rubriques?|lignes?|noms?|names?|mois|months?|budget|nature|depenses?|revenus?)$/;
+  const SIDE_HEADER = /^(types?|kinds?|sens|groupes?|groups?|sections?|notes?|commentaires?|comments?|remarques?|frequences?|frequency|comptes?|accounts?|total|totaux|moyenne|average|sum|somme)$/;
+  // Ligne d’en-tête : au moins un mois, aucun montant (une année en tête est permise).
+  function analyzeHeaderRow(g, r) {
+    const row = g.rows[r]; if (!row) return null;
+    const months = []; let nums = 0, texts = 0, year = null, yearCol = -1;
+    for (let c = 0; c < row.length; c++) {
+      const cell = row[c]; if (!cell || cell.v === null) continue;
+      const v = cell.v, mh = parseMonthHeader(v);
+      if (mh) { months.push({ c, m: mh.m, y: mh.y }); continue; }
+      const asYear = typeof v === "number" ? v : (typeof v === "string" && /^\d{4}$/.test(v) ? +v : NaN);
+      if (year === null && !months.length && isYearNumber(asYear)) { year = asYear; yearCol = c; continue; }
+      if (isNumericValue(v)) nums++; else texts++;
+    }
+    if (nums > 0 || !months.length) return null;
+    // Un seul mois : il doit être dans une colonne de données, pas un intitulé « Mai » isolé.
+    if (months.length === 1 && (months[0].c === 0 || texts > 3)) return null;
+    return { r, months, year, yearCol };
+  }
+  // Mois écrits en lignes (« Mois | Salaire | Loyer » puis « Janvier | 2500 | -800 ») : colonne de mois.
+  function findMonthColumn(g) {
+    for (let c = 0; c < Math.min(g.nCols, 4); c++) {
+      let hits = 0, dup = false;
+      const seen = new Set();
+      for (let r = 0; r < g.nRows; r++) {
+        const cell = gridCell(g, r, c), mh = cell && parseMonthHeader(cell.v); if (!mh) continue;
+        const row = g.rows[r];
+        if (!row.some((x, k) => k !== c && x && (x.f || isNumericValue(x.v)))) continue;
+        // Deux fois le même mois : ce sont des dates d’opérations, pas une ligne par mois.
+        const id = mh.y + ":" + mh.m; if (seen.has(id)) dup = true; seen.add(id);
+        hits++;
+      }
+      if (hits >= 2 && !dup) return c;
+    }
+    return -1;
+  }
+  // Liste d’opérations (Date | Libellé | Montant) : elle relève de l’import de relevé.
+  function looksLikeTransactions(g) {
+    let dateRows = 0, dupMonth = false;
+    const seen = new Set();
+    for (let r = 0; r < Math.min(g.nRows, 40); r++) {
+      const row = g.rows[r]; if (!row) continue;
+      const texts = row.filter((x) => x && typeof x.v === "string").map((x) => plainText(x.v));
+      if (texts.some((t) => /^date/.test(t)) && texts.some((t) => /montant|amount|debit|credit|libelle|description|operation/.test(t))) return true;
+      const d = row.find((x) => x && (x.v instanceof Date || (typeof x.v === "string" && /^\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}$/.test(x.v))));
+      if (d && row.some((x) => x && typeof x.v === "number")) {
+        dateRows++;
+        const mh = parseMonthHeader(d.v), id = mh ? mh.y + ":" + mh.m : "?";
+        if (seen.has(id)) dupMonth = true; seen.add(id);
       }
     }
-    // Si au moins 60% des lignes ont du texte en première colonne, c'est probablement des titres
-    return dataRows > 0 && textCount / dataRows >= 0.6;
+    // Plusieurs dates dans un même mois : des opérations, pas un tableau mensuel.
+    return dateRows >= 3 && dupMonth;
   }
+  function yearFromText(s) { const m = String(s || "").match(/(?:^|\D)((?:19|20|21)\d{2})(?!\d)/); return m && isYearNumber(+m[1]) ? +m[1] : null; }
 
-  function isMonthHeaderRow(row) {
-    if (!Array.isArray(row) || row.length < 2) return false;
-    var first = String(row[0] || "").trim().toLowerCase();
-    if (!/^(mois|month|periode|p[ée]riode)$/.test(first)) return false;
-    return row.slice(1).some(function (v) { return !!normalizeMonthHeader(v); });
-  }
-
-  function fillSheetFromAoa(sheet, aoa, ws) {
-    sheet.cells = {}; sheet.headers = []; sheet.rowHeaders = [];
-    let maxR = -1, maxC = 0;
-
-    var hasRowTitles = hasRowTitleColumn(aoa);
-    var dataStartCol = hasRowTitles ? 1 : 0;
-
-    // Ligne d'en-tête par défaut = première ligne. Mais si une ligne "Mois"
-    // (cellule "Mois" + noms de mois) existe ailleurs, on la promeut comme
-    // source des en-têtes de colonnes et on l'ignore des données.
-    var headerRow = aoa[0] || [];
-    var monthHeaderRowIndex = -1;
-    for (var hri = 0; hri < aoa.length; hri++) {
-      if (isMonthHeaderRow(aoa[hri])) { headerRow = aoa[hri]; monthHeaderRowIndex = hri; break; }
+  // ── Analyse d’une feuille → blocs { lignes source → année, colonnes source → mois } ──
+  function analyzeSheet(g, sheetName, ctx) {
+    let headers = [];
+    for (let r = 0; r < g.nRows; r++) { const h = analyzeHeaderRow(g, r); if (h) headers.push(h); }
+    if (!headers.length) {
+      if (looksLikeTransactions(g)) return { g, blocks: [], reason: "transactions" };
+      const mc = findMonthColumn(g);
+      if (mc >= 0) {
+        g = transposeGrid(g);
+        for (let r = 0; r < g.nRows; r++) { const h = analyzeHeaderRow(g, r); if (h) headers.push(h); }
+      }
     }
-
-    // Construit la map colonne source -> colonne mois cible (0-11)
-    // Si l'en-tête est un mois reconnu (ex: "Août" -> 7, "Novembre" -> 10),
-    // les données de cette colonne seront placées dans la colonne du mois correspondant.
-    var monthMap = {};
-    var MONTH_ORDER = {"Janvier":0,"Février":1,"Mars":2,"Avril":3,"Mai":4,"Juin":5,"Juillet":6,"Août":7,"Septembre":8,"Octobre":9,"Novembre":10,"Décembre":11};
-    headerRow.forEach(function(val, ci) {
-      if (ci < dataStartCol) return;
-      var normalized = normalizeMonthHeader(val);
-      if (normalized && MONTH_ORDER.hasOwnProperty(normalized)) {
-        monthMap[ci] = MONTH_ORDER[normalized];
-      }
-    });
-    var hasMonthMapping = Object.keys(monthMap).length > 0;
-
-    // Construit les en-têtes de colonnes en normalisant les mois
-    headerRow.forEach((val, ci) => {
-      if (ci < dataStartCol) return; // Ignore la colonne des titres de lignes
-      var normalized = normalizeMonthHeader(val);
-      sheet.headers[ci - dataStartCol] = normalized || (val == null || val === "" ? colToLetter(ci - dataStartCol) : String(val));
-      maxC = Math.max(maxC, ci - dataStartCol);
-    });
-
-    // Importe les titres de lignes et les données en sautant la ligne "Mois"
-    // et en compactant l'index (les données remontent d'une case).
-    var dataRowIndex = 0;
-    for (let ri = 1; ri < aoa.length; ri++) {
-      const row = aoa[ri];
-      if (!row) continue;
-      if (ri === monthHeaderRowIndex || isMonthHeaderRow(row)) continue;
-      // Une ligne entièrement vide dans Excel ne doit pas créer un trou dans
-      // le tableur importé ni gonfler artificiellement son nombre de lignes.
-      if (!row.some(function(value) { return value != null && String(value).trim() !== ""; })) continue;
-      if (hasRowTitles) {
-        var label = row[0];
-        if (label != null && String(label).trim() !== "") {
-          sheet.rowHeaders[dataRowIndex] = String(label).trim();
-          maxR = Math.max(maxR, dataRowIndex);
+    if (!headers.length) return { g, blocks: [], reason: looksLikeTransactions(g) ? "transactions" : (g.nRows ? "nomonths" : "empty") };
+    const nameYear = yearFromText(sheetName);
+    const blocks = [];
+    headers.forEach((h, i) => {
+      const r1 = i + 1 < headers.length ? headers[i + 1].r - 1 : g.nRows - 1;
+      let year = h.year;
+      if (year === null) {
+        const ys = h.months.map((x) => x.y).filter((y) => y !== null);
+        if (!ys.length) year = nameYear;
+        if (year === null && !ys.length && i === 0) {
+          // Titre au-dessus du tableau (« Mon budget 2026 »).
+          for (let r = 0; r < h.r && year === null; r++) (g.rows[r] || []).forEach((x) => { if (year === null && x && typeof x.v === "string") year = yearFromText(x.v); });
         }
       }
-      row.forEach((val, ci) => {
-        if (ci < dataStartCol) return;
-        if (val == null || val === "") return;
-        // Si on a une map mois, placer la donnée dans la colonne du mois correspondant
-        var targetC;
-        if (hasMonthMapping && monthMap[ci] !== undefined) {
-          targetC = monthMap[ci];
-        } else {
-          targetC = ci - dataStartCol;
-        }
-        const addr = XLSX.utils.encode_cell({ r: ri, c: ci }); const cellObj = ws ? ws[addr] : null;
-        let raw;
-        if (cellObj && cellObj.f) raw = "=" + shiftFormulaRows(cellObj.f, -1);
-        else if (typeof val === "number") raw = String(val);
-        else raw = String(val);
-        sheet.cells[cellKey(dataRowIndex, targetC)] = { raw };
-        maxR = Math.max(maxR, dataRowIndex); maxC = Math.max(maxC, targetC);
+      const block = { id: blocks.length, header: h, r0: h.r + 1, r1, colMap: {}, labelCol: -1, rows: [], keys: [], ignored: [] };
+      const seen = new Set();
+      h.months.forEach((x) => {
+        const y = x.y !== null ? x.y : year;
+        const key = y !== null ? String(y) : "name:" + sheetName;
+        if (seen.has(key + ":" + x.m)) { ctx.dupMonths++; return; }
+        seen.add(key + ":" + x.m);
+        block.colMap[x.c] = { key, m: x.m, year: y };
+        if (block.keys.indexOf(key) < 0) block.keys.push(key);
       });
-      dataRowIndex++;
-    }
-    sheet.cols = Math.max(DEFAULT_COLS, maxC + 1);
-    // Un import rempli restitue exactement ses lignes utiles. Un fichier vide
-    // affiche néanmoins une grille complète, prête à être saisie.
-    sheet.rows = maxR >= 0 ? maxR + 1 : DEFAULT_ROWS;
-    for (let c = 0; c < sheet.cols; c++) if (!sheet.headers[c]) sheet.headers[c] = colToLetter(c);
-    enforceMonthHeaders(sheet);
+      const firstMonthCol = Math.min.apply(null, Object.keys(block.colMap).map(Number));
+      // Colonne des intitulés : vote majoritaire (une ligne « 2026 » ou un n° de compte ne la
+      // disqualifie pas), l’en-tête départage « Catégorie » et « Type ».
+      let best = -1, bestScore = -Infinity;
+      for (let c = 0; c < firstMonthCol; c++) {
+        let filled = 0, text = 0;
+        for (let r = block.r0; r <= r1; r++) {
+          const cell = gridCell(g, r, c); if (!cell || cell.v === null) continue;
+          filled++; if (!isNumericValue(cell.v)) text++;
+        }
+        if (!filled || text * 2 < filled) continue;
+        const hc = gridCell(g, h.r, c), ht = hc && c !== h.yearCol ? plainText(hc.v) : "";
+        const score = (LABEL_HEADER.test(ht) ? 3 : 0) + (ht ? 0 : 2) + (SIDE_HEADER.test(ht) ? -4 : 0) + text / filled - c * 0.01;
+        if (score > bestScore) { bestScore = score; best = c; }
+      }
+      block.labelCol = best;
+      for (let r = block.r0; r <= r1; r++) {
+        const row = g.rows[r]; if (!row) continue;
+        const label = best >= 0 ? labelText(gridCell(g, r, best) && gridCell(g, r, best).v) : "";
+        const hasData = Object.keys(block.colMap).some((c) => { const x = row[c]; return x && (x.v !== null || x.f); });
+        if (!label && !hasData) continue;
+        block.rows.push({ r, label });
+      }
+      // Colonnes en plus (Total, Type, notes…) : ignorées, mais citées dans le résumé.
+      for (let c = 0; c < g.nCols; c++) {
+        if (c === best || block.colMap[c]) continue;
+        let used = false;
+        for (let k = 0; k < block.rows.length && !used; k++) { const x = gridCell(g, block.rows[k].r, c); used = !!(x && x.v !== null); }
+        if (!used) continue;
+        const hc = gridCell(g, h.r, c);
+        block.ignored.push(hc && hc.v !== null ? labelText(hc.v) : colToLetter(c));
+      }
+      if (block.keys.length) blocks.push(block);
+    });
+    return { g, blocks, reason: blocks.length ? "" : "nomonths" };
   }
-  function readWorkbook(file) {
+
+  // Lignes et colonnes d’une feuille exportée par l’app : correspondance directe (A1 = Janvier, ligne 1).
+  function nativeSheetBlocks(g, key, meta) {
+    const cols = Math.min(NATIVE_MAX_COLS, Math.max(12, (meta && meta.cols) || 12, g.nCols - 1));
+    const block = { id: 0, header: { r: 0, months: [] }, r0: 1, r1: g.nRows - 1, colMap: {}, labelCol: 0, rows: [], keys: [key], ignored: [], native: true };
+    for (let c = 1; c <= cols; c++) block.colMap[c] = { key, m: c - 1, year: yearFromText(key) };
+    const rows = Math.max(g.nRows - 1, (meta && meta.rows) || 0);
+    for (let r = 1; r <= rows; r++) { const x = gridCell(g, r, 0); block.rows.push({ r, label: x ? labelText(x.v) : "" }); }
+    if (g.nCols - 1 > cols) block.ignored.push(colToLetter(cols) + "…");
+    return { g, blocks: [block], reason: "" };
+  }
+
+  // ── Formules : chaque référence suit la vraie correspondance source → tableur ──
+  // Retourne « =… » ou null (formule non prise en charge : on garde alors sa valeur).
+  // Excel n’enregistre que les noms anglais : SOMME, MOYENNE et NB sont écrits SUM, AVERAGE et COUNT.
+  const EXCEL_NAMES = { SOMME: "SUM", MOYENNE: "AVERAGE", NB: "COUNT" };
+  function convertFormula(f, mapRef, mapRange, rename) {
+    let s = String(f || "").trim();
+    if (s.charAt(0) === "=") s = s.slice(1);
+    if (!s || s.length > 2000) return null;
+    let out = "", i = 0, m;
+    while (i < s.length) {
+      const ch = s[i], rest = s.slice(i);
+      if (/\s/.test(ch)) { out += " "; i++; continue; }
+      if ("+-*/(),".indexOf(ch) >= 0) { out += ch; i++; continue; }
+      if ((m = rest.match(/^[0-9]+(?:\.[0-9]+)?(?![0-9A-Za-z_.%:])/))) { out += m[0]; i += m[0].length; continue; }
+      if ((m = rest.match(/^\$?[A-Za-z]{1,3}\$?[0-9]{1,7}:\$?[A-Za-z]{1,3}\$?[0-9]{1,7}(?![A-Za-z0-9_(.!:])/))) {
+        const ends = m[0].split(":"), a = refToRC(ends[0]), b = refToRC(ends[1]);
+        const t = a && b ? mapRange(Math.min(a.r, b.r), Math.min(a.c, b.c), Math.max(a.r, b.r), Math.max(a.c, b.c)) : null;
+        if (!t) return null;
+        out += colToLetter(t.c0) + (t.r0 + 1) + ":" + colToLetter(t.c1) + (t.r1 + 1); i += m[0].length; continue;
+      }
+      if ((m = rest.match(/^\$?[A-Za-z]{1,3}\$?[0-9]{1,7}(?![A-Za-z0-9_(.!:])/))) {
+        const rc = refToRC(m[0]), t = rc ? mapRef(rc.r, rc.c) : null;
+        if (!t) return null;
+        out += colToLetter(t.c) + (t.r + 1); i += m[0].length; continue;
+      }
+      if ((m = rest.match(/^(?:_xlfn\.)?([A-Za-z][A-Za-z0-9_.]*)\s*\(/))) {
+        const name = m[1].toUpperCase();
+        if (!SAFE_FUNCS.has(name)) return null;
+        out += ((rename && rename[name]) || name) + "("; i += m[0].length; continue;
+      }
+      if ((m = rest.match(/^(TRUE|FALSE|VRAI|FAUX)(?![A-Za-z0-9_(.!])/i))) { out += m[1].toUpperCase(); i += m[0].length; continue; }
+      return null;
+    }
+    try { parse(tokenize("=" + out)); } catch (e) { return null; }
+    return "=" + out.trim();
+  }
+  // Une plage reste valable si ses lignes et colonnes gardées restent contiguës et si ce
+  // qu’on laisse de côté (en-tête, intitulés, lignes vides) ne contient aucun montant.
+  function contiguous(list) {
+    if (!list.length) return null;
+    const sorted = list.slice().sort((a, b) => a - b);
+    for (let i = 1; i < sorted.length; i++) if (sorted[i] !== sorted[i - 1] + 1) return null;
+    return { lo: sorted[0], hi: sorted[sorted.length - 1] };
+  }
+  function makeMapper(state) {
+    // state : { g, rowBlock[], rowTarget: Map("r|key" → ligne), key }
+    const g = state.g;
+    const toGrid = (r, c) => (g.transposed ? { r: c, c: r } : { r, c });
+    function rowIn(r, key) { const t = state.rowTarget.get(r + "|" + key); return t === undefined ? null : t; }
+    function mapRef(r0, c0) {
+      const p = toGrid(r0, c0), block = state.rowBlock[p.r], info = block && block.colMap[p.c];
+      if (!info || info.key !== state.key) return null;
+      const tr0 = rowIn(p.r, state.key);
+      return tr0 === null ? null : { r: tr0, c: info.m };
+    }
+    function mapRange(ar0, ac0, ar1, ac1) {
+      let a = toGrid(ar0, ac0), b = toGrid(ar1, ac1);
+      const r0 = Math.min(a.r, b.r), r1 = Math.min(Math.max(a.r, b.r), g.nRows - 1), c0 = Math.min(a.c, b.c), c1 = Math.min(Math.max(a.c, b.c), g.nCols - 1);
+      if ((r1 - r0 + 1) * (c1 - c0 + 1) > 400000) return null;
+      const rows = [], blocks = [];
+      for (let r = r0; r <= r1; r++) {
+        const t = rowIn(r, state.key);
+        if (t === null) { for (let c = c0; c <= c1; c++) if (cellCounts(gridCell(g, r, c))) return null; continue; }
+        rows.push(t);
+        const bl = state.rowBlock[r]; if (blocks.indexOf(bl) < 0) blocks.push(bl);
+      }
+      const rr = contiguous(rows); if (!rr) return null;
+      const cols = [];
+      for (let c = c0; c <= c1; c++) {
+        const infos = blocks.map((bl) => bl.colMap[c]);
+        const ok = infos.every((x) => x && x.key === state.key && x.m === infos[0].m);
+        if (!ok) {
+          if (infos.some((x) => x && x.key === state.key)) return null; // mois différents selon les blocs
+          for (let r = r0; r <= r1; r++) if (cellCounts(gridCell(g, r, c))) return null;
+          continue;
+        }
+        cols.push(infos[0].m);
+      }
+      const cc = contiguous(cols); if (!cc) return null;
+      return { r0: rr.lo, r1: rr.hi, c0: cc.lo, c1: cc.hi };
+    }
+    return { mapRef, mapRange };
+  }
+  // Forme comparable d’une formule (casse, espaces, noms français) : « =somme(a1:a2) » = « =SUM(A1:A2) ».
+  function canonFormula(f) {
+    return convertFormula(f, (r, c) => ({ r, c }), (r0, c0, r1, c1) => ({ r0, c0, r1, c1 }), EXCEL_NAMES);
+  }
+
+  // ── Lecture du fichier ──
+  function decodeText(bytes) {
+    if (bytes[0] === 0xFF && bytes[1] === 0xFE) return new TextDecoder("utf-16le").decode(bytes.subarray(2));
+    if (bytes[0] === 0xFE && bytes[1] === 0xFF) return new TextDecoder("utf-16be").decode(bytes.subarray(2));
+    const start = bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF ? 3 : 0;
+    try { return new TextDecoder("utf-8", { fatal: true }).decode(bytes.subarray(start)); }
+    catch (e) { return new TextDecoder("windows-1252").decode(bytes.subarray(start)); }
+  }
+  function splitDelimited(text, sep) {
+    const rows = []; let row = [], field = "", quoted = false, i = 0;
+    for (; i < text.length; i++) {
+      const ch = text[i];
+      if (quoted) {
+        if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else quoted = false; }
+        else field += ch;
+      } else if (ch === '"' && field === "") quoted = true;
+      else if (ch === sep) { row.push(field); field = ""; }
+      else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(field); rows.push(row); row = []; field = ""; if (rows.length > IMPORT_SRC_ROWS) break; }
+      else field += ch;
+    }
+    if (field !== "" || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+  // Séparateur le plus régulier parmi ; tabulation , | (le « ; » d’abord : en français la virgule est décimale).
+  function guessSeparator(text) {
+    const sample = text.split(/\r?\n/).filter((l) => l.trim()).slice(0, 30).join("\n");
+    let best = ";", bestScore = -1;
+    [";", "\t", ",", "|"].forEach((sep) => {
+      const rows = splitDelimited(sample, sep).filter((r) => r.length > 1);
+      if (!rows.length) return;
+      const counts = {}; rows.forEach((r) => { counts[r.length] = (counts[r.length] || 0) + 1; });
+      const mode = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+      const score = counts[mode] * 100 + Number(mode);
+      if (score > bestScore) { bestScore = score; best = sep; }
+    });
+    return best;
+  }
+  function gridFromText(text) {
+    const rows = splitDelimited(text, guessSeparator(text)).map((r) => r.map((x) => x.trim()));
+    return gridFromAoa(rows);
+  }
+  function sniffKind(bytes) {
+    if (!bytes || !bytes.length) return "empty";
+    if (bytes[0] === 0x50 && bytes[1] === 0x4B) return "zip";
+    if (bytes[0] === 0xD0 && bytes[1] === 0xCF && bytes[2] === 0x11 && bytes[3] === 0xE0) return "cfb";
+    const n = Math.min(bytes.length, 4096);
+    if ((bytes[0] === 0xFF && bytes[1] === 0xFE) || (bytes[0] === 0xFE && bytes[1] === 0xFF)) return "text";
+    for (let i = 0; i < n; i++) { const b = bytes[i]; if (b === 0 || (b < 9) || (b > 13 && b < 32 && b !== 27)) return "binary"; }
+    const head = new TextDecoder("utf-8").decode(bytes.subarray(0, Math.min(n, 512))).trim().toLowerCase();
+    if (/^<\?xml|^<html|^<table|^<!doctype html/.test(head)) return "markup";
+    return "text";
+  }
+  function readErrorMessage(err) {
+    const msg = String(err && err.message || err || "");
+    if (/password|encrypt|protected/i.test(msg)) return tr("Ce fichier est protégé par un mot de passe. Ouvre-le dans Excel, retire la protection, enregistre-le, puis réessaie.", "This file is password-protected. Open it in Excel, remove the protection, save it, then try again.");
+    return tr("Ce fichier n’est pas un tableur lisible. Choisis un fichier .xlsx, .xls, .ods ou .csv.", "This file isn’t a readable spreadsheet. Choose an .xlsx, .xls, .ods or .csv file.");
+  }
+
+  // Lit la feuille cachée d’un export Meuniance (noms, dimensions, contenus tapés).
+  function readExportMeta(wb) {
+    const ws = wb && wb.Sheets && wb.Sheets[META_SHEET];
+    if (!ws) return null;
+    const g = gridFromWorksheet(ws), first = gridCell(g, 0, 0);
+    if (!first || first.v !== META_TAG) return null;
+    const meta = { sheets: {}, raws: {} };
+    for (let r = 1; r < g.nRows; r++) {
+      const cell = (c) => { const x = gridCell(g, r, c); return x ? x.v : null; };
+      const kind = cell(0), sheet = String(cell(1) == null ? "" : cell(1));
+      if (kind === "sheet") meta.sheets[sheet] = { name: String(cell(2) == null ? sheet : cell(2)), rows: Number(cell(3)) || 0, cols: Number(cell(4)) || 12 };
+      else if (kind === "raw") meta.raws[sheet + "!" + cell(2)] = String(cell(3) == null ? "" : cell(3));
+    }
+    return meta;
+  }
+
+  // Analyse complète, sans toucher au tableur : { sheets, summary, error }.
+  function planImport(bytes, fileName) {
+    bytes = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes || []);
+    const kind = sniffKind(bytes);
+    if (kind === "empty") return { error: tr("Ce fichier est vide : rien n’a été importé.", "This file is empty: nothing was imported.") };
+    const sources = []; let meta = null;
+    if (kind === "text" || (kind === "binary" && /\.(csv|txt|tsv)$/i.test(fileName || ""))) {
+      if (kind === "binary") return { error: readErrorMessage("") };
+      sources.push({ name: String(fileName || "").replace(/\.[^.]+$/, "") || "Feuille 1", g: gridFromText(decodeText(bytes)) });
+    } else {
+      if (kind === "binary") return { error: readErrorMessage("") };
+      if (typeof XLSX === "undefined") return { error: tr("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet.", "The Excel module couldn’t be loaded. Check your internet connection.") };
+      let wb;
+      try { wb = XLSX.read(bytes, { type: "array", cellDates: true, cellNF: false, cellHTML: false, sheetRows: IMPORT_SRC_ROWS }); }
+      catch (err) { return { error: readErrorMessage(err) }; }
+      meta = readExportMeta(wb);
+      const info = (wb.Workbook && wb.Workbook.Sheets) || [];
+      (wb.SheetNames || []).forEach((name, i) => {
+        if (name === META_SHEET) return;
+        if (info[i] && info[i].Hidden) return; // feuille masquée : calculs internes, pas des données
+        sources.push({ name, g: gridFromWorksheet(wb.Sheets[name]), meta: meta && meta.sheets[name] ? meta.sheets[name] : null });
+      });
+    }
+    const ctx = { dupMonths: 0 };
+    const targets = new Map(), order = [];
+    const summary = { sheets: [], months: 0, rows: 0, ignoredCols: [], skippedSheets: [], formulasAsValues: 0, droppedRows: 0, droppedCells: 0, native: !!meta, reasons: [] };
+    const target = (key, name) => {
+      if (!targets.has(key)) { targets.set(key, { key, name, rowHeaders: [], cells: {}, rows: 0, cols: 12, months: new Set(), numeric: 0 }); order.push(key); }
+      return targets.get(key);
+    };
+    const analyses = sources.map((src) => {
+      const a = src.meta ? nativeSheetBlocks(src.g, "native:" + src.name, src.meta) : analyzeSheet(src.g, src.name, ctx);
+      a.src = src;
+      summary.droppedCells += src.g.dropped;
+      if (src.g.truncated) summary.droppedRows++;
+      if (!a.blocks.length) { if (src.g.nRows) { summary.skippedSheets.push(src.name); summary.reasons.push(a.reason); } return a; }
+      // Lignes source → lignes du tableur, année par année.
+      a.rowBlock = []; a.rowTarget = new Map();
+      a.blocks.forEach((bl) => {
+        for (let r = bl.r0; r <= bl.r1; r++) a.rowBlock[r] = bl;
+        bl.keys.forEach((key) => {
+          const name = src.meta ? src.meta.name : (key.indexOf("name:") === 0 ? src.name : key);
+          const t = target(key, name);
+          bl.rows.forEach((row) => {
+            if (t.rows >= IMPORT_MAX_ROWS) { summary.droppedRows++; return; }
+            a.rowTarget.set(row.r + "|" + key, t.rows);
+            t.rowHeaders[t.rows] = row.label; t.rows++;
+          });
+        });
+        bl.ignored.forEach((x) => { if (summary.ignoredCols.indexOf(x) < 0) summary.ignoredCols.push(x); });
+      });
+      return a;
+    });
+    // Cellules (après toutes les lignes, pour que chaque formule connaisse sa correspondance).
+    analyses.forEach((a) => {
+      if (!a.blocks.length) return;
+      const src = a.src, g = a.g;
+      a.blocks.forEach((bl) => bl.rows.forEach((row) => Object.keys(bl.colMap).forEach((cs) => {
+        const c = Number(cs), info = bl.colMap[c], t = targets.get(info.key);
+        const tRow = a.rowTarget.get(row.r + "|" + info.key);
+        if (tRow === undefined) return;
+        const cell = gridCell(g, row.r, c); if (!cell) return;
+        let raw = "";
+        if (cell.f) {
+          const mapper = makeMapper({ g, rowBlock: a.rowBlock, rowTarget: a.rowTarget, key: info.key });
+          raw = convertFormula(cell.f, mapper.mapRef, mapper.mapRange) || "";
+          if (!raw) { summary.formulasAsValues++; raw = valueToRaw(cell.v); }
+        } else raw = valueToRaw(cell.v);
+        if (src.meta && meta) {
+          // Contenu tapé dans l’app (« 2 500,50 », « 007 ») : repris s’il vaut toujours la même chose.
+          const typed = meta.raws[src.name + "!" + tRow + "," + info.m];
+          if (typed !== undefined && typed !== raw) {
+            const fa = typed.charAt(0) === "=", fb = raw.charAt(0) === "=";
+            const same = fa && fb ? canonFormula(typed) !== null && canonFormula(typed) === canonFormula(raw)
+              : (!fa && !fb && parseAmount(typed) === parseAmount(raw)) || typed === String(cell.v);
+            if (same) raw = typed;
+          }
+        }
+        if (raw === "") return;
+        t.cells[tRow + "," + info.m] = { raw };
+        t.cols = Math.max(t.cols, info.m + 1);
+        t.months.add(info.m);
+        if (raw.charAt(0) === "=" || Number.isFinite(parseAmount(raw))) t.numeric++;
+      })));
+    });
+    const sheets = order.map((k) => targets.get(k)).filter((t) => t.rows > 0 || Object.keys(t.cells).length);
+    const numeric = sheets.reduce((n, t) => n + t.numeric, 0);
+    if (!sheets.length || !numeric) {
+      let error;
+      if (summary.reasons.indexOf("transactions") >= 0) error = tr("Ce fichier ressemble à une liste d’opérations (date, libellé, montant). Importe-le comme relevé bancaire : Meuniance regroupera les montants par mois. Rien n’a été modifié.", "This file looks like a list of transactions (date, description, amount). Import it as a bank statement: Meuniance will group the amounts by month. Nothing was changed.");
+      else if (sheets.length) error = tr("Je n’ai trouvé aucun montant sous les mois de ce fichier. Rien n’a été modifié.", "No amounts were found under the months in this file. Nothing was changed.");
+      else if (!sources.some((s) => s.g.nRows)) error = tr("Ce fichier ne contient aucune donnée. Rien n’a été modifié.", "This file contains no data. Nothing was changed.");
+      else error = tr("Je ne trouve pas les mois dans ce fichier. Mets les mois (Janvier à Décembre) en en-tête de colonnes, tes intitulés dans la première colonne, puis réessaie. Rien n’a été modifié.", "The months weren’t found in this file. Put the months (January to December) as column headers and your row names in the first column, then try again. Nothing was changed.");
+      return { error, summary };
+    }
+    summary.dupMonths = ctx.dupMonths;
+    // Aucune année dans le fichier (ni feuille, ni en-tête, ni titre) : l’année en cours, dite dans le résumé.
+    const yearless = sheets.filter((t) => t.key.indexOf("name:") === 0), thisYear = String(new Date().getFullYear());
+    if (yearless.length === 1 && !sheets.some((t) => t.key === thisYear)) { yearless[0].name = thisYear; summary.assumedYear = thisYear; }
+    sheets.forEach((t) => {
+      summary.sheets.push(t.name);
+      summary.months = Math.max(summary.months, t.months.size);
+      summary.rows += t.rowHeaders.filter(Boolean).length;
+      t.cols = Math.min(Math.max(12, t.cols), NATIVE_MAX_COLS);
+    });
+    return {
+      sheets: sheets.map((t) => ({ name: t.name, cells: t.cells, rowHeaders: t.rowHeaders.slice(0, t.rows), rows: t.rows, cols: t.cols })),
+      summary
+    };
+  }
+  function importSummaryText(summary, mode) {
+    const parts = [];
+    const n = summary.sheets.length;
+    parts.push((mode === "add" ? tr("Ajouté : ", "Added: ") : tr("Importé : ", "Imported: ")) + summary.sheets.join(", ") + " · " + summary.months + tr(" mois", summary.months > 1 ? " months" : " month") + " · " + summary.rows + tr(" ligne" + (summary.rows > 1 ? "s" : ""), " row" + (summary.rows > 1 ? "s" : "")) + ".");
+    if (n === 0) parts.length = 0;
+    if (summary.assumedYear) parts.push(tr("Aucune année dans le fichier : rangé dans " + summary.assumedYear + ".", "No year in the file: placed in " + summary.assumedYear + "."));
+    if (summary.ignoredCols.length) parts.push(tr("Colonnes ignorées : ", "Ignored columns: ") + summary.ignoredCols.slice(0, 4).join(", ") + (summary.ignoredCols.length > 4 ? "…" : "") + ".");
+    if (summary.skippedSheets.length) parts.push(tr("Feuilles sans mois ignorées : ", "Sheets without months skipped: ") + summary.skippedSheets.slice(0, 3).join(", ") + (summary.skippedSheets.length > 3 ? "…" : "") + ".");
+    if (summary.formulasAsValues) parts.push(summary.formulasAsValues + tr(" formule(s) remplacée(s) par leur valeur.", " formula(s) replaced by their value."));
+    if (summary.droppedRows || summary.droppedCells) parts.push(tr("Le fichier dépassait la taille gérée (2 000 lignes, 80 colonnes) : le surplus n’a pas été importé.", "The file exceeded the supported size (2,000 rows, 80 columns): the extra part wasn’t imported."));
+    return parts.join(" ");
+  }
+
+  function readFileBytes(file) {
+    if (file && typeof file.arrayBuffer === "function") return file.arrayBuffer();
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (e) => { try { resolve(XLSX.read(new Uint8Array(e.target.result), { type: "array" })); } catch (err) { reject(err); } };
-      reader.onerror = () => reject(new Error("Lecture du fichier impossible"));
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = () => reject(new Error("read"));
       reader.readAsArrayBuffer(file);
     });
   }
-  function importChoiceDialog(sheetCount) {
+  // « Ajouter » est le choix par défaut : « Remplacer tout » efface toutes les années.
+  function importChoiceDialog(plan) {
     return new Promise((resolve) => {
+      const s = plan.summary;
       const overlay = document.createElement("div"); overlay.className = "sheet-modal-overlay";
       const modal = document.createElement("div"); modal.className = "sheet-modal sheet-modal-choice";
-      modal.appendChild(document.createElement("h3")).textContent = "Importer " + sheetCount + " feuille" + (sheetCount > 1 ? "s" : "");
-      const p = document.createElement("p"); p.textContent = "Comment importer ces feuilles ?";
-      p.style.cssText = "margin:0 0 16px;line-height:1.5"; modal.appendChild(p);
+      modal.setAttribute("role", "dialog"); modal.setAttribute("aria-modal", "true");
+      const title = document.createElement("h3"); title.textContent = tr("Importer ce fichier", "Import this file"); modal.appendChild(title);
+      const found = document.createElement("p"); found.className = "sheet-import-found";
+      found.textContent = tr("Trouvé : ", "Found: ") + s.sheets.join(", ") + " · " + s.months + tr(" mois", s.months > 1 ? " months" : " month") + " · " + s.rows + tr(" ligne" + (s.rows > 1 ? "s" : ""), " row" + (s.rows > 1 ? "s" : "")) + "." +
+        (s.ignoredCols.length ? " " + tr("Colonnes ignorées : ", "Ignored columns: ") + s.ignoredCols.slice(0, 4).join(", ") + "." : "");
+      modal.appendChild(found);
+      const current = state.sheets.map((x) => x.name);
+      const p = document.createElement("p"); p.className = "sheet-import-help";
+      p.textContent = tr("« Ajouter » complète tes années : les lignes du même nom sont mises à jour, les autres sont ajoutées. « Remplacer tout » efface tes années actuelles (" + current.join(", ") + ") ; tu pourras annuler juste après.",
+        "“Add” completes your years: rows with the same name are updated, others are added. “Replace all” erases your current years (" + current.join(", ") + "); you can undo right after.");
+      modal.appendChild(p);
       const actions = document.createElement("div"); actions.className = "sheet-modal-actions";
-      const close = (v) => { overlay.remove(); unlockModalBackground(); resolve(v); };
-      const rep = document.createElement("button"); rep.className = "button button-primary"; rep.textContent = "Remplacer tout";
-      const add = document.createElement("button"); add.className = "button button-ghost"; add.textContent = "Ajouter à l'existant";
-      const cancel = document.createElement("button"); cancel.className = "button button-ghost"; cancel.textContent = "Annuler";
-      rep.addEventListener("click", () => close("replace"));
+      const close = (v) => { document.removeEventListener("keydown", onKey, true); overlay.remove(); unlockModalBackground(); resolve(v); };
+      function onKey(e) { if (e.key === "Escape") { e.preventDefault(); close(null); } }
+      const add = document.createElement("button"); add.type = "button"; add.className = "button button-primary"; add.textContent = tr("Ajouter à l’existant", "Add to my data");
+      const rep = document.createElement("button"); rep.type = "button"; rep.className = "button button-ghost sheet-import-replace"; rep.textContent = tr("Remplacer tout", "Replace all");
+      const cancel = document.createElement("button"); cancel.type = "button"; cancel.className = "button button-ghost"; cancel.textContent = tr("Annuler", "Cancel");
       add.addEventListener("click", () => close("add"));
+      rep.addEventListener("click", () => close("replace"));
       cancel.addEventListener("click", () => close(null));
       overlay.addEventListener("click", (e) => { if (e.target === overlay) close(null); });
-      actions.appendChild(rep); actions.appendChild(add); actions.appendChild(cancel);
+      document.addEventListener("keydown", onKey, true);
+      actions.append(add, rep, cancel);
       modal.appendChild(actions); overlay.appendChild(modal);
-      document.body.appendChild(overlay); lockModalBackground(); rep.focus();
+      document.body.appendChild(overlay); lockModalBackground(); add.focus();
     });
   }
-  // Fusionne les lignes importées dans une feuille existante :
-  // si une ligne avec le même label existe déjà, elle est remplacée.
+  // Fusionne une année importée dans une année existante : la ligne du même nom est mise à
+  // jour (les mois absents du fichier sont gardés), les autres lignes sont ajoutées à la suite.
+  // Les formules suivent le déplacement de leurs lignes.
   function mergeSheetData(targetSheet, importedSheet) {
     if (!targetSheet || !importedSheet) return;
-    // Fusionne les en-têtes de colonnes (les mois sont forcés par enforceMonthHeaders)
-    // Fusionne les titres de lignes : remplace ou ajoute
-    var targetRowHeaders = targetSheet.rowHeaders || [];
-    var importedRowHeaders = importedSheet.rowHeaders || [];
-    var importedCells = importedSheet.cells || {};
-
-    for (var ir = 0; ir < importedRowHeaders.length; ir++) {
-      var label = importedRowHeaders[ir];
-      if (!label) continue;
-      // Cherche une ligne existante avec le même label
-      var foundIdx = -1;
-      for (var tr = 0; tr < targetRowHeaders.length; tr++) {
-        if (targetRowHeaders[tr] && targetRowHeaders[tr].trim().toLowerCase() === label.trim().toLowerCase()) {
-          foundIdx = tr;
-          break;
-        }
+    const norm = (s) => String(s || "").trim().toLocaleLowerCase("fr");
+    targetSheet.rowHeaders = targetSheet.rowHeaders || [];
+    const used = new Set(), rowMap = [];
+    let next = contentRowCount(targetSheet);
+    const hasCells = (r) => { for (let c = 0; c < (importedSheet.cols || 12); c++) if (importedSheet.cells[r + "," + c]) return true; return false; };
+    for (let ir = 0; ir < (importedSheet.rows || 0); ir++) {
+      const label = importedSheet.rowHeaders[ir] || "";
+      let found = -1;
+      if (label.trim()) found = targetSheet.rowHeaders.findIndex((h, i) => !used.has(i) && norm(h) === norm(label));
+      if (found < 0) {
+        if (!label.trim() && !hasCells(ir)) { rowMap[ir] = null; continue; }
+        found = next++;
+        targetSheet.rowHeaders[found] = label;
       }
-      if (foundIdx >= 0) {
-        // Remplace les cellules de cette ligne
-        for (var c = 0; c < (importedSheet.cols || 0); c++) {
-          var importKey = ir + "," + c;
-          var targetKey = foundIdx + "," + c;
-          if (importedCells[importKey]) {
-            targetSheet.cells[targetKey] = { raw: importedCells[importKey].raw };
-          } else {
-            delete targetSheet.cells[targetKey];
-          }
-        }
-      } else {
-        // Ajoute une nouvelle ligne à la fin
-        var newRowIdx = targetRowHeaders.length;
-        targetRowHeaders[newRowIdx] = label;
-        for (var c2 = 0; c2 < (importedSheet.cols || 0); c2++) {
-          var importKey2 = ir + "," + c2;
-          var targetKey2 = newRowIdx + "," + c2;
-          if (importedCells[importKey2]) {
-            targetSheet.cells[targetKey2] = { raw: importedCells[importKey2].raw };
-          }
-        }
-        targetSheet.rows = Math.max(targetSheet.rows || 0, newRowIdx + 1);
-      }
+      used.add(found); rowMap[ir] = found;
     }
+    const cache = recompute(importedSheet.cells);
+    const mapRef = (r, c) => (rowMap[r] === null || rowMap[r] === undefined ? null : { r: rowMap[r], c });
+    const mapRange = (r0, c0, r1, c1) => {
+      const rows = [];
+      for (let r = r0; r <= Math.min(r1, importedSheet.rows - 1); r++) if (rowMap[r] !== null && rowMap[r] !== undefined) rows.push(rowMap[r]);
+      const rr = contiguous(rows);
+      return rr ? { r0: rr.lo, r1: rr.hi, c0, c1 } : null;
+    };
+    Object.keys(importedSheet.cells).forEach((k) => {
+      const parts = k.split(","), ir = Number(parts[0]), c = Number(parts[1]);
+      if (rowMap[ir] === null || rowMap[ir] === undefined) return;
+      let raw = importedSheet.cells[k].raw;
+      if (String(raw).charAt(0) === "=") {
+        const moved = convertFormula(raw, mapRef, mapRange);
+        if (moved) raw = moved;
+        else { const res = cache[k]; raw = res && typeof res.value === "number" && Number.isFinite(res.value) ? String(res.value) : ""; }
+      }
+      if (raw === "") return;
+      targetSheet.cells[rowMap[ir] + "," + c] = { raw };
+      targetSheet.cols = Math.max(targetSheet.cols || 12, c + 1);
+    });
+    targetSheet.rows = Math.max(targetSheet.rows || 0, next);
+    compactRows(targetSheet);
   }
+  function sheetKeyYear(name) { return yearFromText(name); }
 
   async function importXlsx(file, options) {
     options = options || {};
-    if (typeof XLSX === "undefined" && window.GFVendors) { try { await window.GFVendors.xlsx(); } catch (e) {} }
-    if (typeof XLSX === "undefined") { toast("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet."); return false; }
-    let wb;
-    try { wb = await readWorkbook(file); }
-    catch (err) { toast("Import impossible : " + (err && err.message ? err.message : "erreur")); return false; }
-    const sheetsData = (wb.SheetNames || []).map((name) => {
-      const ws = wb.Sheets[name];
-      const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true });
-      return { name, aoa, ws };
-    }).filter((s) => s.aoa && s.aoa.length);
-    if (!sheetsData.length) { toast("Aucune feuille exploitable dans ce fichier."); return false; }
-    const mode = options.mode || await importChoiceDialog(sheetsData.length);
+    if (!file) return false;
+    if (file.size > IMPORT_MAX_BYTES) { toast(tr("Ce fichier est trop lourd (15 Mo au plus). Enregistre seulement tes feuilles de budget, puis réessaie.", "This file is too large (15 MB max). Save only your budget sheets, then try again.")); return false; }
+    if (!file.size) { toast(tr("Ce fichier est vide : rien n’a été importé.", "This file is empty: nothing was imported.")); return false; }
+    let bytes;
+    try { bytes = new Uint8Array(await readFileBytes(file)); }
+    catch (err) { toast(tr("Lecture du fichier impossible. Réessaie.", "Couldn’t read the file. Try again.")); return false; }
+    const kind = sniffKind(bytes);
+    if ((kind === "zip" || kind === "cfb" || kind === "markup") && typeof XLSX === "undefined" && window.GFVendors) { try { await window.GFVendors.xlsx(); } catch (e) {} }
+    let plan;
+    try { plan = planImport(bytes, file.name); }
+    catch (err) { plan = { error: readErrorMessage(err) }; }
+    if (plan.error) { toast(plan.error, 9000); return false; }
+    const mode = options.mode || await importChoiceDialog(plan);
     if (!mode) return false;
-    try { if (!options.silent && window.MeuniLoader) window.MeuniLoader.start("J’importe ton fichier…"); } catch (e) {}
+    try { if (!options.silent && window.MeuniLoader) window.MeuniLoader.start(tr("J’importe ton fichier…", "Importing your file…")); } catch (e) {}
+    if (state.editing) commitActiveEdit();
+    recordHistory(); // état d’avant l’import, pour « Annuler »
+    const created = [];
     if (mode === "replace") {
       state.sheets = [];
-      const created = sheetsData.map((s) => {
+      plan.sheets.forEach((s) => {
         const sheet = newSheet(s.name);
-        fillSheetFromAoa(sheet, s.aoa, s.ws);
-        return sheet;
+        Object.assign(sheet, { cells: s.cells, rowHeaders: s.rowHeaders, rows: s.rows, cols: s.cols });
+        enforceMonthHeaders(sheet); compactRows(sheet);
+        created.push(sheet);
       });
-      if (created.length) state.activeSheetId = created[0].id;
     } else {
-      // Mode "ajouter" : fusionne les feuilles importées avec les feuilles existantes
-      const created = sheetsData.map((s) => {
-        // Cherche une feuille existante avec un nom similaire
-        var existing = state.sheets.find(function(sh) {
-          return sh.name.trim().toLowerCase() === s.name.trim().toLowerCase();
-        });
-        if (existing) {
-          // Fusionne les données dans la feuille existante
-          var tempSheet = { cells: {}, headers: [], rowHeaders: [], rows: DEFAULT_ROWS, cols: DEFAULT_COLS };
-          fillSheetFromAoa(tempSheet, s.aoa, s.ws);
-          mergeSheetData(existing, tempSheet);
-          return existing;
-        } else {
-          var sheet = newSheet(s.name);
-          fillSheetFromAoa(sheet, s.aoa, s.ws);
-          return sheet;
+      plan.sheets.forEach((s) => {
+        const y = sheetKeyYear(s.name);
+        const existing = state.sheets.find((sh) => (y !== null ? sheetKeyYear(sh.name) === y : String(sh.name).trim().toLowerCase() === String(s.name).trim().toLowerCase()));
+        if (existing) { mergeSheetData(existing, s); created.push(existing); }
+        else {
+          const sheet = newSheet(y !== null ? String(y) : s.name);
+          Object.assign(sheet, { cells: s.cells, rowHeaders: s.rowHeaders, rows: s.rows, cols: s.cols });
+          enforceMonthHeaders(sheet); compactRows(sheet);
+          created.push(sheet);
         }
       });
-      if (created.length) state.activeSheetId = created[0].id;
     }
+    // On ouvre l’année en cours si elle a été importée, sinon la plus récente.
+    const thisYear = new Date().getFullYear();
+    const pick = created.find((x) => sheetYear(x) === thisYear) || created.slice().sort((a, b) => (sheetYear(b) || 0) - (sheetYear(a) || 0))[0];
+    if (pick) state.activeSheetId = pick.id;
+    state.active = { r: 0, c: 0 }; state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
     buildTable(); renderValues(); renderTabs(); scheduleSave(); notifyDashboard();
-    if (typeof window.populateYearSelect === "function") { try { window.populateYearSelect(); } catch(e){} }
-    if (!options.silent) toast(sheetsData.length + " feuille(s) importée(s).");
+    if (typeof window.populateYearSelect === "function") { try { window.populateYearSelect(); } catch (e) {} }
+    if (!options.silent) toast(importSummaryText(plan.summary, mode), 9000, mode === "replace" ? { label: tr("Annuler", "Undo"), run: undo } : null);
     return true;
   }
   function exportXlsx() {
     if (typeof XLSX === "undefined") {
       if (window.GFVendors) {
-        toast("Préparation de l'export…");
-        window.GFVendors.xlsx().then(exportXlsx).catch(function(){ toast("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet."); });
+        toast(tr("Préparation de l’export…", "Preparing the export…"));
+        window.GFVendors.xlsx().then(exportXlsx).catch(function(){ toast(tr("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet.", "The Excel module couldn’t be loaded. Check your internet connection.")); });
         return;
       }
-      toast("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet."); return;
+      toast(tr("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet.", "The Excel module couldn’t be loaded. Check your internet connection.")); return;
     }
     try {
       const wb = buildExportWorkbook();
@@ -1203,37 +1643,50 @@
       toast(state.sheets.length + " feuille(s) exportée(s).");
     } catch (err) { toast("Export impossible : " + (err && err.message ? err.message : "erreur")); }
   }
-  // Workbook complet pour l'export : preserve toutes les colonnes (en-tetes personnalises
-  // OU lettres par defaut), les libelles de lignes, et les formules.
-  function buildExportWorkbook() {
-    if (typeof XLSX === "undefined") return null;
-    const wb = XLSX.utils.book_new();
-    state.sheets.forEach((sheet, idx) => {
-      const cache = recompute(sheet.cells);
-      const hasRowLabels = sheet.rowHeaders && sheet.rowHeaders.some(h => h);
-      const aoa = [];
-      const headerRow = hasRowLabels ? [""] : [];
-      for (let c = 0; c < sheet.cols; c++) headerRow[c + (hasRowLabels ? 1 : 0)] = sheet.headers[c] || colToLetter(c);
-      aoa[0] = headerRow;
-      for (let r = 0; r < sheet.rows; r++) {
-        const row = hasRowLabels ? [sheet.rowHeaders[r] || String(r + 1)] : [];
-        for (let c = 0; c < sheet.cols; c++) {
-          const k = cellKey(r, c);
-          const cell = sheet.cells[k] || { raw: "" };
-          const res = cache[k];
-          const ci = c + (hasRowLabels ? 1 : 0);
-          if (cell.raw && cell.raw[0] === "=") {
-            const o = { f: cell.raw.slice(1) };
-            if (res && typeof res.value === "number" && Number.isFinite(res.value)) { o.v = res.value; o.t = "n"; }
-            row[ci] = o;
-          } else if (res && typeof res.value === "number" && Number.isFinite(res.value)) row[ci] = res.value;
-          else row[ci] = cell.raw || "";
+  // Classeur d’export lisible par Excel : intitulés en colonne A, mois en ligne 1, donc chaque
+  // référence de formule est décalée d’une ligne et d’une colonne (A1 du tableur = B2 d’Excel).
+  function buildExportWorkbook(sheets) {
+    sheets = sheets || state.sheets;
+    const wb = { SheetNames: [], Sheets: {}, Workbook: { Sheets: [] }, Props: { Title: "Meuniance" } };
+    const metaRows = [[META_TAG]];
+    const shift = (r, c) => ({ r: r + 1, c: c + 1 });
+    const shiftRange = (r0, c0, r1, c1) => ({ r0: r0 + 1, c0: c0 + 1, r1: r1 + 1, c1: c1 + 1 });
+    sheets.forEach((sheet, idx) => {
+      const name = sanitizeSheetName(sheet.name, idx, wb);
+      const cache = recompute(sheet.cells || {});
+      const rows = Math.max(contentRowCount(sheet), 0), cols = Math.max(12, sheet.cols || 12);
+      const ws = {};
+      ws[colToLetter(0) + "1"] = { t: "s", v: "" };
+      for (let c = 0; c < cols; c++) ws[colToLetter(c + 1) + "1"] = { t: "s", v: c < 12 ? MONTH_HEADERS[c] : colToLetter(c) };
+      for (let r = 0; r < rows; r++) {
+        const label = (sheet.rowHeaders || [])[r];
+        if (label) ws["A" + (r + 2)] = { t: "s", v: String(label) };
+        for (let c = 0; c < cols; c++) {
+          const k = cellKey(r, c), cell = sheet.cells[k];
+          if (!cell || cell.raw === "" || cell.raw == null) continue;
+          const raw = String(cell.raw), res = cache[k], addr = colToLetter(c + 1) + (r + 2);
+          const num = res && typeof res.value === "number" && Number.isFinite(res.value) ? res.value : null;
+          if (raw.charAt(0) === "=") {
+            const f = convertFormula(raw, shift, shiftRange, EXCEL_NAMES);
+            if (f) ws[addr] = num !== null ? { t: "n", v: num, f: f.slice(1) } : { t: "n", v: 0, f: f.slice(1) };
+            else ws[addr] = num !== null ? { t: "n", v: num } : { t: "s", v: raw };
+            metaRows.push(["raw", name, r + "," + c, raw]);
+          } else if (num !== null && !isLeadingZeroCode(raw)) {
+            ws[addr] = { t: "n", v: num };
+            if (String(num) !== raw) metaRows.push(["raw", name, r + "," + c, raw]);
+          } else ws[addr] = { t: "s", v: raw };
         }
-        aoa[r + 1] = row;
       }
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      XLSX.utils.book_append_sheet(wb, ws, sanitizeSheetName(sheet.name, idx, wb));
+      ws["!ref"] = "A1:" + colToLetter(cols) + Math.max(1, rows + 1);
+      wb.SheetNames.push(name); wb.Sheets[name] = ws; wb.Workbook.Sheets.push({ Hidden: 0 });
+      metaRows.push(["sheet", name, String(sheet.name), rows, cols]);
     });
+    const meta = {};
+    metaRows.forEach((row, r) => row.forEach((v, c) => {
+      meta[colToLetter(c) + (r + 1)] = typeof v === "number" ? { t: "n", v } : { t: "s", v: String(v) };
+    }));
+    meta["!ref"] = "A1:D" + metaRows.length;
+    wb.SheetNames.push(META_SHEET); wb.Sheets[META_SHEET] = meta; wb.Workbook.Sheets.push({ Hidden: 2 });
     return wb;
   }
   // Construit un workbook XLSX (une feuille par tableur) réutilisable par le dashboard.
@@ -1285,7 +1738,6 @@
   function buildTables() {
     return state.sheets.map((sheet) => {
       const cache = recompute(sheet.cells);
-      const hasRowLabels = sheet.rowHeaders && sheet.rowHeaders.some(h => h);
       const dataCols = new Set(); let maxR = -1;
       for (const k in sheet.cells) {
         const raw = sheet.cells[k].raw;
@@ -1293,16 +1745,19 @@
         const parts = k.split(","); const r = +parts[0], c = +parts[1];
         dataCols.add(c); if (r > maxR) maxR = r;
       }
-      const cols = dataCols.size ? Math.max(...dataCols) + 1 : 0;
+      // Toujours les 12 mois en en-tête : une année saisie seulement en janvier reste lue par mois.
+      const cols = dataCols.size ? Math.max(12, Math.max(...dataCols) + 1) : 0;
       const rows = maxR + 1;
       if (rows <= 0 || cols <= 0) return { name: sheet.name, aoa: [] };
-      const off = hasRowLabels ? 1 : 0, aoa = [];
-      const headerRow = hasRowLabels ? [""] : [];
+      // Colonne des intitulés toujours présente : l’accueil y lit le nom de chaque ligne.
+      const off = 1, aoa = [];
+      const headerRow = [""];
       for (let c = 0; c < cols; c++) headerRow[c + off] = sheet.headers[c] || (c < 12 ? MONTH_HEADERS[c] : colToLetter(c));
       aoa.push(headerRow);
       for (let r = 0; r < rows; r++) {
-        const row = hasRowLabels ? [sheet.rowHeaders[r] || String(r + 1)] : [];
-        let filled = hasRowLabels;
+        const label = sheet.rowHeaders && sheet.rowHeaders[r];
+        const row = [label || String(r + 1)];
+        let filled = !!label;
         for (let c = 0; c < cols; c++) {
           const k = cellKey(r, c), cell = sheet.cells[k] || { raw: "" }, res = cache[k];
           let v;
@@ -1369,10 +1824,18 @@
   }
 
   // ═══════════════ Boîtes de dialogue (toast / confirm) ══════════
-  function toast(msg) {
+  // Message bref ; un import long reste lisible plus longtemps et peut proposer « Annuler ».
+  function toast(msg, ms, action) {
     const old = document.querySelector(".sheet-toast"); if (old) old.remove();
-    const t = document.createElement("div"); t.className = "sheet-toast"; t.textContent = msg;
-    document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+    const t = document.createElement("div"); t.className = "sheet-toast"; t.setAttribute("role", "status");
+    const text = document.createElement("span"); text.textContent = msg; t.appendChild(text);
+    if (action && typeof action.run === "function") {
+      t.classList.add("has-action");
+      const b = document.createElement("button"); b.type = "button"; b.className = "sheet-toast-action"; b.textContent = action.label;
+      b.addEventListener("click", () => { t.remove(); action.run(); });
+      t.appendChild(b);
+    }
+    document.body.appendChild(t); setTimeout(() => t.remove(), ms || 2600);
   }
   function confirmDialog(msg) {
     return new Promise((resolve) => {
@@ -1634,7 +2097,7 @@
     });
     const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener("click", fn); };
     bind("btnSheetExport", exportXlsx);
-    bind("btnSheetImport", () => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".xlsx,.xls,.xlsm,.csv,.txt"; inp.addEventListener("change", () => { const f = inp.files[0]; if (!f) return;
+    bind("btnSheetImport", () => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".xlsx,.xls,.xlsm,.ods,.csv,.tsv,.txt"; inp.addEventListener("change", () => { const f = inp.files[0]; if (!f) return;
       // Un relevé bancaire CSV est lu à part (regroupement par catégorie et par mois) ; sinon import Excel classique.
       const bank = window.GFBankImport ? window.GFBankImport.handle(f).catch(() => false) : Promise.resolve(false);
       bank.then((handled) => { if (handled) return; Promise.resolve(importXlsx(f)).then((ok) => { try { window.MeuniLoader && window.MeuniLoader.done(ok ? "Fichier importé." : undefined); } catch (e) {} }); }); }); inp.click(); });
@@ -1861,7 +2324,9 @@
     }
   }
 
-  window.FinanceSheet = { init, recompute, saveNow, openCalculator, openStartingBalance, getSnapshot, loadSnapshot, switchFinancialOwner, buildWorkbook, buildTables, importXlsx, exportXlsx, clearDemoDataFS, parseAmount, updateSheetBalanceCards, getObjectiveSources, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION };
+  window.FinanceSheet = { init, recompute, saveNow, openCalculator, openStartingBalance, getSnapshot, loadSnapshot, switchFinancialOwner, buildWorkbook, buildTables, importXlsx, exportXlsx, clearDemoDataFS, parseAmount, updateSheetBalanceCards, getObjectiveSources, applySetupProfile, migrateOldTemplate, resetToDefaultSheets, VERSION,
+    // Outils d’import exposés pour les tests (aucun effet sur le tableur).
+    _import: { planImport, parseMonthHeader, convertFormula, buildExportWorkbook, mergeSheetData, sanitizeSheetName, guessSeparator, decodeText } };
   // Hook appelé après import / édition / création de feuille pour rafraîchir le dashboard.
   let dashTimer = null;
   function notifyDashboard() {

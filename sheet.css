@@ -1693,3 +1693,15 @@ body[data-theme="brutal"] .sheet-bar #btnSheetCalc {
   }
   .sheet-bar #btnSheetCalc .lbl { display:inline !important; }
 }
+
+/* Import : bouton « Annuler » dans le message de fin, et explication du choix « Ajouter / Remplacer ». */
+.sheet-toast.has-action { display:flex; align-items:center; gap:12px; text-align:left; }
+.sheet-toast-action {
+  flex:none; min-height:36px; padding:6px 12px; border-radius:8px; cursor:pointer;
+  border:1px solid var(--accent, #c08457); background:transparent; color:var(--text); font:inherit; font-weight:700;
+}
+.sheet-toast-action:focus-visible { background:var(--button-primary-bg, var(--accent, #c08457)); color:var(--button-primary-text, #fff); outline:none; }
+@media (hover:hover) and (pointer:fine) { .sheet-toast-action:hover { background:var(--button-primary-bg, var(--accent, #c08457)); color:var(--button-primary-text, #fff); } }
+.sheet-modal-choice .sheet-import-found { margin:0 0 10px; line-height:1.5; font-weight:600; overflow-wrap:anywhere; }
+.sheet-modal-choice .sheet-import-help { margin:0 0 16px; line-height:1.5; font-size:.88rem; color:var(--muted, inherit); overflow-wrap:anywhere; }
+.sheet-modal-choice .sheet-import-replace { color:var(--red, #c0392b); }

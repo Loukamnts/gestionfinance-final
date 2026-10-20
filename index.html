@@ -56,7 +56,7 @@
     })();
   </script>
   <script src="store-shim.js?v=20261019-r4"></script>
-  <link rel="stylesheet" href="sheet.css?v=20261019-r1" />
+  <link rel="stylesheet" href="sheet.css?v=20261020-r2" />
   <link rel="stylesheet" href="onboarding.css?v=20261019-r1" />
   <style>
     /* Anti-zoom mobile : empêche le zoom automatique sur les inputs */
@@ -2436,18 +2436,23 @@
         "amazon", "cdiscount", "fnac", "darty", "ldlc", "boulanger", "decathlon", "sephora", "pharmacie", "docteur",
         "dentiste", "veterinaire", "analyse", "picard", "leaderprice", "franprix", "monoprix", "kiabi", "zara", "nike",
         "adidas", "apple", "samsung", "free", "orange", "sfr", "bouygues", "edf", "engie", "total",
-        "shell", "bp", "elf"
+        "shell", "bp", "elf",
+        "groceries", "grocery", "supermarche", "mutuelle", "mortgage", "resto", "deliveroo", "fuel", "navigo", "peage",
+        "medecin", "shopping", "vetement", "clothing", "clothes", "coiffeur", "creche", "nounou", "ecole", "cantine",
+        "childcare", "utilities", "insurance", "healthcare", "entertainment", "dining", "phone", "subscription", "gym",
+        "travel", "loan", "leasing", "animaux", "bricolage", "menage", "cadeau"
       ],
       savingsKeywords: [
         "epargne", "livret", "boursobank", "bourso", "monseo", "monseobank", "placement", "pea", "ldds", "assurancevie",
         "assurance vie", "crypto", "bourse", "action", "etf", "saving", "savings", "invest", "investment", "portfolio",
         "patrimoine", "wallet", "revolut", "n26", "fortuneo", "ing", "bforbank", "helios", "cash", "fonds",
-        "fund", "tesla", "bitcoin", "ethereum", "celtiis", "psyfi", "mondrian", "lita"
+        "fund", "tesla", "bitcoin", "ethereum", "celtiis", "psyfi", "mondrian", "lita", "pel"
       ],
       incomeKeywords: [
         "salaire", "revenu", "remuneration", "netapayer", "net payer",
         "caf", "apl", "rsa", "allocation", "alloc", "indemnite", "indemnité",
-        "traitement", "emolument", "versement", "paie", "paye", "salairenet"
+        "traitement", "emolument", "versement", "paie", "paye", "salairenet",
+        "salary", "income", "wage", "honoraire", "dividende", "dividend", "chomage", "bonus"
       ],
       ignoredKeywords: [
         "reste", "solde", "apres", "balance", "disponible", "compte", "account", "bank", "banque",
@@ -2532,7 +2537,7 @@
     function getPropertyRules(){ try{ const raw=JSON.parse(safeStore.getItem(STORAGE_KEYS.categoryRules)||"{}"); const mig={}; Object.entries(raw||{}).forEach(([k,val])=>{ const mv=migrateRuleValue(val); if(mv&&mv!=="auto") mig[k]=mv; }); return mig; }catch(e){ return {}; } }
     function savePropertyRules(r){ safeStore.setItem(STORAGE_KEYS.categoryRules,JSON.stringify(r||{})); }
     function getCustomRules(){ let r=[]; try{ r=JSON.parse(safeStore.getItem(STORAGE_KEYS.customRules)||"[]"); }catch(e){ r=[]; } if(!Array.isArray(r)) r=[]; const u=[],seen=new Set(); r.forEach(rule=>{ const name=normalizeRuleName(rule); if(!name) return; const key=normalizePropertyName(name); if(SYSTEM_RULES.some(sys=>normalizePropertyName(sys)===key)) return; if(seen.has(key)) return; seen.add(key); u.push(name); }); return u; }
-    function saveCustomRules(r){ safeStore.setItem(STORAGE_KEYS.customRules,JSON.stringify(r||[])); }
+    function saveCustomRules(r){ safeStore.setItem(STORAGE_KEYS.customRules,JSON.stringify(r||[])); resetClassifyMemo(); }
     function getAvailableRules(){ const custom=getCustomRules(); const prop=Object.values(getPropertyRules()).map(migrateRuleValue); const used=prop.filter(r=>r&&r!=="auto"&&r!=="Ignorer"); const merged=[...SYSTEM_RULES,...custom,...used].map(normalizeRuleName).filter(Boolean); const u=[],seen=new Set(); merged.forEach(rule=>{ const key=normalizePropertyName(rule); if(!key||seen.has(key)) return; seen.add(key); u.push(rule); }); return u; }
     function isSystemRule(r){ return SYSTEM_RULES.some(sys=>normalizePropertyName(sys)===normalizePropertyName(r)); }
     function isRuleInUse(r){ const key=normalizePropertyName(r); const savedUse=Object.values(getPropertyRules()).some(val=>normalizePropertyName(migrateRuleValue(val))===key); const automaticUse=(state.detectedProperties||[]).some(prop=>normalizePropertyName(prop.rule||prop.detectedRule)===key); return savedUse||automaticUse; }
@@ -2614,16 +2619,42 @@
     // ═══════════════════════════════════════════════════════════════════════
     // DONNÉES FINANCIÈRES
     // ═══════════════════════════════════════════════════════════════════════
-    function isMetaPropertyName(p){ return propertyNameMatches(p,[...PROPERTY_NAMES.month,...PROPERTY_NAMES.year,...PROPERTY_NAMES.expenses,...PROPERTY_NAMES.bigExpenses]); }
+    // Classements mémorisés le temps d’une lecture du tableur : sur 3 000 lignes × 12 mois, chaque
+    // intitulé était reclassé des dizaines de milliers de fois (plus de 10 s de calcul bloquant).
+    const classifyMemo=new Map(), metaMemo=new Map(), keywordMemo=new WeakMap();
+    function resetClassifyMemo(){ classifyMemo.clear(); metaMemo.clear(); }
+    const META_PROPERTY_KEYS=new Set([...PROPERTY_NAMES.month,...PROPERTY_NAMES.year,...PROPERTY_NAMES.expenses,...PROPERTY_NAMES.bigExpenses].map(normalizePropertyName));
+    function isMetaPropertyName(p){ const k=String(p); if(!metaMemo.has(k)) metaMemo.set(k,META_PROPERTY_KEYS.has(normalizePropertyName(p))); return metaMemo.get(k); }
     function propertyNameMatches(name,list){ const n=normalizePropertyName(name); return list.some(item=>normalizePropertyName(item)===n); }
     // Ces mots-clés ne valent que comme mots entiers : sinon « Shopping » passerait pour la banque ING, « Péage » pour un PEA,
     // « Netflix » pour un ETF, « Anniversaire » pour le RSA, « Cashback » pour du cash et « Transactions » pour des actions.
     // Les autres restent cherchés dans le nom (« Freebox » → free, « UberEats » → uber).
     // Idem pour les lignes à ignorer : « Aides » ne contient pas « id », ni « Séjour » « jour ».
-    const WHOLE_WORD_KEYWORDS=new Set(["ing","pea","etf","rsa","apl","cash","action","actions","id","ref","jour","mois","code","date","note","notes","name","label","bank"]);
+    // « rent » et « eau » aussi : « Parents », « Rente », « Cadeaux » et « Bureau » ne sont ni un loyer ni une facture d’eau.
+    const WHOLE_WORD_KEYWORDS=new Set(["ing","pea","etf","rsa","apl","cash","action","actions","id","ref","jour","mois","code","date","note","notes","name","label","bank","rent","eau","pel"]);
+    function nameWords(name){ return String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean); }
     function matchesAnyKeyword(name,kw){
-      const n=normalizePropertyName(name), words=String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-      return kw.some(k=>{ const nk=normalizePropertyName(k); if(!nk) return false; if(!WHOLE_WORD_KEYWORDS.has(nk)) return n.includes(nk); return words.some(w=>w===nk||w===nk+"s"||w===nk+"x"); });
+      const n=normalizePropertyName(name), words=nameWords(name);
+      let list=keywordMemo.get(kw); if(!list){ list=kw.map(normalizePropertyName).filter(Boolean); keywordMemo.set(kw,list); }
+      return list.some(nk=>{ if(!WHOLE_WORD_KEYWORDS.has(nk)) return n.includes(nk); return words.some(w=>w===nk||w===nk+"s"||w===nk+"x"); });
+    }
+    // Mots qui décident seuls, avant les listes : « Retraite » n’est pas un « retrait », « Freelance »
+    // pas l’opérateur Free, « Loyer perçu » est un revenu, « Carte Revolut » une dépense et non de l’épargne.
+    function strongFinancialRule(name){
+      const w=nameWords(name), n=normalizePropertyName(name), has=(...k)=>k.some(x=>w.includes(x));
+      if(!w.length) return null;
+      if(/^rembours/.test(w[0])){
+        if(has("pret","credit","emprunt","dette","loan")) return "Dépense";
+        if(has("secu","securite","cpam","ameli","mutuelle","sante","medical","medicaux","impot","impots","assurance","frais","caf")) return "Salaire";
+        return null; // un remboursement entre amis reste ignoré
+      }
+      if(w[0]==="carte"||w[0]==="card"||w[0]==="cb") return "Dépense";
+      if(has("pension","pensions")) return has("alimentaire")&&!has("recu","recue","recues","percu","percue","percues") ? "Dépense" : "Salaire";
+      if(has("recu","recus","recue","recues","percu","percus","percue","percues","received")) return "Salaire";
+      if(has("prime","primes")&&!has("video","amazon")) return "Salaire";
+      if(/(^|[^0-9])13e?(me)?mois/.test(n)||has("retraite","retraites","rente","rentes","freelance","honoraires","honoraire","salary","salaries","income","wage","wages","bonus","dividende","dividendes","dividend","dividends","interet","interets","interest","interests","refund","refunds","chomage","vente","ventes")||n.includes("poleemploi")||n.includes("francetravail")) return "Salaire";
+      if(has("bourse")&&has("etudiante","etudiant","etudes","crous","scolaire","merite")) return "Salaire";
+      return null;
     }
     function isNumberLikeProperty(p){ if(!p) return false; if(p.type==="number") return true; if(p.type==="formula") return p.formula?.type==="number"; if(p.type==="rollup") return p.rollup?.type==="number"; return false; }
     function getPropertyNumber(p){ if(!p) return 0; if(p.type==="number") return Number(p.number||0); if(p.type==="formula"){ if(p.formula?.type==="number") return Number(p.formula.number||0); if(p.formula?.type==="string") return extractFirstNumber(p.formula.string); } if(p.type==="rollup"&&p.rollup?.type==="number") return Number(p.rollup.number||0); if(p.type==="rich_text"||p.type==="title") return extractFirstNumber(getPropertyText(p)); return 0; }
@@ -2631,7 +2662,8 @@
     function getFormulaText(f){ if(!f) return ""; if(f.type==="string") return f.string||""; if(f.type==="number") return String(f.number||0); if(f.type==="date") return f.date?.start||""; if(f.type==="boolean") return f.boolean?"Oui":"Non"; return ""; }
     function getRollupText(r){ if(!r) return ""; if(r.type==="number") return String(r.number||0); if(r.type==="array") return r.array.map(getPropertyText).filter(Boolean).join(", "); return ""; }
     function plainText(parts){ return (parts||[]).map(p=>p.plain_text||"").join("").trim(); }
-    function extractFirstNumber(v){ if(!v) return 0; const m=String(v).replace(/\s/g,"").replace(",",".").match(/-?\d+(\.\d+)?/); return m?Number(m[0]):0; }
+    // Même lecture des montants que le tableur (« 1.234,56 », « (45,00) ») ; repli historique sinon.
+    function extractFirstNumber(v){ if(!v) return 0; const fs=window.FinanceSheet; if(fs&&fs.parseAmount){ const n=fs.parseAmount(String(v).trim()); if(Number.isFinite(n)) return n; } const m=String(v).replace(/\s/g,"").replace(",",".").match(/-?\d+(\.\d+)?/); return m?Number(m[0]):0; }
     function parseIsoDateLocal(value){ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value||"")); if(m) return makeValidDate(Number(m[1]),Number(m[2]),Number(m[3])); return null; }
     function getPropertyDate(p){ if(!p) return null; if(p.type==="date"&&p.date?.start){ const d=parseIsoDateLocal(p.date.start)||new Date(p.date.start); return isNaN(d.getTime())?null:d; } return null; }
     function findProperty(props,names){
@@ -2675,11 +2707,20 @@
     // Ligne de calcul (« Dépenses globales »…) : « Ignorer », comme pour le tableau de bord.
     window.GFClassifyRow=function(name){ try{ const r=classifyFinancialPropertyEx(name); if(!r||!r.matched) return null; return r.rule===null?"Ignorer":r.rule; }catch(e){ return null; } };
     function classifyFinancialPropertyEx(propName){
+      const key=String(propName);
+      if(classifyMemo.has(key)) return classifyMemo.get(key);
+      const res=classifyFinancialPropertyRaw(propName);
+      classifyMemo.set(key,res);
+      return res;
+    }
+    function classifyFinancialPropertyRaw(propName){
       if(isMetaPropertyName(propName)) return {rule:null, matched:true};
       const n=normalizePropertyName(propName);
       const custom=getCustomRules();
       for(const rule of custom) if(n.includes(normalizePropertyName(rule))) return {rule, matched:true};
-      if(isExplicitIgnorePattern(propName)) return {rule:"Ignorer", matched:true};
+      const strong=strongFinancialRule(propName);
+      if(isExplicitIgnorePattern(propName)&&!(strong&&/^rembours/.test(n))) return {rule:"Ignorer", matched:true};
+      if(strong) return {rule:strong, matched:true};
       const stockKw=["bourse","action","actions","etf","pea","crypto","bitcoin","ethereum","trading","invest","investissement","placement","portefeuille"];
       if(matchesAnyKeyword(propName,stockKw)) return {rule:"Épargne", matched:true};
       if(propertyNameMatches(propName,CATEGORY_DETECTION.exactSavingsNames)||matchesAnyKeyword(propName,CATEGORY_DETECTION.savingsKeywords)) return {rule:"Épargne", matched:true};
@@ -3453,6 +3494,7 @@
     }
 
     function normalizeFinanceDataset(pages){
+      resetClassifyMemo(); // les règles personnalisées ont pu changer depuis la dernière lecture
       const cleanPages = (pages || []).filter(page => page && page.properties && Object.keys(page.properties).length > 0);
       const categoryModel = buildCategoryModel(cleanPages);
       const rawMonths = cleanPages
@@ -3663,20 +3705,45 @@
           // Détection des en-têtes qui sont des mois (layout "mois en colonnes")
           const monthCols = [];
           for(let c = 0; c < headers.length; c++){ if(parseFrenchMonth(headers[c])) monthCols.push(c); }
-          const isMatrix = monthCols.length >= 2 && !parseFrenchMonth(headers[0]);
+          // Un seul mois rempli (janvier) suffit : sinon l’année partait en « janvier 2001 ».
+          const isMatrix = monthCols.length >= 1 && !parseFrenchMonth(headers[0]);
           if(isMatrix){
             // Chaque colonne-mois devient une page ; les lignes sont les catégories.
             const labelCol = 0;
+            // Un même intitulé dans deux sections (« Autres » sous Revenus et sous Dépenses) garde
+            // ses deux montants : on le précise par sa section (ligne-titre sans montant) ou par un numéro.
+            const rowKeys = [], seenLabels = new Map();
+            let section = "";
+            for(let r = 1; r < aoa.length; r++){
+              const row = aoa[r]; if(!row) continue;
+              const label = row[labelCol];
+              if(label === undefined || label === null || label === "") continue;
+              const text = String(label);
+              if(!monthCols.some(c => row[c] !== undefined && row[c] !== null && row[c] !== "")){ section = text; continue; }
+              const norm = normalizePropertyName(text);
+              if(!seenLabels.has(norm)) seenLabels.set(norm, []);
+              seenLabels.get(norm).push({ r, text, section });
+            }
+            seenLabels.forEach(list => {
+              if(list.length === 1){ rowKeys[list[0].r] = list[0].text; return; }
+              const used = new Set();
+              list.forEach((item, i) => {
+                let key = item.section && normalizePropertyName(item.section) !== normalizePropertyName(item.text) ? item.text + " (" + item.section + ")" : item.text + (i ? " (" + (i + 1) + ")" : "");
+                if(used.has(normalizePropertyName(key))) key = item.text + " (" + (i + 1) + ")";
+                used.add(normalizePropertyName(key)); rowKeys[item.r] = key;
+              });
+            });
             monthCols.forEach(c => {
               const props = {};
               let nonEmpty = 0;
               for(let r = 1; r < aoa.length; r++){
                 const row = aoa[r]; if(!row) continue;
-                const label = row[labelCol];
+                const key = rowKeys[r];
                 const val = row[c];
-                if(label === undefined || label === null || label === "") continue;
+                if(key === undefined) continue;
                 if(val === undefined || val === null || val === "") continue;
-                props[String(label)] = wrapSheetValue(val); nonEmpty++;
+                // defineProperty : un intitulé « __proto__ » reste une ligne comme les autres.
+                Object.defineProperty(props, key, { value: wrapSheetValue(val), enumerable: true, writable: true, configurable: true }); nonEmpty++;
               }
               if(nonEmpty){
                 // Extraire l'année du nom de feuille (ex: "2025", "2025 - Table 1", "2026 - Budget")
@@ -3880,7 +3947,7 @@
     }
     init();
   </script>
-  <script src="sheet.js?v=20261019-r4"></script>
+  <script src="sheet.js?v=20261020-r1"></script>
   <script src="onboarding.js?v=20261019-r2"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
   <script src="shared-expenses.js?v=20261019-r3"></script>
