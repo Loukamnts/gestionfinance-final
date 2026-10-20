@@ -86,7 +86,7 @@
     else if(Notification.permission==="denied"&&!on)blocked=t2("Les notifications sont bloquées pour Meuniance. Autorise-les dans les réglages de ton appareil.","Notifications are blocked for Meuniance. Allow them in your device settings.");
     var active=on&&!blocked;
 
-    // En-tête : cette appareil, avec son état
+    // En-tête : cet appareil, avec son état
     var hero=el("div","gfr-hero"+(active?" is-on":"")),heroTx=el("div","gfr-hero-tx");
     var h=el("h4","",t2("Sur cet appareil","On this device"));h.id="gfrTitle";
     var state=el("span","gfr-state",blocked?t2("Indisponibles ici","Not available here"):active?t2("Notifications activées","Notifications on"):t2("Notifications désactivées","Notifications off"));
@@ -215,5 +215,7 @@
   if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){
     window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js",{scope:"/"}).catch(function(){});});
   }
-  window.GFReminders={render:schedule,notifyMe:notifyMe,pushReady:pushReady,_invite:showInvite};
+  // Déconnexion : cet appareil arrête de recevoir les notifications du compte (la personne suivante ne les verra pas).
+  function forgetDevice(){return Promise.race([disable().catch(function(){}),new Promise(function(r){setTimeout(r,3000);})]);}
+  window.GFReminders={render:schedule,notifyMe:notifyMe,pushReady:pushReady,forgetDevice:forgetDevice,_invite:showInvite};
 })();

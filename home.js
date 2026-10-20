@@ -146,12 +146,19 @@
   }
   function knownLabels(){var snap=snapshot(),set={},out=[];(snap&&snap.sheets||[]).forEach(function(s){(s.rowHeaders||[]).forEach(function(h){h=String(h||"").trim();if(h&&!set[normKey(h)]){set[normKey(h)]=1;out.push(h);}});});return out;}
 
+  // Même lecture que le tableur : « 1 234,56 », « 1.234,56 » et « 1,234.56 » valent 1234,56.
+  function amountOf(text){
+    if(/%/.test(String(text)))return NaN; // un pourcentage n'est pas un montant
+    var FS=window.FinanceSheet;if(FS&&typeof FS.parseAmount==="function")return FS.parseAmount(text);
+    return parseFloat(String(text).replace(/\s/g,"").replace(",","."));
+  }
   /* ── Ajout rapide ───────────────────────────────────────────────────────── */
   function lineKind(label){
     var r={};try{r=JSON.parse(window.safeStore.getItem("personalFinanceDashboard.categoryRules")||"{}")||{};}catch(e){}
     var v=r[normKey(label)];if(v==="Salaire")return"Salaire";if(v==="Épargne"||v==="Epargne")return"Épargne";if(v==="Ignorer")return null;if(v)return"Dépense";
-    var k=normKey(label);if(/salaire|revenu|prime|paie|paye|allocation|remuneration|caf|apl|rsa/.test(k))return"Salaire";if(/epargne|livret|pea|placement|invest|economie/.test(k))return"Épargne";
-    if(/solde|depart|restant|disponible/.test(k))return null;return"Dépense";
+    // Même classement que le tableau de bord (mots entiers : « Café » ≠ CAF, « Péage » ≠ PEA).
+    var g=null;try{g=window.GFClassifyRow?window.GFClassifyRow(label):null;}catch(e){}
+    if(g==="Ignorer")return null;return g==="Salaire"||g==="Épargne"?g:"Dépense";
   }
   function quickAdd(ctx){
     var KINDS=[["Dépense",t2("Dépense","Expense"),-1,t2("Dépenses","Expenses")],["Salaire",t2("Revenu","Income"),1,t2("Revenus","Income")],["Épargne",t2("Épargne","Savings"),-1,t2("Épargne","Savings")]];
@@ -214,7 +221,7 @@
     cancel.addEventListener("click",function(){d.close();});
     form.addEventListener("submit",function(e){
       e.preventDefault();err.textContent="";
-      var v=parseFloat(String(amt.value).replace(/\s/g,"").replace("€","").replace(",","."));
+      var v=amountOf(amt.value);
       if(!isFinite(v)||v<=0){err.textContent=t2("Indique un montant positif.","Enter a positive amount.");amt.focus();return;}
       var lab=creating?String(newInp.value||"").trim():chosen;
       if(!lab){err.textContent=creating?t2("Donne un nom à la catégorie.","Name the category."):t2("Choisis une catégorie.","Choose a category.");(creating?newInp:(pick.hidden?chips.querySelector(".gfh-chip")||pick:pick)).focus();return;}
@@ -283,7 +290,7 @@
     rm.type=cancel.type="button";ok.type="submit";if(!cur)rm.hidden=true;row.append(rm,cancel,ok);
     var form=document.createElement("form");form.append(h,f,p,row);d.append(form);
     rm.addEventListener("click",function(){setBudget(name,0);d.close();});cancel.addEventListener("click",function(){d.close();});
-    form.addEventListener("submit",function(e){e.preventDefault();var v=parseFloat(String(inp.value).replace(/\s/g,"").replace("€","").replace(",","."));setBudget(name,isFinite(v)&&v>0?v:0);d.close();});
+    form.addEventListener("submit",function(e){e.preventDefault();var v=amountOf(inp.value);setBudget(name,isFinite(v)&&v>0?v:0);d.close();});
     d.addEventListener("close",function(){d.remove();});document.body.append(d);d.showModal();setTimeout(function(){inp.focus();inp.select();},30);
   }
 
@@ -387,7 +394,7 @@
     Object.keys(Object.assign({},pm,cm)).forEach(function(n){var diff=(cm[n]||0)-(pm[n]||0);if(d<0?diff<0:diff>0){if(!best||Math.abs(diff)>Math.abs(best.diff))best={n:n,diff:diff};}});
     var pct1=Math.abs(d).toLocaleString(en()?"en-IE":"fr-FR",{maximumFractionDigits:0}),pmn=mname(prev.mi);
     if(Math.abs(d)<1)return t2("Tes dépenses sont stables par rapport à ","Your spending is stable compared with ")+pmn+"."+tail;
-    var why=best?(d<0?t2(", surtout grâce à «\u00a0",", mostly thanks to “"):t2(", surtout à cause de «\u00a0",", mostly because of “"))+best.n+t2("\u00a0» ("," (")+(best.diff<0?"−":"+")+eur(Math.abs(best.diff))+")":"";
+    var why=best?(d<0?t2(", surtout grâce à «\u00a0",", mostly thanks to “"):t2(", surtout à cause de «\u00a0",", mostly because of “"))+best.n+t2("\u00a0» (","” (")+(best.diff<0?"−":"+")+eur(Math.abs(best.diff))+")":"";
     return (d<0?t2("Tu as dépensé "+pct1+" % de moins qu’en "+pmn,"You spent "+pct1+"% less than in "+pmn):t2("Tu as dépensé "+pct1+" % de plus qu’en "+pmn,"You spent "+pct1+"% more than in "+pmn))+why+"."+tail;
   }
 

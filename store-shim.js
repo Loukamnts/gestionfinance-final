@@ -17,7 +17,15 @@
     "personalFinanceDashboard.importLedger": true,
     "personalFinanceDashboard.subscriptions": true,
     "personalFinanceDashboard.merchantRules": true,
-    "personalFinanceDashboard.rowAliases": true
+    "personalFinanceDashboard.rowAliases": true,
+    // Alertes, objectifs fêtés, bilans vus, notifications, mode discret : propres à chaque compte aussi
+    "personalFinanceDashboard.budgetAlerts": true,
+    "personalFinanceDashboard.budgetAlertsOn": true,
+    "personalFinanceDashboard.goalsCelebrated": true,
+    "personalFinanceDashboard.recapSeen": true,
+    "personalFinanceDashboard.reminders": true,
+    "personalFinanceDashboard.hideAmounts": true,
+    "personalFinanceDashboard.subsTutoDone": true
   };
   var financialOwner = "anonymous";
   var firstAccount = null;
@@ -55,9 +63,12 @@
     }
   } catch (e) {}
   function privateName(k) { return privateKeys[k] ? "gf-private-v1:" + financialOwner + ":" + k : k; }
-  // Ces deux réglages étaient enregistrés sans compte avant le 19 octobre 2026 : repris une fois par le
+  // Ces réglages étaient enregistrés sans compte avant le 19 octobre 2026 : repris une fois par le
   // premier qui les lit sur cet appareil, puis effacés de l'emplacement commun.
-  var movedOnce = { "personalFinanceDashboard.subscriptions": true, "personalFinanceDashboard.merchantRules": true };
+  var movedOnce = { "personalFinanceDashboard.subscriptions": true, "personalFinanceDashboard.merchantRules": true,
+    "personalFinanceDashboard.budgetAlerts": true, "personalFinanceDashboard.budgetAlertsOn": true, "personalFinanceDashboard.goalsCelebrated": true,
+    "personalFinanceDashboard.recapSeen": true, "personalFinanceDashboard.reminders": true, "personalFinanceDashboard.hideAmounts": true,
+    "personalFinanceDashboard.subsTutoDone": true };
   function adoptLegacy(k) {
     if (!movedOnce[k]) return;
     // Déconnecté sur un appareil où un compte s'est déjà connecté : on attend que ce compte les lise.

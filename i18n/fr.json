@@ -1,120 +1,11 @@
 {
-  "common": {
-    "loading": "Chargement...",
-    "error": "Erreur",
-    "success": "Succès",
-    "cancel": "Annuler",
-    "save": "Enregistrer",
-    "delete": "Supprimer",
-    "share": "Partager",
-    "close": "Fermer",
-    "back": "Retour"
-  },
-  "auth": {
-    "signIn": "Se connecter",
-    "signUp": "S'inscrire",
-    "signOut": "Se déconnecter",
-    "email": "Email",
-    "password": "Mot de passe",
-    "forgotPassword": "Mot de passe oublié ?",
-    "confirmPassword": "Confirmer le mot de passe",
-    "error": {
-      "invalidEmail": "Email invalide",
-      "invalidPassword": "Mot de passe invalide (min 6 caractères)",
-      "passwordMismatch": "Les mots de passe ne correspondent pas",
-      "userNotFound": "Utilisateur non trouvé",
-      "wrongPassword": "Mot de passe incorrect",
-      "networkError": "Erreur réseau. Vérifiez votre connexion.",
-      "unknownError": "Une erreur est survenue. Veuillez réessayer."
-    },
-    "loading": {
-      "signingIn": "Connexion en cours...",
-      "signingUp": "Inscription en cours...",
-      "signingOut": "Déconnexion en cours..."
-    }
-  },
-  "sharing": {
-    "title": "Partager",
-    "shareWith": "Partager avec",
-    "addFriend": "Ajouter un ami",
-    "friendEmail": "Email de l'ami",
-    "selectMonths": "Sélectionner les mois",
-    "selectLines": "Sélectionner les lignes",
-    "permissions": "Permissions",
-    "readOnly": "Lecture seule",
-    "canEdit": "Peut éditer",
-    "error": {
-      "invalidEmail": "Email invalide",
-      "alreadyShared": "Déjà partagé avec cet utilisateur",
-      "notFound": "Utilisateur non trouvé",
-      "networkError": "Erreur réseau. Veuillez réessayer.",
-      "unknownError": "Une erreur est survenue lors du partage."
-    },
-    "loading": {
-      "sharing": "Partage en cours...",
-      "revoking": "Révocation en cours..."
-    },
-    "success": {
-      "shared": "Partagé avec succès !",
-      "revoked": "Accès révoqué avec succès."
-    }
-  },
-  "dashboard": {
-    "title": "Tableau de bord",
-    "balance": "Solde",
-    "income": "Revenus",
-    "expenses": "Dépenses",
-    "savings": "Épargne",
-    "month": "Mois",
-    "year": "Année",
-    "total": "Total",
-    "noData": "Aucune donnée disponible",
-    "addEntry": "Ajouter une entrée",
-    "editEntry": "Modifier l'entrée",
-    "deleteEntry": "Supprimer l'entrée",
-    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette entrée ?",
-    "error": {
-      "invalidAmount": "Montant invalide",
-      "invalidDate": "Date invalide",
-      "networkError": "Erreur réseau. Veuillez réessayer."
-    }
-  },
-  "objectives": {
-    "title": "Objectifs",
-    "addObjective": "Ajouter un objectif",
-    "objectiveName": "Nom de l'objectif",
-    "targetAmount": "Montant cible",
-    "currentAmount": "Montant actuel",
-    "targetDate": "Date cible",
-    "progress": "Progression",
-    "completed": "Terminé",
-    "error": {
-      "invalidName": "Nom invalide",
-      "invalidAmount": "Montant invalide",
-      "invalidDate": "Date invalide"
-    }
-  },
-  "theme": {
-    "title": "Thème",
-    "glass": "Verre",
-    "editorial": "Éditorial",
-    "brutal": "Brutal"
-  },
-  "footer": {
-    "privacy": "Confidentialité",
-    "terms": "Conditions d'utilisation",
-    "contact": "Contact"
-  },
   "presentation": {
     "navFeatures": "Fonctionnalités",
     "navPrivacy": "Confidentialité",
     "openApp": "Ouvrir l'application",
-    "kicker": "Le contrôle, sans la complexité",
     "heroTitle": "Tes finances.",
     "heroTitleEm": "Enfin lisibles.",
     "lead": "Meuniance transforme tes chiffres en décisions simples. Un tableau de bord personnel, un vrai tableur et tes objectifs réunis au même endroit.",
-    "ctaStart": "Commencer maintenant",
-    "ctaDiscover": "Découvrir l'outil",
     "trustNoAds": "Sans publicité",
     "trustPrivate": "Données privées",
     "trustFree": "Gratuit",
@@ -122,24 +13,11 @@
     "footerPrivacy": "Confidentialité et contact",
     "footerTerms": "Conditions",
     "languageLabel": "Langue",
-    "finalTitle": "Fais de tes chiffres",
-    "finalTitleEm": "un vrai plan.",
     "ctaOpen": "Ouvrir Meuniance",
-    "kickerReady": "Prêt quand tu l’es",
-    "previewHello": "Bonjour Louka",
-    "previewOverview": "Vue d’ensemble",
     "previewBalance": "Solde disponible",
     "previewSavings": "Épargne",
     "previewGoal": "Objectif 65%",
     "previewExpenses": "Dépenses",
-    "previewChart": "Évolution mensuelle",
-    "previewChartTitle": "Une trajectoire qui se précise",
-    "themeTitle": "Ton espace, ton style",
-    "themeHint": "Le choix s’applique aussi dans l’application.",
-    "themeGlass": "Ardoise",
-    "themeEditorial": "Édition",
-    "themeBrutal": "Contraste",
-    "featuresEyebrow": "Pensé pour le quotidien",
     "featuresTitle1": "Moins de saisie.",
     "featuresTitle2": "Plus de visibilité.",
     "featuresLead": "Chaque outil répond à une question simple : où part ton argent, combien tu gardes et vers quoi tu avances.",
@@ -151,24 +29,14 @@
     "feature3Text": "Fixe un montant, une échéance et suis ta progression sans refaire les calculs.",
     "feature4Title": "Partager, sans tout montrer",
     "feature4Text": "Tu choisis la personne, les mois et les lignes visibles. L’accès se retire à tout moment.",
-    "privacyEyebrow": "La confiance d’abord",
     "privacyTitle": "Tes données financières ne sont pas un produit.",
     "privacyText": "Aucune publicité, aucun suivi commercial et aucune revente. Tu gardes la maîtrise de tes données et peux les exporter ou les supprimer.",
     "privacyLink": "Lire la politique de confidentialité",
-    "previewGoalCard": "Objectif voyage",
-    "previewMonth": "Ce mois",
-    "previewNetSavings": "Épargne nette",
     "previewDemoLabel": "Exemple fictif, montants et pourcentages illustratifs",
     "previewDate": "Septembre 2026⌄",
-    "paletteViolet": "Violet",
-    "paletteBordeaux": "Bordeaux",
-    "paletteGold": "Or",
     "footerCopyright": "© 2026 Meuniance",
     "trustRowLabel": "Avantages",
     "previewStageLabel": "Aperçu fictif de Meuniance",
-    "themeStripLabel": "Choisir l’apparence",
-    "themeGroupLabel": "Choisir un thème",
-    "paletteGroupLabel": "Choisir une couleur",
     "navPricing": "Tarifs",
     "pricingTitle": "Choisis ta formule. Garde ta vie privée.",
     "pricingLead": "Commence gratuitement. Passe à Plus ou Pro quand tu veux partager ou aller plus loin.",
@@ -188,17 +56,17 @@
     "plus3": "Partage avec 1 personne : tu choisis les mois et les lignes visibles",
     "plus4": "Évolution mensuelle complète",
     "plus5": "Tout ce qui est dans Free",
-    "plusCta": "Passer à Plus",
     "proPitch": "Pour partager sans limite et aller plus loin.",
     "pro1": "Tout ce qui est dans Plus",
     "pro2": "Partage avec plusieurs personnes",
     "pro3": "Droits par personne : lecture seule ou modification",
     "pro4": "Accès temporaire qui expire tout seul",
     "pro5": "Historique de progression des objectifs",
-    "proCta": "Passer à Pro",
     "pricingNote": "Plus et Pro ne sont pas encore en vente : pendant le lancement, toutes les fonctions sont ouvertes gratuitement. Prix indicatifs, sans engagement à l’ouverture. Tes données restent les tiennes : aucune pub, aucun suivi, aucune revente.",
     "perMonth": "par mois",
     "soonCta": "Bientôt disponible",
-    "footerLegal": "Mentions légales"
+    "footerLegal": "Mentions légales",
+    "switchToFrench": "Afficher la page en français",
+    "switchToEnglish": "Afficher la page en anglais"
   }
 }

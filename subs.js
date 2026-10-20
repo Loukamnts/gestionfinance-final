@@ -41,7 +41,9 @@
     return[b[0],b[1],true];
   }
   // Catégories où un prélèvement régulier n'est jamais un abonnement (une ligne créée par toi peut l'être).
-  var NOT_SUB_CAT=/^(Courses|Groceries|Restaurants|Transports|Transport|Shopping|Loyer|Rent|Impôts|Taxes|Retraits|Cash withdrawals|Frais bancaires|Bank fees|Voyages|Travel|Salaire|Salary|Épargne|Savings|Aides \(CAF\)|Benefits \(CAF\)|Autres revenus|Other income)$/;
+  var NOT_SUB_CAT=/^(Courses|Groceries|Restaurants|Transports|Transport|Shopping|Loyer|Rent|Impôts|Taxes|Retraits|Cash withdrawals|Frais bancaires|Bank fees|Voyages|Travel|Salaire|Salary|Épargne|Savings|Aides \(CAF\)|Benefits \(CAF\)|Autres revenus|Other income|Crédits|Loans|Santé|Health)$/;
+  // Jamais des abonnements, même réguliers : prêts, cotisations sociales, pension alimentaire, recharges, paiements entre personnes.
+  var NOT_SUB_LABEL=/urssaf|pension alimentaire|recharg|izly|lydia|paylib|\bwero\b|paypal|\bpret\b(?! a porter)|echeance (de |du )?pret|\bcredit (immo|conso|auto|renouvelable)\b|cotisations? sociales|impot|amende/;
   // Ancienne mémoire : clés recalculées (une marque = une clé) et doublons fusionnés.
   function load(){
     var d;try{d=JSON.parse(lsGet(KEY)||"{}");}catch(e){d=null;}if(!d||!d.items||typeof d.items!=="object")return{v:2,items:{}};
@@ -72,7 +74,7 @@
       if(!(op.amount<0))return;
       var c=B.categorize(op,B.learned());if(!c||c[2]!=="Dépense")return;// virement, revenu ou épargne
       var b=brandOf(op.label+(op.detail?" "+op.detail:""));if(!b&&B.transferLabel&&B.transferLabel(op.label))return;// virement à une personne : jamais un abonnement
-      if(!b&&NOT_SUB_CAT.test(c[0]))return;// courses, loyer, essence… reviennent chaque mois sans être des abonnements
+      if(!b&&(NOT_SUB_CAT.test(c[0])||NOT_SUB_LABEL.test(norm(op.label+(op.detail?" "+op.detail:"")))))return;// courses, loyer, essence… reviennent chaque mois sans être des abonnements
       var sl=b?slotOf(b,op):null,m=sl?sl[0]:B.merchantOf(op.label);if(!m)return;
       var k=mk(op.date.y,op.date.m),slot=(per[m]=per[m]||{name:sl?sl[1]:pretty(m),known:!!b,multi:!!(sl&&sl[2]),brand:b?b[0]:null,cat:c[0],months:{}});
       var cur=slot.months[k]||(slot.months[k]=[0,0]);cur[0]+=-op.amount;cur[1]++;
