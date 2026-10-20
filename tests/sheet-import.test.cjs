@@ -184,6 +184,11 @@ test('files that are not a budget are refused with a clear message and change no
   const tx = plan(book([{ name: 'Opérations', aoa: [['Date', 'Libellé', 'Montant'], [{ $date: Date.UTC(2026, 0, 3) }, 'Carrefour', -54.2], [{ $date: Date.UTC(2026, 0, 5) }, 'Salaire', 2500], [{ $date: Date.UTC(2026, 1, 2) }, 'Loyer', -800]] }]));
   assert.match(tx.error, /relevé bancaire/);
   assert.match(plan(book([{ name: '2026', aoa: [['', ...FR], ['Salaire']] }])).error, /aucun montant/);
+  // Classeur chiffré : message en français au lieu de l’erreur anglaise de SheetJS.
+  const cfb = X.CFB.utils.cfb_new();
+  X.CFB.utils.cfb_add(cfb, '/EncryptionInfo', new Uint8Array(200).fill(1));
+  X.CFB.utils.cfb_add(cfb, '/EncryptedPackage', new Uint8Array(400).fill(2));
+  assert.match(plan(new Uint8Array(X.CFB.write(cfb, { type: 'array' })), 'secret.xlsx').error, /mot de passe/);
 });
 
 test('merging into an existing year remaps formulas and keeps unlabeled rows', () => {
