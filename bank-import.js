@@ -467,20 +467,51 @@
     }catch(e){}
     return out.sort(function(a,b){return a.y-b.y||a.m-b.m;});
   }
-  function preview(ops){
+  /* Aperçu en étapes, une décision par écran :
+     1. ce qu'on a trouvé · 2. à vérifier · 3. mois déjà remplis (seulement s'il y en a) · 4. confirmer. */
+  function preview(ops,fileName){
     return new Promise(function(resolve){
-      var extra={},opened={},showAll={},summary=summarize(ops),T=targets(),rowsNow=sheetRows(),lastMove=null;
+      var extra={},opened={},showAll={},summary=summarize(ops),T=targets(),rowsNow=sheetRows(),lastMove=null,mode="replace",step="found",steps=[],conf=[];
       var otherNames=[en()?OTHER_OUT[1]:OTHER_OUT[0],en()?OTHER_IN[1]:OTHER_IN[0]];
-      var d=el("dialog","gfh-dialog gfb-dialog");d.setAttribute("aria-labelledby","gfbTitle");
+      var NB=" ",q=function(s){return t2("«"+NB+s+NB+"»","“"+s+"”");};
+      var KINDS=[["Salaire",t2("Revenus","Income")],["Dépense",t2("Dépenses","Expenses")],["Épargne",t2("Épargne","Savings")]],titles={};KINDS.forEach(function(k){titles[k[0]]=k[1];});
+      var signed=function(kind,v){return kind==="Salaire"?(v<0?"−":"+")+eur(Math.abs(v)):kind==="Dépense"?(v>0?"−":"+")+eur(Math.abs(v)):eur(v);};
+      var plural=function(n,fr1,frN,en1,enN){return n+NB+(n>1?t2(frN,enN):t2(fr1,en1));};
+      var isNew=function(name){return !rowsNow.some(function(r){return key(r)===key(name);});};
+
+      var d=el("dialog","gfh-dialog gfb-dialog gfb-wiz");d.setAttribute("aria-labelledby","gfbTitle");
       var head=el("div","gfb-head"),h=el("h2","",t2("Relevé bancaire","Bank statement"));h.id="gfbTitle";h.tabIndex=-1;
       var x=el("button","gfb-x");x.type="button";x.setAttribute("aria-label",t2("Fermer","Close"));x.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
       head.append(h,x);
-      var lead=el("p","gfb-lead"),totals=el("p","gfb-totals"),list=el("div","gfb-list"),flash=el("p","gfb-flash"),note=el("p","gfb-note");
+      // Indicateur d'étape : « Étape 2 sur 4 » + barre en segments
+      var prog=el("div","gfb-progress"),stepTxt=el("p","gfb-step-txt"),bar=el("div","gfb-bar");stepTxt.setAttribute("aria-live","polite");bar.setAttribute("aria-hidden","true");prog.append(stepTxt,bar);
+
+      var HEADS={found:t2("Relevé reconnu","Statement recognised"),check:t2("À vérifier","To check"),months:t2("Mois déjà remplis","Months already filled"),confirm:t2("Prêt à importer","Ready to import")};
+      var P={};["found","check","months","confirm"].forEach(function(id){var s=el("section","gfb-pane"),hh=el("h3","gfb-step-h",HEADS[id]);hh.tabIndex=-1;hh.id="gfbStep-"+id;s.setAttribute("aria-labelledby",hh.id);s.dataset.step=id;s.hidden=true;s.append(hh);s._h=hh;P[id]=s;});
+      var ICON_OK='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      var badge=el("span","gfb-badge");badge.innerHTML=ICON_OK;P.found._h.prepend(badge);
+
+      /* 1. Ce qu'on a trouvé */
+      var fLead=el("p","gfb-lead"),facts=el("dl","gfb-facts"),fHow=el("p","gfb-lead"),fIgn=el("p","gfb-note"),fPriv=el("p","gfb-note gfb-priv");
+      P.found.append(fLead,facts,fHow,fIgn,fPriv);
+      /* 2. À vérifier */
+      var cLead=el("p","gfb-lead"),list=el("div","gfb-list"),flash=el("p","gfb-flash");
       flash.setAttribute("role","status");flash.setAttribute("aria-live","polite");flash.hidden=true;
-      var tip=el("p","gfb-tip",t2("Ouvre une catégorie pour voir ses opérations et ranger un marchand ailleurs : Meuniance s’en souviendra aux prochains imports.","Open a category to see its transactions and move a merchant elsewhere: Meuniance will remember it next time."));
-      var signed=function(kind,v){return kind==="Salaire"?(v<0?"−":"+")+eur(Math.abs(v)):kind==="Dépense"?(v>0?"−":"+")+eur(Math.abs(v)):eur(v);};
+      P.check.append(cLead,flash,list);
+      /* 3. Mois déjà remplis */
+      var mLead=el("p","gfb-lead"),modeBox=el("fieldset","gfb-mode"),legend=el("legend","",t2("Que faire de ces mois"+NB+"?","What should happen to these months?"));modeBox.append(legend);
+      [["replace",t2("Remplacer","Replace"),t2("Ces lignes prennent les montants du relevé pour ces mois. Ce que tu y avais tapé à la main est effacé.","These rows take the statement’s amounts for these months. What you typed there by hand is erased.")],
+       ["add",t2("Ajouter","Add"),t2("Les opérations jamais importées s’ajoutent à tes chiffres. Celles déjà importées ne comptent pas deux fois.","Transactions never imported before are added to your amounts. Those already imported aren’t counted twice.")]].forEach(function(o){
+        var lab=el("label","gfb-opt"),r=document.createElement("input"),txt=el("span","gfb-opt-txt");r.type="radio";r.name="gfbMode";r.value=o[0];r.checked=o[0]===mode;
+        r.addEventListener("change",function(){if(r.checked)mode=o[0];});
+        txt.append(el("strong","",o[1]),el("small","",o[2]));lab.append(r,txt);modeBox.append(lab);});
+      P.months.append(mLead,modeBox);
+      /* 4. Confirmer */
+      var kLead=el("p","gfb-lead"),recap=el("div","gfb-recap"),kMode=el("p","gfb-note"),kAfter=el("p","gfb-note",t2("Tu pourras tout modifier ensuite dans le tableur.","You can change anything afterwards in the spreadsheet."));
+      P.confirm.append(kLead,recap,kMode,kAfter);
+
       function selectFor(m,current){
-        var sel=document.createElement("select");sel.className="gfb-move";sel.setAttribute("aria-label",t2("Ranger « ","File “")+pretty(m.key)+t2(" » dans","” under"));
+        var sel=document.createElement("select");sel.className="gfb-move";sel.setAttribute("aria-label",t2("Ranger «"+NB,"File “")+pretty(m.key)+t2(NB+"» dans","” under"));
         var groups={cat:t2("Catégories","Categories"),sheet:t2("Lignes de ton tableur","Your spreadsheet rows"),other:t2("Autres","Other")};
         Object.keys(groups).forEach(function(g){var og=document.createElement("optgroup");og.label=groups[g];T.filter(function(t){return t.group===g;}).forEach(function(t){var o=new Option(t.name,t.name+"|"+t.kind);if(key(t.name)===key(current))o.selected=true;og.append(o);});if(og.children.length)sel.append(og);});
         var ig=new Option(t2("Ignorer (virement entre mes comptes)","Ignore (transfer between my accounts)"),"|Ignorer");sel.append(ig);
@@ -490,55 +521,95 @@
           extra[m.key]=v[1]==="Ignorer"?["","Ignorer"]:[v[0],v[1]];if(v[1]!=="Ignorer")opened[v[0]]=true;
           lastMove={key:m.key,prev:prev,label:pretty(m.key),to:v[1]==="Ignorer"?t2("ignoré","ignored"):v[0]};draw(true);};
         sel.addEventListener("change",function(){if(!sel.matches(":focus-visible")||sel.dataset.kbd!=="1")apply();});
-        sel.addEventListener("keydown",function(e){sel.dataset.kbd="1";if(e.key==="Enter"){e.preventDefault();apply();}});
+        sel.addEventListener("keydown",function(e){sel.dataset.kbd="1";if(e.key==="Enter"){e.preventDefault();e.stopPropagation();apply();}});
         sel.addEventListener("blur",function(){if(sel.dataset.kbd==="1"){sel.dataset.kbd="";apply();}});
         return sel;
       }
-      function draw(keepPlace){
-        var top=d.scrollTop,ltop=list.scrollTop;
-        summary=summarize(ops,extra);
-        var first=summary.months[0],lastM=summary.months[summary.months.length-1],years={};summary.months.forEach(function(m){years[m.y]=1;});
-        var yl=Object.keys(years).join(", ");
-        lead.textContent=summary.count+(summary.count>1?t2(" opérations, "," transactions, "):t2(" opération, "," transaction, "))+(first===lastM?monthLabel(first):t2("de ","from ")+monthLabel(first)+t2(" à "," to ")+monthLabel(lastM))+t2(". Elles vont dans la feuille "+yl+" : une ligne par catégorie, une colonne par mois.",". They go into the "+yl+" sheet: one row per category, one column per month.");
-        var tot={"Salaire":0,"Dépense":0,"Épargne":0};summary.groups.forEach(function(g){tot[g.kind]+=g.total;});
-        totals.replaceChildren();[["Salaire",t2("Revenus","Income")],["Dépense",t2("Dépenses","Expenses")],["Épargne",t2("Épargne","Savings")]].forEach(function(k,i){if(!tot[k[0]])return;var sp=el("span","gfb-tot");sp.append(document.createTextNode(k[1]+" "),el("b","gf-amount",signed(k[0],tot[k[0]])));totals.append(sp);});
-        var titles={"Salaire":t2("Revenus","Income"),"Dépense":t2("Dépenses","Expenses"),"Épargne":t2("Épargne","Savings")},lastKind="",nodes=[];
-        var isTodo=function(g){return g.other||otherNames.indexOf(g.name)>=0;};
-        var todo=summary.groups.filter(isTodo),rest=summary.groups.filter(function(g){return !isTodo(g);});
-        function groupNode(g,todoGroup){
-          var det=document.createElement("details");det.className="gfb-group"+(todoGroup?" is-todo":"");if(todoGroup||opened[g.name])det.open=true;
-          det.addEventListener("toggle",function(){opened[g.name]=det.open;});
-          var sum=document.createElement("summary");sum.className="gfb-row";var nm=el("span","gfb-name",g.name);
-          if(!rowsNow.some(function(r){return key(r)===key(g.name);}))nm.append(el("small","gfb-new",t2("nouvelle ligne","new row")));
-          sum.append(nm,el("span","gfb-count",g.count+(g.count>1?t2(" opérations"," transactions"):t2(" opération"," transaction"))),el("b","gf-amount",signed(g.kind,g.total)));det.append(sum);
-          var ms=Object.keys(g.merchants).map(function(k){return g.merchants[k];}).sort(function(a,b){return Math.abs(b.total)-Math.abs(a.total);});
-          var box=el("div","gfb-merchants"),lim=showAll[g.name]?ms.length:25;
-          ms.slice(0,lim).forEach(function(m){var row=el("div","gfb-merchant");var mn=el("span","gfb-mname",m.key?pretty(m.key):m.label);mn.setAttribute("translate","no");mn.title=m.label;row.append(mn,el("b","gf-amount",eur(Math.abs(m.total))));if(m.key&&merchantOf(m.label)===m.key)row.append(selectFor(m,g.name));box.append(row);});
-          if(ms.length>lim){var more=el("button","gfh-link gfb-more",t2("Afficher les "+(ms.length-lim)+" autres","Show the other "+(ms.length-lim)));more.type="button";more.addEventListener("click",function(){showAll[g.name]=true;draw(true);});box.append(more);}
-          det.append(box);return det;
-        }
-        if(todo.length){nodes.push(el("div","gfb-kind gfb-todo-title",t2("À classer","To sort")));nodes.push(el("p","gfb-todo-help",t2("Meuniance n’a pas reconnu ces opérations. Range-les maintenant, ou laisse-les dans «\u00a0Autres\u00a0».","Meuniance didn’t recognise these transactions. Sort them now, or leave them in “Other”.")));todo.forEach(function(g){nodes.push(groupNode(g,true));});}
-        rest.forEach(function(g){if(g.kind!==lastKind){nodes.push(el("div","gfb-kind",titles[g.kind]));lastKind=g.kind;}nodes.push(groupNode(g,false));});
-        list.replaceChildren.apply(list,nodes);
-        if(lastMove){flash.hidden=false;flash.replaceChildren(document.createTextNode("«\u00a0"+lastMove.label+"\u00a0» → "+lastMove.to+" · "));var undo=el("button","gfh-link",t2("Annuler","Undo"));undo.type="button";
-          undo.addEventListener("click",function(){var mv=lastMove;if(!mv)return;if(mv.prev===undefined)delete extra[mv.key];else extra[mv.key]=mv.prev;lastMove=null;flash.hidden=true;draw(true);});flash.append(undo);}
-        note.textContent=t2("Le fichier reste sur ton appareil : seuls ces totaux sont ajoutés au tableur.","The file stays on your device: only these totals are added to the spreadsheet.")+(summary.ignored?" "+summary.ignored+t2(" virement(s) entre tes comptes ignoré(s) (tu peux les ranger ailleurs à un prochain import)."," transfer(s) between your accounts ignored."):"");
-        var conf=conflictMonths(summary);modeBox.hidden=!conf.length;
-        legend.textContent=conf.length?t2("Tu as déjà des montants pour ","You already have amounts for ")+conf.map(monthLabel).join(", ")+t2(". Que faire ?",". What should happen?"):"";
-        ok.disabled=!summary.groups.length;
-        if(keepPlace){d.scrollTop=top;list.scrollTop=ltop;}
+      function groupNode(g,todoGroup){
+        var det=document.createElement("details");det.className="gfb-group"+(todoGroup?" is-todo":"");if(todoGroup||opened[g.name])det.open=true;
+        det.addEventListener("toggle",function(){opened[g.name]=det.open;});
+        var sum=document.createElement("summary");sum.className="gfb-row";var nm=el("span","gfb-name",g.name);
+        if(isNew(g.name))nm.append(el("small","gfb-new",t2("nouvelle ligne","new row")));
+        sum.append(nm,el("span","gfb-count",plural(g.count,"opération","opérations","transaction","transactions")),el("b","gf-amount",signed(g.kind,g.total)));det.append(sum);
+        var ms=Object.keys(g.merchants).map(function(k){return g.merchants[k];}).sort(function(a,b){return Math.abs(b.total)-Math.abs(a.total);});
+        var box=el("div","gfb-merchants"),lim=showAll[g.name]?ms.length:25;
+        ms.slice(0,lim).forEach(function(m){var row=el("div","gfb-merchant");var mn=el("span","gfb-mname",m.key?pretty(m.key):m.label);mn.setAttribute("translate","no");mn.title=m.label;row.append(mn,el("b","gf-amount",eur(Math.abs(m.total))));if(m.key&&merchantOf(m.label)===m.key)row.append(selectFor(m,g.name));box.append(row);});
+        if(ms.length>lim){var more=el("button","gfh-link gfb-more",t2("Afficher les "+(ms.length-lim)+" autres","Show the other "+(ms.length-lim)));more.type="button";more.addEventListener("click",function(){showAll[g.name]=true;draw(true);});box.append(more);}
+        det.append(box);return det;
       }
-      var modeBox=el("fieldset","gfb-mode"),legend=el("legend","");modeBox.append(legend);
-      [["replace",t2("Remplacer par ceux du relevé (les chiffres tapés à la main dans ces lignes, pour ces mois, seront remplacés)","Replace with the statement’s (amounts typed by hand in these rows, for these months, will be replaced)")],["add",t2("Les ajouter à mes chiffres","Add them to my amounts")]].forEach(function(o,i){var lab=el("label","gfb-opt"),r=document.createElement("input");r.type="radio";r.name="gfbMode";r.value=o[0];r.checked=i===0;lab.append(r,el("span","",o[1]));modeBox.append(lab);});
-      var acts=el("div","gfb-actions"),cancel=el("button","gfh-btn",t2("Annuler","Cancel")),ok=el("button","gfh-btn is-primary",t2("Importer","Import"));cancel.type="button";ok.type="submit";acts.append(cancel,ok);
-      var body=el("div","gfb-body");body.append(lead,totals,tip,flash,list,modeBox,note);
-      var form=document.createElement("form");form.className="gfb-form";form.append(head,body,acts);d.append(form);draw();
+      function draw(keepPlace){
+        var top=body.scrollTop;
+        summary=summarize(ops,extra);conf=conflictMonths(summary);
+        steps=["found","check"].concat(conf.length?["months"]:[]).concat(["confirm"]);if(steps.indexOf(step)<0)step="check";
+        var idx=steps.indexOf(step),last=idx===steps.length-1;
+        var first=summary.months[0],lastM=summary.months[summary.months.length-1],years={};summary.months.forEach(function(m){years[m.y]=1;});
+        var yl=Object.keys(years).join(", "),ny=Object.keys(years).length,period=!first?"":first===lastM?monthLabel(first):(first.y===lastM.y?(en()?MN_EN[first.m]:MN[first.m]):monthLabel(first))+" → "+monthLabel(lastM);
+        var tot={"Salaire":0,"Dépense":0,"Épargne":0};summary.groups.forEach(function(g){tot[g.kind]+=g.total;});
+        var isTodo=function(g){return g.other||otherNames.indexOf(g.name)>=0;};
+        var todo=summary.groups.filter(isTodo),rest=summary.groups.filter(function(g){return !isTodo(g);}),todoOps=todo.reduce(function(s,g){return s+g.count;},0);
+
+        // Indicateur
+        stepTxt.textContent=t2("Étape "+(idx+1)+" sur "+steps.length,"Step "+(idx+1)+" of "+steps.length);
+        bar.replaceChildren.apply(bar,steps.map(function(s,i){return el("span","gfb-seg"+(i<idx?" is-done":i===idx?" is-on":""));}));
+
+        // 1. Ce qu'on a trouvé
+        fLead.textContent=fileName?t2("Meuniance a bien lu ton fichier "+q(fileName)+".","Meuniance read your file "+q(fileName)+"."):t2("Meuniance a bien lu ton relevé.","Meuniance read your statement.");
+        var rowsF=[[t2("Opérations","Transactions"),String(summary.count)],[t2("Période","Period"),period]];
+        KINDS.forEach(function(k){if(tot[k[0]])rowsF.push([k[1],signed(k[0],tot[k[0]]),true]);});
+        facts.replaceChildren.apply(facts,rowsF.map(function(r){var w=el("div","gfb-fact");w.append(el("dt","",r[0]),el("dd","",null));var dd=w.lastChild;if(r[2])dd.append(el("b","gf-amount",r[1]));else dd.textContent=r[1];return w;}));
+        fHow.replaceChildren(document.createTextNode(ny>1?t2("Ces montants iront dans les feuilles ","These amounts will go into the "):t2("Ces montants iront dans la feuille ","These amounts will go into the ")),el("b","",yl),document.createTextNode(ny>1?t2(" du tableur"+NB+": une ligne par catégorie, une colonne par mois."," sheets: one row per category, one column per month."):t2(" du tableur"+NB+": une ligne par catégorie, une colonne par mois."," sheet: one row per category, one column per month.")));
+        fIgn.hidden=!summary.ignored;fIgn.textContent=summary.ignored?t2(plural(summary.ignored,"virement entre tes comptes est ignoré","virements entre tes comptes sont ignorés","","")+NB+": ce n’est ni une dépense ni un revenu.",plural(summary.ignored,"","","transfer between your accounts is","transfers between your accounts are")+" ignored: it’s neither spending nor income."):"";
+        fPriv.textContent=t2("Le fichier reste sur ton appareil"+NB+": seuls les totaux vont dans le tableur.","The file stays on your device: only the totals go into the spreadsheet.");
+
+        // 2. À vérifier
+        var nodes=[],lastKind="";
+        if(!summary.groups.length)cLead.textContent=t2("Toutes les opérations sont ignorées"+NB+": il n’y a plus rien à importer.","Every transaction is ignored: there’s nothing left to import.");
+        else if(todo.length)cLead.textContent=t2("Meuniance n’a pas reconnu "+plural(todoOps,"opération","opérations","transaction","transactions")+". Choisis où "+(todoOps>1?"les":"la")+" ranger, ou laisse-"+(todoOps>1?"les":"la")+" dans "+q("Autres")+".","Meuniance didn’t recognise "+plural(todoOps,"opération","opérations","transaction","transactions")+". Choose where to file "+(todoOps>1?"them":"it")+", or leave "+(todoOps>1?"them":"it")+" in “Other”.");
+        else cLead.textContent=t2("Tout est classé. Ouvre une catégorie si tu veux ranger un marchand ailleurs"+NB+": Meuniance s’en souviendra.","Everything is sorted. Open a category if you want to move a merchant elsewhere: Meuniance will remember it.");
+        if(todo.length){nodes.push(el("div","gfb-kind gfb-todo-title",t2("À classer","To sort")));todo.forEach(function(g){nodes.push(groupNode(g,true));});
+          if(rest.length)nodes.push(el("p","gfb-todo-help",t2("Le reste est déjà classé. Ouvre une catégorie pour ranger un marchand ailleurs"+NB+": Meuniance s’en souviendra.","The rest is already sorted. Open a category to move a merchant elsewhere: Meuniance will remember it.")));}
+        rest.forEach(function(g){if(g.kind!==lastKind){nodes.push(el("div","gfb-kind",titles[g.kind]));lastKind=g.kind;}nodes.push(groupNode(g,false));});
+        list.replaceChildren.apply(list,nodes);list.hidden=!nodes.length;
+        if(lastMove){flash.hidden=false;flash.replaceChildren(document.createTextNode(q(lastMove.label)+" → "+lastMove.to+" · "));var undo=el("button","gfh-link",t2("Annuler","Undo"));undo.type="button";
+          undo.addEventListener("click",function(){var mv=lastMove;if(!mv)return;if(mv.prev===undefined)delete extra[mv.key];else extra[mv.key]=mv.prev;lastMove=null;flash.hidden=true;draw(true);});flash.append(undo);}
+
+        // 3. Mois déjà remplis
+        mLead.textContent=conf.length?t2("Ton tableur a déjà des montants pour "+conf.map(monthLabel).join(", ")+" dans les lignes de ce relevé.","Your spreadsheet already has amounts for "+conf.map(monthLabel).join(", ")+" in this statement’s rows."):"";
+
+        // 4. Confirmer
+        kLead.textContent=(ny>1?t2("Meuniance va écrire ces totaux dans les feuilles "+yl,"Meuniance will write these totals into the "+yl+" sheets"):t2("Meuniance va écrire ces totaux dans la feuille "+yl,"Meuniance will write these totals into the "+yl+" sheet"))
+          +(summary.months.length>1?t2(", répartis mois par mois"+NB+":",", month by month:"):t2(NB+":",":"));
+        var rnodes=[];lastKind="";
+        summary.groups.forEach(function(g){if(g.kind!==lastKind){rnodes.push(el("div","gfb-kind",titles[g.kind]));lastKind=g.kind;}
+          var r=el("div","gfb-row gfb-rrow"),nm=el("span","gfb-name",g.name);if(isNew(g.name))nm.append(el("small","gfb-new",t2("nouvelle ligne","new row")));r.append(nm,el("b","gf-amount",signed(g.kind,g.total)));rnodes.push(r);});
+        recap.replaceChildren.apply(recap,rnodes);
+        kMode.hidden=!conf.length;kMode.textContent=conf.length?(mode==="add"?t2("Mois déjà remplis"+NB+": les nouvelles opérations s’ajoutent à tes chiffres.","Months already filled: new transactions are added to your amounts."):t2("Mois déjà remplis"+NB+": les montants du relevé remplacent les tiens.","Months already filled: the statement’s amounts replace yours.")):"";
+
+        // Écran visible + boutons
+        Object.keys(P).forEach(function(id){P[id].hidden=id!==step;});
+        back.textContent=idx?t2("Retour","Back"):t2("Annuler","Cancel");
+        ok.textContent=last?t2("Importer","Import"):t2("Continuer","Continue");
+        ok.disabled=!summary.groups.length&&step!=="found";
+        if(keepPlace)body.scrollTop=top;
+      }
+      function go(id){
+        step=id;draw(false);body.scrollTop=0;
+        var hh=P[step]._h;try{hh.focus({preventScroll:true});}catch(e){}
+      }
+      var acts=el("div","gfb-actions"),back=el("button","gfh-btn"),ok=el("button","gfh-btn is-primary");back.type="button";ok.type="submit";acts.append(back,ok);
+      var body=el("div","gfb-body");body.append(P.found,P.check,P.months,P.confirm);
+      var form=document.createElement("form");form.className="gfb-form";form.noValidate=true;form.append(head,prog,body,acts);d.append(form);draw();
       var done=false;function finish(v){if(done)return;done=true;d.close();resolve(v);}
-      cancel.addEventListener("click",function(){finish(null);});x.addEventListener("click",function(){finish(null);});
-      form.addEventListener("submit",function(e){e.preventDefault();var m=form.querySelector('input[name="gfbMode"]:checked');finish({mode:modeBox.hidden?"replace":(m?m.value:"replace"),summary:summary,extra:extra});});
+      back.addEventListener("click",function(){var i=steps.indexOf(step);if(i>0)go(steps[i-1]);else finish(null);});
+      x.addEventListener("click",function(){finish(null);});
+      // Les raccourcis du tableur (Entrée, flèches) écoutent le document : ils ne doivent pas agir sous la fenêtre.
+      d.addEventListener("keydown",function(e){e.stopPropagation();});
+      form.addEventListener("submit",function(e){e.preventDefault();if(ok.disabled)return;var i=steps.indexOf(step);
+        if(i<steps.length-1){go(steps[i+1]);return;}
+        finish({mode:conflictMonths(summary).length?mode:"replace",summary:summary,extra:extra});});
       d.addEventListener("close",function(){if(!done){done=true;resolve(null);}d.remove();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();});
       document.body.append(d);d.showModal();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();
-      try{h.focus({preventScroll:true});}catch(e){}
+      try{P.found._h.focus({preventScroll:true});}catch(e){}
     });
   }
   function looksLikeMonthTable(text){
@@ -586,7 +657,7 @@
         if(!ops)return notStatement(false);
       }
       var summary=summarize(ops);if(!summary.groups.length)return excel?false:notStatement(false);
-      return preview(ops).then(function(res){
+      return preview(ops,name).then(function(res){
         if(!res)return true;
         // Les choix faits dans l'aperçu sont retenus pour les prochains imports.
         if(Object.keys(res.extra).length)saveLearned(res.extra);
