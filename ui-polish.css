@@ -1148,35 +1148,6 @@ body[data-theme="brutal"][data-mode="light"] #dashboardPage :is(.sheet-status-la
 }
 
 /* ───── Correctifs d'usage mobile : aide, accès et navigation ───── */
-/* Les deux chemins d'accès au compte restent explicitement identifiables. */
-.account-tabs {
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:4px;
-  padding:4px;
-  border:1px solid var(--line);
-  border-radius:var(--control-radius);
-  background:var(--input-bg);
-}
-.account-tab {
-  min-height:42px;
-  padding:9px 10px;
-  border:1px solid transparent;
-  border-radius:calc(var(--control-radius) - 3px);
-  background:transparent;
-  color:var(--muted);
-  font:750 .86rem/1.2 var(--font-body);
-}
-.account-tab.is-active {
-  border-color:var(--line-strong);
-  background:var(--panel-solid);
-  color:var(--accent);
-  box-shadow:0 2px 8px color-mix(in srgb,var(--text) 9%,transparent);
-}
-body[data-theme="editorial"] .account-tabs { border-radius:4px; }
-body[data-theme="editorial"] .account-tab { border-radius:2px; }
-body[data-theme="brutal"] .account-tabs,
-body[data-theme="brutal"] .account-tab { border-radius:0; }
 
 /* Sur téléphone, l'aide du statut devient une vraie petite fenêtre modale :
    aucune infobulle ne peut partir hors écran ni masquer l'en-tête. */
