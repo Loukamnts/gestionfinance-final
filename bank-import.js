@@ -191,9 +191,11 @@
     ["Aides (CAF)","Benefits (CAF)","Salaire",/\bcaf\b|\bcnaf\b|\bmsa\b|chomage|\bapl\b|allocation|pole emploi|france travail|\brsa\b|prime d.activite/],
     ["Crédits","Loans","Dépense",/echeance (de |du )?pret|\bpret (immo|perso|auto|etudiant)|credit (immo|conso|auto)|remboursement (de |du )?pret|cofidis|cetelem|sofinco|franfinance|younited|\boney\b|\bfloa\b|\bdiac\b|carrefour banque|\bpret\b(?! a porter)/],
     ["Loyer","Rent","Dépense",/loyer|foncia|nexity|bailleur|^(?!.*\b(carte|cb)\b).*habitat\b|action logement|immobiliere|\bopac\b|\bhlm\b/],
+    // Carburant à part : « SNCF » ou « Uber » ne doivent jamais finir dans une ligne « Essence ».
+    ["Carburant","Fuel","Dépense",/totalenergies station|total access|\besso\b|\bshell\b|\b(carte|cb)\b.*\b(bp|total ?energies)\b|\bavia\b|\bstation\b(?! f\b)|station.?service|carburant|essence|gazole|gasoil|\bsp ?9[58]\b|intermarche carbu|leclerc carbu|carrefour carbu|auchan carbu|super u carbu|dyneff|\beni\b|\bagip\b/],
     ["Courses","Groceries","Dépense",/carrefour|\bcoop\b|migros|\bmonop\b|leclerc|auchan|lidl|intermarche|super u|hyper u|\bu express|monoprix|franprix|\bcasino\b(?!.*(jeux|barriere|partouche|poker|\bbet\b|betclic|winamax))|\baldi\b|\bpicard\b|biocoop|netto|grand frais|naturalia|\bspar\b|\bmatch\b(?! (point|foot|de))|\bcora\b|g20|coccinelle|marche\b(?! (public|financier))/],
     ["Restaurants","Restaurants","Dépense",/restaurant|\bresto\b(?!s? du coeur)|mcdo|mc donald|mcdonald|burger king|\bkfc\b|uber\W*eats|deliveroo|just ?eat|starbucks|boulangerie|brasserie|sushi|pizza|kebab|cafe\b|bistro|o.?tacos|subway|five guys|\b(carte|cb)\b.*\bpaul\b/],
-    ["Transports","Transport","Dépense",/sncf|\bg7\b|heetch|free ?now|\bratp\b|navigo|\buber\b|bolt|blablacar|totalenergies station|total access|\besso\b|\bshell\b|\b(carte|cb)\b.*\b(bp|total ?energies)\b|\bavia\b|\bstation(nement)?\b(?! f\b)|paybyphone|carburant|essence|peage|autoroute|vinci|sanef|\baprr\b|parking|indigo|tisseo|\btcl\b|\brtm\b|keolis|transdev|\blime\b|velib|trainline|ouigo|tgv/],
+    ["Transports","Transport","Dépense",/sncf|\bg7\b|heetch|free ?now|\bratp\b|navigo|\buber\b|bolt|blablacar|\bstationnement\b|paybyphone|peage|autoroute|vinci|sanef|\baprr\b|parking|indigo|tisseo|\btcl\b|\brtm\b|keolis|transdev|\blime\b|velib|trainline|ouigo|tgv/],
     ["Abonnements","Subscriptions","Dépense",/netflix|spotify|deezer|disney ?(\+|plus)|disneyplus|primevideo|canal\+?|amazon prime|prime video|apple\.com|icloud|google (one|storage|play)|youtube|free mobile|free telecom|freebox|\borange\b(?! ?(boutique|store|shop|magasin))|\bsosh\b|\bsfr\b|bouygues|b ?& ?you|red by|basic.?fit|fitness park|keep cool|crunch|audible|chatgpt|openai/],
     ["Énergie et eau","Energy and water","Dépense",/\bedf\b|engie|total ?energies|ekwateur|\beau de (paris|.*(ville|agglo|metropole|syndicat))|\bsyndicat des eaux|veolia|suez|saur\b|gaz\b|electricite|mint energie|octopus/],
     ["Assurances","Insurance","Dépense",/assurance|\baxa\b|maif|macif|matmut|allianz|groupama|\bgmf\b|\bmma\b|generali|\bapril\b(?! \d)|luko|lovys/],
@@ -239,9 +241,9 @@
   /* Ligne du tableur qui correspond déjà à une catégorie : même nom, singulier/pluriel, ou nom voisin
      (« Abonnement », « Abos » pour « Abonnements »…). Évite de créer une deuxième ligne pour la même chose. */
   var SYN={abonnements:["abonnement","abos","abo","subscriptions","subscription"],courses:["alimentation","supermarche","nourriture","groceries"],
-    restaurants:["restaurant","restos","resto","sorties resto"],transports:["transport","essence","carburant","voiture"],loyer:["logement","rent"],
+    restaurants:["restaurant","restos","resto","sorties resto"],transports:["transport","transports en commun","deplacements","train","navigo"],carburant:["essence","carburant","fuel","gazole","gasoil","plein","plein essence","voiture","auto","vehicule"],autresrevenus:["autre revenu","revenus divers","revenu","revenus","income","other income","rentrees","entrees","extras"],autresdepenses:["autre depense","depenses diverses","other expenses","imprevus"],loyer:["logement","rent"],
     energieeteau:["energie","electricite","edf","eau","gaz","factures energie"],assurances:["assurance","insurance"],sante:["medecin","pharmacie","health"],
-    loisirs:["sorties","leisure"],voyages:["vacances","voyage","travel"],impots:["impot","taxes","taxe"],salaire:["salaires","paie","salary"],
+    loisirs:["sorties","leisure"],voyages:["vacances","voyage","travel"],impots:["impot","taxes","taxe"],salaire:["salaires","paie","salary","revenu","revenus","revenu net","income"],
     shopping:["achats"],credits:["credit","emprunt","emprunts","pret","prets","loans"],retraits:["retrait","especes","liquide"],fraisbancaires:["frais banque","banque","bank fees"],epargne:["savings"]};
   function sing(k){return k.replace(/(s|x)$/,"");}
   // Ligne de calcul (« Total dépenses », « Solde », « Reste à vivre ») : ni revenu, ni dépense, ni épargne.
@@ -275,7 +277,9 @@
     if(exact)return exact;
     // « Abonnements streaming et musique » : une seule ligne qui commence par le nom de la catégorie
     var stem=sing(k);if(stem.length<5)return null;
-    var starts=rows.filter(function(r){return key(r).indexOf(stem)===0;});return starts.length===1?starts[0]:null;
+    var starts=rows.filter(function(r){return key(r).indexOf(stem)===0;});if(starts.length===1)return starts[0];
+    // Pas de ligne « Essence » mais une ligne « Transport » : le carburant y va plutôt que de créer une ligne de plus.
+    return k==="carburant"||k==="fuel"?existingRow("Transports",rows,year):null;
   }
   // Épargne : la ligne d'épargne dont le nom est dans le libellé (« VIR VERS LIVRET A » → « Livret A »),
   // ou la seule ligne d'épargne du tableur.

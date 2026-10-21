@@ -41,7 +41,7 @@
     return[b[0],b[1],true];
   }
   // Catégories où un prélèvement régulier n'est jamais un abonnement (une ligne créée par toi peut l'être).
-  var NOT_SUB_CAT=/^(Courses|Groceries|Restaurants|Transports|Transport|Shopping|Loyer|Rent|Impôts|Taxes|Retraits|Cash withdrawals|Frais bancaires|Bank fees|Voyages|Travel|Salaire|Salary|Épargne|Savings|Aides \(CAF\)|Benefits \(CAF\)|Autres revenus|Other income|Crédits|Loans|Santé|Health)$/;
+  var NOT_SUB_CAT=/^(Courses|Groceries|Restaurants|Transports|Transport|Shopping|Loyer|Rent|Impôts|Taxes|Retraits|Cash withdrawals|Frais bancaires|Bank fees|Voyages|Travel|Salaire|Salary|Épargne|Savings|Aides \(CAF\)|Benefits \(CAF\)|Autres revenus|Other income|Crédits|Loans|Santé|Health|Carburant|Fuel)$/;
   // Jamais des abonnements, même réguliers : prêts, cotisations sociales, pension alimentaire, recharges, paiements entre personnes.
   var NOT_SUB_LABEL=/urssaf|pension alimentaire|recharg|izly|lydia|paylib|\bwero\b|paypal|\bpret\b(?! a porter)|echeance (de |du )?pret|\bcredit (immo|conso|auto|renouvelable)\b|cotisations? sociales|impot|amende/;
   // Ancienne mémoire : clés recalculées (une marque = une clé) et doublons fusionnés.
