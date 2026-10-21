@@ -81,7 +81,9 @@ put('vendor/xlsx.js',sheetjs);
 copy('third_party/sheetjs/LICENSE','vendor/licenses/sheetjs.txt');
 html = html.replace(/<script src="https:\/\/cdn\.sheetjs\.com\/[^" ]+"><\/script>/,'<script src="vendor/xlsx.js"></script>');
 html = html.replace(/https:\/\/cdn\.sheetjs\.com\/xlsx-[0-9.]+\/package\/dist\/xlsx\.full\.min\.js/g,'vendor/xlsx.js');
-html = html.replace('var integrities={xlsx:""};','var integrities={xlsx:"'+SHEETJS_OFFICIAL+'"};');
+// Chart.js est chargé après coup par le site : son empreinte est calculée sur le fichier publié, comme celle de SheetJS.
+const CHART_SRI = integrity(fs.readFileSync(path.join(root,'node_modules/chart.js/dist/chart.umd.min.js')));
+html = html.replace('var integrities={xlsx:"",chart:""};','var integrities={xlsx:"'+SHEETJS_OFFICIAL+'",chart:"'+CHART_SRI+'"};');
 let inlineCount = 0;
 html = html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi,(tag,attrs,code)=>{
   if (/\bsrc\s*=/.test(attrs)) return tag;

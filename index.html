@@ -86,7 +86,7 @@
        Les URLs sont réécrites vers les copies hébergées par le site au moment du build. */
     (function(){
       var sources={chart:"https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js",xlsx:"https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"};
-      var integrities={xlsx:""};
+      var integrities={xlsx:"",chart:""};
       var pending={};
       function load(name){
         if(pending[name]) return pending[name];

@@ -125,3 +125,12 @@ test('Offline service worker: versioned, same-origin only, network first',()=>{
   assert(/return fetch\(request\);/.test(network)&&/event\.preloadResponse/.test(network)&&!/caches/.test(network),'network first');
   assert(sw.includes('caches.delete'),'old versions are removed');
 });
+test('Scripts loaded later by the page (Chart.js, SheetJS) carry the hash of the published file',()=>{
+  const code=fs.readdirSync(path.join(dist,'app')).map(f=>fs.readFileSync(path.join(dist,'app',f),'utf8')).join('\n');
+  const m=code.match(/var integrities=\{xlsx:"([^"]+)",chart:"([^"]+)"\}/);
+  assert(m,'table des empreintes absente ou vide');
+  const sri=file=>'sha384-'+crypto.createHash('sha384').update(fs.readFileSync(path.join(dist,file))).digest('base64');
+  assert.equal(m[1],sri('vendor/xlsx.js'));
+  assert.equal(m[2],sri('vendor/chart.js'));
+  assert(/script\.integrity=integrities\[name\]/.test(code)&&/crossOrigin="anonymous"/.test(code));
+});
