@@ -25,8 +25,21 @@ self.addEventListener("install", function (event) {
 self.addEventListener("activate", function (event) {
   event.waitUntil(caches.keys().then(function (keys) {
     return Promise.all(keys.filter(function (k) { return k.indexOf("meuniance-") === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); }));
+  }).then(function () {
+    // Ouverture plus rapide : la page est demandée au réseau pendant que le service worker démarre
+    // (toujours réseau d'abord, simplement sans attendre son réveil).
+    if (self.registration.navigationPreload) return self.registration.navigationPreload.enable().catch(function () {});
   }).then(function () { return self.clients.claim(); }));
 });
+
+// Réseau d'abord ; pour une page, la réponse déjà demandée par le navigateur (préchargement) est réutilisée.
+function network(event) {
+  var request = event.request;
+  if (request.mode === "navigate" && event.preloadResponse) {
+    return Promise.resolve(event.preloadResponse).then(function (res) { return res || fetch(request); });
+  }
+  return fetch(request);
+}
 
 function cacheable(url, request) {
   if (url.origin !== self.location.origin) return false;
@@ -44,7 +57,7 @@ self.addEventListener("fetch", function (event) {
   var navigate = request.mode === "navigate";
   // Toutes les routes de l'app partagent la même page ; une page publique garde sa propre copie.
   var key = navigate ? (APP_ROUTES.indexOf(url.pathname) >= 0 ? "/app" : url.pathname) : url.pathname + url.search;
-  event.respondWith(fetch(request).then(function (res) {
+  event.respondWith(network(event).then(function (res) {
     if (res.ok && res.type === "basic") {
       var copy = res.clone();
       caches.open(CACHE).then(function (cache) { return cache.put(key, copy); }).catch(function () {});

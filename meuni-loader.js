@@ -62,25 +62,27 @@
     build();shown=true;busy=true;
     var synced=false,finished=false;
     function owner(){try{return window.safeStore&&window.safeStore.financialOwner?window.safeStore.financialOwner():"anonymous";}catch(e){return"anonymous";}}
-    function localEmpty(){try{var sn=window.FinanceSheet&&window.FinanceSheet.getSnapshot();return !sn||!(sn.sheets||[]).some(function(x){return Object.keys(x.cells||{}).some(function(k){return String((x.cells[k]||{}).raw||"").trim()!=="";});});}catch(e){return true;}}
+    // null : le tableur n'a pas encore été lu (il l'est à la fin du chargement de la page) — on ne conclut rien,
+    // sinon l'écran partait sur un accueil vide juste avant que tes chiffres n'apparaissent.
+    function localEmpty(){try{var sn=window.FinanceSheet&&window.FinanceSheet.getSnapshot();if(!sn||!sn.sheets||!sn.sheets.length)return null;return !sn.sheets.some(function(x){return Object.keys(x.cells||{}).some(function(k){return String((x.cells[k]||{}).raw||"").trim()!=="";});});}catch(e){return true;}}
     function figuresReady(){try{var d=window.__gfHomeData&&window.__gfHomeData();return !!(d&&d.all&&d.all.length);}catch(e){return false;}}
     var watcher=null;
     function leave(){
       if(finished)return;finished=true;
       if(watcher)watcher.disconnect();// plus rien à surveiller une fois l’écran parti
       function fade(){boot.classList.add("is-leaving");setTimeout(function(){boot.hidden=true;boot.classList.remove("is-boot","is-leaving");shown=false;busy=false;},220);}
-      // « Voilà. » seulement si l'attente a été perceptible, et brièvement : l'ouverture reste rapide.
-      if(!window.performance||performance.now()<500){fade();return;}
-      if(tx)tx.textContent=FOUND();if(svg)svg.classList.remove("srch");
-      setTimeout(fade,380);
+      // Tes chiffres sont prêts : l'écran s'efface aussitôt (plus de pause « Voilà. » qui rallongeait chaque ouverture).
+      fade();
     }
-    function check(){
+    function check(afterUpdate){
       if(finished||!document.body.classList.contains("gfh-ready"))return;
-      if(localEmpty()){if(owner()!=="anonymous"&&!synced)return;leave();return;}
-      if(figuresReady())leave();
+      var empty=localEmpty();if(empty===null)return;
+      if(empty){if(owner()!=="anonymous"&&!synced)return;leave();return;}
+      // Tableur lu et accueil recalculé : on ouvre, même si ces lignes ne donnent encore aucun mois chiffré.
+      if(figuresReady()||afterUpdate===true)leave();
     }
     window.addEventListener("gf:syncready",function(){synced=true;setTimeout(check,120);});
-    window.addEventListener("gf:dashboardupdate",function(){setTimeout(check,30);});
+    window.addEventListener("gf:dashboardupdate",function(){setTimeout(function(){check(true);},30);});
     if(window.MutationObserver){watcher=new MutationObserver(check);watcher.observe(document.body,{attributes:true,attributeFilter:["class"]});}
     setTimeout(leave,8000);
     check();
