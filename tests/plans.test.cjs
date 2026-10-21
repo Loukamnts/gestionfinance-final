@@ -68,7 +68,7 @@ async function befriend(x,emailY,y){await as(x);const id=await value('select pub
 const save=(friend,on)=>query('select public.save_friend_share_config($1,$2,$2,$3,$4,$5)',[friend,on,JSON.stringify(on?rules:[]),JSON.stringify(sheet),JSON.stringify(dashboard)]);
 const refresh=friend=>value('select public.refresh_friend_share_snapshots($1,$2,$3,$4)',[friend,JSON.stringify(rules),JSON.stringify(sheet),JSON.stringify(dashboard)]);
 async function rejects(run,pattern){await db.exec('savepoint x');try{await assert.rejects(run(),pattern);}finally{await db.exec('rollback to savepoint x; release savepoint x');}}
-async function enforce(){await db.exec('reset role');await db.exec("create or replace function public.billing_enforced() returns boolean language sql stable set search_path = '' as $$ select true $$");}
+async function enforce(){await db.exec('reset role');await db.exec('update public.billing_settings set live=true');}
 async function grant(user,plan){await db.exec('reset role');await query("insert into public.billing_grants(user_id,plan,starts_at,ends_at) values($1,$2,now()-interval '1 day',now()+interval '30 days')",[user,plan]);}
 
 before(async()=>{
@@ -83,7 +83,7 @@ before(async()=>{
   for(const file of ['supabase_schema.sql','supabase_granular_friend_sharing.sql','supabase_fix_secure_sharing_access.sql','supabase_fix_shared_snapshot_read.sql','supabase_security_hardening.sql'])
     await db.exec(fs.readFileSync(path.join(root,file),'utf8'));
   // Tables de facturation telles qu’en production (écrites par le webhook Stripe, service_role seulement).
-  await db.exec(`create table public.billing_subscriptions(user_id uuid primary key,plan text,status text,access_granted boolean default false,subscription_started_at timestamptz);
+  await db.exec(`create table public.billing_subscriptions(user_id uuid primary key,plan text,status text,access_granted boolean default false,current_period_end timestamptz,subscription_started_at timestamptz);
     create table public.billing_grants(id bigserial primary key,user_id uuid,plan text,starts_at timestamptz,ends_at timestamptz,revoked_at timestamptz);
     alter table public.billing_subscriptions enable row level security;alter table public.billing_grants enable row level security;
     revoke all on public.billing_subscriptions,public.billing_grants from anon,authenticated;`);
@@ -122,5 +122,7 @@ test('Serveur : un utilisateur ne peut ni lire ni écrire sa formule, ni appeler
   await rejects(()=>query('select * from public.billing_subscriptions'),/permission denied/);
   await rejects(()=>query('select public.effective_plan($1)',[A]),/permission denied/);
   await rejects(()=>query('select public.billing_enforced()'),/permission denied/);
+  await rejects(()=>query('select public.set_billing_live(true)'),/permission denied/);
+  await rejects(()=>query('select * from public.billing_settings'),/permission denied/);
   await rejects(()=>query('select public.share_plan_block($1,$2)',[A,B]),/permission denied/);
 });

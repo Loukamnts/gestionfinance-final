@@ -37,6 +37,23 @@ Deno.serve(async (request) => {
   const { data, error: userError } = await admin.auth.getUser(token);
   if (userError || !data.user) return new Response("Unauthorized", { status: 401, headers });
 
+  // Abonnement Plus / Pro : arrêté chez Stripe avant la suppression, pour qu'aucun prélèvement ne continue.
+  const stripeKey = (Deno.env.get("STRIPE_SECRET_KEY") || "").trim();
+  if (stripeKey) {
+    const { data: customer } = await admin.from("billing_customers").select("stripe_customer_id").eq("user_id", data.user.id).maybeSingle();
+    if (customer?.stripe_customer_id) {
+      const auth = { Authorization: `Bearer ${stripeKey}` };
+      const res = await fetch(`https://api.stripe.com/v1/subscriptions?customer=${encodeURIComponent(customer.stripe_customer_id)}&status=all&limit=20`, { headers: auth });
+      if (!res.ok) return new Response("Unable to stop subscription", { status: 502, headers });
+      const list = await res.json();
+      for (const s of list?.data || []) {
+        if (!["active", "trialing", "past_due", "unpaid", "incomplete"].includes(s.status)) continue;
+        const stop = await fetch(`https://api.stripe.com/v1/subscriptions/${encodeURIComponent(s.id)}`, { method: "DELETE", headers: auth });
+        if (!stop.ok) return new Response("Unable to stop subscription", { status: 502, headers });
+      }
+    }
+  }
+
   const { error: deleteError } = await admin.auth.admin.deleteUser(data.user.id);
   if (deleteError) return new Response("Unable to delete account", { status: 500, headers });
 

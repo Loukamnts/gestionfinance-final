@@ -1,9 +1,6 @@
 -- Limites des formules côté serveur pour le partage (Free / Plus / Pro).
--- NE PAS APPLIQUER avant que le paiement Stripe soit branché : tant que public.billing_enforced()
--- renvoie false (valeur livrée ici), rien ne change pour personne. Pour activer les limites, le
--- jour où BILLING.enforce passe à true côté site :
---   create or replace function public.billing_enforced() returns boolean
---     language sql stable set search_path = '' as $$ select true $$;
+-- Elles ne s'appliquent qu'une fois les ventes ouvertes : la fonction « billing » appelle set_billing_live(true)
+-- dès que la clé Stripe est enregistrée (et false si elle est retirée). Avant cela, rien ne change pour personne.
 --
 -- Règles (identiques à plans.js, shareFeature) :
 --   Free : aucun partage sortant actif ;
@@ -13,15 +10,34 @@
 -- les derniers instantanés partagés restent lisibles par l'ami, mais ne sont plus mis à jour
 -- (refresh renvoie false) et ne peuvent plus être modifiés tant qu'il y a trop de partages actifs.
 --
--- La formule est lue dans billing_subscriptions / billing_grants (écrits uniquement par service_role,
--- webhook Stripe et attributions manuelles), avec la même logique que get_my_profile().
--- Rien ici n'écrit dans ces tables ni dans profiles. Aucune suppression d'objet (pas de DROP).
+-- La formule est lue dans billing_subscriptions / billing_grants (écrits uniquement par service_role),
+-- avec la même logique que get_my_profile(). Aucune suppression d'objet (pas de DROP).
 
--- 1. Interrupteur : limites coupées pendant la période de lancement.
+-- 1. Interrupteur : ventes ouvertes ou non (une seule ligne, modifiable seulement par le serveur).
+create table if not exists public.billing_settings (
+  id boolean primary key default true check (id),
+  live boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+alter table public.billing_settings enable row level security;
+revoke all on table public.billing_settings from public, anon, authenticated;
+insert into public.billing_settings(id, live) values (true, false) on conflict (id) do nothing;
+
 create or replace function public.billing_enforced()
 returns boolean
-language sql stable set search_path = '' as $$ select false $$;
+language sql stable security definer set search_path = '' as $$
+  select coalesce((select s.live from public.billing_settings s where s.id), false)
+$$;
 revoke all on function public.billing_enforced() from public, anon, authenticated;
+
+create or replace function public.set_billing_live(p_live boolean)
+returns void
+language sql security definer set search_path = '' as $$
+  update public.billing_settings set live = coalesce(p_live, false), updated_at = now()
+  where id and live is distinct from coalesce(p_live, false)
+$$;
+revoke all on function public.set_billing_live(boolean) from public, anon, authenticated;
+grant execute on function public.set_billing_live(boolean) to service_role;
 
 -- 2. Formule effective d'un compte (free / plus / pro), lue côté serveur seulement.
 create or replace function public.effective_plan(p_user_id uuid)
@@ -34,7 +50,8 @@ begin
     where bg.user_id = p_user_id and bg.revoked_at is null and bg.starts_at <= now() and bg.ends_at > now()
     order by case bg.plan when 'pro' then 2 else 1 end desc, bg.ends_at desc limit 1;
   select s.plan into s_plan from public.billing_subscriptions s
-    where s.user_id = p_user_id and s.access_granted and s.status in ('active','trialing');
+    where s.user_id = p_user_id and s.access_granted and s.status in ('active','trialing')
+      and (s.current_period_end is null or s.current_period_end > now() - interval '3 days');
   if g_plan = 'pro' or s_plan = 'pro' then return 'pro'; end if;
   if g_plan = 'plus' or s_plan = 'plus' then return 'plus'; end if;
   return 'free';

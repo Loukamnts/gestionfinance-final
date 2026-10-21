@@ -1,12 +1,12 @@
 /* Abonnements Meuniance : offres, page « Abonnement », onboarding et limites par formule.
-   Les limites ne s'appliquent que si BILLING.enforce vaut true (période de lancement : tout reste ouvert).
-   Pour brancher le paiement, renseigner BILLING.checkout.plus / .pro (ex. liens Stripe Payment Links)
-   avant ce script via window.MEUNIANCE_BILLING = { enforce:true, checkout:{plus:"https://…", pro:"https://…"} }.
-   La sécurité réelle (qui a payé) doit rester côté serveur : profiles.plan est mis à jour par le webhook de paiement. */
+   Paiement : la fonction Supabase « billing » (Stripe Checkout + portail client). Les ventes et les limites
+   s'ouvrent d'elles-mêmes dès que la clé Stripe est enregistrée côté serveur (réponse « ready ») ;
+   avant cela, période de lancement : tout reste ouvert. Qui a payé est décidé par le serveur (get_my_profile). */
 (function(){
   "use strict";
-  var BILLING=Object.assign({enforce:false,checkout:{plus:"",pro:""},portal:""},window.MEUNIANCE_BILLING||{});
-  BILLING.checkout=Object.assign({plus:"",pro:""},(window.MEUNIANCE_BILLING||{}).checkout||{});
+  // Dernier état connu des ventes (gardé sur l'appareil) : pas de bascule visible à chaque ouverture.
+  var READY_KEY="meuniance.billing.ready",cachedReady=false;try{cachedReady=localStorage.getItem(READY_KEY)==="1";}catch(e){}
+  var BILLING=Object.assign({enforce:cachedReady,live:cachedReady},window.MEUNIANCE_BILLING||{});
   var RANK={free:0,plus:1,pro:2};
   var FEATURE_PLAN={avatar_plus:"plus",avatar_pro:"pro",excel:"plus",goals_unlimited:"plus",trends:"plus",share:"plus",share_multi:"pro",share_rights:"pro",share_expiry:"pro",goals_history:"pro"};
   var FEATURE_COPY={
@@ -75,8 +75,37 @@
       if(result.error)throw result.error;
       var profile=Array.isArray(result.data)?result.data[0]:result.data;
       state.plan=normalizePlan(profile&&profile.plan);state.since=profile&&profile.subscription_started_at||null;
-    }catch(e){if(current!==state.request)return;state.plan="free";state.since=null;}
+      try{localStorage.setItem("meuniance.plan."+user.id,state.plan);}catch(e){}
+    }catch(e){
+      // Hors connexion : la dernière formule connue de ce compte, pour ne rien bloquer à tort.
+      if(current!==state.request)return;var known="";try{known=localStorage.getItem("meuniance.plan."+user.id)||"";}catch(x){}
+      state.plan=normalizePlan(known);state.since=null;
+    }
     state.loaded=true;refresh();
+    if(user&&synced!==user.id){synced=user.id;syncBilling();}
+  }
+  // Relit l'abonnement chez Stripe (une fois par ouverture) : paiement tout juste fait, résiliation, impayé.
+  var synced="";
+  function billingCall(body){
+    var acc=account();if(!acc.client||!acc.client.functions)return Promise.reject(new Error("offline"));
+    return acc.client.functions.invoke("billing",{body:body}).then(function(r){
+      if(r.error){var ctx=r.error.context,status=ctx&&ctx.status;var err=new Error("billing");err.status=status||0;throw err;}
+      return r.data||{};});
+  }
+  function syncBilling(){
+    if(!account().user)return;
+    billingCall({action:"status"}).then(function(data){
+      var ready=!!data.ready;try{localStorage.setItem(READY_KEY,ready?"1":"0");}catch(e){}
+      var changed=ready!==BILLING.live;BILLING.live=ready;BILLING.enforce=ready;state.billing=data;
+      var back=returnFlag;returnFlag="";
+      if(ready||changed)return loadPlan().then(function(){refresh();if(back==="merci")thanks();});
+    }).catch(function(){});
+  }
+  // Retour de la page de paiement Stripe : ?abonnement=merci | annule | retour, retiré de l'adresse aussitôt.
+  var returnFlag="";try{var q=new URLSearchParams(window.location.search);returnFlag=q.get("abonnement")||"";if(returnFlag){q.delete("abonnement");var rest=q.toString();history.replaceState(history.state,"",window.location.pathname+(rest?"?"+rest:"")+window.location.hash);}}catch(e){}
+  function thanks(){
+    var plan=planById(state.plan);if(!RANK[state.plan])return;
+    dialog(t2("Abonnement","Plan"),t2("Merci, "+plan.name+" est actif\u00a0!","Thank you, "+plan.name+" is active!"),t2("Toutes les fonctions de "+plan.name+" sont ouvertes sur ton compte, sur tous tes appareils. Tu peux gérer ou résilier ton abonnement à tout moment dans Paramètres › Abonnement.","Every "+plan.name+" feature is now open on your account, on all your devices. You can manage or cancel anytime in Settings › Plan."),[{label:t2("Super","Great"),primary:true}]);
   }
 
   /* ── Cartes d'offres ─────────────────────────────── */
@@ -96,7 +125,7 @@
       var btn=el("button","gfs-btn"+(plan.featured&&!isCurrent?" is-primary":""));btn.type="button";
       if(isCurrent){btn.textContent=t2("Formule actuelle","Current plan");btn.disabled=true;}
       else if(plan.id==="free"){btn.textContent=(RANK[state.plan]>0)?t2("Gérer mon abonnement","Manage my plan"):tr(plan.cta);btn.addEventListener("click",function(){if(options.onChoose&&RANK[state.plan]===0){options.onChoose("free");return;}manage();});}
-      else if(!BILLING.checkout[plan.id]){btn.textContent=t2("Bientôt disponible","Coming soon");btn.disabled=true;btn.classList.add("is-soon");}
+      else if(!BILLING.live){btn.textContent=t2("Bientôt disponible","Coming soon");btn.disabled=true;btn.classList.add("is-soon");}
       else{btn.textContent=tr(plan.cta);btn.addEventListener("click",function(){(options.onChoose||startCheckout)(plan.id);});}
       card.append(btn);grid.append(card);
     });
@@ -124,17 +153,31 @@
       dialog(t2("Abonnement","Plan"),t2("Connecte-toi d’abord","Sign in first"),t2("Ton abonnement est rattaché à ton compte Meuniance, pour le retrouver sur tous tes appareils.","Your plan is linked to your Meuniance account so you get it on every device."),[{label:t2("Plus tard","Later")},{label:t2("Se connecter","Sign in"),primary:true,run:function(){openSettings("account");}}]);
       return;
     }
-    var link=BILLING.checkout[plan.id];
-    if(link){
-      try{var url=new URL(link);if(url.protocol!=="https:")throw new Error("checkout");url.searchParams.set("client_reference_id",user.id);if(user.email)url.searchParams.set("prefilled_email",user.email);window.location.assign(url.toString());return;}catch(e){}
-    }
+    if(BILLING.live){goStripe({action:"checkout",plan:plan.id});return;}
     dialog(t2("Meuniance "+plan.name,"Meuniance "+plan.name),t2("Le paiement en ligne arrive bientôt","Online payment is coming soon"),
       BILLING.enforce?t2("Tu pourras passer à "+plan.name+" ("+price(plan.price)+" par mois) dès l’ouverture des paiements. Tes données restent intactes en attendant.","You will be able to upgrade to "+plan.name+" ("+price(plan.price)+" per month) as soon as payments open. Your data stays intact meanwhile.")
         :t2("Pendant le lancement, toutes les fonctions de "+plan.name+" sont déjà ouvertes sur ton compte. On te préviendra avant toute facturation.","During launch, every "+plan.name+" feature is already open on your account. We will let you know before any billing starts."),
       [{label:t2("Compris","Got it"),primary:true}]);
   }
+  // Ouvre la page Stripe (paiement ou portail). L'adresse vient du serveur et doit être une page stripe.com.
+  var busy=false;
+  function goStripe(body){
+    if(busy)return;busy=true;body.lang=en()?"en":"fr";
+    billingCall(body).then(function(data){
+      busy=false;
+      if(data.manage){manage();return;}
+      var url=null;try{url=new URL(String(data.url||""));}catch(e){}
+      if(url&&url.protocol==="https:"&&/(^|\.)stripe\.com$/.test(url.hostname)){window.location.assign(url.href);return;}
+      throw new Error("billing");
+    }).catch(function(e){
+      busy=false;
+      dialog(t2("Abonnement","Plan"),t2("La page de paiement n’a pas pu s’ouvrir","The payment page couldn’t open"),
+        e&&e.status===429?t2("Une demande vient d’être faite. Réessaie dans 30 secondes.","A request was just made. Try again in 30 seconds.")
+          :t2("Vérifie ta connexion puis réessaie. Aucun paiement n’a été fait.","Check your connection and try again. No payment was made."),[{label:t2("Fermer","Close"),primary:true}]);
+    });
+  }
   function manage(){
-    if(BILLING.portal&&/^https:\/\//.test(String(BILLING.portal))){window.location.assign(BILLING.portal);return;}
+    if(BILLING.live&&state.billing&&state.billing.canManage){goStripe({action:"portal"});return;}
     dialog(t2("Abonnement","Plan"),t2("Gérer ton abonnement","Manage your plan"),t2("Pour changer de formule ou résilier, écris-nous depuis la page Confidentialité et contact. La résiliation prend effet à la fin du mois payé.","To change plan or cancel, contact us from the Privacy and contact page. Cancellation takes effect at the end of the paid month."),[{label:t2("Fermer","Close"),primary:true}]);
   }
   function openUpgrade(feature){
@@ -265,7 +308,7 @@
     },true);
   }
 
-  window.GFSubscriptions={enabled:false,plans:PLANS,get plan(){return state.plan;},can:can,requires:requires,requiresShare:requiresShare,allowsShare:function(otherActive){return !BILLING.enforce||!shareFeature(state.plan,Number(otherActive)||0);},requiresGoalSlot:requiresGoalSlot,requiresFile:requiresFile,_rules:{shareFeature:shareFeature,goalFeature:goalFeature,fileFeature:fileFeature},renderPlans:renderPlans,renderOnboardingOffer:renderOnboardingOffer,startCheckout:startCheckout,openPlans:function(){openSettings("plan");},reload:loadPlan,config:BILLING};
+  window.GFSubscriptions={enabled:false,plans:PLANS,get plan(){return state.plan;},can:can,requires:requires,requiresShare:requiresShare,allowsShare:function(otherActive){return !BILLING.enforce||!shareFeature(state.plan,Number(otherActive)||0);},requiresGoalSlot:requiresGoalSlot,requiresFile:requiresFile,_rules:{shareFeature:shareFeature,goalFeature:goalFeature,fileFeature:fileFeature},renderPlans:renderPlans,renderOnboardingOffer:renderOnboardingOffer,startCheckout:startCheckout,openPlans:function(){openSettings("plan");},reload:loadPlan,config:BILLING,sync:syncBilling};
 
   /* Lien direct depuis la page de présentation (« Passer à Plus / Pro ») : /accueil#abonnement */
   var openPlansOnLoad=window.location.hash==="#abonnement";
