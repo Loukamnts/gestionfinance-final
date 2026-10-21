@@ -3,7 +3,7 @@
   "use strict";
   const byId=id=>document.getElementById(id);
   let request=0;
-  let profile=null,profileUser=null,retryTimer=0;
+  let profile=null,profileUser=null,retryTimer=0,gaveUp=false;
   const welcomeKey=userId=>"gf.welcome.dismissed."+userId;
   function billingReady(){const api=window.GFSubscriptions;return !!(api&&api.enabled===true&&typeof api.renderOnboardingOffer==="function"&&typeof api.startCheckout==="function");}
   function closeWelcome(userId){const dialog=byId("accountWelcomeDialog");if(dialog?.open)dialog.close();if(userId)try{localStorage.setItem(welcomeKey(userId),"1");}catch(e){}}
@@ -26,19 +26,28 @@
   function tr(fr,en){return window.GFI18n?.getLanguage?.()==="en"?en:fr;}
   function date(value){if(!value)return "—";const parsed=new Date(value);return Number.isNaN(parsed.getTime())?"—":new Intl.DateTimeFormat(window.GFI18n?.locale?.()||"fr-FR",{year:"numeric",month:"long",day:"numeric"}).format(parsed);}
   function feedback(message,ok){const node=byId("identityFeedback");if(node){node.textContent=message;node.dataset.kind=ok?"success":"error";}}
+  // Valeur connue, ou petit grain qui cherche (meuni-loader.js) tant qu'elle n'est pas arrivée ;
+  // « — » si le profil n'a pas pu être lu.
+  function setText(node,text,waiting){
+    if(!node)return;
+    if(text!=null||gaveUp||!window.MeuniLoader?.inline){node.textContent=text!=null?text:gaveUp?"—":"…";return;}
+    const label=node.querySelector(".meuni-inline-sr");
+    if(label)label.textContent=waiting;else node.replaceChildren(window.MeuniLoader.inline(waiting,{size:"sm"}));
+  }
   function render(){
     const user=account().user,connected=!!user;
     byId("identitySection").hidden=!connected;
     if(!connected){profile=null;profileUser=null;byId("identityUsername").value="";byId("identityForm").hidden=true;feedback("",true);return;}
     if(profileUser!==user.id)profile=null;
     const name=profile?.username||"";
-    // Profil pas encore lu (connexion lente, jeton en cours de renouvellement) : on n'affirme rien.
-    byId("identityCurrentUsername").textContent=name?"@"+name:profile?tr("À choisir","Not set yet"):"…";
+    // Profil pas encore lu (connexion lente, jeton en cours de renouvellement) : on n'affirme rien,
+    // le petit grain qui cherche tient la place du pseudo et de la formule.
+    setText(byId("identityCurrentUsername"),name?"@"+name:profile?tr("À choisir","Not set yet"):null,tr("Chargement du profil…","Loading profile…"));
     byId("identityEmail").textContent=user.email||"";
     byId("identityFactEmail").textContent=user.email||"—";
     byId("identityAvatar").textContent=(name||user.email||"?").charAt(0).toUpperCase();
     byId("identityCreated").textContent=date(profile?.created_at||user.created_at);
-    byId("identityPlan").textContent=(profile?.plan==="premium"||profile?.plan==="pro")?"Pro":profile?.plan==="plus"?"Plus":tr("Gratuit","Free");
+    setText(byId("identityPlan"),!profile?null:(profile.plan==="premium"||profile.plan==="pro")?"Pro":profile.plan==="plus"?"Plus":tr("Gratuit","Free"),tr("Chargement de ta formule…","Loading your plan…"));
     byId("identitySubscriptionDate").textContent=profile?.subscription_started_at?date(profile.subscription_started_at):"—";
     byId("identitySubscriptionRow").hidden=!profile?.subscription_started_at;
     const changed=profile?.username_changed_at?new Date(profile.username_changed_at):null;
@@ -55,9 +64,11 @@
     const menuAvatar=byId("profileAvatar");if(menuAvatar&&name)menuAvatar.textContent=name.charAt(0).toUpperCase();
   }
   async function load(attempt){
-    attempt=Number(attempt)||0;clearTimeout(retryTimer);
+    attempt=Number(attempt)||0;clearTimeout(retryTimer);if(!attempt)gaveUp=false;
     const current=++request,user=account().user;
     if(!user){render();return;}
+    // La carte s'affiche tout de suite (email, date) ; seuls le pseudo et la formule attendent le serveur.
+    if(!attempt)render();
     try{
       if(!account().client)throw new Error("client_not_ready");
       const result=await account().client.rpc("get_my_profile");
@@ -75,7 +86,7 @@
       // ne doit jamais effacer un profil déjà lu : on garde l'affichage et on réessaie.
       render();
       if(attempt<4){retryTimer=setTimeout(()=>load(attempt+1),[800,2000,5000,12000][attempt]);return;}
-      if(!profile)feedback(tr("Ton profil n’a pas pu être chargé. Vérifie ta connexion puis rouvre cette page.","Your profile could not be loaded. Check your connection and reopen this page."),false);
+      if(!profile){gaveUp=true;render();feedback(tr("Ton profil n’a pas pu être chargé. Vérifie ta connexion puis rouvre cette page.","Your profile could not be loaded. Check your connection and reopen this page."),false);}
     }
   }
   function cooldownMessage(){

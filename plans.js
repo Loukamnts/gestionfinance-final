@@ -32,7 +32,7 @@
       cta:["Passer à Pro","Upgrade to Pro"],
       features:[["Tout ce qui est dans Plus","Everything in Plus"],["Partage avec plusieurs personnes","Share with several people"],["Droits par personne : lecture seule ou modification","Per-person rights: read-only or edit",false,true],["Accès temporaire qui expire tout seul","Temporary access that expires on its own",false,true],["Historique de progression des objectifs","Goal progress history",false,true],["Tous les styles et couleurs d’avatar","Every avatar style and colour"]]}
   ];
-  var state={plan:"free",since:null,loaded:false,request:0};
+  var state={plan:"free",since:null,loaded:false,loadedFor:"",request:0};
   var byId=function(id){return document.getElementById(id);};
   function en(){return window.GFI18n&&typeof window.GFI18n.getLanguage==="function"&&window.GFI18n.getLanguage()==="en";}
   function tr(pair){return Array.isArray(pair)?(en()?pair[1]:pair[0]):String(pair||"");}
@@ -66,9 +66,12 @@
   function requiresFile(file){var f=fileFeature(file&&file.name);return !f||requires(f);}
 
   /* ── Chargement de la formule depuis le profil Supabase ── */
+  // Compte connecté dont la formule n'a pas encore été lue (affichage « chargement » dans les paramètres).
+  function waiting(){var user=account().user;return !!(user&&state.loadedFor!==user.id&&window.MeuniLoader&&window.MeuniLoader.inline);}
   async function loadPlan(){
     var current=++state.request,acc=account(),user=acc.user;
-    if(!user||!acc.client){state.plan="free";state.since=null;state.loaded=true;refresh();return;}
+    if(!user||!acc.client){state.plan="free";state.since=null;state.loaded=true;state.loadedFor=user?user.id:"";refresh();return;}
+    if(waiting())refresh();// nouveau compte : la page s'affiche, seule la formule attend
     try{
       var result=await acc.client.rpc("get_my_profile");
       if(current!==state.request)return;
@@ -81,7 +84,7 @@
       if(current!==state.request)return;var known="";try{known=localStorage.getItem("meuniance.plan."+user.id)||"";}catch(x){}
       state.plan=normalizePlan(known);state.since=null;
     }
-    state.loaded=true;refresh();
+    state.loaded=true;state.loadedFor=user.id;refresh();
     if(user&&synced!==user.id){synced=user.id;syncBilling();}
   }
   // Relit l'abonnement chez Stripe (une fois par ouverture) : paiement tout juste fait, résiliation, impayé.
@@ -114,7 +117,7 @@
     var grid=el("div","gfs-plans"+(options.compact?" is-compact":""));
     grid.setAttribute("role","list");grid.setAttribute("aria-label",t2("Formules","Plans"));
     PLANS.forEach(function(plan){
-      var isCurrent=plan.id===state.plan,card=el("article","gfs-card"+(plan.featured?" is-featured":"")+(isCurrent&&!options.compact?" is-current":""));
+      var isCurrent=!options.pending&&plan.id===state.plan,card=el("article","gfs-card"+(plan.featured?" is-featured":"")+(isCurrent&&!options.compact?" is-current":""));
       card.setAttribute("role","listitem");
       if(isCurrent&&!options.compact)card.append(el("span","gfs-tag",t2("Ta formule","Your plan")));
       else if(plan.featured)card.append(el("span","gfs-tag",t2("Recommandé","Recommended")));
@@ -127,6 +130,7 @@
       else if(plan.id==="free"){btn.textContent=(RANK[state.plan]>0)?t2("Gérer mon abonnement","Manage my plan"):tr(plan.cta);btn.addEventListener("click",function(){if(options.onChoose&&RANK[state.plan]===0){options.onChoose("free");return;}manage();});}
       else if(!BILLING.live){btn.textContent=t2("Bientôt disponible","Coming soon");btn.disabled=true;btn.classList.add("is-soon");}
       else{btn.textContent=tr(plan.cta);btn.addEventListener("click",function(){(options.onChoose||startCheckout)(plan.id);});}
+      if(options.pending)btn.disabled=true;// formule pas encore lue : on ne propose rien à l'aveugle
       card.append(btn);grid.append(card);
     });
     container.replaceChildren(grid);
@@ -207,12 +211,18 @@
     var panel=byId("gfsPlanPanel");if(!panel)return;
     var back=el("button","settings-detail-back",t2("← Paramètres","← Settings"));back.type="button";back.setAttribute("data-settings-back","");
     var head=el("div","gfplan-panel-head");head.append(el("h3","",t2("Choisis ta formule. Garde ta vie privée.","Pick your plan. Keep your privacy.")),el("p","",t2("Commence gratuitement. Passe à Plus ou Pro quand tu veux partager ou aller plus loin.","Start for free. Move to Plus or Pro when you want to share or go further.")));
-    var current=el("div","gfs-current"),copy=el("div","gfs-current-copy"),plan=planById(state.plan);
-    copy.append(el("small","",t2("Ta formule actuelle","Your current plan")),el("strong","",plan.name+(plan.price?" · "+price(plan.price)+t2(" / mois"," / month"):"")),el("span","",account().user?(state.since?t2("Abonné depuis le ","Subscribed since ")+date(state.since):t2("Aucun abonnement payant","No paid subscription")):t2("Connecte-toi pour retrouver ta formule sur tous tes appareils.","Sign in to keep your plan on every device.")));
+    var current=el("div","gfs-current"),copy=el("div","gfs-current-copy"),plan=planById(state.plan),pending=waiting();
+    if(pending){
+      // Formule pas encore lue : le reste de la page est déjà là, seule cette ligne attend.
+      var name=el("strong");name.append(window.MeuniLoader.inline(t2("Chargement de ta formule…","Loading your plan…"),{size:"sm"}));
+      copy.append(el("small","",t2("Ta formule actuelle","Your current plan")),name,el("span",""," "));
+    }
+    else copy.append(el("small","",t2("Ta formule actuelle","Your current plan")),el("strong","",plan.name+(plan.price?" · "+price(plan.price)+t2(" / mois"," / month"):"")),el("span","",account().user?(state.since?t2("Abonné depuis le ","Subscribed since ")+date(state.since):t2("Aucun abonnement payant","No paid subscription")):t2("Connecte-toi pour retrouver ta formule sur tous tes appareils.","Sign in to keep your plan on every device.")));
     current.append(copy);
-    if(!account().user){var signin=el("button","gfs-btn is-inline",t2("Se connecter","Sign in"));signin.type="button";signin.addEventListener("click",function(){openSettings("account");});current.append(signin);}
+    if(pending){/* pas de bouton tant que la formule n'est pas connue */}
+    else if(!account().user){var signin=el("button","gfs-btn is-inline",t2("Se connecter","Sign in"));signin.type="button";signin.addEventListener("click",function(){openSettings("account");});current.append(signin);}
     else if(RANK[state.plan]>0){var m=el("button","gfs-btn is-inline",t2("Gérer","Manage"));m.type="button";m.addEventListener("click",manage);current.append(m);}
-    var plans=el("div");renderPlans(plans);
+    var plans=el("div");renderPlans(plans,{pending:pending});
     var nodes=[back,head,current];
     if(!BILLING.enforce){var note=el("p","gfs-note");var b=el("strong","",t2("Période de lancement.","Launch period."));note.append(b,document.createTextNode(t2(" Les formules Plus et Pro ne sont pas encore en vente : aucun paiement n’est possible et toutes les fonctions sont ouvertes gratuitement. Leur ouverture s’accompagnera de conditions générales de vente, et tu seras prévenu avant."," Plus and Pro are not on sale yet: no payment is possible and every feature is open for free. They will come with terms of sale, and you will be told beforehand.")));nodes.push(note);}
     var promise=el("p","gfs-promise");promise.append(document.createTextNode(t2("Même en payant, tes données restent ","Even when paying, your data stays ")),el("em","",t2("les tiennes","yours")),document.createTextNode(t2(". Aucune pub, aucun suivi, aucune revente.",". No ads, no tracking, no resale.")));
@@ -252,8 +262,8 @@
     if(planFact&&!byId("gfsIdentityManage")){var m=el("button","gfs-link",t2("Changer","Change"));m.type="button";m.id="gfsIdentityManage";m.setAttribute("data-open-plans","");m.style.marginLeft="8px";planFact.after(m);}
   }
   function refresh(){
-    var plan=planById(state.plan),badge=byId("gfsPopoverPlan");if(badge)badge.textContent=plan.name;
-    var fact=byId("identityPlan");if(fact&&account().user)fact.textContent=plan.id==="free"?t2("Gratuit","Free"):plan.name;
+    var plan=planById(state.plan),badge=byId("gfsPopoverPlan");if(badge){badge.textContent=plan.name;badge.hidden=waiting();}
+    var fact=byId("identityPlan");if(fact&&account().user&&!waiting())fact.textContent=plan.id==="free"?t2("Gratuit","Free"):plan.name;
     renderPanel();updateLocks();keepTrendsView();
   }
   // Vue « Évolution » du graphique (Plus) : restée enregistrée sans l'offre, elle revient sur la vue précédente.
