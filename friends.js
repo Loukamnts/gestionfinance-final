@@ -13,6 +13,8 @@
   function el(tag,cls,text){var node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node;}
   function button(text,handler,cls){var node=el("button","sharing-action"+(cls?" "+cls:""),text);node.type="button";node.addEventListener("click",handler);return node;}
   function notice(text,kind){var node=el("p","sf-notice"+(kind?" is-"+kind:""),text);node.setAttribute("role","status");return node;}
+  // Bloc en attente du réseau : le grain qui cherche (meuni-loader.js), le reste de la page reste affiché.
+  function loading(text,options){var L=window.MeuniLoader;return L&&L.inline?L.inline(text,options):notice(text);}
   function defaults(){return{can_view_dashboard:false,can_view_sheet:false,can_view_categories:false};}
   function money(value){if(window.GFI18n)return window.GFI18n.money(value);return Number(value||0).toLocaleString("fr-FR",{style:"currency",currency:"EUR"});}
   function normal(value){return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();}
@@ -310,7 +312,7 @@
   }
   async function viewShared(friend,kind){
     disposeSharedDashboard();var version=++viewVersion,target=document.getElementById("sharedView"),home=document.getElementById("sharingContainer");if(!target)return;
-    if(home)home.hidden=true;target.className="sf-shared";target.hidden=false;target.replaceChildren(action("Mes amis",closeSharedView,"back","back"),notice("Ouverture du partage…"));
+    if(home)home.hidden=true;target.className="sf-shared";target.hidden=false;target.replaceChildren(action("Mes amis",closeSharedView,"back","back"),loading("Ouverture du partage…",{size:"page"}));
     var result=await loadShared(friend.friendId,kind);if(version!==viewVersion)return;
     if(result.error){target.replaceChildren(action("Mes amis",closeSharedView,"back","back"),emptyState("Ce partage n’est pas disponible",result.error,"lock",action("Réessayer",function(){viewShared(friend,kind);},"secondary","refresh")));return;}
     if(kind==="dashboard")renderSharedDashboard(target,result.payload,friend);else renderSharedTable(target,result.payload,friend);target.tabIndex=-1;target.focus({preventScroll:true});target.scrollIntoView({block:"start"});
@@ -322,7 +324,7 @@
   }
   async function renderSharingAccess(friendId){
     var target=document.getElementById("sharingAccessContainer");if(!target)return;
-    var version=++renderVersion;target.replaceChildren(notice("Chargement des autorisations…"));
+    var version=++renderVersion;target.replaceChildren(loading("Chargement des autorisations…",{size:"page"}));
     var data=await loadFriends(),friend=data.friends.find(function(item){return item.friendId===friendId;}),table=snapshot();if(version!==renderVersion)return;
     if(!friend){target.replaceChildren(emptyState("Ami indisponible","Retourne dans la liste de tes amis et réessaie.","people"));return;}
     var rules;try{rules=await loadRules(friend.friendId);}catch(error){target.replaceChildren(notice(errorText(error),"error"),action("Réessayer",function(){renderSharingAccess(friendId);},"secondary"));return;}
@@ -403,7 +405,7 @@
     options=options||{};if(!container)return;container.hidden=false;closeSharedView();var me=user();
     if(!me){container.dataset.sharingReady="";renderSignedOutSharing(container);return;}
     if(!options.force&&container.dataset.sharingReady===me.id&&container._sharingData===cache.data&&cache.data&&Date.now()-cache.loadedAt<30000)return;
-    var version=++renderVersion,started=Date.now();if(!container.childElementCount)container.replaceChildren(notice("Chargement de tes amis…"));
+    var version=++renderVersion,started=Date.now();if(!container.childElementCount)container.replaceChildren(loading("Chargement de tes amis…",{size:"page"}));
     var data=await loadFriends({force:!!options.force});
     if(options.animated&&Date.now()-started<450)await new Promise(function(resolve){setTimeout(resolve,450-(Date.now()-started));});
     if(version!==renderVersion||!user()||user().id!==me.id)return;
@@ -436,7 +438,7 @@
     function chooseTab(name){selectedTab=name;friendPanel.hidden=name!=="friends";invitationPanel.hidden=name!=="invitations";[[friendsTab,"friends"],[invitesTab,"invitations"]].forEach(function(item){var active=item[1]===name;item[0].setAttribute("aria-selected",String(active));item[0].tabIndex=active?0:-1;});}
     chooseTab(selectedTab);container.replaceChildren(shell);container.dataset.sharingReady=me.id;container._sharingData=data;
   }
-  window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots,friendCount:function(){return knownCount;},_rules:{select:selectionFromRules,build:buildRules,otherActive:otherActiveShares},ui:{el:el,action:action,notice:notice,icon:icon,openDialog:openDialog}};
+  window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots,friendCount:function(){return knownCount;},_rules:{select:selectionFromRules,build:buildRules,otherActive:otherActiveShares},ui:{el:el,action:action,notice:notice,loading:loading,icon:icon,openDialog:openDialog}};
   // Lorsqu'on arrive directement sur /partage, le routeur est exécuté avant
   // ce fichier. On rend donc l'état initial ici, puis à chaque connexion.
   function refreshVisibleSharing(){var page=document.getElementById("sharingPage"),container=document.getElementById("sharingContainer");if(page&&!page.hidden&&container)renderSharing(container,{force:true});}

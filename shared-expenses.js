@@ -26,6 +26,8 @@
   // Textes FR/EN dans le code : les phrases contiennent des noms d'amis (translate="no"), le dictionnaire de i18n.js ne les voit pas.
   function en(){return !!(window.GFI18n&&window.GFI18n.getLanguage&&window.GFI18n.getLanguage()==="en");}
   function t2(fr,eng){return en()?eng:fr;}
+  // Petit grain qui cherche, posé dans une ligne de texte (meuni-loader.js) ; « … » si le script manque.
+  function spinner(label){var L=window.MeuniLoader;if(L&&L.inline)return L.inline(label,{size:"sm"});var n=document.createElement("span");n.textContent="…";n.setAttribute("aria-label",label);return n;}
   function money(cents){var v=Number(cents||0)/100;if(window.GFI18n&&window.GFI18n.money)return window.GFI18n.money(v);return v.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});}
   function errorText(error){
     var m=String(error&&error.message||error||"").toLowerCase();
@@ -58,7 +60,7 @@
     var u=ui();if(!u||!slot||!friend||!friend.friendId)return;
     slot.className="sf-friend-split";slot.dataset.friendId=friend.friendId;
     track(slot,friend);
-    if(!slot.childElementCount){var head=u.el("div","sf-label-row");head.append(u.el("span","sf-label",t2("Comptes entre vous","Your balance together")));slot.append(head,u.el("p","sfx-status sfx-loading","…"));}
+    if(!slot.childElementCount){var head=u.el("div","sf-label-row");head.append(u.el("span","sf-label",t2("Comptes entre vous","Your balance together")));var wait=u.el("p","sfx-status sfx-loading");wait.append(spinner(t2("Chargement des comptes…","Loading balances…")));slot.append(head,wait);}
     balances(false).then(function(map){fill(slot,friend,map);});
   }
   // Les cartes sont créées avant d'être mises dans la page : on ne trie les anciennes qu'au rafraîchissement.
@@ -79,7 +81,7 @@
     var ids={};friends.forEach(function(f){ids[f.friendId]=1;});
     var owed=0,owe=0,any=false;
     if(map&&!map.__error)Object.keys(map).forEach(function(id){if(!ids[id])return;var n=map[id].net;if(map[id].entries)any=true;if(n>0)owed+=n;else owe-=n;});
-    if(!map)line.textContent="…";
+    if(!map)line.append(spinner(t2("Chargement des comptes…","Loading balances…")));
     else if(map.__error)line.textContent=map.__error;
     else if(owed||owe){
       if(owed){var a=u.el("span","sfx-pill is-plus");a.append(document.createTextNode(t2("On te doit ","You’re owed ")),u.el("strong","",money(owed)));line.append(a);}
@@ -177,7 +179,7 @@
     var u=ui(),client=sb();if(!u||!client)return;
     var name=friend.displayName||t2("ton ami","your friend"),dlg=u.openDialog(t2("Avec ","With ")+name,t2("Les 50 dernières lignes. Tu peux retirer une dépense que tu as ajoutée pendant 30 jours.","The last 50 entries. You can remove an expense you added for 30 days."));
     dlg.classList.add("sfx-dialog");dlg.querySelector("h2").setAttribute("translate","no");// contient le nom de l’ami
-    var box=u.el("div","sfx-history");box.append(u.notice(t2("Chargement…","Loading…")));dlg.append(box);
+    var box=u.el("div","sfx-history");box.append(u.loading?u.loading(t2("Chargement de l’historique…","Loading history…"),{height:160}):u.notice(t2("Chargement…","Loading…")));dlg.append(box);
     async function load(){
       var res;try{res=await client.rpc("get_shared_entries",{p_friend_id:friend.friendId});}catch(e){res={error:e};}
       if(!dlg.isConnected)return;

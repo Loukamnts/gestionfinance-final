@@ -44,7 +44,7 @@
       if (window.__account && window.__account.user) {
         for (let attempt = 0; attempt < 3; attempt++) {
           if (window.__gfSync && window.__gfSync.pullFromCloud) {
-            var pulled = await window.__gfSync.pullFromCloud();
+            var pulled = await window.__gfSync.pullFromCloud({ loader: true });
             if (pulled) {
               store(STORAGE.onboarding, true);
               if (typeof window.setPage === "function") window.setPage("dashboard");

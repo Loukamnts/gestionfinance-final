@@ -78,6 +78,8 @@
     var old=byId("gfrBudget");if(old)old.remove();
     var box=byId("gfrReminders");
     if(!box){box=el("section","gfh-set gfr-set");box.id="gfrReminders";box.setAttribute("aria-labelledby","gfrTitle");panel.append(box);}
+    // Premier affichage : l'en-tête du panneau est déjà là, seul ce bloc attend l'appareil et le compte.
+    if(!box.childElementCount&&window.MeuniLoader&&window.MeuniLoader.inline)box.append(window.MeuniLoader.inline(t2("Chargement de tes notifications…","Loading your notifications…"),{height:180}));
     var p=prefs(),sub=await currentSub(),on=!!(p.on&&sub),days=[3,7,14,30].indexOf(Number(p.days))>=0?Number(p.days):7;
     var msg=el("p","gfr-msg");msg.setAttribute("role","status");
     var blocked="";

@@ -27,6 +27,9 @@ const publicFiles = ['sheet.js','sheet.css','onboarding.js','onboarding.css','fr
   'store-shim.js','meuni-loader.js','plans.js','plans.css','home.js','home.css','sheet-balances.css','finishing.js','finishing.css','bank-import.js','subs.js','reminders.js','install.js','avatars.js','backup.js','menus.js','menus.css','discover.js','discover.css','favicon.ico','brand-mark.svg','app-icon-180.png','app-icon-180.webp','app-icon-512.png','app-icon-512.webp','manifest.webmanifest','supabase_config.json',
   'robots.txt','sitemap.xml','public.css','public.js','share-card.png','share-card.webp'];
 for (const file of publicFiles) copy(file);
+// Écrans de lancement iPhone (scripts/generate-splash.cjs) : lus par iOS à l'ajout à l'écran d'accueil.
+const splash = fs.readdirSync(path.join(root,'splash')).filter(f=>/^(light|dark)-\d+x\d+\.png$/.test(f));
+for (const file of splash) copy('splash/'+file);
 const config = JSON.parse(fs.readFileSync(path.join(root,'supabase_config.json'),'utf8'));
 require('./public-config.cjs')(config);
 const deployment=JSON.parse(fs.readFileSync(path.join(root,'vercel.json'),'utf8'));
@@ -106,7 +109,8 @@ put('app.html',html);
     const page=fs.readFileSync(path.join(root,u.slice(1)+'.html'),'utf8');
     return [...page.matchAll(/<link\b[^>]*\shref="([^"#:]+)"/g)].map(m=>'/'+m[1].replace(/^\.?\//,'')).filter(h=>/\.css(\?|$)/.test(h));
   });
-  const list=[...new Set([...extra,...local,...legal])].filter(u=>!/\/vendor\/xlsx\.js/.test(u));
+  // Ni le module Excel (lourd, chargé à la demande) ni les écrans de lancement (un seul sert, pris par iOS) ne sont précopiés.
+  const list=[...new Set([...extra,...local,...legal])].filter(u=>!/\/vendor\/xlsx\.js/.test(u)&&!/^\/splash\//.test(u));
   const version=crypto.createHash('sha256').update(html).digest('hex').slice(0,12);
   let sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
   if(!sw.includes('__BUILD_VERSION__')||!sw.includes('__PRECACHE_LIST__'))throw new Error('sw.js : marqueurs manquants');
