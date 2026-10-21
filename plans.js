@@ -8,12 +8,13 @@
   var BILLING=Object.assign({enforce:false,checkout:{plus:"",pro:""},portal:""},window.MEUNIANCE_BILLING||{});
   BILLING.checkout=Object.assign({plus:"",pro:""},(window.MEUNIANCE_BILLING||{}).checkout||{});
   var RANK={free:0,plus:1,pro:2};
-  var FEATURE_PLAN={avatar_plus:"plus",avatar_pro:"pro",excel:"plus",goals_unlimited:"plus",share:"plus",share_multi:"pro",share_rights:"pro",share_expiry:"pro",goals_history:"pro"};
+  var FEATURE_PLAN={avatar_plus:"plus",avatar_pro:"pro",excel:"plus",goals_unlimited:"plus",trends:"plus",share:"plus",share_multi:"pro",share_rights:"pro",share_expiry:"pro",goals_history:"pro"};
   var FEATURE_COPY={
     avatar_plus:["Ce style d’avatar","This avatar style"],
     avatar_pro:["Ce style d’avatar","This avatar style"],
     excel:["L’import et l’export Excel","Excel import and export"],
     goals_unlimited:["Les objectifs illimités","Unlimited goals"],
+    trends:["L’évolution mensuelle complète","Full monthly trends"],
     share:["Le partage avec un proche","Sharing with someone"],
     share_multi:["Le partage avec plusieurs personnes","Sharing with several people"],
     share_rights:["Les droits par personne","Per-person permissions"],
@@ -29,7 +30,7 @@
       features:[["Import et export Excel","Excel import and export"],["Objectifs illimités","Unlimited goals"],["Partage avec 1 personne : tu choisis les mois et les lignes visibles","Share with 1 person: you choose visible months and rows"],["Évolution mensuelle complète","Full monthly trends"],["Styles et couleurs d’avatar Plus","Plus avatar styles and colours"],["Tout ce qui est dans Free","Everything in Free"]]},
     {id:"pro",name:"Pro",price:7.99,pitch:["Pour partager sans limite et aller plus loin.","Share without limits and go further."],period:["par mois","per month"],
       cta:["Passer à Pro","Upgrade to Pro"],
-      features:[["Tout ce qui est dans Plus","Everything in Plus"],["Partage avec plusieurs personnes","Share with several people"],["Droits par personne : lecture seule ou modification","Per-person rights: read-only or edit"],["Accès temporaire qui expire tout seul","Temporary access that expires on its own"],["Historique de progression des objectifs","Goal progress history"],["Tous les styles et couleurs d’avatar","Every avatar style and colour"]]}
+      features:[["Tout ce qui est dans Plus","Everything in Plus"],["Partage avec plusieurs personnes","Share with several people"],["Droits par personne : lecture seule ou modification","Per-person rights: read-only or edit",false,true],["Accès temporaire qui expire tout seul","Temporary access that expires on its own",false,true],["Historique de progression des objectifs","Goal progress history",false,true],["Tous les styles et couleurs d’avatar","Every avatar style and colour"]]}
   ];
   var state={plan:"free",since:null,loaded:false,request:0};
   var byId=function(id){return document.getElementById(id);};
@@ -50,6 +51,19 @@
     return (RANK[state.plan]||0)>=(RANK[need]||0);
   }
   function requires(feature){if(can(feature))return true;openUpgrade(feature);return false;}
+  /* Règles pures (testées) : la fonction qui manque à cette formule pour aller plus loin, ou null. */
+  function rankOf(plan){return RANK[normalizePlan(plan)]||0;}
+  // Un partage actif de plus : aucun en Free, un seul en Plus, autant qu'on veut en Pro.
+  function shareFeature(plan,otherActive){var r=rankOf(plan);if(r<RANK[FEATURE_PLAN.share])return "share";if(r<RANK[FEATURE_PLAN.share_multi]&&otherActive>=1)return "share_multi";return null;}
+  // Un objectif actif de plus (création ou réactivation) : un seul en Free.
+  function goalFeature(plan,active){return rankOf(plan)<RANK[FEATURE_PLAN.goals_unlimited]&&active>=1?"goals_unlimited":null;}
+  // Import : le CSV (relevé bancaire ou tableau) reste gratuit ; les classeurs Excel / ODS sont dans Plus.
+  var EXCEL_FILE=/\.(xlsx|xls|xlsm|ods)$/i;
+  function fileFeature(name){return EXCEL_FILE.test(String(name||""))?"excel":null;}
+  function requiresRule(feature){if(!BILLING.enforce||!feature)return true;openUpgrade(feature);return false;}
+  function requiresShare(otherActive){return requiresRule(shareFeature(state.plan,Number(otherActive)||0));}
+  function requiresGoalSlot(){return requiresRule(goalFeature(state.plan,activeGoals()));}
+  function requiresFile(file){var f=fileFeature(file&&file.name);return !f||requires(f);}
 
   /* ── Chargement de la formule depuis le profil Supabase ── */
   async function loadPlan(){
@@ -77,7 +91,8 @@
       else if(plan.featured)card.append(el("span","gfs-tag",t2("Recommandé","Recommended")));
       card.append(el("h4","",plan.name),el("p","gfs-pitch",tr(plan.pitch)));
       var p=el("div","gfs-price");p.append(el("b","",price(plan.price)),el("small","",tr(plan.period)));card.append(p);
-      var list=el("ul");plan.features.forEach(function(f){var li=el("li",f[2]?"is-dim":"",tr(f));list.append(li);});card.append(list);
+      // 4e valeur : fonction pas encore livrée, affichée « bientôt » pour ne rien vendre qui n’existe pas.
+      var list=el("ul");plan.features.forEach(function(f){var li=el("li",f[2]?"is-dim":"",tr(f));if(f[3])li.append(el("small","gfs-soon",t2("bientôt","coming soon")));list.append(li);});card.append(list);
       var btn=el("button","gfs-btn"+(plan.featured&&!isCurrent?" is-primary":""));btn.type="button";
       if(isCurrent){btn.textContent=t2("Formule actuelle","Current plan");btn.disabled=true;}
       else if(plan.id==="free"){btn.textContent=(RANK[state.plan]>0)?t2("Gérer mon abonnement","Manage my plan"):tr(plan.cta);btn.addEventListener("click",function(){if(options.onChoose&&RANK[state.plan]===0){options.onChoose("free");return;}manage();});}
@@ -196,10 +211,15 @@
   function refresh(){
     var plan=planById(state.plan),badge=byId("gfsPopoverPlan");if(badge)badge.textContent=plan.name;
     var fact=byId("identityPlan");if(fact&&account().user)fact.textContent=plan.id==="free"?t2("Gratuit","Free"):plan.name;
-    renderPanel();updateLocks();
+    renderPanel();updateLocks();keepTrendsView();
   }
+  // Vue « Évolution » du graphique (Plus) : restée enregistrée sans l'offre, elle revient sur la vue précédente.
+  var lastView="pie";
+  function keepTrendsView(){var sel=byId("viewSelect");if(!sel)return;if(sel.value==="line"&&!can("trends")){sel.value=lastView!=="line"?lastView:"pie";sel.dispatchEvent(new Event("change",{bubbles:true}));}else lastView=sel.value;}
   function updateLocks(){
-    ["btnSheetImport","btnSheetExport"].forEach(function(id){var b=byId(id);if(!b)return;var lock=b.querySelector(".gfs-lock");var locked=!can("excel");if(locked&&!lock){lock=el("span","gfs-lock","Plus");b.append(lock);}else if(!locked&&lock)lock.remove();});
+    // L'import reste ouvert à tous (CSV gratuit) : seul l'export Excel porte le badge.
+    var imp=byId("btnSheetImport"),old=imp&&imp.querySelector(".gfs-lock");if(old)old.remove();
+    ["btnSheetExport"].forEach(function(id){var b=byId(id);if(!b)return;var lock=b.querySelector(".gfs-lock");var locked=!can("excel");if(locked&&!lock){lock=el("span","gfs-lock","Plus");b.append(lock);}else if(!locked&&lock)lock.remove();});
   }
   function relabel(){
     document.querySelectorAll('.studio-sidebar-nav [data-open-plans]').forEach(function(b){var node=b.lastChild;if(node&&node.nodeType===3)node.textContent=t2("Abonnement","Plan");b.setAttribute("aria-label",t2("Abonnement","Plan"));b.title=t2("Abonnement","Plan");});
@@ -221,10 +241,19 @@
       if(nav&&!(nav.dataset.settingsView==="plan"))markNav(false);
       if(nav&&nav.dataset.settingsView==="plan")markNav(true);
       if(!BILLING.enforce)return;
-      var excel=event.target.closest&&event.target.closest("#btnSheetImport,#btnSheetExport,[data-gf-feature='excel']");
+      // L'import n'est pas bloqué ici : c'est le fichier choisi qui décide (requiresFile, appelé par le tableur).
+      var excel=event.target.closest&&event.target.closest("#btnSheetExport,[data-gf-feature='excel']");
       if(excel){guard(event,"excel");return;}
       var add=event.target.closest&&event.target.closest("#objectiveAddButton");
-      if(add&&activeGoals()>=1){guard(event,"goals_unlimited");return;}
+      if(add&&goalFeature(state.plan,activeGoals())){guard(event,"goals_unlimited");return;}
+      var trend=event.target.closest&&event.target.closest('#gfcViews [data-view="line"]');
+      if(trend){guard(event,"trends");return;}
+    },true);
+    // Menu de la vue du graphique : « Évolution » est annulé avant que le tableau de bord ne lise le choix.
+    document.addEventListener("change",function(event){
+      var sel=event.target;if(!sel||sel.id!=="viewSelect")return;
+      if(sel.value==="line"&&!can("trends")){event.stopImmediatePropagation();sel.value=lastView!=="line"?lastView:"pie";if(window.GFCustomSelect&&window.GFCustomSelect.sync)window.GFCustomSelect.sync(sel);openUpgrade("trends");return;}
+      lastView=sel.value;
     },true);
     document.addEventListener("submit",function(event){
       if(!BILLING.enforce)return;
@@ -236,7 +265,7 @@
     },true);
   }
 
-  window.GFSubscriptions={enabled:false,plans:PLANS,get plan(){return state.plan;},can:can,requires:requires,renderPlans:renderPlans,renderOnboardingOffer:renderOnboardingOffer,startCheckout:startCheckout,openPlans:function(){openSettings("plan");},reload:loadPlan,config:BILLING};
+  window.GFSubscriptions={enabled:false,plans:PLANS,get plan(){return state.plan;},can:can,requires:requires,requiresShare:requiresShare,allowsShare:function(otherActive){return !BILLING.enforce||!shareFeature(state.plan,Number(otherActive)||0);},requiresGoalSlot:requiresGoalSlot,requiresFile:requiresFile,_rules:{shareFeature:shareFeature,goalFeature:goalFeature,fileFeature:fileFeature},renderPlans:renderPlans,renderOnboardingOffer:renderOnboardingOffer,startCheckout:startCheckout,openPlans:function(){openSettings("plan");},reload:loadPlan,config:BILLING};
 
   /* Lien direct depuis la page de présentation (« Passer à Plus / Pro ») : /accueil#abonnement */
   var openPlansOnLoad=window.location.hash==="#abonnement";

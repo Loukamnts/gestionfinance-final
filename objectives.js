@@ -36,6 +36,13 @@
     return Array.isArray(profile.objectives) ? profile.objectives.map(validGoal).filter(Boolean).slice(0, MAX_GOALS) : [];
   }
 
+  // Un objectif actif de plus (création, réactivation) selon la formule. Les objectifs déjà là ne sont
+  // jamais supprimés ni masqués après un retour à Free : ils restent modifiables, archivables et supprimables.
+  function goalSlot() {
+    const api = window.GFSubscriptions;
+    return !(api && typeof api.requiresGoalSlot === "function") || api.requiresGoalSlot();
+  }
+
   function makeId() {
     return "goal-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   }
@@ -193,7 +200,7 @@
       function action(label, handler, danger) { const button = document.createElement("button"); button.type = "button"; button.className = "button button-ghost"; if (danger) button.classList.add("objective-remove"); button.textContent = label; button.addEventListener("click", handler); actions.append(button); }
       action(t2("Modifier", "Edit"), function() { openForm(goal); });
       action(goal.paused ? t2("Reprendre", "Resume") : t2("Mettre en pause", "Pause"), function() { const current = readProfile(); current.objectives = goalsFrom(current).map(item => item.id === goal.id ? Object.assign({}, item, { paused: !item.paused }) : item); saveProfile(current); render(); });
-      action(goal.archived ? t2("Réactiver", "Reactivate") : t2("Archiver", "Archive"), function() { const current = readProfile(); current.objectives = goalsFrom(current).map(item => item.id === goal.id ? Object.assign({}, item, { archived: !item.archived }) : item); saveProfile(current); render(); });
+      action(goal.archived ? t2("Réactiver", "Reactivate") : t2("Archiver", "Archive"), function() { if (goal.archived && !goalSlot()) return; const current = readProfile(); current.objectives = goalsFrom(current).map(item => item.id === goal.id ? Object.assign({}, item, { archived: !item.archived }) : item); saveProfile(current); render(); });
       action(t2("Supprimer", "Delete"), function() { const current = readProfile(); current.objectives = goalsFrom(current).filter(item => item.id !== goal.id); saveProfile(current); render(); }, true);
       const management = document.createElement("details"); management.className = "objective-management";
       const managementLabel = document.createElement("summary"); managementLabel.textContent = t2("Gérer l’objectif", "Manage goal");
@@ -292,6 +299,7 @@
       if (!title || !Number.isFinite(target) || target < 0) return;
       const profile = readProfile();
       const goals = goalsFrom(profile);
+      if (!editingId && !goalSlot()) return;
       if (!editingId && goals.length >= MAX_GOALS) { status(t2("Limite de " + MAX_GOALS + " objectifs atteinte", "Limit of " + MAX_GOALS + " goals reached")); return; }
       const previous = editingId ? goals.find(goal => goal.id === editingId) : null;
       const data = { id: editingId || makeId(), title, type: document.getElementById("objectiveType")?.value || "custom", target, current, dueDate: document.getElementById("objectiveDueDate")?.value || "", cadence: document.getElementById("objectiveCadence")?.value || "once", sourceId: document.getElementById("objectiveSheetSource")?.value || "", paused: Boolean(previous?.paused), archived: Boolean(previous?.archived) };
