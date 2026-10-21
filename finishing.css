@@ -315,3 +315,15 @@ html body[data-theme="moulin"]:not([data-interface="studio"]) .app-page{padding-
 .gf-pie-total span{font-size:14px;color:var(--muted)}
 body.gf-hide-amounts .gf-pie-legend .gf-amount{filter:blur(7px)}
 @media(hover:hover){.gf-pie-toggle:hover{background:color-mix(in srgb,var(--text) 6%,transparent)}}
+
+/* Feuille Notes sur téléphone : poignée en haut (la tirer vers le bas ferme la feuille), hauteur ajustée au contenu. */
+.personal-notes-grabber{display:none}
+@media (max-width:720px){
+  .personal-notes-grabber{display:block;flex:none;align-self:center;width:44px;height:28px;margin:-12px 0 -10px;cursor:grab;touch-action:none;position:relative}
+  .personal-notes-grabber::before{content:"";position:absolute;left:4px;right:4px;top:12px;height:5px;border-radius:3px;background:var(--line-strong,rgba(0,0,0,.2))}
+  .personal-notes-panel{min-height:min(64dvh,600px)!important}
+}
+/* Mode sombre : les fenêtres et feuilles se détachent nettement du fond (surface plus claire, voile plus sombre). */
+body[data-theme="moulin"][data-mode="dark"] :is(.gfh-dialog,.gfplan-dialog,.sf-dialog,.welcome-dialog,.password-recovery-dialog,.sheet-status-mobile-dialog,.tutorial-tooltip,.personal-notes-panel,#renameModal .modal-container){--panel-solid:#22352D;background:#22352D!important;border-color:rgba(243,238,226,.14)!important;box-shadow:0 28px 70px rgba(0,0,0,.55)!important}
+body[data-theme="moulin"][data-mode="dark"] :is(.gfh-dialog,.gfplan-dialog,.sf-dialog,.welcome-dialog,.password-recovery-dialog,.sheet-status-mobile-dialog)::backdrop{background:rgba(3,6,5,.7)}
+body[data-theme="moulin"][data-mode="dark"] .personal-notes-overlay{background:rgba(3,6,5,.7)!important}

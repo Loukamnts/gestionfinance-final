@@ -528,7 +528,9 @@
 
     // Carte solde
     var card=el("div","gfh-card");
-    var lab=el("div","gfh-lab");lab.append(el("span","",hasStart?t2("Solde disponible","Available balance"):t2("Solde calculé","Calculated balance")),eyeButton());card.append(lab);
+    var lab=el("div","gfh-lab");// Le solde affiché est celui de la fin du mois choisi (le tableur, lui, montre celui du dernier mois saisi).
+    var endOf=(en()?"":"à fin ")+mname(sel.mi);
+    lab.append(el("span","",hasStart?t2("Solde disponible "+endOf,"Available balance, end of "+endOf):t2("Solde calculé "+endOf,"Calculated balance, end of "+endOf)),eyeButton());card.append(lab);
     var bigTxt=eur(sd); card.append(el("div","gfh-big"+(bigTxt.length>11?" is-xl":bigTxt.length>9?" is-long":""),bigTxt));
     var dl=el("div","gfh-dl");
     if(blank)dl.append(document.createTextNode(t2("Aucune donnée pour l’instant","No data yet")));
@@ -662,8 +664,13 @@
     all.forEach(function(m){var k=m.year+"-"+String(m.mi+1).padStart(2,"0");if(!hasStart||!ref||k>=ref)run+=Number(m.salary||0)-Math.abs(Number(m.expenses||0))-Math.abs(Number(m.savingsTotal||0));});
     return run;
   }
+  // Dernier mois saisi (celui du solde global), pour l'écrire à côté du chiffre dans le tableur.
+  function totalBalanceMonth(){
+    var data=typeof window.__gfHomeData==="function"?window.__gfHomeData():null,all=(data&&data.all||[]).filter(function(m){return m.year&&m.mi>=0;});if(!all.length)return "";
+    var last=all.reduce(function(a,m){return Number(m.year)*12+m.mi>Number(a.year)*12+a.mi?m:a;});return mname(last.mi)+" "+last.year;
+  }
   window.addEventListener("gf:dashboardupdate",function(){setTimeout(function(){try{window.FinanceSheet&&window.FinanceSheet.updateSheetBalanceCards&&window.FinanceSheet.updateSheetBalanceCards();}catch(e){}},0);});
-  window.GFHome={alertsOn:alertsOn,setAlertsOn:function(v){lsSet(ALERT_ON,v?null:"0");},render:schedule,totalBalance:totalBalance,loadExample:loadExample,removeExample:removeExample};
+  window.GFHome={alertsOn:alertsOn,setAlertsOn:function(v){lsSet(ALERT_ON,v?null:"0");},render:schedule,totalBalance:totalBalance,totalBalanceMonth:totalBalanceMonth,loadExample:loadExample,removeExample:removeExample};
   document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest("[data-page]"))setTimeout(sheetBanner,60);});
   window.addEventListener("gf:dashboardupdate",function(){sheetBanner();});
   document.addEventListener("focusout",function(e){if(e.target&&e.target.closest&&e.target.closest("#sheetApp"))setTimeout(sheetBanner,400);});
