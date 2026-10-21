@@ -95,11 +95,6 @@ body[data-mode="light"] .onboarding-overlay {
 @media (hover:hover) {
 .mode-segment button:not(.is-active):hover { color: var(--text, rgba(0,0,0,0.9)); }
 }
-.mode-segment button.is-active {
-  background: var(--accent, #c08457);
-  color: var(--button-primary-text, #090a1f);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.22);
-}
 .mode-segment button:focus-visible { outline: 2px solid var(--accent, #c08457); outline-offset: 2px; }
 
 /* Brutal : bordure épaisse + ombre dure décalée (respect du thème brutaliste) */

@@ -112,8 +112,8 @@
     })();
   </script>
   <script src="store-shim.js?v=20261019-r4"></script>
-  <link rel="stylesheet" href="sheet.css?v=20261020-r2" />
-  <link rel="stylesheet" href="onboarding.css?v=20261019-r1" />
+  <link rel="stylesheet" href="sheet.css?v=20261021-r1" />
+  <link rel="stylesheet" href="onboarding.css?v=20261021-r1" />
   <style>
     /* Anti-zoom mobile : empêche le zoom automatique sur les inputs */
     @media (max-width: 768px) {
@@ -1494,7 +1494,6 @@
   .mode-segment { display: inline-flex; align-items: stretch; border: 1px solid var(--line-strong); border-radius: var(--radius); overflow: hidden; background: var(--panel-bg); backdrop-filter: var(--panel-blur); box-shadow: var(--shadow); }
     .mode-segment button { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; background: transparent; color: var(--muted); font-family: var(--font-body); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: color 0.18s ease, background 0.18s ease; white-space: nowrap; }
     .mode-segment button svg { width: 16px; height: 16px; flex-shrink: 0; }
-  .mode-segment button.is-active { color: var(--button-primary-text, #090a1f); background: var(--button-primary-bg); }
   @media (hover:hover) {
   .mode-segment button:not(.is-active):hover { color: var(--text); background: var(--button-active-bg, rgba(192,132,87,0.08)); }
 }
@@ -1510,11 +1509,9 @@
   .brand-copy { display: grid; gap: 2px; }
   .desktop-nav { display: flex; align-items: center; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-bg); backdrop-filter: var(--panel-blur); }
   .desktop-nav-link { min-height: 36px; padding: 7px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font: 700 0.84rem var(--font-body); }
-  .desktop-nav-link.is-active { color: var(--text); background: var(--button-active-bg); }
   @media (hover:hover) {
   .desktop-nav-link:hover { color: var(--text); background: var(--button-active-bg); }
 }
-  .desktop-nav-link.is-active { color: var(--accent); }
   .profile-menu { position: relative; }
   .profile-trigger { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 4px 8px 4px 5px; border: var(--panel-border); border-radius: 12px; background: var(--panel-bg); color: var(--text); box-shadow: var(--shadow); }
   .profile-trigger svg { width: 15px; height: 15px; color: var(--muted); }
@@ -1954,13 +1951,13 @@
   @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
   </style>
   <link rel="stylesheet" href="sharing.css?v=20261019-r3">
-  <link rel="stylesheet" href="ui-polish.css?v=20261019-r1">
-  <link rel="stylesheet" href="theme-directions.css?v=20261021-r2">
+  <link rel="stylesheet" href="ui-polish.css?v=20261021-r1">
+  <link rel="stylesheet" href="theme-directions.css?v=20261021-r3">
   <link rel="stylesheet" href="plans.css?v=20261021-r2">
   <link rel="stylesheet" href="home.css?v=20261021-r3">
   <link rel="stylesheet" href="year-review.css?v=20261019-r2">
   <link rel="stylesheet" href="sheet-balances.css?v=20261019-r1">
-  <link rel="stylesheet" href="finishing.css?v=20261021-r2">
+  <link rel="stylesheet" href="finishing.css?v=20261021-r5">
   <link rel="stylesheet" href="menus.css?v=20261018-h1">
   <link rel="stylesheet" href="discover.css?v=20261019-r1">
   <script src="ui-controls.js?v=20261019-r1" defer></script>
@@ -2012,12 +2009,12 @@
       </div>
       <div class="studio-sidebar-profile-host" id="studioProfileHost"></div>
       <nav class="studio-sidebar-nav" aria-label="Navigation principale">
-        <button type="button" data-page="dashboard" class="is-active" aria-current="page" aria-label="Accueil" title="Accueil"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M3 11l9-8 9 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 21v-6h4v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Accueil</button>
-        <button type="button" data-page="sheet" aria-label="Tableur" title="Tableur"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18" stroke="currentColor" stroke-width="2"/></svg></span>Tableur</button>
-        <button type="button" data-page="objectives" aria-label="Objectifs" title="Objectifs"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 2a10 10 0 1 0 10 10h-3a7 7 0 1 1-7-7V2Zm0 5a5 5 0 1 0 5 5h-3a2 2 0 1 1-2-2V7Zm8.7-5.7-3 1v2.2l-6.8 6.8 1.8 1.8 6.8-6.8h2.2l1-3-2-2Z" clip-rule="evenodd"/></svg></span>Objectifs</button>
-        <button type="button" data-page="sharing" aria-label="Partage et amis" title="Partage et amis"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.42 0-7 2.2-7 5v2h14v-2c0-2.8-2.58-5-7-5Zm8-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm.5 2c-.7 0-1.34.06-1.93.18A6.7 6.7 0 0 1 18 18v2h4v-2c0-2.68-1.8-5-4.5-5Z"/></svg></span>Partage et amis</button>
-        <button type="button" data-page="updates" aria-label="Nouveautés" title="Nouveautés"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="m12 1 2.1 6.9L21 10l-6.9 2.1L12 19l-2.1-6.9L3 10l6.9-2.1L12 1Zm7 14 1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3Z"/></svg></span>Nouveautés</button>
-        <button type="button" data-page="settings" aria-label="Paramètres" title="Paramètres"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6l-.04.08a2 2 0 0 1-3.92 0L10 20a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1l-.08-.04a2 2 0 0 1 0-3.92L4 10a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6l.04-.08a2 2 0 0 1 3.92 0L14 4a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.36.7.6 1l.08.04a2 2 0 0 1 0 3.92L20 14c-.24.3-.46.64-.6 1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Paramètres</button>
+        <a href="/accueil" data-page="dashboard" class="is-active" aria-current="page" aria-label="Accueil" title="Accueil"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M3 11l9-8 9 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 21v-6h4v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Accueil</a>
+        <a href="/tableur" data-page="sheet" aria-label="Tableur" title="Tableur"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18" stroke="currentColor" stroke-width="2"/></svg></span>Tableur</a>
+        <a href="/objectifs" data-page="objectives" aria-label="Objectifs" title="Objectifs"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 2a10 10 0 1 0 10 10h-3a7 7 0 1 1-7-7V2Zm0 5a5 5 0 1 0 5 5h-3a2 2 0 1 1-2-2V7Zm8.7-5.7-3 1v2.2l-6.8 6.8 1.8 1.8 6.8-6.8h2.2l1-3-2-2Z" clip-rule="evenodd"/></svg></span>Objectifs</a>
+        <a href="/partage" data-page="sharing" aria-label="Partage et amis" title="Partage et amis"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.42 0-7 2.2-7 5v2h14v-2c0-2.8-2.58-5-7-5Zm8-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm.5 2c-.7 0-1.34.06-1.93.18A6.7 6.7 0 0 1 18 18v2h4v-2c0-2.68-1.8-5-4.5-5Z"/></svg></span>Partage et amis</a>
+        <a href="/nouveautes" data-page="updates" aria-label="Nouveautés" title="Nouveautés"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="m12 1 2.1 6.9L21 10l-6.9 2.1L12 19l-2.1-6.9L3 10l6.9-2.1L12 1Zm7 14 1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3Z"/></svg></span>Nouveautés</a>
+        <a href="/parametres" data-page="settings" aria-label="Paramètres" title="Paramètres"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6l-.04.08a2 2 0 0 1-3.92 0L10 20a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1l-.08-.04a2 2 0 0 1 0-3.92L4 10a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6l.04-.08a2 2 0 0 1 3.92 0L14 4a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.36.7.6 1l.08.04a2 2 0 0 1 0 3.92L20 14c-.24.3-.46.64-.6 1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Paramètres</a>
       </nav>
       <p class="studio-sidebar-foot">Une vue plus claire de tes finances.</p>
     </aside>
@@ -2026,13 +2023,13 @@
         <div class="brand-copy"><h1 aria-label="Meuniance"><svg class="brand-m mk" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect class="lg-sq" width="28" height="28" rx="7.5"/><circle class="lg-t" cx="14" cy="14" r="9.4"/><circle class="lg-a" cx="14" cy="14" r="9.4" transform="rotate(-90 14 14)"/><g transform="rotate(30 14 14)"><path class="lg-s" d="M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z"/><path class="lg-c" d="M14 9.6c-.4 2.8-.4 5.8 0 8.6"/></g></svg><span class="brand-word" aria-hidden="true">Meuniance</span></h1></div>
       </div>
       <nav class="desktop-nav" aria-label="Navigation principale">
-        <button class="desktop-nav-link" id="desktopHomeButton" type="button" data-page="dashboard">Accueil</button>
-        <button class="desktop-nav-link" id="desktopSheetButton" type="button" data-page="sheet">Tableur</button>
-        <button class="desktop-nav-link" id="desktopSpaceButton" type="button" data-page="sharing" data-space="1">Mon espace</button>
+        <a class="desktop-nav-link" id="desktopHomeButton" href="/accueil" data-page="dashboard">Accueil</a>
+        <a class="desktop-nav-link" id="desktopSheetButton" href="/tableur" data-page="sheet">Tableur</a>
+        <a class="desktop-nav-link" id="desktopSpaceButton" href="/partage" data-page="sharing" data-space="1">Mon espace</a>
       </nav>
       <div class="top-actions">
         <button class="studio-mobile-menu-button" id="studioMobileMenuButton" type="button" aria-label="Ouvrir la navigation" aria-controls="studioSidebar" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <button class="mobile-settings-button" type="button" data-page="settings" aria-label="Paramètres" title="Paramètres"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6l-.04.08a2 2 0 0 1-3.92 0L10 20a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1l-.08-.04a2 2 0 0 1 0-3.92L4 10a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6l.04-.08a2 2 0 0 1 3.92 0L14 4a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.36.7.6 1l.08.04a2 2 0 0 1 0 3.92L20 14c-.24.3-.46.64-.6 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></button>
+        <a class="mobile-settings-button" href="/parametres" data-page="settings" aria-label="Paramètres" title="Paramètres"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6l-.04.08a2 2 0 0 1-3.92 0L10 20a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1l-.08-.04a2 2 0 0 1 0-3.92L4 10a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6l.04-.08a2 2 0 0 1 3.92 0L14 4a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.36.7.6 1l.08.04a2 2 0 0 1 0 3.92L20 14c-.24.3-.46.64-.6 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></a>
         <div class="profile-menu" id="profileMenu">
           <button class="profile-trigger" id="profileMenuButton" type="button" aria-expanded="false" aria-controls="profilePopover"><span class="profile-avatar is-guest" id="profileAvatar"><svg class="profile-avatar-guest" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5" stroke="currentColor" stroke-width="1.9"/><path d="M5 20c.8-3.6 3.4-5.4 7-5.4s6.2 1.8 7 5.4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></span><span class="profile-trigger-label" id="profileLabel">Profil</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <div class="profile-popover" id="profilePopover" hidden>
@@ -2114,13 +2111,11 @@
     </section>
     <section class="app-page" id="sharingPage" hidden>
       <section class="content personal-workspace-layout">
-        <h2 class="personal-workspace-title">Mon espace</h2>
+        <div class="personal-workspace-head"><h2 class="personal-workspace-title">Mon espace</h2><button class="personal-workspace-notes" type="button" data-open-notes aria-label="Notes" title="Notes"></button></div>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
-          <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
-          <button class="personal-workspace-notes" type="button" data-open-notes>Notes</button>
-        </nav>
+          <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>        </nav>
         <div class="personal-workspace-content">
           <div id="sharingContainer"></div>
           <section class="sf-shared" id="sharedView" hidden aria-live="polite"></section>
@@ -2129,13 +2124,11 @@
     </section>
     <section class="app-page" id="sharingAccessPage" hidden>
       <section class="content personal-workspace-layout">
-        <h2 class="personal-workspace-title">Mon espace</h2>
+        <div class="personal-workspace-head"><h2 class="personal-workspace-title">Mon espace</h2><button class="personal-workspace-notes" type="button" data-open-notes aria-label="Notes" title="Notes"></button></div>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
-          <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
-          <button class="personal-workspace-notes" type="button" data-open-notes>Notes</button>
-        </nav>
+          <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>        </nav>
         <div class="personal-workspace-content">
           <div id="sharingAccessContainer"></div>
         </div>
@@ -2143,13 +2136,11 @@
     </section>
     <section class="app-page" id="updatesPage" hidden>
       <section class="content personal-workspace-layout">
-        <h2 class="personal-workspace-title">Mon espace</h2>
+        <div class="personal-workspace-head"><h2 class="personal-workspace-title">Mon espace</h2><button class="personal-workspace-notes" type="button" data-open-notes aria-label="Notes" title="Notes"></button></div>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
-          <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
-          <button class="personal-workspace-notes" type="button" data-open-notes>Notes</button>
-        </nav>
+          <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>        </nav>
         <div class="personal-workspace-content">
           <div class="updates-list" id="updatesPageList"></div>
           <nav class="updates-pagination" id="updatesPagination" aria-label="Pages des nouveautés"></nav>
@@ -2158,13 +2149,11 @@
     </section>
     <section class="app-page" id="objectivesPage" hidden>
       <section class="content personal-workspace-layout">
-        <h2 class="personal-workspace-title">Mon espace</h2>
+        <div class="personal-workspace-head"><h2 class="personal-workspace-title">Mon espace</h2><button class="personal-workspace-notes" type="button" data-open-notes aria-label="Notes" title="Notes"></button></div>
         <nav class="personal-workspace-nav" aria-label="Navigation de Mon espace">
           <button class="personal-workspace-link" type="button" data-page="sharing">Partage et amis</button>
           <button class="personal-workspace-link" type="button" data-page="objectives">Objectifs</button>
-          <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>
-          <button class="personal-workspace-notes" type="button" data-open-notes>Notes</button>
-        </nav>
+          <button class="personal-workspace-link" type="button" data-page="updates">Nouveautés</button>        </nav>
         <div class="personal-workspace-content objectives-shell">
           <section class="objectives-overview" id="objectivesOverview" aria-label="Résumé des objectifs"></section>
           <div class="objectives-tabs" role="tablist" aria-label="Filtrer les objectifs"><button type="button" class="is-active" data-objective-filter="active" role="tab" aria-selected="true">En cours</button><button type="button" data-objective-filter="archived" role="tab" aria-selected="false">Archivés</button></div>
@@ -2236,7 +2225,7 @@
       <div class="sheet-fx">
         <div class="fx-ref" id="fxRef">A1</div>
         <div class="fx-fn">fx</div>
-        <input class="fx-input" id="fxInput" type="text" placeholder="Valeur ou formule, ex: =SUM(A1:A5)" autocomplete="off" />
+        <input class="fx-input" id="fxInput" type="text" aria-label="Barre de formule" placeholder="Valeur ou formule, ex: =SUM(A1:A5)" autocomplete="off" />
         <div class="fx-preview" id="fxPreview"></div>
       </div>
       <div class="sheet-balance-cards" id="sheetBalanceCards">
@@ -2255,10 +2244,11 @@
       <div class="sheet-wrap"><div id="sheetApp"></div></div>
       <!-- Configuration liée aux données : elle appartient au tableur. -->
       <section class="settings-section panel category-settings sheet-rules-section" id="categorySettings" hidden><div class="settings-section-head category-settings-title"><div><h3>Catégories détectées</h3><p>Associe les catégories détectées à la bonne règle.</p></div></div><div class="category-settings-list" id="categorySettingsList"></div></section>
-      <section class="settings-section panel custom-rules-section sheet-rules-section"><div class="settings-section-head"><div><h3>Gestion des règles</h3><p>Crée, modifie ou supprime tes propres règles de catégorisation.</p></div></div><div class="custom-rule-inputs"><input type="text" id="customRuleName" placeholder="Ex : Bourse, Crypto, Immobilier" /><button id="btnAddCustomRule" type="button">Ajouter la règle</button></div><div id="customRulesList"></div><p class="hint" style="margin-top: 12px;">Les règles système (Dépense, Épargne, Ignorer) sont toujours disponibles. Une règle utilisée par une catégorie ne peut pas être supprimée.</p></section>
+      <section class="settings-section panel custom-rules-section sheet-rules-section"><div class="settings-section-head"><div><h3>Gestion des règles</h3><p>Crée, modifie ou supprime tes propres règles de catégorisation.</p></div></div><div class="custom-rule-inputs"><input type="text" id="customRuleName" aria-label="Nom de la nouvelle règle" placeholder="Ex : Bourse, Crypto, Immobilier" /><button id="btnAddCustomRule" type="button">Ajouter la règle</button></div><div id="customRulesList"></div><p class="hint" style="margin-top: 12px;">Les règles système (Dépense, Épargne, Ignorer) sont toujours disponibles. Une règle utilisée par une catégorie ne peut pas être supprimée.</p></section>
     </section>
     <section class="settings-page app-page" id="settingsPage" hidden>
       <div class="settings-shell">
+        <h2 class="settings-mobile-title">Paramètres</h2>
         <div class="settings-header panel"><div><span class="eyebrow" id="settingsKicker">Paramètres</span><h2 id="settingsTitle">Réglages</h2><p id="settingsSubtitle">Choisis ce que tu souhaites régler.</p></div></div>
         <nav class="settings-hub" id="settingsHub" aria-label="Rubriques des paramètres">
           <span class="settings-hub-label">Profil</span>
@@ -2443,18 +2433,18 @@
 
   <!-- Barre de navigation inférieure (style app mobile : Accueil / Tableur / Mon espace) -->
   <nav class="bottom-nav" aria-label="Navigation principale">
-    <button class="bottom-nav-btn" id="homeButton" type="button" data-page="dashboard" aria-label="Accueil" title="Accueil">
+    <a class="bottom-nav-btn" id="homeButton" href="/accueil" data-page="dashboard" aria-label="Accueil" title="Accueil">
       <svg viewBox="0 0 24 24" fill="none"><path d="M3 11l9-8 9 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 21v-6h4v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span class="bottom-nav-label">Accueil</span>
-    </button>
-    <button class="bottom-nav-btn" id="sheetButton" type="button" data-page="sheet" aria-label="Tableur" title="Tableur">
+    </a>
+    <a class="bottom-nav-btn" id="sheetButton" href="/tableur" data-page="sheet" aria-label="Tableur" title="Tableur">
       <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18" stroke="currentColor" stroke-width="2"/></svg>
       <span class="bottom-nav-label">Tableur</span>
-    </button>
-    <button class="bottom-nav-btn" id="personalNavButton" type="button" data-page="sharing" data-space="1" aria-label="Mon espace" title="Mon espace">
+    </a>
+    <a class="bottom-nav-btn" id="personalNavButton" href="/partage" data-page="sharing" data-space="1" aria-label="Mon espace" title="Mon espace">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8.5" r="3.2" stroke="currentColor" stroke-width="1.8"/><path d="M3 19.5c.6-3.3 2.8-5 6-5s5.4 1.7 6 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15.2 5.6a3 3 0 1 1 .9 5.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M17.4 14.6c2 .4 3.3 1.9 3.6 4.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       <span class="bottom-nav-label">Mon espace</span>
-    </button>
+    </a>
   </nav>
 
   <script>
@@ -3167,7 +3157,7 @@
         const active=nav.querySelector('[data-page="'+page+'"]');
         nav.querySelectorAll("[data-page]").forEach(function(button){ button.setAttribute("aria-current",button===active?"page":"false"); });
         if(active&&state.appearance.interface!=="studio"&&window.matchMedia&&window.matchMedia("(max-width:720px)").matches){
-          requestAnimationFrame(function(){ active.scrollIntoView({block:"nearest",inline:"center",behavior:"auto"}); });
+          requestAnimationFrame(function(){ var a=active.getBoundingClientRect(),n=nav.getBoundingClientRect(); nav.scrollLeft=Math.max(0,nav.scrollLeft+a.left-n.left-(n.width-a.width)/2); }); /* défilement horizontal seul : la page ne bouge pas en hauteur */
         }
       });
     }
@@ -3187,7 +3177,7 @@
       if(elements.updatesPage) elements.updatesPage.hidden=state.page!=="updates";
       if(elements.objectivesPage) elements.objectivesPage.hidden=state.page!=="objectives";
       if(elements.sheetPage) elements.sheetPage.hidden=state.page!=="sheet";
-      document.querySelectorAll("button[data-page]").forEach(function(button){ button.classList.toggle("is-active",button.dataset.page===state.page); });
+      document.querySelectorAll("button[data-page],a[data-page]").forEach(function(button){ button.classList.toggle("is-active",button.dataset.page===state.page); });
       document.querySelectorAll(".studio-sidebar-nav [data-page]").forEach(function(button){ button.setAttribute("aria-current",button.dataset.page===state.page?"page":"false"); });
       updatePageTitle(next);
       syncPersonalWorkspaceNavigation(next);
@@ -3307,7 +3297,7 @@
       }
       // Événement pour vider l'état du dashboard (appelé par le bouton admin)
       window.addEventListener("financeClearData", () => { resetDataState(); updateInterface(); });
-      document.querySelectorAll("button[data-page]").forEach(function(button){ button.addEventListener("click",function(){ setPage(button.dataset.page); }); });
+      document.querySelectorAll("button[data-page],a[data-page]").forEach(function(button){ button.addEventListener("click",function(event){ if(event.defaultPrevented) return; if(button.tagName==="A"){ if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button>0) return; event.preventDefault(); } setPage(button.dataset.page); }); });
       initPageRouting();
       var profileMenu=document.getElementById("profileMenu"), profileButton=document.getElementById("profileMenuButton"), profilePopover=document.getElementById("profilePopover"), profileNotes=document.getElementById("profileNotesButton");
       let wasMobileLayout=window.matchMedia("(max-width:999px)").matches;
@@ -4621,8 +4611,8 @@
   <script src="ios-fix.js?v=20261013-r2" defer></script>
   <script src="plans.js?v=20261021-r3" defer></script>
   <script src="year-review.js?v=20261019-r5" defer></script>
-  <script src="home.js?v=20261021-r2" defer></script>
-  <script src="finishing.js?v=20261019-r2" defer></script>
+  <script src="home.js?v=20261021-r3" defer></script>
+  <script src="finishing.js?v=20261021-r1" defer></script>
   <script src="bank-import.js?v=20261021-r1" defer></script>
   <script src="subs.js?v=20261021-r1" defer></script>
   <script src="reminders.js?v=20261021-r1" defer></script>
