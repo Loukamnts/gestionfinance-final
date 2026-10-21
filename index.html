@@ -1939,28 +1939,20 @@
   .account-code-step p { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.45; }
   .account-confirm-guidance { display: grid; gap: 4px; padding: 11px 12px; border: 1px solid color-mix(in srgb, var(--accent), var(--line) 68%); border-radius: calc(var(--control-radius) - 4px); background: color-mix(in srgb, var(--accent), transparent 93%); color: var(--text); font-size: .8rem; line-height: 1.55; }
   .account-confirm-guidance strong { color: var(--accent); }
-  .account-code-orbit { position: absolute; right: -34px; top: -38px; width: 118px; height: 118px; border: 1px solid color-mix(in srgb, var(--accent), transparent 58%); border-radius: 50%; animation: accountOrbit 5s linear infinite; pointer-events: none; }
-  .account-code-orbit::before, .account-code-orbit::after, .account-code-orbit span { content: ""; position: absolute; border-radius: 50%; background: var(--accent); box-shadow: 0 0 18px var(--accent); }
-  .account-code-orbit::before { width: 7px; height: 7px; top: 12px; left: 26px; }.account-code-orbit::after { width: 4px; height: 4px; right: 17px; bottom: 29px; }.account-code-orbit span { width: 5px; height: 5px; bottom: 13px; left: 21px; }
-  @keyframes accountOrbit { to { transform: rotate(360deg); } }
-  .account-code-inputs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; max-width: 390px; }
-  .account-code-inputs input { width: 100%; aspect-ratio: 1 / 1.08; min-height: 46px; padding: 0; border: 1px solid var(--line-strong); border-radius: calc(var(--control-radius) - 4px); background: var(--panel-bg); color: var(--text); text-align: center; font: 850 1.2rem var(--font-heading); caret-color: var(--accent); transition: transform .16s ease, border-color .16s ease, background .16s ease; }
-  .account-code-inputs input:focus { outline: 0; border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 18px color-mix(in srgb, var(--accent), transparent 76%); }
-  .account-code-inputs input.is-filled { border-color: var(--accent); background: var(--button-active-bg); animation: accountDigitIn .23s ease both; }
-  @keyframes accountDigitIn { 50% { transform: scale(1.08); } }
   .account-user { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: calc(var(--radius) - 4px); background: var(--input-bg); }
   .account-user-info { display: flex; align-items: center; gap: 10px; }.account-user-info p { margin: 0 0 2px; color: var(--muted); font-size: .74rem; }.account-user-info strong { color: var(--text); overflow-wrap: anywhere; }.account-user-avatar { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--button-primary-bg); color: var(--button-primary-text); font-weight: 850; }
   body[data-theme="brutal"] .account-tabs, body[data-theme="brutal"] .account-tab, body[data-theme="brutal"] .account-auth-pane input, body[data-theme="brutal"] .account-code-step, body[data-theme="brutal"] .account-code-inputs input, body[data-theme="brutal"] .account-btn-primary, body[data-theme="brutal"] .account-btn-secondary { border-radius: 0 !important; }
-  @media (max-width: 420px) { .account-code-step { padding: 16px; } .account-code-inputs { gap: 5px; } .account-code-inputs input { min-height: 39px; font-size: 1rem; } }
+
   </style>
   <link rel="stylesheet" href="sharing.css?v=20261019-r3">
-  <link rel="stylesheet" href="ui-polish.css?v=20261019-r1">
+  <link rel="stylesheet" href="ui-polish.css?v=20261021-r1">
   <link rel="stylesheet" href="theme-directions.css?v=20261021-r2">
   <link rel="stylesheet" href="plans.css?v=20261021-r2">
   <link rel="stylesheet" href="home.css?v=20261021-r1">
   <link rel="stylesheet" href="year-review.css?v=20261019-r2">
   <link rel="stylesheet" href="sheet-balances.css?v=20261019-r1">
   <link rel="stylesheet" href="finishing.css?v=20261019-r8">
+  <link rel="stylesheet" href="auth.css?v=20261021-r1">
   <link rel="stylesheet" href="menus.css?v=20261018-h1">
   <link rel="stylesheet" href="discover.css?v=20261019-r1">
   <script src="ui-controls.js?v=20261019-r1" defer></script>
@@ -1969,7 +1961,7 @@
   <!-- Écran d’ouverture : visible dès la première image, retiré quand tes chiffres sont prêts (meuni-loader.js). -->
   <div class="meuni-loader is-boot" id="meuniBoot" role="status" aria-live="polite"><svg class="meuni-loader-logo srch" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect class="lg-sq" width="28" height="28" rx="7.5"/><circle class="lg-t" cx="14" cy="14" r="9.4"/><g class="ml-spin"><circle class="lg-a" cx="14" cy="14" r="9.4" transform="rotate(-90 14 14)"/></g><g class="ml-gw"><g transform="rotate(30 14 14)"><path class="lg-s" d="M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z"/><path class="lg-c" d="M14 9.6c-.4 2.8-.4 5.8 0 8.6"/></g></g></svg><span class="meuni-loader-text">Connexion…</span></div>
   <!-- Traductions : chargées juste après l’écran d’ouverture, qui s’affiche ainsi sans les attendre (elles s’appliquent à la fin du chargement de la page, comme avant). -->
-  <script src="i18n.js?v=20261021-r1"></script>
+  <script src="i18n.js?v=20261021-r2"></script>
   <div class="loader" id="loader" aria-live="polite" aria-label="Chargement"><div class="spinner"></div></div>
   <div class="message" id="messageBox" role="alert" aria-live="polite" aria-atomic="true">
     <span class="message-text" id="messageText"></span>
@@ -2288,34 +2280,58 @@
           </div>
         </section>
         <div class="account-panel">
-          <div class="settings-intro" id="accountIntro">
-            <strong>Ton espace synchronisé</strong>
-            <p>Crée un compte ou connecte-toi pour retrouver ton tableur sur tes appareils.</p>
-          </div>
+          <header class="auth-head" id="accountIntro">
+            <img class="auth-mark" src="brand-mark.svg?v=20261013" alt="" width="44" height="44" decoding="async">
+            <h3 class="auth-title" id="accountAuthTitle">Content de te revoir</h3>
+            <p class="auth-lead">Ton espace est privé&nbsp;: seuls toi et les personnes que tu choisis y accèdent.</p>
+          </header>
           <p class="account-hint" id="accountHint" style="display:none"></p>
-          <form id="accountForm" class="account-form" autocomplete="on">
+          <form id="accountForm" class="account-form" autocomplete="on" novalidate>
             <div class="account-tabs" role="tablist" aria-label="Accès au compte">
               <button class="account-tab is-active" id="accountLoginTab" type="button" role="tab" aria-selected="true" aria-controls="accountLoginPane">Se connecter</button>
-              <button class="account-tab" id="accountRegisterTab" type="button" role="tab" aria-selected="false" aria-controls="accountRegisterPane">Créer un compte</button>
+              <button class="account-tab" id="accountRegisterTab" type="button" role="tab" aria-selected="false" aria-controls="accountRegisterPane" tabindex="-1">Créer un compte</button>
             </div>
             <section class="account-auth-pane" id="accountLoginPane" role="tabpanel" aria-labelledby="accountLoginTab">
-              <div class="settings-field"><label for="accountLoginEmail">Email</label><input id="accountLoginEmail" type="email" autocomplete="email" placeholder="toi@exemple.com" /></div>
-              <div class="settings-field"><label for="accountLoginPw">Mot de passe</label><div class="input-wrapper"><input id="accountLoginPw" type="password" autocomplete="current-password" minlength="8" placeholder="Ton mot de passe" /><button type="button" class="eye-button" id="accountEyeButton" aria-label="Afficher ou masquer le mot de passe"><svg id="accountEyeShow" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg><svg id="accountEyeHide" viewBox="0 0 24 24" fill="none" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>
-              <button type="submit" class="account-btn-primary" id="accountLoginBtn">Se connecter</button>
-              <div class="account-links-row"><button type="button" class="account-link-btn" id="accountForgotBtn">Mot de passe oublié ?</button></div>
+              <div class="auth-field">
+                <label for="accountLoginEmail">Adresse e-mail</label>
+                <input id="accountLoginEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="toi@exemple.com" aria-describedby="accountLoginEmailErr" />
+                <p class="auth-error" id="accountLoginEmailErr" hidden></p>
+              </div>
+              <div class="auth-field">
+                <label for="accountLoginPw">Mot de passe</label>
+                <div class="auth-pw">
+                  <input id="accountLoginPw" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-describedby="accountLoginPwErr" />
+                  <button type="button" class="auth-eye" id="accountEyeButton" data-auth-eye="accountLoginPw" aria-label="Afficher le mot de passe" aria-pressed="false"><svg class="eye-on" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg><svg class="eye-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17.9 17.9A10.1 10.1 0 0 1 12 19.5C5.5 19.5 1.5 12 1.5 12a18.5 18.5 0 0 1 5-5.9M9.9 4.7A9.1 9.1 0 0 1 12 4.5c6.5 0 10.5 7.5 10.5 7.5a18.6 18.6 0 0 1-2.2 3.2M14.1 14.1a3 3 0 1 1-4.2-4.2M3 3l18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                </div>
+                <p class="auth-error" id="accountLoginPwErr" hidden></p>
+              </div>
+              <div class="auth-forgot"><button type="button" class="auth-text-btn" id="accountForgotBtn">Mot de passe oublié ?</button></div>
+              <button type="submit" class="account-btn-primary" id="accountLoginBtn"><span class="auth-spin" aria-hidden="true"></span><span class="auth-btn-label">Se connecter</span></button>
             </section>
             <section class="account-auth-pane" id="accountRegisterPane" role="tabpanel" aria-labelledby="accountRegisterTab" hidden>
-              <div class="settings-field"><label for="accountRegisterEmail">Email</label><input id="accountRegisterEmail" type="email" autocomplete="email" placeholder="toi@exemple.com" /></div>
-              <div class="settings-field"><label for="accountRegisterPw">Choisir un mot de passe</label><input id="accountRegisterPw" type="password" autocomplete="new-password" minlength="8" placeholder="Au moins 8 caractères" /></div>
-              <button type="button" class="account-btn-primary" id="accountRegisterBtn">Recevoir le lien de confirmation</button>
-              <p class="account-form-note">Un lien sécurisé sera envoyé à cette adresse pour confirmer la création du compte.</p>
+              <div class="auth-field">
+                <label for="accountRegisterEmail">Adresse e-mail</label>
+                <input id="accountRegisterEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="toi@exemple.com" aria-describedby="accountRegisterEmailHelp accountRegisterEmailErr" />
+                <p class="auth-help" id="accountRegisterEmailHelp">Nous t’y enverrons un lien pour confirmer ton compte.</p>
+                <p class="auth-error" id="accountRegisterEmailErr" hidden></p>
+              </div>
+              <div class="auth-field">
+                <label for="accountRegisterPw">Choisir un mot de passe</label>
+                <div class="auth-pw">
+                  <input id="accountRegisterPw" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-describedby="accountRegisterPwHelp accountRegisterPwErr" />
+                  <button type="button" class="auth-eye" id="accountRegisterEyeButton" data-auth-eye="accountRegisterPw" aria-label="Afficher le mot de passe" aria-pressed="false"><svg class="eye-on" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg><svg class="eye-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17.9 17.9A10.1 10.1 0 0 1 12 19.5C5.5 19.5 1.5 12 1.5 12a18.5 18.5 0 0 1 5-5.9M9.9 4.7A9.1 9.1 0 0 1 12 4.5c6.5 0 10.5 7.5 10.5 7.5a18.6 18.6 0 0 1-2.2 3.2M14.1 14.1a3 3 0 1 1-4.2-4.2M3 3l18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                </div>
+                <p class="auth-help" id="accountRegisterPwHelp">Au moins 8 caractères.</p>
+                <p class="auth-error" id="accountRegisterPwErr" hidden></p>
+              </div>
+              <button type="button" class="account-btn-primary" id="accountRegisterBtn"><span class="auth-spin" aria-hidden="true"></span><span class="auth-btn-label">Recevoir le lien de confirmation</span></button>
             </section>
             <section class="account-code-step account-email-confirm-step" id="accountEmailConfirmStep" hidden aria-live="polite">
-              <div class="account-code-orbit" aria-hidden="true"><span></span></div>
-              <div><span class="eyebrow">Confirmation requise</span><h3>Confirme ton adresse</h3><p id="accountConfirmDescription">Nous avons envoyé un lien sécurisé à ton adresse.</p></div>
-              <div class="account-confirm-guidance"><strong>1.</strong> Ouvre l’e-mail reçu. <strong>2.</strong> Clique sur « Confirmer ». <strong>3.</strong> Tu reviendras connecté dans Meuniance.</div>
-              <button type="button" class="account-btn-primary" id="accountConfirmCheckBtn">J’ai cliqué sur le lien</button>
-              <div class="account-links-row"><button type="button" class="account-link-btn" id="accountResendBtn">Renvoyer le lien</button><button type="button" class="account-link-btn" id="accountChangeEmailBtn">Changer d’adresse</button></div>
+              <div class="auth-confirm-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="m4 8 8 5.5L20 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="auth-confirm-copy"><span class="eyebrow">Confirmation requise</span><h3 id="accountConfirmTitle" tabindex="-1">Confirme ton adresse</h3><p id="accountConfirmDescription">Nous avons envoyé un lien sécurisé à ton adresse.</p></div>
+              <ol class="account-confirm-guidance"><li>Ouvre l’e-mail reçu.</li><li>Clique sur «&nbsp;Confirmer&nbsp;».</li><li>Tu reviendras connecté dans Meuniance.</li></ol>
+              <button type="button" class="account-btn-primary" id="accountConfirmCheckBtn"><span class="auth-spin" aria-hidden="true"></span><span class="auth-btn-label">J’ai cliqué sur le lien</span></button>
+              <div class="account-links-row"><button type="button" class="auth-text-btn" id="accountResendBtn">Renvoyer le lien</button><button type="button" class="auth-text-btn" id="accountChangeEmailBtn">Modifier l’e-mail</button></div>
             </section>
             <p class="account-msg" id="accountMsg" role="status" aria-live="polite"></p>
           </form>
@@ -3331,8 +3347,6 @@
       elements.paletteButtons.forEach(btn=>btn.addEventListener("click",()=>setPalette(btn.dataset.paletteOption)));
       document.getElementById("interfaceLayoutToggle")?.addEventListener("click",function(){setInterfaceLayout(state.appearance.interface==="studio"?"classic":"studio");});
       Array.from(elements.modeToggle.querySelectorAll("button")).forEach(btn=>btn.addEventListener("click",()=>setMode(btn.dataset.modeOption)));
-      var accEyeBtn = document.getElementById("accountEyeButton");
-      if(accEyeBtn){ accEyeBtn.addEventListener("click", function(){ var inp=document.getElementById("accountLoginPw"); var show=document.getElementById("accountEyeShow"); var hide=document.getElementById("accountEyeHide"); if(!inp) return; var isPass=inp.type==="password"; inp.type=isPass?"text":"password"; if(show) show.style.display=isPass?"none":""; if(hide) hide.style.display=isPass?"":"none"; }); }
       if(elements.messagePauseButton) elements.messagePauseButton.addEventListener("click",()=>{ if(!elements.messageBox?.classList.contains("is-visible")) return; if(messagePaused) resumeMessageTimer(); else pauseMessageTimer(); }); if(elements.messageCloseButton) elements.messageCloseButton.addEventListener("click", hideMessage);
       elements.viewSelect.addEventListener("change",()=>setView(elements.viewSelect.value));
       document.querySelectorAll("[data-mobile-summary]").forEach(function(button){ button.addEventListener("click",function(){ setMobileSummary(button.dataset.mobileSummary); }); });
@@ -4173,8 +4187,58 @@
   }
 
   function msg(t, kind){ var m = el("accountMsg"); if(m){ m.textContent = t; m.className = "account-msg " + (kind||""); } }
-  function clearMsg(){ msg(""); }
-  function setLoading(v){ ["accountLoginBtn","accountRegisterBtn","accountResendBtn","accountConfirmCheckBtn","accountChangeEmailBtn"].forEach(function(id){var button=el(id);if(button)button.disabled=v;}); }
+  /* Interface : erreurs rattachées au champ concerné (aria-invalid + aria-describedby déjà posé dans le HTML). */
+  var AUTH_FIELDS = ["accountLoginEmail","accountLoginPw","accountRegisterEmail","accountRegisterPw"];
+  function setFieldError(id, text){
+    var input = el(id), err = el(id + "Err"); if(!input || !err) return;
+    if(text){ err.textContent = text; err.hidden = false; input.setAttribute("aria-invalid","true"); }
+    else { err.textContent = ""; err.hidden = true; input.removeAttribute("aria-invalid"); }
+  }
+  function clearFieldErrors(){ AUTH_FIELDS.forEach(function(id){ setFieldError(id,""); }); }
+  function clearMsg(){ msg(""); clearFieldErrors(); }
+  function focusField(id){
+    var input = el(id); if(!input) return;
+    try{ input.focus({ preventScroll:true }); }catch(e){ input.focus(); }
+    keepVisible(input, true);
+  }
+  function keepVisible(node, immediate){
+    if(!node || !node.scrollIntoView) return;
+    var run = function(){ try{ node.scrollIntoView({ block:"center", behavior: (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? "auto" : "smooth" }); }catch(e){} };
+    if(immediate) run(); else setTimeout(run, 320);
+  }
+  /* Affiche les erreurs de champs puis place le focus sur le premier champ invalide. */
+  function failFields(list){
+    clearMsg();
+    list.forEach(function(item){ setFieldError(item[0], item[1]); });
+    if(list.length) focusField(list[0][0]);
+  }
+  /* Une erreur renvoyée par le service : sous le champ concerné si on le reconnaît, sinon dans la zone d'état. */
+  function showAuthError(scope, error){
+    var text = translateAuthError(error), n = String((error && error.message) || error || "").toLowerCase(), field = "";
+    if(/invalid login credentials|invalid credentials|password should be at least|password.*least/.test(n)) field = scope + "Pw";
+    else if(/user already registered|already.*registered|user not found|no user found|email address.*invalid|invalid email/.test(n)) field = scope + "Email";
+    clearMsg();
+    if(field && el(field)){ setFieldError(field, text); focusField(field); } else msg(text, "error");
+  }
+  var LOADING_LABEL = { accountLoginBtn:"Connexion…", accountRegisterBtn:"Création…", accountConfirmCheckBtn:"Vérification…", accountResendBtn:"Envoi…", accountForgotBtn:"Envoi…" };
+  var loadingFocus = null;
+  function setLoading(v, activeId){
+    if(v){ var current = document.activeElement; loadingFocus = current && current !== document.body && el("accountForm") && el("accountForm").contains(current) ? current : null; }
+    ["accountLoginBtn","accountRegisterBtn","accountResendBtn","accountConfirmCheckBtn","accountChangeEmailBtn","accountForgotBtn"].forEach(function(id){
+      var button = el(id); if(!button) return;
+      button.disabled = v;
+      var busy = !!(v && id === activeId), label = button.querySelector(".auth-btn-label") || (button.classList.contains("auth-text-btn") ? button : null);
+      button.classList.toggle("is-loading", busy);
+      if(busy) button.setAttribute("aria-busy","true"); else button.removeAttribute("aria-busy");
+      if(label){
+        if(busy){ if(label.dataset.label === undefined) label.dataset.label = label.textContent; label.textContent = LOADING_LABEL[id] || label.textContent; }
+        else if(label.dataset.label !== undefined){ label.textContent = label.dataset.label; delete label.dataset.label; }
+      }
+    });
+    var form = el("accountForm"); if(form) form.setAttribute("aria-busy", v ? "true" : "false");
+    /* Un bouton désactivé fait perdre le focus : on le rend à la fin, sauf si l'interface l'a déjà déplacé. */
+    if(!v && loadingFocus){ var back = loadingFocus; loadingFocus = null; if((!document.activeElement || document.activeElement === document.body) && back.offsetParent !== null && !back.disabled){ try{ back.focus({ preventScroll:true }); }catch(e){} } }
+  }
   function recoveryMessage(text,kind){ var node=el("passwordRecoveryMessage"); if(node){ node.textContent=window.GFI18n?window.GFI18n.t(text||""):text||""; node.dataset.kind=kind||""; } }
   function openPasswordRecovery(){
     var dialog=el("passwordRecoveryDialog");
@@ -4220,23 +4284,34 @@
     }catch(error){recoveryMessage(passwordChanged?"Mot de passe modifié, mais la déconnexion a échoué. Clique sur Terminer pour réessayer.":translateAuthError(error),"error");}
     finally{submit.disabled=false;cancel.disabled=false;}
   }
-  function accountPane(name){var loginPane=el("accountLoginPane"),registerPane=el("accountRegisterPane"),confirmPane=el("accountEmailConfirmStep"),loginTab=el("accountLoginTab"),registerTab=el("accountRegisterTab"),loginActive=name==="login",registerActive=name==="register"||name==="confirm";if(loginPane)loginPane.hidden=!loginActive;if(registerPane)registerPane.hidden=name!=="register";if(confirmPane)confirmPane.hidden=name!=="confirm";if(loginTab){loginTab.classList.toggle("is-active",loginActive);loginTab.setAttribute("aria-selected",String(loginActive));loginTab.setAttribute("aria-current",loginActive?"step":"false");}if(registerTab){registerTab.classList.toggle("is-active",registerActive);registerTab.setAttribute("aria-selected",String(registerActive));registerTab.setAttribute("aria-current",registerActive?"step":"false");}}
+  function accountPane(name){
+    var loginPane=el("accountLoginPane"),registerPane=el("accountRegisterPane"),confirmPane=el("accountEmailConfirmStep"),loginTab=el("accountLoginTab"),registerTab=el("accountRegisterTab"),loginActive=name==="login",registerActive=name==="register"||name==="confirm";
+    if(loginPane)loginPane.hidden=!loginActive;
+    if(registerPane)registerPane.hidden=name!=="register";
+    if(confirmPane)confirmPane.hidden=name!=="confirm";
+    [[loginTab,loginActive],[registerTab,registerActive]].forEach(function(pair){var tab=pair[0];if(!tab)return;tab.classList.toggle("is-active",pair[1]);tab.setAttribute("aria-selected",String(pair[1]));tab.tabIndex=pair[1]?0:-1;});
+    var title=el("accountAuthTitle");if(title)title.textContent=loginActive?"Content de te revoir":"Crée ton espace";
+    var panel=document.querySelector(".account-section .account-panel");if(panel)panel.dataset.authMode=name;
+  }
   function accountEmail(kind){var id=kind==="register"?"accountRegisterEmail":"accountLoginEmail";return String(el(id)&&el(id).value||"").trim();}
-  function showEmailConfirmation(email){sb.pendingSignupEmail=email;accountPane("confirm");var description=el("accountConfirmDescription");if(description)description.textContent="Nous avons envoyé un lien sécurisé à "+email+".";}
+  function showEmailConfirmation(email){sb.pendingSignupEmail=email;accountPane("confirm");var description=el("accountConfirmDescription");if(description)description.textContent="Nous avons envoyé un lien sécurisé à "+email+".";var heading=el("accountConfirmTitle");if(heading){try{heading.focus({preventScroll:true});}catch(e){}keepVisible(heading,true);}}
 
   async function register(){
     var email = accountEmail("register");
     var pw = el("accountRegisterPw").value||"";
-    if(!email || !pw){ msg("Renseigne un email et un mot de passe."); return; }
-    if(pw.length < 8){ msg("Le mot de passe doit faire au moins 8 caractères."); return; }
-    setLoading(true); clearMsg();
+    if(!email || !pw){
+      var missing = []; if(!email) missing.push(["accountRegisterEmail","Renseigne ton adresse e-mail."]); if(!pw) missing.push(["accountRegisterPw","Choisis un mot de passe."]);
+      failFields(missing); return;
+    }
+    if(pw.length < 8){ failFields([["accountRegisterPw","Le mot de passe doit faire au moins 8 caractères."]]); return; }
+    setLoading(true, "accountRegisterBtn"); clearMsg();
     try{
       var res = await sb.client.auth.signUp({
         email: email,
         password: pw,
         options: { emailRedirectTo: window.location.origin + window.location.pathname }
       });
-      if(res.error){ msg(translateAuthError(res.error)); return; }
+      if(res.error){ showAuthError("accountRegister", res.error); return; }
       sb.lastWasSignup = true;
       if(res.data.session){ msg("Compte créé — tu es connecté.", "ok"); }
       else {
@@ -4245,7 +4320,7 @@
       }
     }catch(e){
       console.error("Register error:", e);
-      msg(translateAuthError(e));
+      showAuthError("accountRegister", e);
     }
     finally{ setLoading(false); }
   }
@@ -4253,36 +4328,39 @@
   async function resend(){
     var email = sb.pendingSignupEmail || accountEmail("register");
     if(!email){ msg("Renseigne d’abord ton adresse email."); return; }
-    setLoading(true); clearMsg();
+    setLoading(true, "accountResendBtn"); clearMsg();
     try{
       var res = await sb.client.auth.resend({ email: email, type: "signup" });
-      if(res.error){ msg(translateAuthError(res.error)); return; }
+      if(res.error){ msg(translateAuthError(res.error), "error"); return; }
       msg("Nouveau lien envoyé. Vérifie aussi tes spams.", "ok");
-    }catch(e){ msg(e.message||"Erreur lors du renvoi."); }
+    }catch(e){ msg(e.message||"Erreur lors du renvoi.", "error"); }
     finally{ setLoading(false); }
   }
 
   async function login(){
     var email = accountEmail("login");
     var pw = el("accountLoginPw").value||"";
-    if(!email || !pw){ msg("Renseigne un email et un mot de passe."); return; }
-    setLoading(true); clearMsg();
+    if(!email || !pw){
+      var missing = []; if(!email) missing.push(["accountLoginEmail","Renseigne ton adresse e-mail."]); if(!pw) missing.push(["accountLoginPw","Renseigne ton mot de passe."]);
+      failFields(missing); return;
+    }
+    setLoading(true, "accountLoginBtn"); clearMsg();
     try{
       var res = await sb.client.auth.signInWithPassword({ email: email, password: pw });
       if(res.error){
         var unconfirmed = /not confirmed|non confirm/i.test(res.error.message || "");
-        msg(translateAuthError(res.error));
-        if(unconfirmed){ showEmailConfirmation(email); msg("Ton adresse n’est pas encore confirmée. Ouvre le lien reçu par e-mail."); }
+        if(unconfirmed){ clearMsg(); showEmailConfirmation(email); msg("Ton adresse n’est pas encore confirmée. Ouvre le lien reçu par e-mail."); }
+        else showAuthError("accountLogin", res.error);
         return;
       }
-    }catch(e){ msg(translateAuthError(e)); }
+    }catch(e){ showAuthError("accountLogin", e); }
     finally{ setLoading(false); }
   }
 
   async function checkEmailConfirmation(){
-    setLoading(true); clearMsg();
+    setLoading(true, "accountConfirmCheckBtn"); clearMsg();
     try{var res=await sb.client.auth.getSession();if(res&&res.data&&res.data.session){sb.pendingSignupEmail="";msg("Adresse confirmée — tu es connecté.","ok");}else{msg("Le lien n’a pas encore été validé. Ouvre l’e-mail reçu puis clique sur le lien de confirmation.");}}
-    catch(e){msg(translateAuthError(e));}
+    catch(e){msg(translateAuthError(e), "error");}
     finally{setLoading(false);}
   }
 
@@ -4300,21 +4378,40 @@
     var confirmCheck=el("accountConfirmCheckBtn");if(confirmCheck)confirmCheck.addEventListener("click",function(e){e.preventDefault();checkEmailConfirmation();});
     var changeEmail=el("accountChangeEmailBtn");if(changeEmail)changeEmail.addEventListener("click",function(){clearMsg();accountPane("register");});
     document.querySelectorAll("[data-account-logout]").forEach(function(button){ button.addEventListener("click", function(e){ e.preventDefault(); logout(); }); });
-    var f = el("accountForm"); if(f) f.addEventListener("submit", function(e){ e.preventDefault(); if(!el("accountLoginPane").hidden)login(); });
+    var f = el("accountForm"); if(f) f.addEventListener("submit", function(e){ e.preventDefault(); if(!el("accountLoginPane").hidden)login(); else if(!el("accountRegisterPane").hidden)register(); });
+    document.querySelectorAll("[data-auth-eye]").forEach(function(button){
+      button.addEventListener("click", function(){
+        var input = el(button.dataset.authEye); if(!input) return;
+        var show = input.type === "password"; input.type = show ? "text" : "password";
+        button.setAttribute("aria-pressed", String(show));
+        button.setAttribute("aria-label", show ? "Masquer le mot de passe" : "Afficher le mot de passe");
+        try{ input.focus({ preventScroll:true }); }catch(e){}
+      });
+    });
+    AUTH_FIELDS.forEach(function(id){
+      var input = el(id); if(!input) return;
+      input.addEventListener("focus", function(){ keepVisible(input, false); });
+      input.addEventListener("input", function(){ if(input.hasAttribute("aria-invalid")) setFieldError(id, ""); });
+    });
+    var tabs = [el("accountLoginTab"), el("accountRegisterTab")];
+    tabs.forEach(function(tab, index){ if(tab) tab.addEventListener("keydown", function(e){
+      var next = e.key === "ArrowRight" || e.key === "ArrowLeft" ? 1 - index : e.key === "Home" ? 0 : e.key === "End" ? 1 : -1;
+      if(next < 0 || !tabs[next]) return; e.preventDefault(); tabs[next].focus(); tabs[next].click();
+    }); });
     var fp = el("accountForgotBtn"); if(fp) fp.addEventListener("click", function(e){ e.preventDefault(); resetPassword(); });
   }
 
   async function resetPassword(){
     var email = accountEmail("login") || accountEmail("register");
-    if(!email){ msg("Renseigne d'abord ton email."); return; }
-    setLoading(true); clearMsg();
+    if(!email){ failFields([[el("accountLoginPane").hidden ? "accountRegisterEmail" : "accountLoginEmail","Renseigne d’abord ton adresse e-mail."]]); return; }
+    setLoading(true, "accountForgotBtn"); clearMsg();
     try{
       var res = await sb.client.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + window.location.pathname
       });
-      if(res.error){ msg(translateAuthError(res.error)); return; }
+      if(res.error){ msg(translateAuthError(res.error), "error"); return; }
       msg("Si un compte existe pour cette adresse, un lien de réinitialisation sera envoyé. Vérifie aussi les spams.", "ok");
-    }catch(e){ msg(translateAuthError(e)); }
+    }catch(e){ msg(translateAuthError(e), "error"); }
     finally{ setLoading(false); }
   }
 
