@@ -1,12 +1,6 @@
 User-agent: *
-Allow: /$
-Allow: /confidentialite
-Allow: /conditions
-Disallow: /accueil
-Disallow: /tableur
-Disallow: /objectifs
-Disallow: /partage
-Disallow: /nouveautes
-Disallow: /parametres
+Allow: /
+
+# Les pages de l'application sont en noindex (en-tête X-Robots-Tag) : elles doivent rester lisibles pour que l'instruction soit vue.
 
 Sitemap: https://meuniance.vercel.app/sitemap.xml
