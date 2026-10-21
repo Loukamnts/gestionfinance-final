@@ -17,7 +17,7 @@ const dictionary=Object.freeze({
   "13 octobre 2026": "13 October 2026",
   "Trop de recherches d’amis en peu de temps. Réessaie dans une heure.": "Too many friend searches in a short time. Try again in an hour.",
   "Ton solde": "Your balance",
-  "Ton solde et son évolution sur l’année. Touche un mois pour l’afficher.": "Your balance and how it changes over the year. Tap a month to show it.",
+  "Ton solde et son évolution sur l’année. Il se met à jour à chaque montant saisi.": "Your balance and how it changes over the year. It updates with every amount you enter.",
   "Ajouter en un geste": "Add in one tap",
   "Ajoute une dépense, un revenu ou de l’épargne sans ouvrir le tableur.": "Add an expense, income or savings without opening the spreadsheet.",
   "Ton mois en détail": "Your month in detail",

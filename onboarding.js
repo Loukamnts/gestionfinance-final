@@ -105,7 +105,7 @@
   const TUTORIAL_STEPS = [
     {
       title: "Ton solde",
-      text: "Ton solde et son évolution sur l’année. Touche un mois pour l’afficher.",
+      text: "Ton solde et son évolution sur l’année. Il se met à jour à chaque montant saisi.",
       target: "#gfhHome .gfh-card",
       action: "Suivant",
       page: "dashboard",
