@@ -7,8 +7,8 @@ const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const styles = fs.readFileSync(path.join(root, 'theme-directions.css'), 'utf8');
 
-test('navigation clicks are bound only to buttons, never the page body', () => {
-  assert.match(html, /document\.querySelectorAll\("button\[data-page\]"\).*addEventListener\("click"/);
+test('navigation clicks are bound only to buttons and links, never the page body', () => {
+  assert.match(html, /document\.querySelectorAll\("button\[data-page\],a\[data-page\]"\).*addEventListener\("click"/);
   assert.doesNotMatch(html, /document\.querySelectorAll\("\[data-page\]"\).*addEventListener\("click"/);
 });
 

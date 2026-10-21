@@ -320,7 +320,6 @@ body { padding-bottom: 0; }
 .bottom-nav-label { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.01em; line-height: 1; white-space: nowrap; }
 @media (hover:hover) {
 .bottom-nav-btn:hover { color: var(--text); background: var(--button-active-bg, rgba(192,132,87,0.12)); } }
-.bottom-nav-btn.is-active { color: var(--accent); }
 .bottom-nav-btn.is-active svg { transform: translateY(-1px); }
 .bottom-nav-btn:active { transform: scale(0.94); }
 

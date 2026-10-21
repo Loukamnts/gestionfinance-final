@@ -121,6 +121,8 @@ const dictionary=Object.freeze({
   "Accueil": "Home",
   "Tableur": "Spreadsheet",
   "Paramètres": "Settings",
+  "Barre de formule": "Formula bar",
+  "Nom de la nouvelle règle": "New rule name",
   "Profil": "Profile",
   "Pseudo et abonnement": "Username and plan",
   "Pseudo, connexion et abonnement": "Username, sign-in and plan",

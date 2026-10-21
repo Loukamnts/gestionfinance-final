@@ -19,7 +19,7 @@
   /* 2. Navigation : Accueil, Tableur, Mon espace (Partage, Objectifs, Nouveautés), en bas sur
      téléphone et en haut sur ordinateur. Paramètres est l'engrenage, à gauche du profil. */
   var SPACE=["sharing","objectives","updates"];
-  function navPage(x){var page=document.body.dataset.page;return x.dataset.page===page||(x.dataset.space==="1"&&SPACE.indexOf(page)>=0);}
+  function navPage(x){var page=document.body.dataset.page;if(page==="settings")return false;return x.dataset.page===page||(x.dataset.space==="1"&&SPACE.indexOf(page)>=0);}
   function syncBottom(){
     document.querySelectorAll(".bottom-nav .bottom-nav-btn, .desktop-nav .desktop-nav-link").forEach(function(x){var on=navPage(x);x.classList.toggle("is-active",on);if(on)x.setAttribute("aria-current","page");else x.removeAttribute("aria-current");});
     document.querySelectorAll(".mobile-settings-button").forEach(function(x){x.classList.toggle("is-active",document.body.dataset.page==="settings");});
@@ -84,10 +84,11 @@
     if(nav){
       var mark=function(b){nav.querySelectorAll(".bottom-nav-btn").forEach(function(x){x.classList.toggle("is-active",x===b);});};
       var restore=syncBottom;
-      nav.addEventListener("pointerdown",function(e){var b=e.target.closest(".bottom-nav-btn");if(b&&!(e.button>0))mark(b);});
+      nav.addEventListener("pointerdown",function(e){var b=e.target.closest(".bottom-nav-btn");if(b&&!(e.button>0)&&!(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey))mark(b);});
       nav.addEventListener("pointercancel",restore);
       nav.addEventListener("click",function(e){
         var b=e.target.closest(".bottom-nav-btn");if(!b||!b.dataset.page||!window.setPage)return;
+        if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button>0)return; /* ouverture native dans un nouvel onglet */
         e.preventDefault();e.stopPropagation();
         mark(b);b.classList.remove("gf-pop");void b.offsetWidth;b.classList.add("gf-pop");
         var page=b.dataset.page;

@@ -183,9 +183,13 @@
     var monL=el("label","gfh-field"),mon=document.createElement("select");monL.append(el("span","",t2("Mois","Month")),mon);
     for(var i=0;i<12;i++){var o=new Option(cap(mname(i))+" "+ctx.year,String(i));if(i===ctx.mi)o.selected=true;mon.append(o);}
     if(window.GFSelect)setTimeout(function(){window.GFSelect.enhance(mon);},0);
-    var err=el("p","gfh-err");err.setAttribute("role","alert");
+    var err=el("p","gfh-err");err.id="gfhQuickErr";err.setAttribute("role","alert");
     var row=el("div","gfh-dialog-actions"),cancel=el("button","gfh-btn",t2("Annuler","Cancel")),ok=el("button","gfh-btn is-primary",t2("Ajouter","Add"));cancel.type="button";ok.type="submit";row.append(cancel,ok);
-    var form=document.createElement("form");form.append(h,typeRow,amtL,lineBox,newWrap,monL,err,row);d.append(form);
+    var form=document.createElement("form");form.append(h,typeRow,amtL,err,lineBox,newWrap,monL,row);d.append(form);
+    // Le message d'erreur se place juste sous le champ concerné et lui est relié (aria-invalid / aria-describedby).
+    function clearErr(){err.textContent="";[amt,newInp,pick].forEach(function(f){f.removeAttribute("aria-invalid");f.removeAttribute("aria-describedby");});}
+    function fail(msg,anchor,field){err.textContent=msg;anchor.after(err);field.setAttribute("aria-describedby","gfhQuickErr");if(field.tagName==="INPUT")field.setAttribute("aria-invalid","true");field.focus();}
+    amt.addEventListener("input",function(){if(amt.getAttribute("aria-invalid"))clearErr();});
 
     function allLines(){var seen={},out=[];knownLabels().forEach(function(l){var k=lineKind(l);if(k&&!seen[normKey(l)]){seen[normKey(l)]=1;out.push({label:l,kind:k});}});(ctx.expenseLines||[]).forEach(function(l){if(!seen[normKey(l)]){seen[normKey(l)]=1;out.push({label:l,kind:"Dépense"});}});return out;}
     function setKind(k,fromUser){kind=k;seg.querySelectorAll("button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.kind===k[0]));});newLab.textContent=t2("Nom de la catégorie (","Category name (")+k[1].toLowerCase()+")";if(fromUser&&chosen&&lineKind(chosen)!==k[0]&&!creating){chosen="";pickTxt.textContent=t2("Choisir une catégorie","Choose a category");pick.classList.remove("has-value");}buildMenu();buildChips();}
@@ -220,11 +224,11 @@
     setKind(kind,false);
     cancel.addEventListener("click",function(){d.close();});
     form.addEventListener("submit",function(e){
-      e.preventDefault();err.textContent="";
+      e.preventDefault();clearErr();
       var v=amountOf(amt.value);
-      if(!isFinite(v)||v<=0){err.textContent=t2("Indique un montant positif.","Enter a positive amount.");amt.focus();return;}
+      if(!isFinite(v)||v<=0){fail(t2("Indique un montant positif.","Enter a positive amount."),amtL,amt);return;}
       var lab=creating?String(newInp.value||"").trim():chosen;
-      if(!lab){err.textContent=creating?t2("Donne un nom à la catégorie.","Name the category."):t2("Choisis une catégorie.","Choose a category.");(creating?newInp:(pick.hidden?chips.querySelector(".gfh-chip")||pick:pick)).focus();return;}
+      if(!lab){fail(creating?t2("Donne un nom à la catégorie.","Name the category."):t2("Choisis une catégorie.","Choose a category."),creating?newWrap:lineBox,creating?newInp:(pick.hidden?chips.querySelector(".gfh-chip")||pick:pick));return;}
       var mi=Number(mon.value);
       writeEntries([{year:ctx.year,mi:mi,label:lab,amount:kind[2]*v,kind:kind[0]}]);
       d.close();toast(t2("Ajouté : ","Added: ")+eur(v)+" · "+lab+" · "+mname(mi));
