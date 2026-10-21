@@ -2114,7 +2114,8 @@
     bind("btnSheetRedo", redo);
     container.addEventListener("paste", (e) => { if (state.editing) return; const text = (e.clipboardData || window.clipboardData).getData("text"); if (text) { e.preventDefault(); paste(text); } });
     container.addEventListener("copy", (e) => { if (state.editing) return; e.clipboardData.setData("text/plain", copySelection()); e.preventDefault(); });
-    notifyDashboard();
+    // À l'ouverture, l'accueil lit le tableur tout de suite (pas d'attente groupée : rien n'est en cours de saisie).
+    notifyDashboard(0);
     showCurrentYearOnce();
   }
 
@@ -2335,9 +2336,9 @@
     _import: { planImport, parseMonthHeader, convertFormula, buildExportWorkbook, mergeSheetData, sanitizeSheetName, guessSeparator, decodeText } };
   // Hook appelé après import / édition / création de feuille pour rafraîchir le dashboard.
   let dashTimer = null;
-  function notifyDashboard() {
+  function notifyDashboard(delay) {
     if (dashTimer) clearTimeout(dashTimer);
-    dashTimer = setTimeout(() => { try { if (typeof window.syncDashboardFromFinanceSheet === "function") window.syncDashboardFromFinanceSheet({silent:true}); } catch (e) {} }, 350);
+    dashTimer = setTimeout(() => { try { if (typeof window.syncDashboardFromFinanceSheet === "function") window.syncDashboardFromFinanceSheet({silent:true}); } catch (e) {} }, typeof delay === "number" ? delay : 350);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
