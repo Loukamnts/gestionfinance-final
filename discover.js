@@ -109,7 +109,9 @@
     var s=state(),r=release(),tour=r&&TOURS[r.version];
     var visible=!!(s&&r&&document.body.dataset.theme==="moulin"&&!s.hidden&&!document.body.classList.contains("tutorial-active")&&store()&&store().getItem("personalFinanceDashboard.onboardingCompleted"));
     if(!visible||!content){if(box)box.remove();return;}
-    if(!box){box=el("section","gfd");box.id="gfdDiscover";box.setAttribute("aria-live","polite");var anchor=byId("latestUpdateBanner");content.insertBefore(box,anchor||null);}
+    if(!box){box=el("section","gfd");box.id="gfdDiscover";box.setAttribute("aria-live","polite");var anchor=byId("latestUpdateBanner"),grid=content.querySelector(".gfh-dg");
+      // Sur l’accueil, le bloc se place dans la grille (sous le solde) ; l’accueil le reprend à chaque rafraîchissement.
+      if(grid&&grid.firstChild)grid.insertBefore(box,grid.firstChild.nextSibling);else content.insertBefore(box,anchor||null);}
     box.setAttribute("aria-label",t2("Nouveautés","What’s new"));
     var all=tour||[],left=all.filter(function(i){return s.tried.indexOf(i.id)<0;}),complete=!!tour&&!left.length;
     // Anneau plein : il reste visible un moment (pour voir le résultat), puis le bloc disparaît

@@ -47,7 +47,7 @@ body[data-mode="dark"] .gfh-card{border-color:var(--line)}
 .gfh-big.is-xl{font-size:clamp(32px,7vw,50px)}
 .gfh-dl{font-size:14px;color:var(--block-muted,#B7C2BB)}
 .gfh-dl b{color:var(--accent-fill,#E3A82B);font-weight:600}
-.gfh-setup{margin-left:8px;border:0;background:none;padding:0;color:var(--block-text,#F6F2E8);font:600 13px var(--font-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.gfh-setup{display:flex;align-items:center;min-height:44px;margin:0;border:0;background:none;padding:0;text-align:left;color:var(--block-text,#F6F2E8);font:600 13px var(--font-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .gfh-bars{display:flex;gap:5px;align-items:flex-end;height:112px;margin-top:22px}
 .gfh-bars button{flex:1;min-width:0;height:100%;border:0;padding:0;background:transparent;display:flex;align-items:flex-end;cursor:pointer;border-radius:5px}
 .gfh-bars button span{display:block;width:100%;border-radius:5px 5px 2px 2px;background:var(--block-line,rgba(246,242,232,.22));transition:background .2s}
@@ -87,9 +87,23 @@ body.gfh-ready.gfh-empty #dashboardPage .home-toolbar,
 body.gfh-ready.gfh-empty #dashboardPage .chart-panel,
 body.gfh-ready.gfh-empty #dashboardPage .month-details{display:none!important}
 @media(max-width:959px){.gfh-right{margin-top:12px}}
-@media(min-width:960px){
-  .gfh-mon{max-width:420px;margin-bottom:20px}
-  .gfh-dg{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(28px,5vw,56px);align-items:start}
+@media(min-width:960px){.gfh-mon{max-width:420px;margin-bottom:20px}}
+/* Grille de l’accueil : solde | panneaux, puis Nouveautés | Objectifs sur la même rangée (dès 900 px) */
+.gfh-dg>.gfd{margin:14px 0 0}
+.gfh-dg>.gfh-goal-slot{margin-top:14px}
+@media(min-width:900px){
+  .gfh-dg{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);grid-template-areas:"card right" "news goal";column-gap:clamp(28px,5vw,56px);row-gap:clamp(16px,2vw,24px);align-items:start}
+  .gfh-dg>.gfh-left{grid-area:card}
+  .gfh-dg>.gfh-right{grid-area:right;margin-top:0}
+  .gfh-dg>.gfd{grid-area:news;margin:0;align-self:stretch;padding:14px 16px;border:1px solid var(--line);border-radius:22px;grid-template-columns:44px minmax(0,1fr) 44px;grid-template-areas:"ring copy close" ". actions actions";gap:4px 12px}
+  .gfh-dg>.gfd .gfd-ring{grid-area:ring;width:44px;height:44px;align-self:start}
+  .gfh-dg>.gfd .gfd-main{display:contents}
+  .gfh-dg>.gfd .gfd-copy{grid-area:copy}
+  .gfh-dg>.gfd .gfd-actions{grid-area:actions;margin-top:6px}
+  .gfh-dg>.gfd .gfd-close{grid-area:close;width:36px;height:36px;margin:-4px -6px 0 0}
+  .gfh-dg>.gfd .gfd-title{font-size:15px!important}
+  .gfh-dg>.gfd .gfd-text,.gfh-dg>.gfd .gfd-kicker{font-size:13px}
+  .gfh-dg>.gfh-goal-slot{grid-area:goal;margin:0;align-self:stretch}
 }
 @media(prefers-reduced-motion:reduce){.gfh-bars button span{transition:none}}
 
@@ -106,7 +120,7 @@ body.gfh-ready.gfh-empty #dashboardPage .month-details{display:none!important}
 body.gfh-ready.gfh-nocharts #dashboardPage .home-toolbar,
 body.gfh-ready.gfh-nocharts #dashboardPage .chart-panel,
 body.gfh-ready.gfh-nocharts #dashboardPage .month-details{display:none!important}
-@media(min-width:960px){.gfh-dg.is-solo{grid-template-columns:minmax(0,760px)}}
+@media(min-width:900px){.gfh-dg.is-solo{grid-template-columns:minmax(0,760px);grid-template-areas:"card"}}
 .gfh-foot .t{font-size:13px;color:var(--block-muted,#B7C2BB)}
 .gfh-foot .v{margin-top:2px;font:600 clamp(17px,4.6vw,22px)/1.2 var(--font-heading);letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
 .gfh-foot small{display:block;margin-top:6px;font-size:12px;color:var(--block-muted,#B7C2BB)}
@@ -529,3 +543,22 @@ body[data-mode="dark"] .gfr-kind.is-goals .gfr-ic{color:#CDA8DA}
 .gfh-chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media(hover:hover){.gfh-chip:not([aria-pressed="true"]):hover{background:color-mix(in srgb,var(--text) 5%,transparent)}}
 .gfh-pick[hidden]{display:none}
+
+/* ── Accueil vide : une seule action, un relevé bancaire ── */
+body.gfh-empty .gfd,body.gfh-empty .gfh-mon{display:none!important}
+body.gfh-empty .gfh-topbar{justify-content:flex-end;margin:0}
+body.gfh-empty .gfh-add{background:transparent;color:var(--text);border-color:var(--line-strong,var(--line))}
+.gfh-card-empty{display:grid;justify-items:center;text-align:center;padding:26px 22px 8px}
+.gfh-e-kick{margin:0;font:600 12px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--block-muted,#B7C2BB)}
+.gfh-e-title{margin:8px 0 0;font:700 clamp(24px,6.4vw,30px)/1.15 var(--font-heading);letter-spacing:-.025em;color:var(--block-text,#F6F2E8)}
+.gfh-e-text{margin:8px 0 0;max-width:34ch;font-size:15px;line-height:1.45;color:var(--block-muted,#B7C2BB)}
+.gfh-e-main{display:flex;align-items:center;justify-content:center;width:100%;max-width:420px;min-height:56px;margin-top:20px;padding:0 20px;border:0;border-radius:16px;background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font:700 16px/1.2 var(--font-body);text-align:center;cursor:pointer}
+@media(hover:hover){.gfh-e-main:hover{filter:brightness(1.05)}}
+.gfh-e-main:focus-visible,.gfh-e-link:focus-visible{outline:2px solid var(--accent-fill,#E3A82B);outline-offset:2px}
+.gfh-e-alt{display:flex;flex-wrap:wrap;justify-content:center;gap:0 22px;margin-top:4px}
+.gfh-e-link{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;border:0;background:none;color:var(--block-text,#F6F2E8);font:600 14px var(--font-body);text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+@media(min-width:900px){body.gfh-empty .gfh-dg.is-solo{grid-template-columns:minmax(0,560px)}}
+
+/* Bloc Nouveautés : le bouton « Voir » est centré au pixel près */
+.gfd-try,.gfd-next{display:inline-flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap}
+@media(min-width:900px){body.gfh-empty .gfh-dg.is-solo{justify-content:center}body.gfh-empty .gfh-hi{text-align:center;margin-top:-6px}body.gfh-empty .gfh-bilan{margin-inline:auto}}
