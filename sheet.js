@@ -2104,6 +2104,8 @@
     const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener("click", fn); };
     bind("btnSheetExport", exportXlsx);
     bind("btnSheetImport", () => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".xlsx,.xls,.xlsm,.ods,.csv,.tsv,.txt"; inp.addEventListener("change", () => { const f = inp.files[0]; if (!f) return;
+      // CSV gratuit (relevé ou tableau) ; un classeur Excel / ODS, relevé compris, demande l’offre Plus quand l’abonnement est actif.
+      const plans = window.GFSubscriptions; if (plans && typeof plans.requiresFile === "function" && !plans.requiresFile(f)) return;
       // Un relevé bancaire CSV est lu à part (regroupement par catégorie et par mois) ; sinon import Excel classique.
       const bank = window.GFBankImport ? window.GFBankImport.handle(f).catch(() => false) : Promise.resolve(false);
       bank.then((handled) => { if (handled) return; Promise.resolve(importXlsx(f)).then((ok) => { try { window.MeuniLoader && window.MeuniLoader.done(ok ? "Fichier importé." : undefined); } catch (e) {} }); }); }); inp.click(); });

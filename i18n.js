@@ -488,6 +488,7 @@ const dictionary=Object.freeze({
   "Cette personne t’a déjà envoyé une demande.": "This person has already sent you a request.",
   "Vous êtes déjà amis.": "You're already friends.",
   "Choisis au moins un mois et une ligne avant d’activer le partage.": "Select at least one month and one row before enabling sharing.",
+  "Ta formule actuelle ne permet pas d’ouvrir cet accès. Retrouve les formules dans Paramètres › Abonnement.": "Your current plan doesn’t include this access. See the plans in Settings › Plan.",
   "Cet accès ne peut être configuré qu’après acceptation réciproque de l’amitié.": "Access can only be set up after the friend request has been accepted.",
   "Ajoute d’abord des données à ton tableur.": "Add data to your spreadsheet first.",
   "Impossible de retirer les autorisations de partage.": "Could not remove sharing permissions.",
