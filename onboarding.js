@@ -106,7 +106,7 @@
     {
       title: "Ton solde",
       text: "Ton solde et son évolution sur l’année. Il se met à jour à chaque montant saisi.",
-      target: "#gfhHome .gfh-card",
+      target: "#gfhHome .gfh-card, #gfhHome .gfh-g-card",
       action: "Suivant",
       page: "dashboard",
     },
