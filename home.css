@@ -383,6 +383,53 @@ body.gf-hide-amounts .gfb-row b{filter:blur(7px)}
 .gfb-group.is-todo>summary .gfb-name{font-weight:600}
 body.gf-hide-amounts .gfb-merchant b,body.gf-hide-amounts .gfb-group summary b{filter:blur(7px)}
 @media(prefers-reduced-motion:reduce){.gfb-group>summary::before{transition:none}}
+/* Relevé bancaire en étapes : 1. trouvé · 2. à vérifier · 3. mois déjà remplis · 4. confirmer */
+.gfb-wiz{width:min(480px,calc(100vw - 24px));height:min(680px,calc(100dvh - 32px - env(safe-area-inset-bottom,0px)))}
+.gfb-wiz .gfb-kind{position:static}
+.gfb-wiz .gfb-lead b{font-weight:600}
+.gfb-wiz .gfb-form{display:flex;gap:0}
+.gfb-wiz .gfb-head{padding-bottom:8px}
+.gfb-progress{display:flex;align-items:center;gap:12px;padding:0 20px 16px}
+.gfb-step-txt{flex:none;margin:0;font:600 13px var(--font-body);color:var(--muted);font-variant-numeric:tabular-nums}
+.gfb-bar{display:flex;flex:1;gap:4px;min-width:0}
+.gfb-seg{flex:1;height:4px;border-radius:99px;background:color-mix(in srgb,var(--text) 14%,transparent);transition:background-color .2s}
+.gfb-seg.is-done,.gfb-seg.is-on{background:var(--accent-fill,var(--accent))}
+.gfb-wiz .gfb-body{display:block;padding-top:2px}
+.gfb-pane{display:grid;gap:12px;align-content:start;min-width:0;animation:gfbIn .22s ease-out}
+.gfb-pane[hidden]{display:none}
+@keyframes gfbIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.gfb-step-h{display:flex;align-items:center;gap:10px;margin:0;font:700 19px/1.25 var(--font-heading);letter-spacing:-.01em;color:var(--text)}
+.gfb-step-h:focus,.gfb-step-h:focus-visible{outline:none}
+.gfb-badge{display:grid;flex:none;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F)}
+.gfb-badge svg{width:16px;height:16px}
+.gfb-wiz .gfb-lead{font-size:15px;color:var(--text);overflow-wrap:anywhere}
+.gfb-wiz .gfb-note{font-size:13px}
+.gfb-note[hidden]{display:none}
+.gfb-facts{display:grid;margin:0;padding:2px 16px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--text) 3%,transparent)}
+.gfb-fact{display:flex;align-items:baseline;justify-content:space-between;gap:12px;min-height:42px;padding:9px 0;border-top:1px solid var(--line);box-sizing:border-box}
+.gfb-fact:first-child{border-top:0}
+.gfb-fact dt{flex:none;font-size:14px;color:var(--muted)}
+.gfb-fact dd{min-width:0;margin:0;text-align:right;font:600 15px/1.35 var(--font-body);color:var(--text);font-variant-numeric:tabular-nums;overflow-wrap:break-word}
+.gfb-fact dd b{font-weight:600}
+.gfb-wiz .gfb-list[hidden]{display:none}
+.gfb-wiz .gfb-todo-help{margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+.gfb-wiz .gfb-mode{gap:10px}
+.gfb-wiz .gfb-mode legend{margin-bottom:10px;font-size:15px}
+.gfb-wiz .gfb-opt{align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;transition:border-color .15s,background-color .15s}
+.gfb-wiz .gfb-opt input{margin-top:1px}
+.gfb-wiz .gfb-opt:has(input:checked){border-color:var(--accent-fill,var(--accent));background:color-mix(in srgb,var(--accent-fill,var(--accent)) 10%,transparent)}
+.gfb-wiz .gfb-opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.gfb-opt-txt{display:grid;gap:3px;min-width:0}
+.gfb-opt-txt strong{font:600 15px/1.3 var(--font-body);color:var(--text)}
+.gfb-opt-txt small{font:400 13.5px/1.45 var(--font-body);color:var(--muted)}
+.gfb-recap{display:grid;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.gfb-rrow{grid-template-columns:minmax(0,1fr) auto;min-height:42px;padding:5px 0}
+.gfb-wiz .gfb-actions{justify-content:space-between}
+.gfb-wiz .gfb-actions .gfh-btn{min-width:112px}
+.gfb-wiz .gfb-actions .is-primary{min-width:140px}
+body.gf-hide-amounts .gfb-dialog .gf-amount{filter:blur(7px)}
+@media(max-width:380px){.gfb-progress,.gfb-wiz .gfb-head{padding-left:16px;padding-right:16px}.gfb-wiz .gfb-body{padding-left:16px;padding-right:16px}.gfb-wiz .gfb-actions{padding-left:16px;padding-right:16px}.gfb-facts{padding:2px 14px}.gfb-wiz .gfb-actions .gfh-btn{min-width:0;flex:1}}
+@media(prefers-reduced-motion:reduce){.gfb-pane{animation:none}.gfb-seg,.gfb-wiz .gfb-opt{transition:none}}
 /* Alerte de plafond : bandeau fin d'une ligne */
 .gfh-banner{--b:var(--accent-fill,#E3A82B);position:fixed;left:12px;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:1500;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:10px;min-height:48px;padding:4px 4px 4px 14px;border:1px solid var(--b);border-radius:14px;background:var(--panel-solid,var(--bg));color:var(--text);box-shadow:0 8px 22px rgba(0,0,0,.14);font:500 14px/1.3 var(--font-body);opacity:0;transform:translateY(8px);transition:opacity .2s ease-out,transform .2s ease-out}
 .gfh-banner.is-over{--b:var(--red,#C0503A)}

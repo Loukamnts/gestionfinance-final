@@ -76,8 +76,9 @@ test('Libellés piégeux : bonne catégorie',()=>{
   assert.equal(cat('VIR SEPA PAUL DURAND'),'Autres dépenses');
   assert.equal(cat('CARTE 12/09 PAUL GARE DE LYON'),'Restaurants');
   assert.equal(cat('PRLV BP ECHEANCE PRET'),'Crédits');
-  assert.equal(cat('CARTE 03/09 BP STATION A6'),'Transports');
-  assert.equal(cat('CARTE 05/09 TOTALENERGIES PARIS'),'Transports');
+  assert.equal(cat('CARTE 03/09 BP STATION A6'),'Carburant');
+  assert.equal(cat('CARTE 05/09 TOTALENERGIES PARIS'),'Carburant');
+  assert.equal(cat('CARTE 12/09 SNCF CONNECT'),'Transports');
   assert.equal(cat('PRLV TOTALENERGIES ELECTRICITE'),'Énergie et eau');
   assert.equal(cat('CARTE 06/09 HABITAT PARIS'),'Autres dépenses');
   assert.equal(cat('PRLV OPH HABITAT 75'),'Loyer');
@@ -386,4 +387,14 @@ test('Tableau de budget repéré par des cellules de mois entières, pas par un 
   assert.equal(B._monthTable('Ligne;Janvier;Février;Mars\nLoyer;700;700;700'),true);
   assert.equal(B._monthTable('Category;Jan 2026;Feb 2026\nRent;700;700'),true);
   assert.equal(B._monthTable('Date;Libellé;Montant\n02/05/2026;CARTE MAISON DU MONDE MAI;-20\n03/05/2026;DECATHLON MARSEILLE;-30'),false);
+});
+test('Lignes existantes : « Revenu » reçoit les autres revenus, « Essence » ne reçoit que le carburant',()=>{
+  const env=setupSheet(['Revenu','Essence','Courses']);
+  const s=env.imp('Date;Libellé;Montant\n05/09/2026;VIR M DUPONT REMBOURSEMENT;120,00\n06/09/2026;CARTE SNCF CONNECT;-45,00\n07/09/2026;CARTE TOTALENERGIES STATION;-60,00\n08/09/2026;VIR SALAIRE ACME;1500,00\n');
+  const names=s.groups.map(g=>g.name);
+  assert.ok(!names.includes('Autres revenus'));assert.ok(names.includes('Revenu'));
+  assert.equal(total(s,'Revenu'),1620);assert.equal(total(s,'Essence'),60);assert.equal(total(s,'Transports'),45);
+  const env2=setupSheet(['Salaire','Transport']);
+  const s2=env2.imp('Date;Libellé;Montant\n07/09/2026;CARTE ESSO EXPRESS;-50,00\n08/09/2026;CARTE SNCF;-20,00\n');
+  assert.equal(total(s2,'Transport'),70);// pas de ligne « Essence » : le carburant va dans « Transport »
 });

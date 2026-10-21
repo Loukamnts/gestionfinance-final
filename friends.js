@@ -30,7 +30,7 @@
   function rowHasData(sheet,row){if(String(sheet.rowHeaders&&sheet.rowHeaders[row]||"").trim())return true;return Object.keys(sheet.cells||{}).some(function(key){return key.indexOf(row+",")===0;});}
   function usefulRows(sheet){var rows=[],count=Math.max(Number(sheet&&sheet.rows||0),(sheet&&sheet.rowHeaders&&sheet.rowHeaders.length)||0);for(var row=0;row<count;row++)if(rowHasData(sheet,row))rows.push(row);return rows;}
   function invalidate(){cache={userId:"",data:null,pending:null};}
-  function errorText(error,step){var message=String(error&&error.message||error||"").toLowerCase(),where=step?" pour "+step:"";if(/user_not_found/.test(message))return"Aucun compte trouvé avec cet e-mail ou ce pseudo.";if(/too_many_friend_requests/.test(message))return"Trop de recherches d’amis en peu de temps. Réessaie dans une heure.";if(/request_cooldown/.test(message))return"Attends 24 heures avant de renvoyer une demande à cette personne.";if(/cannot_add_self/.test(message))return"Tu ne peux pas t’ajouter toi-même.";if(/request_already_sent/.test(message))return"La demande a déjà été envoyée.";if(/request_already_received/.test(message))return"Cette personne t’a déjà envoyé une demande.";if(/already_friends/.test(message))return"Vous êtes déjà amis.";if(/friendship_not_accepted/.test(message))return"Cet accès ne peut être configuré qu’après acceptation réciproque de l’amitié.";if(/share_selection_required/.test(message))return"Choisis au moins un mois et une ligne avant d’activer le partage.";if(/save_friend_share_config|function .* does not exist/.test(message))return"La mise à jour sécurisée du partage doit être appliquée dans Supabase avant de continuer.";if(/row-level security|permission denied/.test(message))return"La base a refusé l’action"+where+". Applique le correctif de partage sécurisé dans Supabase.";if(/finance_shared_(sheet|dashboard)_snapshots|relation .* does not exist/.test(message))return"La migration Supabase du partage sécurisé n’est pas encore appliquée.";return"Impossible d’enregistrer cette action"+where+". Réessaie dans un instant.";}
+  function errorText(error,step){var message=String(error&&error.message||error||"").toLowerCase(),where=step?" pour "+step:"";if(/user_not_found/.test(message))return"Aucun compte trouvé avec cet e-mail ou ce pseudo.";if(/too_many_friend_requests/.test(message))return"Trop de recherches d’amis en peu de temps. Réessaie dans une heure.";if(/request_cooldown/.test(message))return"Attends 24 heures avant de renvoyer une demande à cette personne.";if(/cannot_add_self/.test(message))return"Tu ne peux pas t’ajouter toi-même.";if(/request_already_sent/.test(message))return"La demande a déjà été envoyée.";if(/request_already_received/.test(message))return"Cette personne t’a déjà envoyé une demande.";if(/already_friends/.test(message))return"Vous êtes déjà amis.";if(/friendship_not_accepted/.test(message))return"Cet accès ne peut être configuré qu’après acceptation réciproque de l’amitié.";if(/plan_share_(required|multi_required)/.test(message))return"Ta formule actuelle ne permet pas d’ouvrir cet accès. Retrouve les formules dans Paramètres › Abonnement.";if(/share_selection_required/.test(message))return"Choisis au moins un mois et une ligne avant d’activer le partage.";if(/save_friend_share_config|function .* does not exist/.test(message))return"La mise à jour sécurisée du partage doit être appliquée dans Supabase avant de continuer.";if(/row-level security|permission denied/.test(message))return"La base a refusé l’action"+where+". Applique le correctif de partage sécurisé dans Supabase.";if(/finance_shared_(sheet|dashboard)_snapshots|relation .* does not exist/.test(message))return"La migration Supabase du partage sécurisé n’est pas encore appliquée.";return"Impossible d’enregistrer cette action"+where+". Réessaie dans un instant.";}
 
   async function loadFriends(options){
     options=options||{};var client=sb(),me=user();if(!client||!me){knownCount=null;return{friends:[],pending:[],sent:[]};}
@@ -114,6 +114,8 @@
     var client=sb(),me=user(),data=snapshot();if(!client||!me)return{error:"Non connecté"};if((permissions.can_view_dashboard||permissions.can_view_sheet)&&(!data||!data.sheets||!data.sheets.length))return{error:"Ajoute d’abord des données à ton tableur."};
     var active=!!(permissions.can_view_dashboard||permissions.can_view_sheet),rules=active?buildRules(data,selection):[];
     if(active&&!rules.length)return{error:"Choisis au moins un mois et une ligne avant d’activer le partage."};
+    // Formule : retirer un accès reste toujours possible ; en ouvrir ou en modifier un dépend de l’offre (Plus : une personne).
+    var plans=window.GFSubscriptions;if(active&&plans&&typeof plans.requiresShare==="function"&&!plans.requiresShare(otherActiveShares(friend.friendId)))return{error:"",blocked:true};
     var table=buildTablePayload(data,selection),dashboard=buildDashboardPayload(table);
     try{
       // Une RPC transactionnelle : les anciennes autorisations restent intactes
@@ -130,6 +132,8 @@
       invalidate();return{success:true};
     }catch(e){return{error:errorText(e,"l’enregistrement de cet accès")};}
   }
+  // Amis (autres que celui-ci) qui voient déjà une partie de mes données.
+  function otherActiveShares(friendId,list){return(list||friendsList).filter(function(f){var p=f.permissions||{};return f.friendId!==friendId&&(p.can_view_sheet||p.can_view_dashboard);}).length;}
   function ruleSet(rules){return(rules||[]).map(function(r){return r.year+"|"+r.month+"|"+r.row_key;}).sort().join(",");}
   // Noms des lignes déjà partagées avec cet ami (dernier instantané), par feuille.
   async function sharedLabels(client,meId,friendId){
@@ -150,6 +154,8 @@
       for(var i=0;i<friends.friends.length;i++){
         try{
           var friend=friends.friends[i];if(!friend.permissions.can_view_sheet&&!friend.permissions.can_view_dashboard)continue;
+          // Hors de la formule (retour à Free, ou Plus avec plusieurs partages) : le dernier partage reste visible tel quel, il n’est plus mis à jour.
+          var plans=window.GFSubscriptions;if(plans&&typeof plans.allowsShare==="function"&&!plans.allowsShare(otherActiveShares(friend.friendId,friends.friends)))continue;
           var rules=await loadRules(friend.friendId),legacy=null;
           // Anciennes règles (position seule) : on ne garde que les lignes dont le nom était déjà dans le partage.
           if(rules.some(function(r){return String(r.row_key||"").split(":").length<3;}))legacy=await sharedLabels(client,me.id,friend.friendId);
@@ -342,6 +348,7 @@
     var summaryTitle=el("h3","","Résumé de l’accès"),summaryText=el("p","sf-summary-text"),summaryItems=el("div","sf-summary-items"),summaryStatus=tag("Aucun partage","lock"),countText=el("p","sf-summary-count"),save=action("Enregistrer l’accès",async function(){
       if(saving)return;saving=true;feedback.replaceChildren();updateSummary();root.querySelectorAll("input,select").forEach(function(n){n.disabled=true;});
       var result=await saveShare(friend,permissions,selection);saving=false;root.querySelectorAll("input,select").forEach(function(n){n.disabled=false;});
+      if(result.blocked){updateSummary();return;}
       if(result.error){feedback.append(notice(result.error,"error"));updateSummary();return;}
       nextMessage="L’accès de "+friend.displayName+" a été enregistré.";if(window.setPage)window.setPage("sharing");
     },"primary","check");
@@ -429,7 +436,7 @@
     function chooseTab(name){selectedTab=name;friendPanel.hidden=name!=="friends";invitationPanel.hidden=name!=="invitations";[[friendsTab,"friends"],[invitesTab,"invitations"]].forEach(function(item){var active=item[1]===name;item[0].setAttribute("aria-selected",String(active));item[0].tabIndex=active?0:-1;});}
     chooseTab(selectedTab);container.replaceChildren(shell);container.dataset.sharingReady=me.id;container._sharingData=data;
   }
-  window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots,friendCount:function(){return knownCount;},_rules:{select:selectionFromRules,build:buildRules},ui:{el:el,action:action,notice:notice,icon:icon,openDialog:openDialog}};
+  window.FriendsSystem={loadFriends:loadFriends,renderSharing:renderSharing,renderSharingAccess:renderSharingAccess,sendFriendRequest:sendRequest,acceptFriend:function(id){return respond(id,true);},declineFriend:function(id){return respond(id,false);},removeFriend:removeFriend,loadFriendSnapshot:function(id){return loadShared(id,"sheet");},refreshMySharedSnapshots:refreshMySharedSnapshots,friendCount:function(){return knownCount;},_rules:{select:selectionFromRules,build:buildRules,otherActive:otherActiveShares},ui:{el:el,action:action,notice:notice,icon:icon,openDialog:openDialog}};
   // Lorsqu'on arrive directement sur /partage, le routeur est exécuté avant
   // ce fichier. On rend donc l'état initial ici, puis à chaque connexion.
   function refreshVisibleSharing(){var page=document.getElementById("sharingPage"),container=document.getElementById("sharingContainer");if(page&&!page.hidden&&container)renderSharing(container,{force:true});}
