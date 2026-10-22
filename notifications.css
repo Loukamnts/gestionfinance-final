@@ -131,3 +131,6 @@ body[data-mode="dark"] .gfn-dialog{--gfn-badge-bg:#E8917A}
 @media(prefers-reduced-motion:reduce){
   .gfn-dialog,.gfn-dialog[open],.gfn-dialog[open]::backdrop,.gfn-card.is-swap,.gfn-bell,.gfh-toast{animation:none!important;transition:none!important}
 }
+
+/* Carte non lue dans la cloche : toute la carte est cliquable (elle devient « lue »). */
+.gfn-card.is-list:not(.is-read){cursor:pointer}

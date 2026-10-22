@@ -202,6 +202,8 @@
     }
     if(mode==="list"&&!m.read)a.append(el("span","gfn-dot"));
     a.append(foot);
+    // Dans la cloche, toucher la carte n'importe où la marque comme lue (les boutons gardent leur rôle).
+    if(mode==="list"&&!m.read)a.addEventListener("click",function(){markRead(m.id);});
     return a;
   }
 
