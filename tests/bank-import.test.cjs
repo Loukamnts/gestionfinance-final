@@ -455,7 +455,7 @@ test('À classer : opérations inconnues regroupées par marchand, choix par mar
 test('En attente / annulée / total différé : comptés à part, jamais importés',()=>{
   const {B}=setupSheet([]);
   const s=B.summarize(B.parse(B._decode(enc('Date;Libellé;Montant;Statut\n02/09/2026;CARTE LIDL;-20,00;\n03/09/2026;CARTE FNAC;-30,00;EN ATTENTE\n04/09/2026;CARTE ZARA;-40,00;REFUSÉ\n05/09/2026;CARTE SNCF;-15,00;\n06/09/2026;CARTE LIDL;-12,00;\n07/09/2026;FACTURE CARTE DU 30/09;-47,00;\n'))));
-  assert.equal(s.pending,2);assert.equal(s.deferred,1);assert.equal(s.rows.length,3);
+  assert.equal(s.pending,2);assert.equal(s.deferred,1);assert.equal(s.rows.length,6);assert.equal(s.rows.filter(r=>r.status==="dropped").length,3);
 });
 test('Mois déjà remplis : montants du tableur et du relevé pour chaque ligne concernée',()=>{
   const env=setupSheet(['Salaire','Courses','Loyer']);

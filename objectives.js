@@ -202,6 +202,9 @@
       action(goal.paused ? t2("Reprendre", "Resume") : t2("Mettre en pause", "Pause"), function() { const current = readProfile(); current.objectives = goalsFrom(current).map(item => item.id === goal.id ? Object.assign({}, item, { paused: !item.paused }) : item); saveProfile(current); render(); });
       action(goal.archived ? t2("Réactiver", "Reactivate") : t2("Archiver", "Archive"), function() { if (goal.archived && !goalSlot()) return; const current = readProfile(); current.objectives = goalsFrom(current).map(item => item.id === goal.id ? Object.assign({}, item, { archived: !item.archived }) : item); saveProfile(current); render(); });
       action(t2("Supprimer", "Delete"), function() { const current = readProfile(); current.objectives = goalsFrom(current).filter(item => item.id !== goal.id); saveProfile(current); render(); }, true);
+      const trash = actions.lastElementChild;
+      trash.textContent = ""; trash.title = t2("Supprimer l’objectif", "Delete goal"); trash.setAttribute("aria-label", t2("Supprimer l’objectif", "Delete goal"));
+      trash.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
       const management = document.createElement("details"); management.className = "objective-management";
       const managementLabel = document.createElement("summary"); managementLabel.textContent = t2("Gérer l’objectif", "Manage goal");
       management.append(managementLabel, progressEditor, remaining, actions);
@@ -280,7 +283,8 @@
     grip.className = "personal-notes-grabber";
     grip.setAttribute("aria-hidden", "true");
     panel.prepend(grip);
-    let startY = 0, dy = 0, startT = 0, dragging = false;
+    let startY = 0, dy = 0, startT = 0, dragging = false, frame = 0;
+    function paint() { frame = 0; panel.style.transform = "translate3d(0," + dy + "px,0)"; }
     function begin(event) {
       if (!window.matchMedia("(max-width: 720px)").matches) return;
       dragging = true; startY = event.clientY; dy = 0; startT = Date.now();
@@ -290,18 +294,20 @@
     function move(event) {
       if (!dragging) return;
       dy = Math.max(0, event.clientY - startY);
-      panel.style.transform = "translateY(" + dy + "px)";
+      if (!frame) frame = requestAnimationFrame(paint);
     }
     function end() {
       if (!dragging) return;
       dragging = false;
-      const fast = dy > 40 && dy / Math.max(1, Date.now() - startT) > 0.6;
-      panel.style.transition = "transform .22s ease-out";
-      if (dy > Math.min(140, panel.offsetHeight * 0.3) || fast) {
-        panel.style.transform = "translateY(100%)";
-        setTimeout(function () { setNotesOpen(false); panel.style.transform = ""; panel.style.transition = ""; }, 220);
+      if (frame) { cancelAnimationFrame(frame); frame = 0; }
+      const fast = dy > 30 && dy / Math.max(1, Date.now() - startT) > 0.5;
+      panel.style.transition = "transform .2s cubic-bezier(.2,.8,.3,1)";
+      if (dy > Math.min(120, panel.offsetHeight * 0.25) || fast) {
+        panel.style.transform = "translate3d(0,100%,0)";
+        setTimeout(function () { setNotesOpen(false); panel.style.transform = ""; panel.style.transition = ""; }, 200);
       } else {
-        panel.style.transform = "";
+        panel.style.transform = "translate3d(0,0,0)";
+        setTimeout(function () { panel.style.transform = ""; panel.style.transition = ""; }, 220);
       }
     }
     grip.addEventListener("pointerdown", begin);

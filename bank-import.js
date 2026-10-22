@@ -353,6 +353,8 @@
       // Opération que Meuniance n'a pas su classer : à demander une par une (regroupées par marchand)
       if(isOther){row.unk=true;var gid=mo||"~"+norm(op.label).replace(/\s+/g," ").slice(0,30),u=unk[gid]||(unk[gid]={gid:gid,key:mo,label:op.label,count:0,total:0,fps:[],last:dkey});u.count++;u.total+=op.amount;u.fps.push(op._base);if(dkey>u.last)u.last=dkey;}
     });
+    // Opérations en attente, refusées, annulées (ou total de carte différé) : jamais importées, mais visibles dans la liste
+    drop.forEach(function(op){var dkey=op.date.y*10000+op.date.m*100+op.date.d;rows.push({i:rows.length,fp:op._base,date:op.date,dkey:dkey,label:op.label,amount:op.amount,mkey:"",status:"dropped",ig:op.why==="deferred"?"deferred":"pending"});});
     var list=Object.keys(groups).map(function(k){return groups[k];}).filter(function(g){return Math.abs(g.total)>=0.005;});
     var order={"Salaire":0,"Dépense":1,"Épargne":2};list.sort(function(a,b){return order[a.kind]-order[b.kind]||Math.abs(b.total)-Math.abs(a.total);});
     var mlist=Object.keys(months).map(function(k){return months[k];}).sort(function(a,b){return a.y-b.y||a.m-b.m;});
@@ -580,7 +582,7 @@
       flash.setAttribute("role","status");flash.hidden=true;moreLive.setAttribute("role","status");
       var sLab=el("label","gfb-search"),sIn=document.createElement("input");sIn.type="search";sIn.autocomplete="off";sIn.setAttribute("enterkeyhint","search");sIn.placeholder=t2("Chercher une opération","Search a transaction");sIn.setAttribute("aria-label",t2("Chercher une opération","Search a transaction"));sLab.append(sIn);
       var fBar=el("div","gfb-filters");fBar.setAttribute("role","group");fBar.setAttribute("aria-label",t2("Filtrer les opérations","Filter transactions"));
-      var FB={};[["all",t2("Toutes","All")],["todo",t2("À classer","To sort")],["dup",t2("Déjà importées","Already imported")]].forEach(function(f){var b=el("button","gfb-fbtn");b.type="button";b.dataset.f=f[0];b.append(el("span","",f[1]));b.append(el("small","",""));b.addEventListener("click",function(){filt=f[0];shown=PAGE;paintList();});FB[f[0]]=b;fBar.append(b);});
+      var FB={};[["all",t2("Toutes","All")],["todo",t2("À classer","To sort")],["dup",t2("Déjà importées","Already imported")],["out",t2("Non importées","Not imported")]].forEach(function(f){var b=el("button","gfb-fbtn");b.type="button";b.dataset.f=f[0];b.append(el("span","",f[1]));b.append(el("small","",""));b.addEventListener("click",function(){filt=f[0];shown=PAGE;paintList();});FB[f[0]]=b;fBar.append(b);});
       tools.append(sLab,fBar);
       P.list.append(lLead,lStats,flash,tools,lEmpty,list,more,moreLive);
       var st=null;sIn.addEventListener("input",function(){clearTimeout(st);st=setTimeout(function(){query=sIn.value;shown=PAGE;paintList();},140);});
@@ -653,15 +655,17 @@
         return rs.filter(function(r){
           if(filt==="todo"&&!r.unk)return false;
           if(filt==="dup"&&r.status!=="dup"&&!r.forced)return false;
+          if(filt==="out"&&r.status==="ok")return false;
           if(qn&&norm(r.label).indexOf(qn)<0&&norm(cleanLabel(r)).indexOf(qn)<0&&norm(r.name||"").indexOf(qn)<0)return false;
           return true;});
       }
       function rowNode(r){
-        var dup=r.status==="dup",ign=r.status==="ignored",li=el("div","gfb-op"+(dup?" is-dup":"")+(ign?" is-ign":"")+(r.unk?" is-todo":""));li.dataset.fp=r.fp;
+        var dup=r.status==="dup",ign=r.status==="ignored"||r.status==="dropped",drp=r.status==="dropped",li=el("div","gfb-op"+(dup?" is-dup":"")+(ign?" is-ign":"")+(r.unk?" is-todo":""));li.dataset.fp=r.fp;
         var dt=el("div","gfb-op-date");dt.append(el("b","",String(r.date.d)),el("span","",weekday(r.date)));
         var mid=el("div","gfb-op-mid"),nm=el("span","gfb-op-name",cleanLabel(r));nm.setAttribute("translate","no");nm.title=r.label;mid.append(nm);
         var meta=el("div","gfb-op-meta");
-        if(dup){meta.append(el("span","gfb-tag",t2("Déjà importée","Already imported")),el("span","gfb-op-cat",r.name));}
+        if(drp){meta.append(el("span","gfb-tag",r.ig==="deferred"?t2("Total de carte différé, non importé","Deferred card total, not imported"):t2("En attente ou refusée, non importée","Pending or declined, not imported")));mid.append(meta);}
+        else if(dup){meta.append(el("span","gfb-tag",t2("Déjà importée","Already imported")),el("span","gfb-op-cat",r.name));}
         else{
           var txt=ign?(r.ig==="wallet"?t2("Mouvement ignoré","Movement ignored"):t2("Ignorée","Ignored")):r.unk?t2("À classer","To sort"):r.internal?t2("Virement interne → épargne","Own-account transfer → savings"):r.name;
           var chip=el("button","gfb-chip"+(r.unk?" is-todo":"")+(ign?" is-ign":"")+(r.internal?" is-int":""));chip.type="button";chip.dataset.k="chip";
@@ -688,7 +692,7 @@
         list.append(frag);rendered=Math.min(to,view.length);
       }
       function paintList(){
-        var n={all:summary.rows.length,todo:0,dup:0};summary.rows.forEach(function(r){if(r.unk)n.todo++;if(r.status==="dup"||r.forced)n.dup++;});
+        var n={all:summary.rows.length,todo:0,dup:0,out:0};summary.rows.forEach(function(r){if(r.unk)n.todo++;if(r.status==="dup"||r.forced)n.dup++;if(r.status!=="ok")n.out++;});
         Object.keys(FB).forEach(function(k){var b=FB[k];b.setAttribute("aria-pressed",filt===k?"true":"false");b.lastChild.textContent=String(n[k]);b.hidden=(k!=="all"&&!n[k]&&filt!==k);});
         view=visibleRows();lastMk="";list.replaceChildren();rendered=0;
         appendRows(0,shown);
@@ -806,7 +810,7 @@
         Object.keys(P).forEach(function(id){P[id].hidden=id!==step;});
         if(step==="list"){
           var dated=summary.rows.length;
-          lLead.textContent=t2("Voici les "+dated+" opérations du fichier, de la plus récente à la plus ancienne. Touche une catégorie pour la changer.","Here are the "+dated+" transactions in the file, newest first. Tap a category to change it.");
+          lLead.textContent=t2("Voici les "+dated+" opérations du fichier, de la plus récente à la plus ancienne. Touche une catégorie pour la changer. Celles qui ne seront pas importées sont grisées : le filtre « Non importées » les réunit.","Here are the "+dated+" transactions in the file, newest first. Tap a category to change it. Greyed-out ones will not be imported: the “Not imported” filter groups them.");
           var stats=[];
           if(summary.dupCount)stats.push(t2(plural(summary.dupCount,"déjà importée (non reprise)","déjà importées (non reprises)","",""),plural(summary.dupCount,"","","already imported (skipped)","already imported (skipped)")));
           if(summary.pending)stats.push(t2(plural(summary.pending,"en attente ou refusée, ignorée","en attente, refusées ou annulées, ignorées","",""),plural(summary.pending,"","","pending or declined, ignored","pending, declined or cancelled, ignored")));

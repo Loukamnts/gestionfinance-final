@@ -317,9 +317,9 @@ body.gf-hide-amounts .gf-pie-legend .gf-amount{filter:blur(7px)}
 /* Feuille Notes sur téléphone : poignée en haut (la tirer vers le bas ferme la feuille), hauteur ajustée au contenu. */
 .personal-notes-grabber{display:none}
 @media (max-width:720px){
-  .personal-notes-grabber{display:block;flex:none;align-self:center;width:44px;height:28px;margin:-12px 0 -10px;cursor:grab;touch-action:none;position:relative}
-  .personal-notes-grabber::before{content:"";position:absolute;left:4px;right:4px;top:12px;height:5px;border-radius:3px;background:var(--line-strong,rgba(0,0,0,.2))}
-  .personal-notes-panel{min-height:min(64dvh,600px)!important}
+  .personal-notes-grabber{display:block;flex:none;align-self:stretch;height:36px;margin:-18px -18px -14px;cursor:grab;touch-action:none;position:relative;-webkit-user-select:none;user-select:none}
+  .personal-notes-grabber::before{content:"";position:absolute;left:50%;width:44px;margin-left:-22px;top:14px;height:5px;border-radius:3px;background:var(--line-strong,rgba(0,0,0,.2))}
+  .personal-notes-panel{min-height:min(64dvh,600px)!important;will-change:transform}
 }
 /* Mode sombre : les fenêtres et feuilles se détachent nettement du fond (surface plus claire, voile plus sombre). */
 body[data-theme="moulin"][data-mode="dark"] :is(.gfh-dialog,.gfplan-dialog,.sf-dialog,.welcome-dialog,.password-recovery-dialog,.sheet-status-mobile-dialog,.tutorial-tooltip,.personal-notes-panel,#renameModal .modal-container){--panel-solid:#22352D;background:#22352D!important;border-color:rgba(243,238,226,.14)!important;box-shadow:0 28px 70px rgba(0,0,0,.55)!important}
@@ -437,22 +437,6 @@ body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x::before{content:n
   body[data-theme="moulin"] .settings-hub-item,body[data-theme="moulin"] .settings-hub .settings-hub-item{min-height:44px!important;height:auto}
 }
 
-/* 7) Menu du profil sur iPhone : feuille qui monte du bas (poignée, glisser vers le bas pour fermer, lignes de 48 px).
-   Sur ordinateur et en interface latérale, il reste une bulle. */
-@keyframes gfSheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.gf-sheet-grab{display:none}
-@media(max-width:720px){
-  body:not([data-interface="studio"]) .app-header .profile-popover:not([hidden]){position:fixed!important;left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%!important;max-width:none!important;max-height:min(82dvh,640px)!important;margin:0;padding:0 16px calc(16px + env(safe-area-inset-bottom,0px))!important;gap:6px;border-radius:22px 22px 0 0!important;border-width:1px 0 0!important;box-shadow:0 -12px 40px rgba(0,0,0,.22)!important;overflow:auto;overscroll-behavior:contain;background:var(--panel-solid,var(--bg))!important;animation:gfSheetUp .28s cubic-bezier(.2,.9,.3,1)}
-  body:not([data-interface="studio"]) .app-header .profile-popover.is-dragging{animation:none;transition:none}
-  body:not([data-interface="studio"]) .app-header .profile-popover:not([hidden]) .gf-sheet-grab{display:block;position:sticky;top:0;z-index:1;flex:none;height:30px;margin:0 -16px 2px;background:var(--panel-solid,var(--bg));touch-action:none;cursor:grab}
-  .gf-sheet-grab::before{content:"";position:absolute;left:50%;top:10px;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:var(--line-strong,#999)}
-  body:not([data-interface="studio"]):has(.app-header .profile-popover:not([hidden]))::after{content:"";position:fixed;inset:0;z-index:9999;background:rgba(14,23,19,.45);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
-  body:not([data-interface="studio"]):has(.app-header .profile-popover:not([hidden])) .app .app-header{z-index:10000!important}
-  body:not([data-interface="studio"]) .app-header .profile-menu-link{min-height:48px;padding:10px 12px;font-size:1rem}
-  body:not([data-interface="studio"]) .app-header .profile-menu-link small{font-size:.6875rem}
-}
-@media(prefers-reduced-motion:reduce){body .app-header .profile-popover{animation:none!important}}
-
 /* 10) Pas de décalage au chargement : le tableau de bord classique reste invisible tant que l’accueil n’est pas prêt
    (il ne se dessine jamais, puis il est remplacé par l’accueil). Sécurité : il réapparaît seul au bout de 3,5 s si l’accueil échoue. */
 @keyframes gfRevealApp{to{visibility:visible}}
@@ -516,3 +500,18 @@ body[data-page="dashboard"]:not(.gfh-ready) .app{visibility:hidden;animation:gfR
 .legal-section a::after,.settings-section p a::after,.settings-reset-copy a::after{content:"";position:absolute;left:-4px;right:-4px;top:50%;height:44px;transform:translateY(-50%)}
 .gfc-views button{min-height:44px}
 @media(max-width:360px){.gfh-mon button{width:40px}}
+
+/* Objectifs : la corbeille est un bouton de 44 px, calé à droite de la ligne d'actions */
+.objective-card-actions{align-items:center}
+.objective-card-actions .objective-remove{order:99;margin-left:auto;flex:0 0 44px!important;width:44px;min-width:44px;height:44px;min-height:44px;padding:0;display:inline-grid;place-items:center}
+
+/* Le titre « Notifications » reçoit le focus à l'ouverture (lecteurs d'écran) sans encadré visible */
+.gfn-p-title:focus,.gfn-p-title:focus-visible{outline:none!important}
+/* Onglets et pastilles (Paramètres, Mon espace, Objectifs) : le changement de couleur est immédiat */
+body[data-theme] :is(.settings-hub-item,.personal-workspace-link,.objectives-tabs button,.mode-segment button,.account-tab,.mobile-finance-summary-tabs button,.gfc-views button){transition:background-color .1s linear,border-color .1s linear,color .1s linear!important}
+
+/* Barre d'outils du tableur : jamais de défilement caché, elle passe sur deux lignes quand l'écran (ou la taille du texte) est trop étroit */
+@media(max-width:720px){
+  body #sheetPage .sheet-bar{flex-wrap:wrap!important;overflow:visible!important;justify-content:space-between;row-gap:6px}
+  body #sheetPage .sheet-bar-left,body #sheetPage .sheet-bar-right{flex-wrap:wrap}
+}
