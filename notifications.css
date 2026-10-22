@@ -49,6 +49,12 @@ body.gf-hide-amounts .gfn-sensitive{filter:blur(6px)}
 .gfn-dot{position:absolute;top:10px;left:40px;width:11px;height:11px;border-radius:50%;background:var(--gfn-badge-bg);border:2px solid var(--panel-solid,var(--bg));box-sizing:border-box}
 .gfn-card.is-read .gfn-title{font-weight:500}
 .gfn-card.is-read .gfn-ic{opacity:.72}
+/* Ordinateur : le message du haut tient sur une seule rangée (icône, texte, action, « 1 sur N ») */
+@media(min-width:900px){
+  .gfn-card.is-slot{grid-template-columns:40px minmax(0,1fr) auto;align-items:center;padding-top:12px;padding-bottom:12px}
+  .gfn-card.is-slot .gfn-foot{grid-column:3;grid-row:1;margin-top:0;flex-wrap:nowrap;gap:8px 20px}
+  .gfn-card.is-slot .gfn-x{top:50%;margin-top:-22px}
+}
 @media(max-width:360px){
   .gfn-card{padding:12px 48px 10px 12px;grid-template-columns:36px minmax(0,1fr);column-gap:10px}
   .gfn-ic{width:36px;height:36px}.gfn-ic .gfn-ring{width:36px;height:36px}.gfn-dot{left:36px}
