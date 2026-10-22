@@ -557,7 +557,7 @@
   function preview(ops,fileName){
     return new Promise(function(resolve){
       var extra={},ovr={},inc={},ans={},mode=null,step="found",steps=[],conf=[],summary=null,rowMap={},T=targets(),rowsNow=sheetRows(),flashUndo=null;
-      var dirty=true,filt="all",query="",shown=PAGE,unkSnap=null,unkIdx=0,view=[],rendered=0,lastMk="",confOpen={};
+      var dirty=true,query="",unkSnap=null,unkIdx=0,confOpen={};
       var KINDS=[["Salaire",t2("Revenus","Income")],["Dépense",t2("Dépenses","Expenses")],["Épargne",t2("Épargne","Savings")]],titles={};KINDS.forEach(function(k){titles[k[0]]=k[1];});
       var isNew=function(name){return !rowsNow.some(function(r){return key(r)===key(name);});};
       var ICON_OK='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -568,24 +568,23 @@
       head.append(h,x);
       var prog=el("div","gfb-progress"),stepTxt=el("p","gfb-step-txt"),bar=el("div","gfb-bar");stepTxt.setAttribute("aria-live","polite");bar.setAttribute("aria-hidden","true");prog.append(stepTxt,bar);
 
-      var HEADS={found:t2("Relevé reconnu","Statement recognised"),list:t2("Toutes les opérations","All transactions"),unknown:t2("À classer","To sort"),months:t2("Mois déjà remplis","Months already filled"),confirm:t2("Résumé avant import","Summary before import")};
+      var HEADS={found:t2("Voici ce que j’ai trouvé","Here’s what I found"),list:t2("Tes opérations","Your transactions"),unknown:t2("À classer","To sort"),months:t2("Mois déjà remplis","Months already filled"),confirm:t2("Résumé avant import","Summary before import")};
       var ORDER=["found","list","unknown","months","confirm"],P={};
       ORDER.forEach(function(id){var s=el("section","gfb-pane"),hh=el("h3","gfb-step-h",HEADS[id]);hh.tabIndex=-1;hh.id="gfbStep-"+id;s.setAttribute("aria-labelledby",hh.id);s.dataset.step=id;s.hidden=true;s.append(hh);s._h=hh;P[id]=s;});
       var badge=el("span","gfb-badge");badge.innerHTML=ICON_OK;P.found._h.prepend(badge);
 
       /* 1. Relevé reconnu */
-      var fLead=el("p","gfb-lead"),facts=el("dl","gfb-facts"),fHow=el("p","gfb-lead"),fNext=el("p","gfb-note"),fPriv=el("p","gfb-note gfb-priv");
-      P.found.append(fLead,facts,fHow,fNext,fPriv);
+      var fLead=el("p","gfb-lead"),fStats=el("div","gfb-stat3"),fList=el("ul","gfb-facts2");
+      P.found.append(fLead,fStats,fList);
 
-      /* 2. Toutes les opérations */
-      var lLead=el("p","gfb-lead"),lStats=el("ul","gfb-stats"),flash=el("p","gfb-flash"),tools=el("div","gfb-tools"),lEmpty=el("p","gfb-note gfb-empty"),list=el("div","gfb-ops"),more=el("button","gfh-btn gfb-more-btn"),moreLive=el("p","gfb-sr");
-      flash.setAttribute("role","status");flash.hidden=true;moreLive.setAttribute("role","status");
+      /* 2. Tes opérations : deux blocs, ce qui sera importé puis ce qui ne le sera pas */
+      var lLead=el("p","gfb-lead"),flash=el("p","gfb-flash"),tools=el("div","gfb-tools"),lEmpty=el("p","gfb-note gfb-empty");
+      flash.setAttribute("role","status");flash.hidden=true;
       var sLab=el("label","gfb-search"),sIn=document.createElement("input");sIn.type="search";sIn.autocomplete="off";sIn.setAttribute("enterkeyhint","search");sIn.placeholder=t2("Chercher une opération","Search a transaction");sIn.setAttribute("aria-label",t2("Chercher une opération","Search a transaction"));sLab.append(sIn);
-      var fBar=el("div","gfb-filters");fBar.setAttribute("role","group");fBar.setAttribute("aria-label",t2("Filtrer les opérations","Filter transactions"));
-      var FB={};[["all",t2("Toutes","All")],["todo",t2("À classer","To sort")],["out",t2("Non importées","Not imported")]].forEach(function(f){var b=el("button","gfb-fbtn");b.type="button";b.dataset.f=f[0];b.append(el("span","",f[1]));b.append(el("small","",""));b.addEventListener("click",function(){filt=f[0];shown=PAGE;paintList();});FB[f[0]]=b;fBar.append(b);});
-      tools.append(sLab,fBar);
-      P.list.append(lLead,lStats,flash,tools,lEmpty,list,more,moreLive);
-      var st=null;sIn.addEventListener("input",function(){clearTimeout(st);st=setTimeout(function(){query=sIn.value;shown=PAGE;paintList();},140);});
+      tools.append(sLab);
+      var blkIn=makeBlock(t2("Sera importé","Will be imported")),blkOut=makeBlock(t2("Ne sera pas importé","Will not be imported"));
+      P.list.append(lLead,flash,tools,lEmpty,blkIn.box,blkOut.box);
+      var st=null;sIn.addEventListener("input",function(){clearTimeout(st);st=setTimeout(function(){query=sIn.value;blkIn.shown=blkOut.shown=PAGE;paintList();},140);});
 
       /* 3. À classer */
       var uBody=el("div","gfb-unk");P.unknown.append(uBody);
@@ -645,66 +644,75 @@
         flash.replaceChildren(document.createTextNode(q(label)+" → "+to+" · "));
         var u=el("button","gfh-link gfb-undo",t2("Annuler","Undo"));u.type="button";u.addEventListener("click",function(){if(flashUndo)flashUndo();flashUndo=null;flash.hidden=true;dirty=true;draw(true);});flash.append(u);flash.hidden=false;
         draw(true);
-        var again=list.querySelector('[data-fp="'+cssq(r.fp)+'"] .gfb-chip');try{again&&again.focus({preventScroll:true});}catch(e){}
+        var again=P.list.querySelector('[data-fp="'+cssq(r.fp)+'"] .gfb-chip');try{again&&again.focus({preventScroll:true});}catch(e){}
       }
       function cssq(s){return String(s).replace(/(["\\])/g,"\\$1");}
 
-      /* ── Liste ── */
-      function visibleRows(){
-        var qn=norm(query).trim(),rs=summary.rows;
-        return rs.filter(function(r){
-          if(filt==="todo"&&!r.unk)return false;
-          if(filt==="out"&&r.status==="ok")return false;
-          if(filt!=="out"&&r.status==="dropped")return false;
+      /* ── Liste : deux blocs, chacun avec sa pagination ── */
+      function makeBlock(title){
+        var b={box:el("section","gfb-blk"),cnt:el("span","gfb-blk-n"),sub:el("p","gfb-blk-sub"),list:el("div","gfb-ops"),emp:el("p","gfb-note gfb-empty"),more:el("button","gfh-btn gfb-more-btn"),live:el("p","gfb-sr"),view:[],rendered:0,shown:PAGE,lastMk:""};
+        var hd=el("div","gfb-blk-h");hd.append(el("h4","",title),b.cnt);
+        b.live.setAttribute("role","status");b.more.type="button";
+        b.box.append(hd,b.sub,b.list,b.emp,b.more,b.live);
+        b.more.addEventListener("click",function(){var from=b.rendered;b.shown=b.rendered+PAGE;appendRows(b,from,b.shown);moreState(b);b.live.textContent=t2((b.rendered-from)+" opérations de plus affichées.",(b.rendered-from)+" more transactions shown.");
+          var first=b.list.querySelectorAll(".gfb-op")[from];try{first&&first.querySelector("button,input")&&first.querySelector("button,input").focus({preventScroll:false});}catch(e){}});
+        b.list.addEventListener("click",function(e){var c=e.target.closest&&e.target.closest("[data-k=chip]");if(!c)return;var li=c.closest(".gfb-op"),r=rowMap[li.dataset.fp];if(r)openPicker(r,c);});
+        b.list.addEventListener("change",function(e){var i=e.target;if(!i||i.dataset.k!=="sw")return;var li=i.closest(".gfb-op"),fp=li.dataset.fp;if(i.checked)inc[fp]=true;else delete inc[fp];flash.hidden=true;dirty=true;
+          draw(true);var again=P.list.querySelector('[data-fp="'+cssq(fp)+'"] .gfb-swi');try{again&&again.focus({preventScroll:true});}catch(e2){}});
+        return b;
+      }
+      function inImport(r){return r.status==="ok";}
+      function visibleRows(wantIn){
+        var qn=norm(query).trim();
+        return summary.rows.filter(function(r){
+          if(inImport(r)!==wantIn)return false;
           if(qn&&norm(r.label).indexOf(qn)<0&&norm(cleanLabel(r)).indexOf(qn)<0&&norm(r.name||"").indexOf(qn)<0)return false;
           return true;});
       }
       function rowNode(r){
-        var dup=r.status==="dup",ign=r.status==="ignored"||r.status==="dropped",drp=r.status==="dropped",li=el("div","gfb-op"+(dup?" is-dup":"")+(ign?" is-ign":"")+(r.unk?" is-todo":""));li.dataset.fp=r.fp;
+        var dup=r.status==="dup",ign=r.status==="ignored",drp=r.status==="dropped",off=dup||ign||drp,li=el("div","gfb-op"+(off?" is-off":"")+(dup?" is-dup":"")+(r.unk?" is-todo":""));li.dataset.fp=r.fp;
         var dt=el("div","gfb-op-date");dt.append(el("b","",String(r.date.d)),el("span","",weekday(r.date)));
         var mid=el("div","gfb-op-mid"),nm=el("span","gfb-op-name",cleanLabel(r));nm.setAttribute("translate","no");nm.title=r.label;mid.append(nm);
         var meta=el("div","gfb-op-meta");
-        if(drp){meta.append(el("span","gfb-tag",r.ig==="deferred"?t2("Total de carte différé, non importé","Deferred card total, not imported"):t2("En attente ou refusée, non importée","Pending or declined, not imported")));mid.append(meta);}
-        else if(dup){meta.append(el("span","gfb-tag",t2("Déjà importée","Already imported")),el("span","gfb-op-cat",r.name));}
+        if(drp){meta.append(el("span","gfb-tag",r.ig==="deferred"?t2("Total de carte différé : les paiements sont déjà comptés un par un.","Deferred card total: the payments are already counted one by one."):t2("En attente ou refusée : pas importée.","Pending or declined: not imported.")));mid.append(meta);}
+        else if(dup){meta.append(el("span","gfb-tag",t2("Déjà importée.","Already imported.")));mid.append(meta);}
         else{
-          var txt=ign?(r.ig==="wallet"?t2("Mouvement ignoré","Movement ignored"):t2("Ignorée","Ignored")):r.unk?t2("À classer","To sort"):r.internal?t2("Virement interne → épargne","Own-account transfer → savings"):r.name;
+          var txt=ign?(r.ig==="wallet"?t2("Mouvement entre tes comptes : ignoré","Movement between your accounts: ignored"):t2("Tu l’as choisi : ignorée","Your choice: ignored")):r.unk?t2("À classer","To sort"):r.internal?t2("Virement interne → épargne","Own-account transfer → savings"):r.name;
           var chip=el("button","gfb-chip"+(r.unk?" is-todo":"")+(ign?" is-ign":"")+(r.internal?" is-int":""));chip.type="button";chip.dataset.k="chip";
           chip.setAttribute("aria-label",t2("Changer la catégorie de ","Change the category of ")+cleanLabel(r)+" ("+txt+")");
           chip.append(el("span","gfb-chip-t",txt),el("i","gfb-chip-c"));mid.append(meta);meta.append(chip);
-          if(r.forced)meta.append(el("span","gfb-tag",t2("Réimportée","Imported again")));
+          if(r.forced)meta.append(el("span","gfb-tag",t2("Importée quand même","Imported anyway")));
         }
         if(dup||r.forced){
           var sw=el("label","gfb-sw"),inp=document.createElement("input");inp.type="checkbox";inp.className="gfb-swi";inp.setAttribute("role","switch");inp.checked=!!r.forced;inp.dataset.k="sw";
           sw.append(inp,el("span","gfb-sw-ui"),el("span","gfb-sw-t",t2("Importer quand même","Import anyway")));
-          if(dup)mid.append(meta);
-          li.append(dt,mid,sw);
+          li.append(dt,mid,sw);li.classList.add("has-sw");
         }else li.append(dt,mid);
         var am=el("b","gf-amount gfb-op-amt "+(r.amount<0?"is-out":"is-in"),sgn(r.amount));
         li.insertBefore(am,li.children[2]||null);
-        if(dup||r.forced){li.classList.add("has-sw");}
         return li;
       }
-      function appendRows(from,to){
+      function appendRows(b,from,to){
         var frag=document.createDocumentFragment();
-        for(var i=from;i<to&&i<view.length;i++){var r=view[i],mk=r.date.y+"-"+r.date.m;
-          if(mk!==lastMk){lastMk=mk;var mh=el("h4","gfb-mh",monthTitle(r.date));frag.append(mh);}
+        for(var i=from;i<to&&i<b.view.length;i++){var r=b.view[i],mk=r.date.y+"-"+r.date.m;
+          if(mk!==b.lastMk){b.lastMk=mk;frag.append(el("h5","gfb-mh",monthTitle(r.date)));}
           frag.append(rowNode(r));}
-        list.append(frag);rendered=Math.min(to,view.length);
+        b.list.append(frag);b.rendered=Math.min(to,b.view.length);
+      }
+      function moreState(b){var left=b.view.length-b.rendered;b.more.hidden=left<=0;b.more.textContent=left>0?t2("Voir "+Math.min(PAGE,left)+" de plus ("+left+" restantes)","Show "+Math.min(PAGE,left)+" more ("+left+" left)"):"";}
+      function paintBlock(b,wantIn){
+        b.view=visibleRows(wantIn);b.lastMk="";b.list.replaceChildren();b.rendered=0;appendRows(b,0,b.shown);
+        b.cnt.textContent=plural(b.view.length,"opération","opérations","transaction","transactions");
+        b.emp.hidden=!!b.view.length;b.emp.textContent=b.view.length?"":(query?t2("Aucune opération ne correspond à cette recherche.","No transaction matches this search."):wantIn?t2("Rien de nouveau à importer.","Nothing new to import."):t2("Aucune opération laissée de côté.","No transaction left aside."));
+        moreState(b);
       }
       function paintList(){
-        var n={all:0,todo:0,out:0};summary.rows.forEach(function(r){if(r.status!=="dropped")n.all++;if(r.unk)n.todo++;if(r.status!=="ok")n.out++;});
-        Object.keys(FB).forEach(function(k){var b=FB[k];b.setAttribute("aria-pressed",filt===k?"true":"false");b.lastChild.textContent=String(n[k]);b.hidden=(k!=="all"&&!n[k]&&filt!==k);});
-        view=visibleRows();lastMk="";list.replaceChildren();rendered=0;
-        appendRows(0,shown);
-        lEmpty.hidden=!!view.length;lEmpty.textContent=view.length?"":(query?t2("Aucune opération ne correspond à cette recherche.","No transaction matches this search."):t2("Rien à afficher ici.","Nothing to show here."));
-        var left=view.length-rendered;more.hidden=left<=0;
-        more.textContent=left>0?t2("Voir "+Math.min(PAGE,left)+" de plus ("+left+" restantes)","Show "+Math.min(PAGE,left)+" more ("+left+" left)"):"";
+        paintBlock(blkIn,true);paintBlock(blkOut,false);
+        var todo=summary.rows.filter(function(r){return r.unk;}).length;
+        blkIn.sub.textContent=!blkIn.view.length&&!query?"":todo?t2("Les lignes jaunes seront à classer à l’étape suivante.","The yellow lines are for you to sort in the next step."):t2("Tout est classé.","Everything is sorted.");
+        blkOut.sub.textContent=blkOut.view.length||query?t2("Je te dis pourquoi à chaque ligne. Rien n’est perdu : tu peux en rajouter.","Each line says why. Nothing is lost: you can add any of them."):"";
+        blkOut.box.hidden=!summary.rows.some(function(r){return !inImport(r);});
       }
-      more.type="button";more.addEventListener("click",function(){var from=rendered;shown=rendered+PAGE;appendRows(from,shown);var left=view.length-rendered;more.hidden=left<=0;more.textContent=left>0?t2("Voir "+Math.min(PAGE,left)+" de plus ("+left+" restantes)","Show "+Math.min(PAGE,left)+" more ("+left+" left)"):"";moreLive.textContent=t2((rendered-from)+" opérations de plus affichées.",(rendered-from)+" more transactions shown.");
-        var first=list.querySelectorAll(".gfb-op")[from];try{first&&first.querySelector("button,input")&&first.querySelector("button,input").focus({preventScroll:false});}catch(e){}});
-      list.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-k=chip]");if(!b)return;var li=b.closest(".gfb-op"),r=rowMap[li.dataset.fp];if(r)openPicker(r,b);});
-      list.addEventListener("change",function(e){var i=e.target;if(!i||i.dataset.k!=="sw")return;var li=i.closest(".gfb-op"),fp=li.dataset.fp;if(i.checked)inc[fp]=true;else delete inc[fp];flash.hidden=true;dirty=true;
-        draw(true);var again=list.querySelector('[data-fp="'+cssq(fp)+'"] .gfb-swi');try{again&&again.focus({preventScroll:true});}catch(e2){}});
 
       /* ── À classer, une par une ── */
       function groupLabel(g){return String(g.label||"").replace(/\s+/g," ").trim().slice(0,90);}
@@ -795,28 +803,28 @@
         bar.replaceChildren.apply(bar,steps.map(function(s,i){return el("span","gfb-seg"+(i<idx?" is-done":i===idx?" is-on":""));}));
 
         // 1
-        fLead.textContent=fileName?t2("Meuniance a bien lu ton fichier "+q(fileName)+".","Meuniance read your file "+q(fileName)+"."):t2("Meuniance a bien lu ton relevé.","Meuniance read your statement.");
-        var tot={"Salaire":0,"Dépense":0,"Épargne":0};summary.groups.forEach(function(g){tot[g.kind]+=g.total;});
-        var period=!summary.from?"":(function(a,b){var same=a.y===b.y&&a.m===b.m;return same?monthLabel(a):(a.y===b.y?(en()?MN_EN[a.m]:MN[a.m]):monthLabel(a))+" → "+monthLabel(b);})(summary.from,summary.to);
-        var rowsF=[[t2("Opérations","Transactions"),String(summary.rows.length)],[t2("Période","Period"),period]];
-        KINDS.forEach(function(k){if(tot[k[0]])rowsF.push([k[1],signed(k[0],tot[k[0]]),true]);});
-        facts.replaceChildren.apply(facts,rowsF.map(function(r){var w=el("div","gfb-fact");w.append(el("dt","",r[0]),el("dd","",null));var dd=w.lastChild;if(r[2])dd.append(el("b","gf-amount",r[1]));else dd.textContent=r[1];return w;}));
+        fLead.textContent=fileName?t2("Relevé reconnu : ton fichier "+q(fileName)+".","Statement recognised: your file "+q(fileName)+"."):t2("Relevé reconnu.","Statement recognised.");
+        var aside=summary.ignored+summary.pending+summary.deferred;
+        fStats.replaceChildren.apply(fStats,[[summary.newCount,t2("à importer","to import")],[summary.dupCount,t2("déjà importée"+(summary.dupCount>1?"s":""),"already imported")],[aside,t2("laissée"+(aside>1?"s":"")+" de côté","left aside")]].map(function(x){var c=el("div","gfb-stat");c.append(el("b","",String(x[0])),el("span","",x[1]));return c;}));
         var yrs={};summary.rows.forEach(function(r){yrs[r.date.y]=1;});var yl=Object.keys(yrs).sort().join(", "),ny=Object.keys(yrs).length;
-        fHow.replaceChildren(document.createTextNode(ny>1?t2("Ces montants iront dans les feuilles ","These amounts will go into the "):t2("Ces montants iront dans la feuille ","These amounts will go into the ")),el("b","",yl),document.createTextNode(ny>1?t2(" du tableur"+NB+": une ligne par catégorie, une colonne par mois."," sheets: one row per category, one column per month."):t2(" du tableur"+NB+": une ligne par catégorie, une colonne par mois."," sheet: one row per category, one column per month.")));
-        fNext.textContent=t2("Tu vas d’abord voir toutes les opérations. Rien n’entre dans ton tableur avant ta validation finale.","You’ll first see every transaction. Nothing goes into your spreadsheet before your final approval.");
-        fPriv.textContent=t2("Le fichier reste sur ton appareil"+NB+": seuls les totaux vont dans le tableur.","The file stays on your device: only the totals go into the spreadsheet.");
+        function dayLabel(d){return d.d+NB+(en()?MN_EN[d.m]:MN[d.m]);}
+        var same=summary.from&&summary.to&&summary.from.y===summary.to.y&&summary.from.m===summary.to.m;
+        var facts=[];
+        function fact(kind,nodes){var li=el("li","gfb-f2 is-"+kind),ic=el("span","gfb-f2-ic");ic.innerHTML=kind==="ok"?ICON_OK:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/></svg>';var tx=el("span","gfb-f2-t");nodes.forEach(function(n){tx.append(typeof n==="string"?document.createTextNode(n):n);});li.append(ic,tx);facts.push(li);}
+        if(summary.from){
+          fact("ok",same?[t2("Opérations de ","Transactions from "),el("b","",monthLabel(summary.from)),t2(", dans la feuille ",", in the ")+yl+t2("."," sheet.")]
+            :[t2("Du ","From "),el("b","",dayLabel(summary.from)),t2(" au "," to "),el("b","",dayLabel(summary.to)+(summary.to.y!==summary.from.y?" "+summary.to.y:"")),t2(", importés mois par mois dans "+(ny>1?"les feuilles ":"la feuille ")+yl+".",", month by month into the "+yl+(ny>1?" sheets.":" sheet."))]);
+        }
+        if(summary.rows.some(function(r){return r.internal&&r.status==="ok";}))fact("ok",[t2("Les virements vers ton épargne comptent comme de l’épargne.","Transfers to your savings count as savings.")]);
+        if(aside)fact("dot",[t2("Les opérations refusées ou en attente, et les virements entre tes comptes courants, sont laissés de côté.","Declined or pending transactions, and transfers between your current accounts, are left aside.")]);
+        fact("dot",[t2("Ton fichier n’est pas conservé"+NB+": seuls les totaux arrivent dans ton tableur.","Your file is not kept: only the totals reach your spreadsheet.")]);
+        fList.replaceChildren.apply(fList,facts);
 
         // Pane actif seulement
         Object.keys(P).forEach(function(id){P[id].hidden=id!==step;});
         if(step==="list"){
-          var dated=summary.rows.filter(function(r){return r.status!=="dropped";}).length;
-          lLead.textContent=t2(plural(dated,"opération dans ton fichier.","opérations dans ton fichier.","","")+" Touche une catégorie pour la changer.",plural(dated,"","","transaction in your file.","transactions in your file.")+" Tap a category to change it.");
-          var stats=[];
-          if(summary.dupCount)stats.push(t2(plural(summary.dupCount,"déjà importée (non reprise)","déjà importées (non reprises)","",""),plural(summary.dupCount,"","","already imported (skipped)","already imported (skipped)")));
-          if(summary.pending)stats.push(t2(plural(summary.pending,"en attente ou refusée, ignorée","en attente, refusées ou annulées, ignorées","",""),plural(summary.pending,"","","pending or declined, ignored","pending, declined or cancelled, ignored")));
-          if(summary.wallet)stats.push(t2(plural(summary.wallet,"recharge ou mouvement interne ignoré","recharges ou mouvements internes ignorés","",""),plural(summary.wallet,"","","top-up or internal movement ignored","top-ups or internal movements ignored")));
-          lStats.replaceChildren.apply(lStats,stats.map(function(s){return el("li","",s);}));lStats.hidden=true;
-          if(!summary.newCount&&!summary.groups.length)lEmpty.textContent="";
+          lLead.textContent=t2("Touche une catégorie pour la changer.","Tap a category to change it.");
+          lEmpty.textContent="";lEmpty.hidden=true;
           paintList();
           if(!summary.newCount)lLead.textContent+=" "+t2("Rien de nouveau à importer"+NB+": active « Importer quand même » sur une opération pour la recompter.","Nothing new to import: switch on “Import anyway” on a transaction to count it again.");
         }

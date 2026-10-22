@@ -654,5 +654,26 @@ body[data-mode="dark"] .gfh-bpanel{box-shadow:0 22px 48px -22px rgba(0,0,0,.75)}
 .gfb-guide .gfb-actions{flex-wrap:wrap;justify-content:flex-end}
 @media(max-width:380px){.gfb-pick .gfb-head,.gfb-guide .gfb-head{padding-left:16px;padding-right:16px}.gfb-op{grid-template-columns:30px minmax(0,1fr) auto;column-gap:8px}.gfb-pick .gfb-body,.gfb-guide .gfb-body{padding-left:16px;padding-right:16px}.gfb-guide .gfb-actions{padding-left:16px;padding-right:16px}.gfb-fbtn{padding:4px 3px;font-size:0.7812rem}}
 @media(prefers-reduced-motion:reduce){.gfb-sw-ui,.gfb-sw-ui::after,.gfb-unk-fill,.gfb-bank-s::after{transition:none}}
-@media(min-width:900px){@media(max-width:520px){.gfb-guide .gfb-actions{flex-direction:column-reverse}.gfb-guide .gfb-actions .gfh-btn{width:100%}}
-@media(prefers-reduced-motion:reduce){
+@media(max-width:520px){.gfb-guide .gfb-actions{flex-direction:column-reverse}.gfb-guide .gfb-actions .gfh-btn{width:100%}}
+/* Assistant du relevé : étape 1 (trois chiffres) et étape 2 (deux blocs) */
+.gfb-stat3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:2px 0 4px}
+.gfb-stat{min-width:0;padding:12px 8px;border:1px solid var(--line);border-radius:14px;text-align:center}
+.gfb-stat b{display:block;font:700 1.5rem/1.1 var(--font-heading);font-variant-numeric:tabular-nums;color:var(--text)}
+.gfb-stat span{display:block;margin-top:3px;font-size:.75rem;line-height:1.25;color:var(--muted)}
+.gfb-facts2{display:grid;gap:10px;margin:8px 0 0;padding:0;list-style:none}
+.gfb-f2{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px;font-size:.9375rem;line-height:1.4;color:var(--text)}
+.gfb-f2-ic{display:grid;place-items:center;width:20px;height:20px;margin-top:1px}
+.gfb-f2-ic svg{width:18px;height:18px}
+.gfb-f2.is-ok .gfb-f2-ic{color:var(--green)}
+.gfb-f2.is-dot{color:var(--muted)}
+.gfb-f2.is-dot .gfb-f2-ic{color:var(--muted)}
+.gfb-f2 b{font-weight:600;color:var(--text)}
+.gfb-blk{display:block;margin-top:16px}
+.gfb-blk[hidden]{display:none}
+.gfb-blk-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.gfb-blk-h h4{margin:0;font:700 1rem/1.3 var(--font-heading);color:var(--text)}
+.gfb-blk-n{font-size:.8125rem;color:var(--muted);white-space:nowrap}
+.gfb-blk-sub{margin:2px 0 4px;font-size:.875rem;line-height:1.4;color:var(--muted)}
+.gfb-blk-sub:empty{display:none}
+.gfb-op.is-off .gfb-op-date,.gfb-op.is-off .gfb-op-name,.gfb-op.is-off .gfb-op-amt{opacity:.62}
+.gfb-op.is-off .gfb-tag{background:transparent;padding:0;font:400 .8125rem/1.4 var(--font-body);color:var(--muted)}
