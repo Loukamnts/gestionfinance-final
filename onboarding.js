@@ -467,9 +467,9 @@
   function restartOnboarding() {
     // Affiche une modal de confirmation
     showConfirmModal(
-      "Réinitialiser le compte ?",
-      "Tu seras déconnecté et la copie locale de cet espace sera effacée sur cet appareil. Les données déjà synchronisées dans ton compte restent disponibles. Le tutoriel recommencera.",
-      "Réinitialiser le compte",
+      "Effacer les données de cet appareil ?",
+      "Tu seras déconnecté et la copie de ton espace sur cet appareil sera effacée. Ce qui est enregistré dans ton compte reste disponible. Le tutoriel recommencera.",
+      "Effacer et me déconnecter",
       async function() {
         // Le compte distant reste intact. Seule sa copie sur cet appareil est effacée.
         var previousOwner = window.__account && window.__account.user && window.__account.user.id;
@@ -480,7 +480,8 @@
             var result = await sb.auth.signOut();
             if (result && result.error) throw result.error;
           } catch(e) {
-            alert("La déconnexion a échoué. Tes données locales n'ont pas été effacées.");
+            console.warn("Meuniance : déconnexion impossible", e);
+            showInfoModal("Déconnexion impossible", "La déconnexion n’a pas abouti. Rien n’a été effacé de cet appareil : réessaie dans un instant.");
             return;
           }
           window.__account.user = null;
@@ -505,25 +506,33 @@
     );
   }
 
+  // === Modal d'information (un seul bouton) : remplace alert(), jamais de fenêtre native ===
+  function showInfoModal(title, message) {
+    showConfirmModal(title, message, "Fermer", null, true);
+  }
+
   // === Modal de confirmation générique ===
-  function showConfirmModal(title, message, confirmLabel, onConfirm) {
+  function showConfirmModal(title, message, confirmLabel, onConfirm, infoOnly) {
     // Crée l'overlay
     var modal = document.createElement("div");
     modal.className = "onboarding-overlay";
     modal.style.zIndex = "100000";
+    modal.setAttribute("role", "alertdialog");
+    modal.setAttribute("aria-modal", "true");
     modal.innerHTML = 
       '<div class="wizard-card" style="max-width: 420px; text-align: center;">' +
       '<h2 style="margin-bottom: 12px;">' + title + '</h2>' +
       '<p style="color: var(--text-muted, #9ca3af); margin-bottom: 24px; line-height: 1.6;">' + message + '</p>' +
       '<div class="wizard-buttons" style="justify-content: center; gap: 12px;">' +
-      '<button class="wizard-btn wizard-btn-ghost" id="confirmCancel">Annuler</button>' +
-      '<button class="wizard-btn wizard-btn-primary" id="confirmOk" style="background: linear-gradient(135deg, #ef4444, #dc2626);">' + confirmLabel + '</button>' +
+      (infoOnly ? '' : '<button class="wizard-btn wizard-btn-ghost" id="confirmCancel">Annuler</button>') +
+      '<button class="wizard-btn wizard-btn-primary" id="confirmOk"' + (infoOnly ? '' : ' style="background: linear-gradient(135deg, #ef4444, #dc2626);"') + '>' + confirmLabel + '</button>' +
       '</div>' +
       '</div>';
     document.body.appendChild(modal);
 
     // Wire buttons
-    document.getElementById("confirmCancel").onclick = function() {
+    var cancelButton = document.getElementById("confirmCancel");
+    if (cancelButton) cancelButton.onclick = function() {
       document.body.removeChild(modal);
     };
     document.getElementById("confirmOk").onclick = function() {
@@ -571,9 +580,9 @@
   // === Suppression définitive du compte Supabase ===
   function deleteAccount() {
     showConfirmModal(
-      "Supprimer définitivement le compte ?",
-      "Attention : ton compte sera définitivement supprimé du cloud, ainsi que toutes les données associées (amis, permissions, sauvegardes). Cette action est IRRÉVERSIBLE. Tes données locales seront aussi effacées.",
-      "Supprimer définitivement",
+      "Supprimer définitivement ton compte ?",
+      "Ton compte et tes données (tableur, objectifs, amis, partages) seront supprimés, et ta formule payante éventuelle sera résiliée. Cette action est définitive.",
+      "Supprimer mon compte",
       async function() {
         try {
           var sb = window.__account && window.__account.client;
@@ -582,14 +591,16 @@
             // la fonction Edge vérifie le JWT puis supprime auth.users côté serveur.
             var result = await sb.functions.invoke("delete-account");
             if (result.error) {
-              alert(window.GFI18n?window.GFI18n.t("La suppression du compte a échoué. Vérifie que la fonction Supabase « delete-account » est déployée."):"La suppression du compte a échoué. Vérifie que la fonction Supabase « delete-account » est déployée.");
+              console.warn("Meuniance : suppression du compte refusée", result.error);
+              showInfoModal("Suppression impossible", "Ton compte n’a pas pu être supprimé. Rien n’a été effacé : réessaie dans un instant, ou écris-nous si ça persiste.");
               return;
             }
             window.__account.user = null;
             window.dispatchEvent(new CustomEvent("authStateChanged", { detail: { user: null, event: "SIGNED_OUT" } }));
           }
         } catch(e) {
-          alert(window.GFI18n?window.GFI18n.t("La suppression du compte a échoué. Réessaie plus tard."):"La suppression du compte a échoué. Réessaie plus tard.");
+          console.warn("Meuniance : suppression du compte impossible", e);
+          showInfoModal("Suppression impossible", "Ton compte n’a pas pu être supprimé. Rien n’a été effacé : réessaie dans un instant, ou écris-nous si ça persiste.");
           return;
         }
         // Nettoie tout en local

@@ -148,7 +148,7 @@
       const fill = document.createElement("span"); fill.style.width = progress + "%"; line.append(fill);
       const details = document.createElement("div"); details.className = "objective-details";
       const amountWrap = document.createElement("div"); amountWrap.className = "objective-amount-wrap";
-      const amountLabel = document.createElement("span"); amountLabel.textContent = t2("Progression actuelle", "Current progress");
+      const amountLabel = document.createElement("span"); amountLabel.textContent = t2("Déjà mis de côté", "Set aside so far");
       const amount = document.createElement("strong"); amount.textContent = euro(displayedCurrent) + " / " + euro(goal.target);
       amountWrap.append(amountLabel, amount);
       const remaining = document.createElement("p"); remaining.className = "objective-remaining";
@@ -156,7 +156,7 @@
       const insight = document.createElement("p"); insight.className = "objective-insight";
       const remainingAmount = Math.max(0, goal.target - displayedCurrent), remainingMonths = monthsRemaining(goal.dueDate);
       const rhythm = document.createElement("div"); rhythm.className = "objective-rhythm";
-      const rhythmLabel = document.createElement("span"); rhythmLabel.textContent = remainingMonths && remainingAmount ? t2("Rythme conseillé", "Suggested pace") : t2("Statut", "Status");
+      const rhythmLabel = document.createElement("span"); rhythmLabel.textContent = remainingMonths && remainingAmount ? t2("Pour y arriver", "To get there") : t2("Statut", "Status");
       const rhythmValue = document.createElement("strong"); rhythmValue.textContent = remainingMonths && remainingAmount ? euro(Math.ceil(remainingAmount / remainingMonths)) + t2(" / mois", " / month") : stateLabel.textContent;
       rhythmValue.setAttribute("translate", "no");
       rhythm.append(rhythmLabel, rhythmValue);
@@ -166,7 +166,7 @@
       // jour directement depuis sa carte. Cette modification passe par le
       // même chemin de sauvegarde et de synchronisation que le reste du profil.
       const progressEditor = document.createElement("div"); progressEditor.className = "objective-progress-editor";
-      const currentLabel = document.createElement("label"); currentLabel.textContent = t2("Montant atteint", "Amount reached");
+      const currentLabel = document.createElement("label"); currentLabel.textContent = t2("Déjà mis de côté", "Set aside so far");
       const currentInput = document.createElement("input");
       currentInput.type = "number";
       currentInput.min = "0";
@@ -174,7 +174,7 @@
       currentInput.inputMode = "decimal";
       currentInput.value = String(displayedCurrent);
       currentInput.disabled = Boolean(goal.sourceId);
-      currentInput.setAttribute("aria-label", t2("Montant atteint pour ", "Amount reached for ") + goal.title);
+      currentInput.setAttribute("aria-label", t2("Déjà mis de côté pour ", "Set aside for ") + goal.title);
       currentLabel.append(currentInput);
       const update = document.createElement("button");
       update.type = "button";

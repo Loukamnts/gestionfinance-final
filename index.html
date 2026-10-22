@@ -1949,7 +1949,7 @@
   <!-- Écran d’ouverture : visible dès la première image, retiré quand tes chiffres sont prêts (meuni-loader.js). -->
   <div class="meuni-loader is-boot" id="meuniBoot" role="status" aria-live="polite"><svg class="meuni-loader-logo srch" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect class="lg-sq" width="28" height="28" rx="7.5"/><circle class="lg-t" cx="14" cy="14" r="9.4"/><g class="ml-spin"><circle class="lg-a" cx="14" cy="14" r="9.4" transform="rotate(-90 14 14)"/></g><g class="ml-gw"><g transform="rotate(30 14 14)"><path class="lg-s" d="M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z"/><path class="lg-c" d="M14 9.6c-.4 2.8-.4 5.8 0 8.6"/></g></g></svg><span class="meuni-loader-text">Connexion…</span></div>
   <!-- Traductions : chargées juste après l’écran d’ouverture, qui s’affiche ainsi sans les attendre (elles s’appliquent à la fin du chargement de la page, comme avant). -->
-  <script src="i18n.js?v=20261021-r2"></script>
+  <script src="i18n.js?v=20261022-r1"></script>
   <div class="loader" id="loader" aria-live="polite" aria-label="Chargement"><div class="spinner"></div></div>
   <div class="message" id="messageBox" role="alert" aria-live="polite" aria-atomic="true">
     <span class="message-text" id="messageText"></span>
@@ -2018,7 +2018,7 @@
           <div class="profile-popover" id="profilePopover" hidden>
             <div class="profile-popover-account"><span class="profile-popover-kicker">Compte</span><strong id="profileEmail">Non connecté</strong></div>
             <div class="status-pill" id="connectionStatus" title="État de tes données et de leur connexion au compte"><span class="status-dot is-empty"></span><span id="connectionText">Aucune donnée</span></div>
-            <button class="profile-menu-link" id="profileIdentityButton" type="button" title="Voir ton pseudo, ton abonnement et ton compte"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.7-3.4 3.1-5 7-5s6.3 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Profil</span></button>
+            <button class="profile-menu-link" id="profileIdentityButton" type="button" title="Voir ton pseudo, ta formule et ton compte"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.7-3.4 3.1-5 7-5s6.3 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Profil</span></button>
             <button class="profile-menu-link" id="profileNotesButton" type="button" data-open-notes title="Ouvrir tes notes privées"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 14h6M9 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Notes</span></button>
           </div>
         </div>
@@ -2074,8 +2074,8 @@
             <div class="savings-goal-bar-fill" id="savingsGoalBarFill" style="width:0%"></div>
           </div>
           <div class="savings-goal-detail">
-            <span id="savingsGoalCurrent">Épargné : -</span>
-            <span id="savingsGoalRemaining">Restant : -</span>
+            <span id="savingsGoalCurrent">Mis de côté : —</span>
+            <span id="savingsGoalRemaining">Reste : —</span>
           </div>
         </section>
         <section class="panel chart-panel">
@@ -2141,7 +2141,7 @@
             <label><span>Nom de l'objectif</span><input id="objectiveTitle" maxlength="80" placeholder="Ex. Apport immobilier" required /></label>
             <label><span>Type</span><select id="objectiveType"><option value="savings">Épargne</option><option value="investment">Investissement</option><option value="expense">Dépense prévue</option><option value="custom">Personnalisé</option></select></label>
             <label><span>Montant visé (€)</span><input id="objectiveTarget" type="number" inputmode="decimal" min="0" step="0.01" inputmode="decimal" required /></label>
-            <label><span>Déjà atteint (€)</span><input id="objectiveCurrent" type="number" inputmode="decimal" min="0" step="0.01" inputmode="decimal" value="0" /></label>
+            <label><span>Déjà mis de côté (€)</span><input id="objectiveCurrent" type="number" inputmode="decimal" min="0" step="0.01" inputmode="decimal" value="0" /></label>
             <button class="objective-plan-toggle" id="objectivePlanToggle" type="button" aria-expanded="false" aria-controls="objectivePlanFields">Échéance ou rythme <span>Facultatif</span></button>
             <div class="objective-plan-fields" id="objectivePlanFields" hidden><label><span>Rythme</span><select id="objectiveCadence"><option value="once">Sans récurrence</option><option value="monthly">Chaque mois</option><option value="yearly">Chaque année</option></select></label><label><span>Échéance <em>facultative</em></span><input id="objectiveDueDate" type="date" /></label><label class="objective-link-field"><span>Lier à un mois du tableur <em>facultatif</em></span><select id="objectiveSheetSource"><option value="">Aucune liaison</option></select></label></div>
             <div class="objective-form-actions"><button class="button button-ghost" id="objectiveCancelButton" type="button">Annuler</button><button class="button button-primary" type="submit">Enregistrer l'objectif</button></div>
@@ -2191,20 +2191,20 @@
           </div>
           <span class="sheet-spacer"></span>
           <span class="sheet-divider"></span>
-          <button class="button button-ghost icon-btn" id="btnSheetDeleteRow" type="button" title="Supprimer la ligne sélectionnée" data-tooltip="Supprimer la ligne" aria-label="Supprimer la ligne sélectionnée">
+          <button class="button button-ghost icon-btn" id="btnSheetDeleteRow" type="button" title="Supprimer la ligne" data-tooltip="Supprimer la ligne" aria-label="Supprimer la ligne">
             <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 11h6M9 15h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 4v16h12V4" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-            <span class="lbl">Ligne</span>
+            <span class="lbl">Supprimer la ligne</span>
           </button>
-          <button class="button button-ghost icon-btn" id="btnSheetClear" type="button" title="Vider le tableau" data-tooltip="Vider la feuille" aria-label="Vider la feuille active">
+          <button class="button button-ghost icon-btn" id="btnSheetClear" type="button" title="Vider la feuille" data-tooltip="Vider la feuille" aria-label="Vider la feuille">
             <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span class="lbl">Corbeille</span>
+            <span class="lbl">Vider la feuille</span>
           </button>
         </div>
       </div>
       <div class="sheet-fx">
         <div class="fx-ref" id="fxRef">A1</div>
         <div class="fx-fn">fx</div>
-        <input class="fx-input" id="fxInput" type="text" aria-label="Barre de formule" placeholder="Valeur ou formule, ex: =SUM(A1:A5)" autocomplete="off" />
+        <input class="fx-input" id="fxInput" type="text" aria-label="Barre de formule" placeholder="Valeur ou formule, ex. : =SOMME(A1:A5)" autocomplete="off" />
         <div class="fx-preview" id="fxPreview"></div>
       </div>
       <div class="sheet-balance-cards" id="sheetBalanceCards">
@@ -2231,13 +2231,13 @@
         <div class="settings-header panel"><div><span class="eyebrow" id="settingsKicker">Paramètres</span><h2 id="settingsTitle">Réglages</h2><p id="settingsSubtitle">Choisis ce que tu souhaites régler.</p></div></div>
         <nav class="settings-hub" id="settingsHub" aria-label="Rubriques des paramètres">
           <span class="settings-hub-label">Profil</span>
-          <button class="settings-hub-item" type="button" data-settings-view="account"><span><strong>Profil</strong><small>Pseudo, connexion et abonnement</small></span></button>
+          <button class="settings-hub-item" type="button" data-settings-view="account"><span><strong>Profil</strong><small>Pseudo, connexion et formule</small></span></button>
           <span class="settings-hub-label">Préférences</span>
           <button class="settings-hub-item" type="button" data-settings-view="appearance"><span><strong>Apparence</strong><small>Thème et mode d'affichage</small></span></button>
           <button class="settings-hub-item" type="button" data-settings-view="notifications"><span><strong>Notifications</strong><small>Rappels de saisie</small></span></button>
           <button class="settings-hub-item" type="button" data-settings-view="language"><span><strong>Langue</strong><small>Français ou English</small></span></button>
           <span class="settings-hub-label">Données</span>
-          <button class="settings-hub-item" type="button" data-settings-view="data"><span><strong>Données et synchronisation</strong><small>Tableur, sauvegarde et réinitialisation</small></span></button>
+          <button class="settings-hub-item" type="button" data-settings-view="data"><span><strong>Données</strong><small>Sauvegarde, effacement et suppression</small></span></button>
           <span class="settings-hub-label">À propos</span>
           <button class="settings-hub-item" type="button" data-settings-view="privacy"><span><strong>Confidentialité &amp; sécurité</strong><small>Ce qui protège tes données</small></span></button>
           <button class="settings-hub-item" type="button" data-settings-view="legal"><span><strong>Mentions légales</strong><small>Informations sur le service</small></span></button>
@@ -2252,7 +2252,7 @@
             <div class="identity-summary"><div class="identity-avatar" id="identityAvatar" aria-hidden="true">?</div><div class="identity-summary-copy"><div class="identity-name-row"><strong id="identityCurrentUsername" translate="no">…</strong><button id="identityEditButton" class="identity-edit-button" type="button" aria-label="Modifier le pseudo" title="Modifier le pseudo"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m4 20 4.2-.9L19 8.3a2.1 2.1 0 0 0-3-3L5.2 16.1 4 20Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m14.4 6.9 2.7 2.7" stroke="currentColor" stroke-width="1.8"/></svg></button></div><span id="identityEmail" class="identity-email" translate="no"></span></div></div>
             <form id="identityForm" class="identity-form" hidden><label for="identityUsername">Pseudo</label><div class="identity-form-row"><span aria-hidden="true">@</span><input id="identityUsername" type="text" minlength="3" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ton.pseudo" required><button type="submit" class="gf-button">Enregistrer</button><button id="identityCancelButton" type="button" class="gf-button gf-button-secondary">Annuler</button></div><p class="identity-help">3 à 24 caractères. Une modification tous les 30 jours.</p></form>
             <p id="identityChangeDate" class="identity-change-date"></p><p id="identityFeedback" class="identity-feedback" role="status" aria-live="polite"></p>
-            <div class="identity-facts"><div><span>Email</span><strong id="identityFactEmail" translate="no">—</strong></div><div><span>Membre depuis</span><strong id="identityCreated">—</strong></div><div><span>Abonnement</span><strong id="identityPlan">Gratuit</strong></div><div id="identitySubscriptionRow" hidden><span>Abonnement depuis</span><strong id="identitySubscriptionDate">—</strong></div></div>
+            <div class="identity-facts"><div><span>E-mail</span><strong id="identityFactEmail" translate="no">—</strong></div><div><span>Membre depuis</span><strong id="identityCreated">—</strong></div><div><span>Formule</span><strong id="identityPlan">Free</strong></div><div id="identitySubscriptionRow" hidden><span>Formule payante depuis</span><strong id="identitySubscriptionDate">—</strong></div></div>
             <details class="account-sync-detail" id="accountSyncDetail" hidden><summary>Sauvegarde et partage <strong id="syncStatusText" role="status">Prêt à synchroniser</strong></summary><div class="account-sync-content"><p>Tes changements sont enregistrés automatiquement dans ton compte lorsque la synchronisation est disponible. En cas de coupure, ils restent sur cet appareil jusqu’au retour de la connexion.</p><p>Le partage est désactivé par défaut. Chaque ami ne peut consulter que les mois et les lignes que tu lui autorises dans « Partage et amis ».</p></div></details>
           </div>
         </section>
@@ -2350,39 +2350,40 @@
         <!-- Actions sensibles : sobres et séparées du pied de page. -->
         <div class="settings-reset-section" data-settings-panel="data" hidden>
           <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
-          <div class="settings-reset-copy"><h3>Données et compte</h3><p>Sauvegarde ou restaure toutes tes données, réinitialise l’application ou supprime définitivement les données synchronisées.</p></div>
+          <div class="settings-reset-copy"><h3>Données</h3><p>Sauvegarde ou restaure toutes tes données, efface la copie de cet appareil ou supprime définitivement ton compte.</p></div>
           <button type="button" class="settings-reset-btn" id="settingsResetBtn">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" style="flex-shrink:0"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 3v5h5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span>Réinitialiser le compte</span>
+            <span>Effacer les données de cet appareil</span>
           </button>
-          <p class="settings-reset-hint">Déconnecte ton compte, efface toutes les données locales et relance la configuration et le tutoriel.</p>
+          <p class="settings-reset-hint">Te déconnecte et efface la copie de ton espace sur cet appareil. Ce qui est enregistré dans ton compte reste disponible.</p>
           <button type="button" class="settings-delete-btn" id="settingsDeleteBtn" style="margin-top: 12px;">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" style="flex-shrink:0"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             <span>Supprimer mon compte</span>
           </button>
-          <p class="settings-reset-hint">Supprime définitivement ton compte et toutes tes données sur le cloud. Cette action est irréversible.</p>
+          <p class="settings-reset-hint">Supprime définitivement ton compte et toutes tes données. Cette action est définitive.</p>
         </div>
         <section class="settings-section panel settings-reading-page" data-settings-panel="privacy" hidden>
           <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
           <div class="settings-section-head"><div><h3>Confidentialité &amp; sécurité</h3><p>Les protections utiles, expliquées simplement.</p></div></div>
-          <div class="legal-section"><strong>Stockage local</strong><p>Une copie non chiffrée par mot de passe reste dans ce navigateur pour le mode hors ligne. Elle est séparée par compte. Sur un appareil partagé, protège ta session et efface les données du navigateur après usage.</p></div>
-          <div class="legal-section"><strong>Connexion HTTPS</strong><p>Le site est servi via HTTPS pour garantir le chiffrement des données en transit.</p></div>
-          <div class="legal-section"><strong>Synchronisation de compte (optionnelle)</strong><p>Lorsque tu te connectes, ton tableur est synchronisé avec ton compte Supabase via une connexion chiffrée.</p></div>
-          <div class="legal-section"><strong>Pas de tracking publicitaire</strong><p>Ce site ne contient aucun tracker, cookie publicitaire ni script d'analyse tierce. Aucune donnée n'est vendue ou partagée avec des tiers.</p></div>
-          <div class="legal-section"><strong>Ce qui est enregistré</strong><p>Ton adresse email, le contenu de ton tableur (libellés, montants, dates), tes objectifs et les partages accordés. Supabase Auth hache ton mot de passe. La base Supabase est chiffrée au repos. Aucune coordonnée bancaire n'est demandée ni stockée.</p></div>
-          <div class="legal-section"><strong>Qui peut voir tes données</strong><p>Toi seul, et les personnes à qui tu donnes explicitement accès depuis la page Partage — jusqu'à ce que tu retires cet accès. Les règles de sécurité de la base de données empêchent tout autre compte de lire tes lignes.</p></div>
-          <div class="legal-section"><strong>Durée de conservation</strong><p>Tes données sont conservées tant que ton compte existe. Après suppression du compte, elles sont effacées de la base ; les sauvegardes techniques expirent sous 30 jours.</p></div>
-          <div class="legal-section"><strong>Récupérer ou supprimer tes données</strong><p>«&nbsp;Données et synchronisation › Télécharger mes données&nbsp;» crée un fichier avec tout ton contenu, que tu peux restaurer plus tard ; le bouton «&nbsp;Exporter&nbsp;» du tableur donne aussi ton tableur au format Excel. Pour effacer : «&nbsp;Données et synchronisation&nbsp;» permet de réinitialiser ton tableur ou de supprimer définitivement ton compte.</p></div>
-          <div class="legal-section"><strong>Une question sur tes données ?</strong><p>Écris-nous depuis l'adresse email de ton compte. Tu peux aussi consulter la <a href="/confidentialite" target="_blank" rel="noopener">politique de confidentialité complète</a> et les <a href="/conditions" target="_blank" rel="noopener">conditions d'utilisation</a>.</p></div>
+          <div class="legal-section"><strong>Stockage local</strong><p>Une copie non chiffrée par mot de passe reste dans ce navigateur pour le mode hors ligne. Elle est séparée par compte. Sur un appareil partagé, protégez votre session et effacez les données du navigateur après usage.</p></div>
+          <div class="legal-section"><strong>Connexion HTTPS</strong><p>Le site est servi via HTTPS : vos données sont chiffrées pendant leur transfert.</p></div>
+          <div class="legal-section"><strong>Synchronisation de compte (optionnelle)</strong><p>Lorsque vous vous connectez, votre tableur est synchronisé avec votre compte Meuniance via une connexion chiffrée. Les données sont hébergées par Supabase, dans l’Union européenne (Irlande).</p></div>
+          <div class="legal-section"><strong>Pas de publicité ni de suivi</strong><p>Ce site ne contient aucun traqueur, cookie publicitaire ni outil d’analyse tiers. Nous ne vendons pas vos données ; elles sont hébergées par Supabase et Vercel et, pour les paiements, traitées par Stripe.</p></div>
+          <div class="legal-section"><strong>Ce qui est enregistré</strong><p>Votre adresse e-mail, le contenu de votre tableur (libellés, montants, dates), vos objectifs et les partages accordés. Votre mot de passe est haché (jamais lisible) et la base de données est chiffrée au repos. Meuniance ne voit ni ne stocke vos coordonnées bancaires : le paiement d’une formule payante est traité par Stripe.</p></div>
+          <div class="legal-section"><strong>Qui peut voir vos données</strong><p>Vous seul, et les personnes à qui vous donnez explicitement accès depuis la page Partage, jusqu’à ce que vous retiriez cet accès. Les règles de sécurité de la base de données empêchent tout autre compte de lire vos lignes.</p></div>
+          <div class="legal-section"><strong>Notifications</strong><p>Les notifications de rappel et d’alerte ne contiennent aucun montant.</p></div>
+          <div class="legal-section"><strong>Durée de conservation</strong><p>Vos données sont conservées tant que votre compte existe. Après suppression du compte, elles sont effacées de la base ; les sauvegardes techniques éventuelles sont supprimées selon la durée de rétention de notre hébergeur.</p></div>
+          <div class="legal-section"><strong>Récupérer ou supprimer vos données</strong><p>«&nbsp;Données › Télécharger mes données&nbsp;» crée un fichier avec tout votre contenu, que vous pouvez restaurer plus tard ; le bouton «&nbsp;Exporter&nbsp;» du tableur donne aussi votre tableur au format Excel. Pour effacer : «&nbsp;Données&nbsp;» permet d’effacer la copie de cet appareil ou de supprimer définitivement votre compte.</p></div>
+          <div class="legal-section"><strong>Une question sur vos données ?</strong><p>Écrivez-nous depuis l’adresse e-mail de votre compte. Vous pouvez aussi consulter la <a href="/confidentialite" target="_blank" rel="noopener">politique de confidentialité complète</a> et les <a href="/conditions" target="_blank" rel="noopener">conditions d’utilisation</a>.</p></div>
         </section>
         <section class="settings-section panel settings-reading-page" data-settings-panel="legal" hidden>
           <button class="settings-detail-back" type="button" data-settings-back>← Paramètres</button>
           <div class="settings-section-head"><div><h3>Mentions légales</h3><p>Qui édite Meuniance, qui l’héberge et les règles qui s’appliquent.</p></div></div>
           <div class="legal-section"><strong>Éditeur</strong><p>Meuniance est édité par un particulier, à titre non professionnel. Contact : <a href="mailto:louka.meunier1@gmail.com">louka.meunier1@gmail.com</a>. Le détail figure dans les <a href="/mentions-legales" target="_blank" rel="noopener">mentions légales complètes</a>.</p></div>
-          <div class="legal-section"><strong>Hébergement</strong><p>Site hébergé par Vercel Inc. (États-Unis). Base de données et comptes hébergés par Supabase dans l’Union européenne (Irlande).</p></div>
-          <div class="legal-section"><strong>Nature du service</strong><p>Outil de suivi budgétaire personnel, gratuit. Ce n’est ni une banque, ni un conseil financier, fiscal ou juridique. Aucune coordonnée bancaire n’est demandée.</p></div>
-          <div class="legal-section"><strong>Offres Plus et Pro</strong><p>Elles ne sont pas encore en vente : aucun paiement n’est possible pour le moment.</p></div>
-          <div class="legal-section"><strong>Pages publiques</strong><p><a href="/mentions-legales" target="_blank" rel="noopener">Mentions légales</a> · <a href="/conditions" target="_blank" rel="noopener">Conditions d'utilisation</a> · <a href="/confidentialite" target="_blank" rel="noopener">Confidentialité</a></p></div>
+          <div class="legal-section"><strong>Hébergement</strong><p>Site hébergé par Vercel Inc. (États-Unis). Base de données et comptes hébergés par Supabase dans l’Union européenne (Irlande). Paiements des formules payantes traités par Stripe.</p></div>
+          <div class="legal-section"><strong>Nature du service</strong><p>Outil de suivi budgétaire personnel, gratuit dans sa version de base. Ce n’est ni une banque, ni un conseil financier, fiscal ou juridique. Meuniance ne voit ni ne stocke vos coordonnées bancaires.</p></div>
+          <div class="legal-section"><strong>Formules Plus et Pro</strong><p>Les formules payantes Plus et Pro sont proposées selon les conditions de vente en vigueur au moment de la souscription.</p></div>
+          <div class="legal-section"><strong>Pages publiques</strong><p><a href="/mentions-legales" target="_blank" rel="noopener">Mentions légales</a> · <a href="/conditions" target="_blank" rel="noopener">Conditions d’utilisation</a> · <a href="/confidentialite" target="_blank" rel="noopener">Confidentialité</a></p></div>
         </section>
       </div>
     </section>
@@ -2407,10 +2408,10 @@
     </section>
     <section id="welcomePlanStep" hidden>
       <span class="welcome-kicker">Ton espace, à ton rythme</span>
-      <h2>Choisis ton abonnement</h2>
-      <p>Découvre les offres disponibles. Tu peux aussi continuer avec l’offre gratuite.</p>
+      <h2>Choisis ta formule</h2>
+      <p>Découvre les formules disponibles. Tu peux aussi rester sur Free.</p>
       <div id="welcomePlanOffer"></div>
-      <div class="welcome-actions"><button class="gf-button welcome-skip" id="welcomeSkipPlan" type="button">Non merci</button></div>
+      <div class="welcome-actions"><button class="gf-button welcome-skip" id="welcomeSkipPlan" type="button">Rester sur Free</button></div>
     </section>
   </dialog>
 
@@ -2903,12 +2904,12 @@
     function renderEmptyDashboardState(){
       if(!elements.emptyState)return;
       const eyebrow=document.createElement("span"),title=document.createElement("h3"),copy=document.createElement("p"),steps=document.createElement("ol"),actions=document.createElement("div"),start=document.createElement("button"),importFile=document.createElement("button");
-      eyebrow.className="empty-dashboard-kicker";eyebrow.textContent="POUR COMMENCER";
+      eyebrow.className="empty-dashboard-kicker";eyebrow.textContent="Pour commencer";
       title.textContent=state.currentView==="pie"&&state.selectedYear?`Aucun mois renseigné pour ${getYearLabel(state.selectedYear)}.`:"Ton tableau de bord est prêt";
-      copy.textContent="Ajoute quelques montants dans le tableur ou importe ton fichier : les graphiques et les indicateurs se mettront à jour automatiquement.";
+      copy.textContent="Ajoute quelques montants dans le tableur ou importe un relevé ou un fichier Excel : les graphiques et les indicateurs se mettront à jour automatiquement.";
       [["1","Configure ton solde de départ"],["2","Ajoute ou importe tes opérations"],["3","Découvre tes graphiques"]].forEach(function(item){const step=document.createElement("li"),number=document.createElement("span"),label=document.createElement("span");number.textContent=item[0];label.textContent=item[1];step.append(number,label);steps.append(step);});
       start.type="button";start.className="empty-state-action empty-state-primary";start.textContent="Configurer mon tableur";start.addEventListener("click",function(){setPage("sheet");});
-      importFile.type="button";importFile.className="empty-state-action";importFile.textContent="Importer un fichier";importFile.addEventListener("click",function(){setPage("sheet");window.requestAnimationFrame(function(){const button=document.getElementById("btnSheetImport");if(button)button.click();});});
+      importFile.type="button";importFile.className="empty-state-action";importFile.textContent="Importer un relevé ou un fichier Excel";importFile.addEventListener("click",function(){setPage("sheet");window.requestAnimationFrame(function(){const button=document.getElementById("btnSheetImport");if(button)button.click();});});
       actions.className="empty-dashboard-actions";actions.append(start,importFile);
       steps.className="empty-dashboard-steps";elements.emptyState.className="empty-state is-visible empty-dashboard";elements.emptyState.replaceChildren(eyebrow,title,copy,steps,actions);
     }
@@ -2944,9 +2945,9 @@
           elements.chartSubtitle.textContent="Préparation du graphique…";
           window.GFVendors.chart().then(function(){ renderChart(); }).catch(function(){
             elements.chartTitle.textContent="Graphique indisponible";
-            elements.chartSubtitle.textContent="Le graphique n'a pas pu être préparé.";
+            elements.chartSubtitle.textContent="Le graphique n’a pas pu s’afficher.";
             elements.emptyState.classList.add("is-visible");
-            showMessage("Le graphique n’a pas pu être préparé. Vérifie ta connexion internet.");
+            showMessage("Le graphique n’a pas pu s’afficher. Vérifie ta connexion, puis réessaie.");
           });
           return;
         }
@@ -3233,23 +3234,23 @@
     function pauseMessageTimer(){ if(!elements.messageBox?.classList.contains("is-visible")||messagePaused) return; messagePaused=true; messageRemainingMs=Math.max(0,messageDeadline-performance.now()); clearMessageTimers(); updateMessagePauseState(true); setMessageProgress(messageDurationMs?messageRemainingMs/messageDurationMs:0); }
     function resumeMessageTimer(){ if(!elements.messageBox?.classList.contains("is-visible")||!messagePaused) return; messagePaused=false; messageDeadline=performance.now()+messageRemainingMs; updateMessagePauseState(false); const tick=()=>{ if(!elements.messageBox?.classList.contains("is-visible")||messagePaused) return; const rem=Math.max(0,messageDeadline-performance.now()); messageRemainingMs=rem; setMessageProgress(messageDurationMs?rem/messageDurationMs:0); if(rem<=0){ hideMessage(); return; } messageRafId=requestAnimationFrame(tick); }; messageRafId=requestAnimationFrame(tick); messageTimeoutId=setTimeout(hideMessage,messageRemainingMs); }
     function showMessage(msg,duration=15000){ if(!elements.messageBox) return; clearMessageTimers(); if(messageLeaveTimeoutId){ clearTimeout(messageLeaveTimeoutId); messageLeaveTimeoutId=null; } const text=String(msg||"").trim(); if(!text){ hideMessage(); return; } messageDurationMs=Math.max(4000,Number(duration)||15000); messageRemainingMs=messageDurationMs; messageDeadline=performance.now()+messageDurationMs; messagePaused=false; if(elements.messageText) elements.messageText.textContent=text; elements.messageBox.style.setProperty("--message-duration",`${messageDurationMs}ms`); elements.messageBox.classList.remove("is-leaving"); elements.messageBox.classList.remove("is-visible"); void elements.messageBox.offsetWidth; elements.messageBox.classList.add("is-visible"); updateMessagePauseState(false); setMessageProgress(1); const tick=()=>{ if(!elements.messageBox?.classList.contains("is-visible")||elements.messageBox?.classList.contains("is-leaving")||messagePaused) return; const rem=Math.max(0,messageDeadline-performance.now()); messageRemainingMs=rem; setMessageProgress(messageDurationMs?rem/messageDurationMs:0); if(rem<=0){ hideMessage(); return; } messageRafId=requestAnimationFrame(tick); }; messageRafId=requestAnimationFrame(tick); messageTimeoutId=setTimeout(hideMessage,messageDurationMs); }
-    function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Non connecté"; }
+    function setConnection(v,label){ elements.connectionStatus.classList.toggle("is-online",v); elements.connectionText.textContent=v?(label||"Connecté"):"Sur cet appareil"; }
 
     const RELEASE_NOTES_VERSION="2026-10-19-ensemble";
     const RELEASE_NOTES=[
       {date:"19 octobre 2026",title:"Ton année, tes amis, tes abonnements",text:"Le bilan de l’année, les dépenses partagées entre amis, les abonnements repérés dans tes relevés et des alertes avant de dépasser un plafond.",highlights:["Bilan de l’année : ton année en quelques écrans, à partager sans aucun montant.","Dépenses entre amis : qui a payé, qui doit combien, et « Marquer comme remboursé ».","Abonnements et alertes : tes prélèvements réguliers repérés, et une alerte à 80 % puis 100 % d’un plafond."],sections:[{type:"new",text:"Le bilan de l’année arrive sur l’accueil en décembre. Tes dépenses partagées se notent depuis la fiche de chaque ami. Les abonnements repérés dans tes relevés s’affichent sur l’accueil."},{type:"improvement",text:"À l’import d’un relevé, Meuniance retient la catégorie que tu choisis pour chaque commerçant. Un appui long sur l’icône de l’app (Android, ordinateur) ouvre directement l’ajout d’une dépense."}]},
       {date:"15 octobre 2026",title:"Ton mois en un coup d’œil",text:"Un bilan à chaque début de mois, l’import de ton relevé bancaire, des rappels et un mode discret pour montrer ton écran.",highlights:["Bilan du mois : ce qui reste, ton épargne et ta plus grosse dépense, comparés au mois d’avant.", "Relevé bancaire : importe le fichier CSV de ta banque, tes dépenses sont rangées par catégorie.", "Rappels : une notification si tu oublies de noter tes dépenses."],sections:[{type:"new",text:"Le bilan du mois s’affiche au début de chaque mois, et tu peux le garder en permanence dans Paramètres › Apparence. L’œil à côté du solde floute tes montants quand tu montres ton écran."},{type:"new",text:"Importe le relevé CSV de ta banque depuis le tableur : il est lu sur ton appareil et seuls les totaux par catégorie et par mois sont ajoutés. Active les rappels dans Paramètres › Apparence. Tu peux aussi télécharger une sauvegarde de toutes tes données et la restaurer."},{type:"improved",text:"L’ouverture est plus rapide et ton mois en cours s’affiche directement. Le mois choisi reste sélectionné, le tableur s’ouvre sur l’année en cours et le site s’ouvre même sans connexion. Les mentions légales, les conditions et la politique de confidentialité ont été complétées."}]},
-      {date:"13 octobre 2026",title:"Meuniance change de visage",text:"Nouvelle identité claire et sombre, un accueil qui résume ton mois, un tableur rangé par année et des objectifs qui suivent un mois précis.",highlights:["Accueil : ton solde sur l’année, où part ton argent et l’ajout en un geste.","Tableur : une feuille par année, la précédente ou la suivante en un clic.","Objectifs : lie un objectif à un mois précis du tableur."],sections:[{type:"new",text:"L’accueil affiche ton solde sur l’année, où part ton argent et tes dépenses fixes. Tu peux ajouter une dépense, un revenu ou de l’épargne sans ouvrir le tableur."},{type:"new",text:"Le tableur compte une feuille par année : ajoute la précédente ou la suivante d’un geste. Un objectif peut suivre un mois précis du tableur."},{type:"improved",text:"Nouvelles couleurs, nouveau logo, menus déroulants repensés et une page Abonnement. Pendant la période de lancement, tout reste ouvert."}]},
-      {date:"2 octobre 2026",title:"Du nouveau depuis le 20 septembre",text:"Une nouvelle disposition, plus de choix pour l’apparence et un profil plus utile. Plusieurs écrans ont aussi été revus pour faciliter la navigation.",sections:[{type:"new",text:"La nouvelle disposition propose une navigation latérale que tu peux réduire sur ordinateur et ouvrir sur téléphone. Tu peux choisir la couleur d’accent indépendamment du thème. Ton profil accueille un pseudo unique pour recevoir des demandes d’amis. Si tu ouvres un lien qui n’existe plus, une page te ramène à l’application."},{type:"improvement",text:"Les palettes, le logo et la navigation mobile ont été retravaillés. La barre du tableur reste plus lisible pendant le défilement, les fenêtres bloquent le défilement en arrière-plan et les menus passent au premier plan. Le partage et l’accueil vide guident mieux l’utilisateur. Le résumé global évite de répéter les catégories, le profil est plus clair et les données locales sont désormais séparées par compte. Sur la page de présentation, les chiffres d’exemple sont indiqués comme fictifs."}]},
+      {date:"13 octobre 2026",title:"Meuniance change de visage",text:"Nouvelle identité claire et sombre, un accueil qui résume ton mois, un tableur rangé par année et des objectifs qui suivent un mois précis.",highlights:["Accueil : ton solde sur l’année, où part ton argent et l’ajout en un geste.","Tableur : une feuille par année, la précédente ou la suivante en un clic.","Objectifs : lie un objectif à un mois précis du tableur."],sections:[{type:"new",text:"L’accueil affiche ton solde sur l’année, où part ton argent et tes dépenses fixes. Tu peux ajouter une dépense, un revenu ou de l’épargne sans ouvrir le tableur."},{type:"new",text:"Le tableur compte une feuille par année : ajoute la précédente ou la suivante d’un geste. Un objectif peut suivre un mois précis du tableur."},{type:"improved",text:"Nouvelles couleurs, nouveau logo, menus déroulants repensés et une page Formule. Pendant la période de lancement, tout reste ouvert."}]},
+      {date:"2 octobre 2026",title:"Du nouveau depuis le 20 septembre",text:"Une nouvelle disposition, plus de choix pour l’apparence et un profil plus utile. Plusieurs écrans ont aussi été revus pour faciliter la navigation.",sections:[{type:"new",text:"La nouvelle disposition propose une navigation latérale que tu peux réduire sur ordinateur et ouvrir sur téléphone. Tu peux choisir la couleur d’accent indépendamment du thème. Ton profil accueille un pseudo unique pour recevoir des demandes d’amis. Si tu ouvres un lien qui n’existe plus, une page te ramène à l’application."},{type:"improvement",text:"Les palettes, le logo et la navigation mobile ont été retravaillés. La barre du tableur reste plus lisible pendant le défilement, les fenêtres ne font plus défiler la page derrière elles et les menus restent au premier plan. Le partage et l’accueil vide te guident mieux. Le résumé global évite de répéter les catégories, le profil est plus clair et les données locales sont désormais séparées par compte. Sur la page de présentation, les chiffres d’exemple sont indiqués comme fictifs."}]},
       {date:"20 septembre 2026",title:"Objectifs et tableur passent un cap",sections:[{type:"new",text:"Les objectifs disposent maintenant d’un résumé global, d’un suivi actif ou archivé, d’une mise en pause et d’une liaison facultative avec une ligne du tableur."},{type:"improvement",text:"Tu peux supprimer une ligne du tableur directement depuis la barre d’outils. Les règles reconnues automatiquement sont désormais bien indiquées comme utilisées."}]},
       {date:"18 septembre 2026",title:"Un espace plus clair et plus complet",sections:[{type:"new",text:"Mon espace accueille les objectifs et les notes privées. Tu peux créer un objectif d’épargne, d’investissement, de dépense ou un projet personnel, suivre son avancement et conserver tes idées dans un bloc-notes synchronisé lorsque tu es connecté. Le partage entre amis reste privé par défaut : tu choisis précisément les lignes, les mois et les vues que chacun peut consulter."},{type:"improvement",text:"Le tableur est plus confortable avec une barre d’outils suivie, des sélections plus lisibles et des explications de solde plus claires. L’accueil, les réglages, le partage et les tableaux de bord s’adaptent mieux aux petits écrans. Le français et l’anglais couvrent aussi les contenus recréés, les réglages et les nouveautés, sans modifier tes données."}]},
       {date:"17 septembre 2026",title:"Partage et réglages simplifiés",sections:[{type:"new",text:"Tu peux maintenant consulter le tableur ou le tableau de bord partagé depuis la fiche d’un ami, sans lui donner le droit de modifier tes données."},{type:"improvement",text:"Les accès se configurent ligne par ligne et mois par mois, uniquement en lecture. Les réglages et les pages de partage sont mieux organisés sur téléphone comme sur ordinateur."}]},
       {date:"16 septembre 2026",title:"Un espace plus simple sur tous les écrans",text:"L’en-tête, le tableur et les graphiques s’adaptent mieux au téléphone, à la tablette et au bureau. Les objectifs et un bloc-notes privé rejoignent désormais ton espace personnel."},
-      {date:"10 septembre 2026",title:"Des actions de compte plus claires",text:"Supprimer mon compte apparaît uniquement lorsque vous êtes connecté. Hors connexion, Réinitialiser reste disponible pour effacer les données locales."},
+      {date:"10 septembre 2026",title:"Des actions de compte plus claires",text:"Supprimer mon compte apparaît uniquement lorsque tu es connecté. Hors connexion, tu peux toujours effacer les données de cet appareil."},
       {date:"10 septembre 2026",title:"Des moyennes fidèles aux données",text:"Un mois sans salaire ou sans dépense n’est plus pris pour un zéro. Les moyennes et les mois les plus ou moins dépensiers utilisent uniquement les montants réellement renseignés."},
-      {date:"10 septembre 2026",title:"Des partages mieux protégés",text:"Retirer un ami ferme désormais les accès dans les deux sens. Si vous vous ajoutez à nouveau, chacun choisit ce qu’il souhaite partager. Le chargement du site et les boutons de configuration ont aussi été renforcés."},
-      {date:"8 septembre 2026",title:"Les mêmes repères dans les partages",text:"Le tableau de bord d’un ami reprend maintenant les cartes et graphiques de l’accueil. Les indications de partage sont plus simples et les traductions anglaises ont été complétées. Sur téléphone, les nouveautés restent dans le bandeau de l’accueil."},
-      {date:"8 septembre 2026",title:"Un accueil plus léger",text:"L’en-tête prend moins de place, les filtres sont alignés et les actualisations sont animées. Les tableaux de bord partagés ont leurs graphiques. Français ou anglais : à toi de choisir dans les paramètres."},
+      {date:"10 septembre 2026",title:"Des partages mieux protégés",text:"Retirer un ami coupe désormais l’accès dans les deux sens. Si vous vous ajoutez de nouveau, chacun choisit ce qu’il veut partager. Le site est aussi mieux protégé."},
+      {date:"8 septembre 2026",title:"Les mêmes repères dans les partages",text:"Le tableau de bord d’un ami reprend les cartes et graphiques de l’accueil. Les indications de partage sont plus simples et l’anglais est mieux couvert. Sur téléphone, les nouveautés restent dans le bandeau de l’accueil."},
+      {date:"8 septembre 2026",title:"Un accueil plus léger",text:"L’en-tête prend moins de place et les filtres sont alignés. Les tableaux de bord partagés ont leurs graphiques. Français ou anglais : à toi de choisir dans les paramètres."},
       {date:"8 septembre 2026",title:"Le partage, plus clair",text:"Une fiche par ami, les mois et lignes à cocher dans le tableur, et un résumé avant d’enregistrer. Les partages reçus s’ouvrent depuis la même fiche."},
       {date:"7 septembre 2026",title:"Confirmation de compte simplifiée",text:"La création de compte envoie désormais un lien sécurisé à ouvrir, sans code à recopier. La confirmation d’e-mail reste active."},
       {date:"7 septembre 2026",title:"Accès et partage repensés",text:"La barre d’accueil est mieux structurée et les partages s’ouvrent dans une vraie vue de consultation."},
@@ -3260,7 +3261,7 @@
       {date:"2 septembre 2026",title:"Accueil plus net",text:"Les filtres restent au-dessus des graphiques et seules les années présentes dans le tableur sont proposées."},
       {date:"1 septembre 2026",title:"Tableur plus lisible",text:"Les colonnes A, B, C… et les numéros de ligne facilitent la lecture des formules."},
       {date:"1 septembre 2026",title:"Détail des graphiques",text:"Clique sur un mois pour voir son récapitulatif."},
-      {date:"1 septembre 2026",title:"Synchronisation",text:"Un compte déjà configuré récupère ses données avant d’afficher le tutoriel."}
+      {date:"1 septembre 2026",title:"Reprise de ton compte",text:"Quand tu te reconnectes, tes données sont récupérées avant l’affichage du tutoriel."}
     ];
     /* Nouveautés : la dernière version en bloc plein, puis un fil par mois (une ligne par changement, détails à la demande). */
     let updatesVisible=8;
@@ -3680,8 +3681,8 @@
       if (valEl) valEl.textContent = formatEuro(goal);
       if (pctEl) pctEl.textContent = pct + "%";
       if (fillEl) fillEl.style.width = pct + "%";
-      if (curEl) curEl.textContent = "Épargné : " + formatEuro(current);
-      if (remEl) remEl.textContent = remaining > 0 ? "Restant : " + formatEuro(remaining) : "Objectif atteint !";
+      if (curEl) curEl.textContent = "Mis de côté : " + formatEuro(current);
+      if (remEl) remEl.textContent = remaining > 0 ? "Reste : " + formatEuro(remaining) : "Objectif atteint !";
       card.classList.toggle("goal-reached", current >= goal);
     }
 
@@ -3722,11 +3723,11 @@
         if(!tables && (typeof window.XLSX === "undefined" || !window.XLSX?.utils?.sheet_to_json)){
           if(window.GFVendors){
             window.GFVendors.xlsx().then(function(){ syncDashboardFromFinanceSheet(opts); }).catch(function(){
-              if(!silent) showMessage("Le module de lecture Excel n’a pas pu être préparé. Vérifie ta connexion internet.");
+              if(!silent) showMessage("L’import Excel n’a pas pu démarrer. Vérifie ta connexion, puis réessaie.");
             });
             return false;
           }
-          if(!silent) showMessage("Le module de lecture Excel n’a pas pu être préparé. Vérifie ta connexion internet.");
+          if(!silent) showMessage("L’import Excel n’a pas pu démarrer. Vérifie ta connexion, puis réessaie.");
           return false;
         }
         const wb = tables ? { SheetNames: tables.map(t => t.name), Sheets: {}, tables: tables } : window.FinanceSheet.buildWorkbook();
@@ -3986,11 +3987,11 @@
     }
     init();
   </script>
-  <script src="sheet.js?v=20261021-r3"></script>
-  <script src="onboarding.js?v=20261021-r3"></script>
+  <script src="sheet.js?v=20261022-r1"></script>
+  <script src="onboarding.js?v=20261022-r1"></script>
   <script src="shared-dashboard.js?v=20260908-r9"></script>
   <script src="shared-expenses.js?v=20261021-r2"></script>
-  <script src="friends.js?v=20261021-r3"></script>
+  <script src="friends.js?v=20261022-r1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>(function(){
   /* === Auth email + mot de passe (Supabase) ===
@@ -4001,14 +4002,14 @@
   function translateAuthError(error){
     var raw = String((error && error.message) || error || "").trim();
     var normalized = raw.toLowerCase();
-    if(/database error saving new user|error saving new user/.test(normalized)) return "La création du compte a échoué côté base de données. Le correctif Supabase doit être appliqué par l’administrateur du projet.";
-    if(/invalid login credentials|invalid credentials/.test(normalized)) return "Email ou mot de passe incorrect.";
-    if(/email not confirmed|email.*not.*confirm/.test(normalized)) return "Ton adresse email n’est pas encore confirmée.";
-    if(/user already registered|already.*registered/.test(normalized)) return "Un compte existe déjà avec cette adresse email.";
+    if(/database error saving new user|error saving new user/.test(normalized)) { console.warn("Meuniance : création du compte refusée côté serveur", raw); return "Ton compte n’a pas pu être créé pour le moment. Réessaie dans quelques minutes ; si ça persiste, écris-nous."; }
+    if(/invalid login credentials|invalid credentials/.test(normalized)) return "E-mail ou mot de passe incorrect.";
+    if(/email not confirmed|email.*not.*confirm/.test(normalized)) return "Ton adresse e-mail n’est pas encore confirmée.";
+    if(/user already registered|already.*registered/.test(normalized)) return "Un compte existe déjà avec cette adresse e-mail.";
     if(/password should be at least|password.*least/.test(normalized)) return "Le mot de passe doit contenir au moins 8 caractères.";
-    if(/banned|user is banned|account.*(banned|suspend|disabled)|blocked/.test(normalized)) return "Ce compte est suspendu et ne peut plus être utilisé pour le moment. Contacte l’administrateur si tu penses qu’il s’agit d’une erreur.";
-    if(/user not found|no user found/.test(normalized)) return "Aucun compte n’existe avec cette adresse email.";
-    if(/email address.*invalid|invalid email/.test(normalized)) return "Cette adresse email n’est pas valide.";
+    if(/banned|user is banned|account.*(banned|suspend|disabled)|blocked/.test(normalized)) return "Ce compte est suspendu et ne peut plus être utilisé pour le moment. Écris-nous si tu penses qu’il s’agit d’une erreur.";
+    if(/user not found|no user found/.test(normalized)) return "Aucun compte n’existe avec cette adresse e-mail.";
+    if(/email address.*invalid|invalid email/.test(normalized)) return "Cette adresse e-mail n’est pas valide.";
     if(/signups? not allowed|signup is disabled/.test(normalized)) return "Les nouvelles inscriptions sont temporairement fermées.";
     if(/session.*(expired|missing)|refresh token/.test(normalized)) return "Ta session a expiré. Reconnecte-toi pour continuer.";
     if(/rate limit|too many requests/.test(normalized)) return "Trop de tentatives. Réessaie dans quelques instants.";
@@ -4248,11 +4249,11 @@
       sb.recoveryPending=false;
       el("passwordRecoveryNew").value="";el("passwordRecoveryConfirm").value="";
       el("passwordRecoveryFields").hidden=true;submit.hidden=true;cancel.hidden=true;
-      el("passwordRecoveryDone").hidden=false;
+      el("passwordRecoveryDone").hidden=false;el("passwordRecoveryDone").textContent="Terminer";
       var signedOut=await sb.client.auth.signOut({ scope:"local" });
       if(signedOut.error)throw signedOut.error;
       recoveryMessage("Mot de passe modifié. Tu peux maintenant te connecter avec ton nouveau mot de passe.","success");
-    }catch(error){recoveryMessage(passwordChanged?"Mot de passe modifié, mais la déconnexion a échoué. Clique sur Terminer pour réessayer.":translateAuthError(error),"error");}
+    }catch(error){if(passwordChanged){ var again=el("passwordRecoveryDone"); if(again)again.textContent="Réessayer"; } recoveryMessage(passwordChanged?"Mot de passe modifié, mais la déconnexion n’a pas abouti. Utilise le bouton « Réessayer ».":translateAuthError(error),"error");}
     finally{submit.disabled=false;cancel.disabled=false;}
   }
   function accountPane(name){
@@ -4570,9 +4571,9 @@
     if(!el) return;
     el.dataset.syncState=!navigator.onLine?"offline":syncState.pushing?"syncing":syncState.dirty?"pending":syncState.lastSync?"synced":"idle";
     if(!getUser()){ el.textContent = ""; return; }
-    if(!navigator.onLine){ el.textContent = "Hors ligne — sync en attente"; return; }
-    if(syncState.pushing){ el.textContent = "Synchronisation..."; return; }
-    if(syncState.dirty){ el.textContent = "En attente de sync..."; return; }
+    if(!navigator.onLine){ el.textContent = "Hors ligne — synchronisation en attente"; return; }
+    if(syncState.pushing){ el.textContent = "Synchronisation…"; return; }
+    if(syncState.dirty){ el.textContent = "En attente de synchronisation…"; return; }
     if(syncState.lastSync){ var ago = Math.max(0,Math.round((Date.now() - syncState.lastSync) / 1000)); if(ago<15) el.textContent = "Synchronisé à l’instant"; else if(ago<60) el.textContent = "Synchronisé il y a " + ago + " s"; else if(ago<3600) el.textContent = "Synchronisé il y a " + Math.round(ago/60) + " min"; else el.textContent = "Synchronisé"; return; }
     el.textContent = "Prêt à synchroniser";
   }
@@ -4684,21 +4685,21 @@
   window.__gfSync = { pushToCloud: pushToCloud, pullFromCloud: pullFromCloud, markDirty: markDirty, updateSyncStatus: updateSyncStatus };
 })();
 </script>
-  <script src="objectives.js?v=20261021-r2"></script>
+  <script src="objectives.js?v=20261022-r1"></script>
   <script src="meuni-loader.js?v=20261021-r3" defer></script>
   <script src="ios-fix.js?v=20261013-r2" defer></script>
-  <script src="plans.js?v=20261021-r3" defer></script>
+  <script src="plans.js?v=20261022-r1" defer></script>
   <script src="year-review.js?v=20261021-r2" defer></script>
   <script src="notifications.js?v=20261021-r2" defer></script>
-  <script src="home.js?v=20261021-r5" defer></script>
+  <script src="home.js?v=20261022-r1" defer></script>
   <script src="finishing.js?v=20261021-r1" defer></script>
-  <script src="bank-import.js?v=20261022-r1" defer></script>
+  <script src="bank-import.js?v=20261022-r2" defer></script>
   <script src="subs.js?v=20261021-r2" defer></script>
   <script src="reminders.js?v=20261021-r2" defer></script>
   <script src="backup.js?v=20261021-r1" defer></script>
   <script src="install.js?v=20261021-r1" defer></script>
   <script src="avatars.js?v=20261019-r8" defer></script>
-  <script src="menus.js?v=20261013-r1" defer></script>
+  <script src="menus.js?v=20261022-r1" defer></script>
   <script src="discover.js?v=20261021-r3" defer></script>
 </body>
 </html>
