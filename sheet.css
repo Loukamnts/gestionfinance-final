@@ -169,7 +169,6 @@ body[data-theme="brutal"] .sheet-wrap,
 body[data-theme="brutal"] .sheet-modal,
 body[data-theme="brutal"] .sheet-calc-display,
 body[data-theme="brutal"] .sheet-calc-btn,
-body[data-theme="brutal"] .sheet-toast,
 body[data-theme="brutal"] .sheet-bar .button,
 body[data-theme="brutal"] .sheet-addrows .button,
 body[data-theme="brutal"] .sheet-status .dot { border-radius: 0 !important; }
@@ -217,16 +216,6 @@ body[data-theme="brutal"] .sheet-divider { background: var(--line-strong, #fff);
 .sheet-modal-choice p { text-align: center; }
 .sheet-modal-actions { display: flex; flex-direction: column; gap: 8px; }
 .sheet-modal-actions .button { width: 100%; justify-content: center; text-align: center; white-space: nowrap; }
-
-/* Toast */
-.sheet-toast {
-  position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 10000;
-  padding: 12px 18px; border-radius: 10px; font-size: 0.86rem; font-weight: 600;
-  background: var(--input-focus-bg, #111); color: var(--text);
-  border: 1px solid var(--accent, #c08457); box-shadow: var(--shadow, 0 10px 30px rgba(0,0,0,0.4));
-  animation: sheetToastIn .2s ease;
-}
-@keyframes sheetToastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
 /* Mobile */
 @media (max-width: 720px) {
@@ -796,11 +785,8 @@ body[data-theme="brutal"] .sheet-starting-balance-modal :is(.sheet-field input,.
 @media (max-width:720px) {
   .sheet-bar { width:max-content; max-width:100%; gap:4px; }
   .sheet-bar-right .sheet-divider { display:none; }
-  .sheet-toast { top:calc(12px + env(safe-area-inset-top, 0px)); bottom:auto; max-width:calc(100vw - 24px); text-align:center; }
 }
 
-/* Même emplacement que les autres confirmations, quel que soit l'écran. */
-.sheet-toast { top:calc(20px + env(safe-area-inset-top, 0px)); bottom:auto; max-width:calc(100vw - 32px); text-align:center; }
 
 /* Toolbar professionnelle : commandes regroupées, hiérarchie nette et aucune
    largeur artificielle. Cette finition remplace les variantes historiques. */
@@ -1695,13 +1681,6 @@ body[data-theme="brutal"] .sheet-bar #btnSheetCalc {
 }
 
 /* Import : bouton « Annuler » dans le message de fin, et explication du choix « Ajouter / Remplacer ». */
-.sheet-toast.has-action { display:flex; align-items:center; gap:12px; text-align:left; }
-.sheet-toast-action {
-  flex:none; min-height:36px; padding:6px 12px; border-radius:8px; cursor:pointer;
-  border:1px solid var(--accent, #c08457); background:transparent; color:var(--text); font:inherit; font-weight:700;
-}
-.sheet-toast-action:focus-visible { background:var(--button-primary-bg, var(--accent, #c08457)); color:var(--button-primary-text, #fff); outline:none; }
-@media (hover:hover) and (pointer:fine) { .sheet-toast-action:hover { background:var(--button-primary-bg, var(--accent, #c08457)); color:var(--button-primary-text, #fff); } }
 .sheet-modal-choice .sheet-import-found { margin:0 0 10px; line-height:1.5; font-weight:600; overflow-wrap:anywhere; }
 .sheet-modal-choice .sheet-import-help { margin:0 0 16px; line-height:1.5; font-size:.88rem; color:var(--muted, inherit); overflow-wrap:anywhere; }
 .sheet-modal-choice .sheet-import-replace { color:var(--red, #c0392b); }

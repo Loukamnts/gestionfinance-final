@@ -68,7 +68,6 @@
   }
   // Libellés courts posés ici : refaits à chaque changement de langue.
   function shortLabels(){
-    var nb=byId("latestUpdateAllButton");if(nb){nb.textContent=t2("Voir","See");nb.setAttribute("aria-label",t2("Voir les nouveautés","See what’s new"));}
     document.querySelectorAll('.personal-workspace-nav .personal-workspace-link[data-page="sharing"]').forEach(function(b){b.innerHTML='<span class="gfp-long">'+t2("Partage et amis","Sharing and friends")+'</span><span class="gfp-short">'+t2("Partage","Sharing")+'</span>';});}
   function start(){
     shortLabels();

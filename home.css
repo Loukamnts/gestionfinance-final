@@ -12,7 +12,6 @@ body.gfh-ready #dashboardPage .mobile-finance-summary,
 body.gfh-ready #dashboardPage .savings-goal-card,
 body.gfh-ready #dashboardPage .home-filter-year,
 body.gfh-ready #dashboardPage .home-filter-month{display:none!important}
-body.gfh-ready #dashboardPage .latest-update-banner{order:-2}
 body.gfh-ready[data-theme] #dashboardPage .home-toolbar .home-filter-grid{grid-template-columns:minmax(0,1fr)!important}
 @media(min-width:700px){body.gfh-ready[data-theme] #dashboardPage .home-toolbar .home-filter-grid{grid-template-columns:minmax(0,320px)!important}}
 .gfh-home{color:var(--text);font-family:var(--font-body)}
@@ -194,9 +193,6 @@ body.gfh-ready.gfh-nocharts #dashboardPage .month-details{display:none!important
 .gfh-err:empty{display:none}
 .gfh-dialog-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px;margin-top:4px}
 .gfh-dialog-actions .gfh-link{margin-right:auto}
-.gfh-toast{position:fixed;left:50%;bottom:calc(110px + env(safe-area-inset-bottom,0px));z-index:1000;transform:translate(-50%,12px);max-width:calc(100vw - 32px);padding:12px 18px;border-radius:14px;background:var(--block-bg,#17261F);color:var(--block-text,#F6F2E8);font:500 14px var(--font-body);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 12px 30px rgba(0,0,0,.25)}
-.gfh-toast.is-on{opacity:1;transform:translate(-50%,0)}
-@media(min-width:900px){.gfh-toast{bottom:32px}}
 /* Dépenses fixes */
 .gfh-fixed{border-color:var(--accent-fill,var(--accent))!important;border-style:dashed!important}
 .gfh-fixed .gfh-row h3{margin:0;font-size:18px}
@@ -254,31 +250,13 @@ button.gfh-cat:focus-visible{outline:2px solid var(--accent);outline-offset:0}
 .gfh-menu-empty{margin:6px 10px;font-size:13px;color:var(--muted)}
 .gfh-newline[hidden],.gfh-field[hidden]{display:none}
 
-/* Bilan du mois écoulé */
-.gfh-recap{margin:0 0 16px;padding:22px;border:1px solid var(--line);border-radius:22px;background:color-mix(in srgb,var(--accent-fill,#E3A82B) 7%,transparent)}
-.gfh-recap-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.gfh-recap h3{margin:4px 0 0;font:700 22px/1.15 var(--font-heading);letter-spacing:-.02em;color:var(--text)}
-.gfh-recap-x{flex:none;width:44px;height:44px;margin:-10px -10px 0 0;border:0;border-radius:50%;background:transparent;color:var(--muted);font:400 24px/1 var(--font-body);cursor:pointer}
-@media (hover:hover){
-.gfh-recap-x:hover{background:var(--line);color:var(--text)}}
-.gfh-recap-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:18px}
-.gfh-recap-stat{min-width:0}
-.gfh-recap-stat .t{display:block;font-size:13px;color:var(--muted)}
-.gfh-recap-stat .v{display:block;margin-top:2px;font:600 clamp(18px,4.6vw,22px)/1.2 var(--font-heading);letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap}
-.gfh-recap-stat.is-neg .v,.gfh-recap-stat.is-up .v{color:var(--red,#C2410C)}
-.gfh-recap-stat small{display:block;margin-top:4px;font-size:12px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
-.gfh-recap-fact{margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line);font-size:15px;line-height:1.45;color:var(--text)}
-.gfh-recap-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:14px}
-.gfh-recap-acts .gfh-link{margin:0;min-height:44px;padding:0 4px}
-.gfh-recap button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
-@media(max-width:700px){.gfh-recap-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}.gfh-recap{padding:18px}}
 
 /* Mode discret : bouton œil et montants floutés */
 .gfh-eye{flex:none;display:grid;place-items:center;width:44px;height:44px;margin:-12px -12px -12px 0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer}
 .gfh-eye svg{width:20px;height:20px}
 @media(hover:hover){.gfh-eye:hover{background:var(--block-line,rgba(246,242,232,.14))}}
 .gfh-eye:focus-visible{outline:2px solid currentColor;outline-offset:-2px}
-body.gf-hide-amounts :is(.gfh-big,.gfh-foot .v,.gfh-foot small,.gfh-cat .gfh-row span:last-child,.gfh-over,.gfh-fixed-amt,.gfh-goal small,.gfh-bilan,.gfh-recap-stat .v,.gfh-recap-stat small,.gfh-recap-fact,
+body.gf-hide-amounts :is(.gfh-big,.gfh-foot .v,.gfh-foot small,.gfh-cat .gfh-row span:last-child,.gfh-over,.gfh-fixed-amt,.gfh-goal small,.gfh-bilan,
   .metric-value,.metric-note,.mobile-finance-summary-value,#savingsGoalValue,#savingsGoalCurrent,#savingsGoalRemaining,.detail-row strong,#dashboardPage canvas,.chart-wrap,
   .balance-value,#sheetPage td.cell,#sheetPage .fx-input,#sheetPage .fx-preview,#sheetPage .sheet-table tfoot td,
   .objective-amount-wrap,.objective-remaining,.objective-insight,.objective-rhythm,.objective-stat strong,.objective-meta){filter:blur(7px);-webkit-user-select:none;user-select:none;transition:filter .15s ease}
@@ -341,22 +319,9 @@ body.gf-hide-amounts .gfb-row b{filter:blur(7px)}
 .gfh-set-row.is-off{opacity:.5}
 .gfh-switch:disabled{cursor:not-allowed}
 
-/* Invitation aux rappels : petite carte au-dessus de la barre du bas, jamais bloquante */
-.gfr-invite{position:fixed;left:12px;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:1500;max-width:520px;margin:0 auto;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:start;padding:14px 14px 10px;border:1px solid var(--line);border-radius:20px;background:var(--panel-solid,var(--bg));color:var(--text);box-shadow:0 14px 34px rgba(0,0,0,.18);opacity:0;transform:translateY(12px);transition:opacity .22s ease-out,transform .22s ease-out}
-.gfr-invite.is-on{opacity:1;transform:none}
-.gfr-invite-ic{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--accent-fill,#E3A82B);color:var(--on-accent-fill,#17261F)}
-.gfr-invite-ic svg{width:20px;height:20px}
-.gfr-invite-tx strong{display:block;font:600 15px var(--font-body)}
-.gfr-invite-tx span{display:block;margin-top:2px;font-size:14px;line-height:1.4;color:var(--muted)}
-.gfr-invite-acts{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
-.gfr-invite-acts button{min-height:44px;padding:0 16px;border-radius:14px;font:600 15px var(--font-body);cursor:pointer}
-.gfr-invite-later{border:0;background:transparent;color:var(--text)}
-.gfr-invite-go{border:0;background:var(--accent-fill,#E3A82B);color:var(--on-accent-fill,#17261F)}
-.gfr-invite button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
-@media(min-width:721px){.gfr-invite{bottom:24px;right:24px;left:auto;width:420px}}
 @keyframes gfrFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent-fill,#E3A82B) 60%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
 .gfr-set.is-flash{animation:gfrFlash .9s ease-out 2;border-radius:16px}
-@media(prefers-reduced-motion:reduce){.gfr-invite{transition:none}.gfr-set.is-flash{animation:none}}
+@media(prefers-reduced-motion:reduce){.gfr-set.is-flash{animation:none}}
 
 /* Paramètres › Données : sauvegarde */
 .gfb-backup{margin:16px 0;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -430,22 +395,6 @@ body.gf-hide-amounts .gfb-merchant b,body.gf-hide-amounts .gfb-group summary b{f
 body.gf-hide-amounts .gfb-dialog .gf-amount{filter:blur(7px)}
 @media(max-width:380px){.gfb-progress,.gfb-wiz .gfb-head{padding-left:16px;padding-right:16px}.gfb-wiz .gfb-body{padding-left:16px;padding-right:16px}.gfb-wiz .gfb-actions{padding-left:16px;padding-right:16px}.gfb-facts{padding:2px 14px}.gfb-wiz .gfb-actions .gfh-btn{min-width:0;flex:1}}
 @media(prefers-reduced-motion:reduce){.gfb-pane{animation:none}.gfb-seg,.gfb-wiz .gfb-opt{transition:none}}
-/* Alerte de plafond : bandeau fin d'une ligne */
-.gfh-banner{--b:var(--accent-fill,#E3A82B);position:fixed;left:12px;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:1500;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:10px;min-height:48px;padding:4px 4px 4px 14px;border:1px solid var(--b);border-radius:14px;background:var(--panel-solid,var(--bg));color:var(--text);box-shadow:0 8px 22px rgba(0,0,0,.14);font:500 14px/1.3 var(--font-body);opacity:0;transform:translateY(8px);transition:opacity .2s ease-out,transform .2s ease-out}
-.gfh-banner.is-over{--b:var(--red,#C0503A)}
-@supports (color:color-mix(in srgb,red 50%,blue)){.gfh-banner{border-color:color-mix(in srgb,var(--b) 45%,var(--line));background:color-mix(in srgb,var(--b) 12%,var(--panel-solid,var(--bg)))}}
-.gfh-banner.is-on{opacity:1;transform:none}
-.gfh-banner-ic{flex:none;display:grid;place-items:center;color:var(--b)}
-.gfh-banner-ic svg{width:18px;height:18px}
-.gfh-banner-tx{flex:1;min-width:0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
-.gfh-banner-tx b{font-weight:650}
-.gfh-banner-amt{font-variant-numeric:tabular-nums}
-.gfh-banner-x{flex:none;display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:10px;background:transparent;color:var(--muted,var(--text));cursor:pointer}
-.gfh-banner-x svg{width:18px;height:18px}
-.gfh-banner-x:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-body.gf-hide-amounts .gfh-banner-amt{filter:blur(6px)}
-@media(min-width:721px){.gfh-banner{bottom:24px;right:24px;left:auto;width:420px}}
-@media(prefers-reduced-motion:reduce){.gfh-banner{transition:none}}
 /* Abonnements détectés */
 .gfs-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 6px}
 .gfs-k{display:block;font-size:12px;color:var(--muted)}

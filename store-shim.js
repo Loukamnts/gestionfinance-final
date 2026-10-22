@@ -25,7 +25,9 @@
     "personalFinanceDashboard.recapSeen": true,
     "personalFinanceDashboard.reminders": true,
     "personalFinanceDashboard.hideAmounts": true,
-    "personalFinanceDashboard.subsTutoDone": true
+    "personalFinanceDashboard.subsTutoDone": true,
+    // Messages du site (fermés, lus, réglages) : état d'interface, mais rangé par compte comme les alertes et bilans qu'il porte
+    "personalFinanceDashboard.notifications": true
   };
   var financialOwner = "anonymous";
   var firstAccount = null;

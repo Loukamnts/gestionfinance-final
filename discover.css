@@ -1,41 +1,6 @@
 /* ═══════════════════════════════════════════════
-   Nouveautés « Le Moulin » : anneau à remplir sur l'accueil,
-   mise en lumière de la fonction ouverte et fil chronologique de la page Nouveautés.
+   Nouveautés « Le Moulin » : mise en lumière de la fonction ouverte et fil chronologique de la page Nouveautés.
    ═══════════════════════════════════════════════ */
-
-/* Le bloc remplace l'ancienne ligne « Du nouveau depuis… » */
-body[data-theme="moulin"] #dashboardPage #latestUpdateBanner.latest-update-banner{display:none!important}
-
-.gfd{display:grid;grid-template-columns:56px minmax(0,1fr) 44px;align-items:center;gap:4px 16px;margin:4px 0 0;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
-.gfd-ring{width:56px;height:56px;flex:none}
-.gfd-track{fill:none;stroke:var(--line);stroke-width:2.4}
-.gfd-arc{fill:none;stroke:var(--accent-fill,var(--accent));stroke-width:2.4;stroke-linecap:round;transition:stroke-dasharray .7s cubic-bezier(.2,.8,.2,1)}
-.gfd-seed{fill:var(--muted);transition:fill .4s}
-.gfd-ring.is-complete .gfd-seed{fill:var(--accent-fill,var(--accent))}
-.gfd-main{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;min-width:0}
-.gfd-copy{min-width:0;flex:1 1 260px}
-.gfd-kicker{margin:0 0 2px;font:500 13px var(--font-body);color:var(--muted);font-variant-numeric:tabular-nums}
-.gfd-title{margin:0;font:600 16px/1.3 var(--font-body)!important;letter-spacing:0!important;color:var(--text)}
-.gfd-text{margin:2px 0 0;font-size:14px;line-height:1.45;color:var(--muted)}
-.gfd-actions{display:flex;align-items:center;gap:6px;flex:none}
-.gfd-try{height:44px;padding:0 18px;border:1px solid var(--accent-fill,var(--accent));border-radius:14px;background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font:600 15px var(--font-body);cursor:pointer}
-@media (hover:hover){
-.gfd-try:hover{filter:brightness(1.05)}}
-.gfd-next{height:44px;padding:0 12px;border:0;border-radius:14px;background:transparent;color:var(--text);font:600 14px var(--font-body);text-decoration:underline;text-underline-offset:4px;cursor:pointer}
-@media (hover:hover){
-.gfd-next:hover{background:var(--line)}}
-.gfd-close{width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--muted);font:400 22px/1 var(--font-body);cursor:pointer;align-self:start}
-@media (hover:hover){
-.gfd-close:hover{background:var(--line);color:var(--text)}}
-.gfd button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
-@media(max-width:560px){
-  .gfd{grid-template-columns:44px minmax(0,1fr) 44px;grid-template-areas:"ring copy close" ". actions actions";gap:4px 12px}
-  .gfd-ring{grid-area:ring;width:44px;height:44px;align-self:start}
-  .gfd-main{display:contents}
-  .gfd-copy{grid-area:copy}
-  .gfd-actions{grid-area:actions;margin-top:8px}
-  .gfd-close{grid-area:close}
-}
 
 /* Repère ouvert par « Essayer » : voile, anneau autour de l'élément exact et bulle d'explication */
 .gfd-coach{position:fixed;inset:0;z-index:3000;cursor:pointer}
@@ -46,7 +11,7 @@ body[data-theme="moulin"] #dashboardPage #latestUpdateBanner.latest-update-banne
 .gfd-coach-ok:focus-visible{outline:2px solid var(--text);outline-offset:2px}
 @keyframes gfdHole{from{opacity:0;transform:scale(1.06)}to{opacity:1;transform:none}}
 @keyframes gfdTip{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.gfd-arc,.gfd-seed{transition:none}.gfd-coach-hole,.gfd-coach-tip{animation:none}}
+@media(prefers-reduced-motion:reduce){.gfd-coach-hole,.gfd-coach-tip{animation:none}}
 
 /* ── Page Nouveautés : bloc plein pour la dernière version, puis un fil à filets ── */
 body[data-theme="moulin"] #updatesPage .updates-list{display:block}
@@ -83,5 +48,4 @@ body[data-theme="moulin"] #updatesPage .updates-list{display:block}
 .update-more:hover{border-color:var(--text)}}
 .update-more:focus-visible,.update-details summary:focus-visible{outline:2px solid var(--text);outline-offset:2px}
 body[data-theme="moulin"] #updatesPagination{display:none!important}
-.gfd-actions .gfd-next:first-child{padding-left:0}@media (hover:hover){.gfd-actions .gfd-next:first-child:hover{background:transparent}}
 .gfd-coach-step{font:700 12px var(--font-body);letter-spacing:.06em;color:var(--muted)}

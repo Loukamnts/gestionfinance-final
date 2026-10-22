@@ -142,7 +142,7 @@ body[data-palette] .preview-editorial .preview-cards i { border-top-color:var(--
 .preview-brutal .preview-chart i:nth-child(3) { background:#f0e4ca; }
 
 /* Le rendu Ardoise reste opaque, y compris pour les éléments surélevés. */
-body[data-theme="glass"] :is(.panel,.metric-card,.detail-panel,.latest-update-banner,.profile-popover,.custom-select-options,.settings-section,.settings-reset-section,.update-entry) { background:var(--panel-solid) !important; }
+body[data-theme="glass"] :is(.panel,.metric-card,.detail-panel,.profile-popover,.custom-select-options,.settings-section,.settings-reset-section,.update-entry) { background:var(--panel-solid) !important; }
 body[data-theme="glass"] :is(.custom-select-trigger,.sheet-status-tooltip) { background:var(--panel-solid) !important; backdrop-filter:none !important; }
 body[data-theme="glass"] h1 { background:none; -webkit-background-clip:initial; background-clip:initial; color:var(--text); }
 body[data-theme="glass"] .sheet-status-dot.online,body[data-theme="glass"] .status-pill.is-online .status-dot { box-shadow:none; }
@@ -610,7 +610,7 @@ body[data-theme][data-mode][data-palette] {
   --chart-grid:var(--neutral-line); --chart-tick:var(--neutral-muted); --chart-text:var(--neutral-text);
   --pie-border-color:var(--panel-solid);
 }
-body[data-theme="glass"] :is(.panel,.metric-card,.detail-panel,.home-toolbar,.latest-update-banner,.profile-popover,.custom-select-options,.settings-section,.settings-reset-section,.update-entry,.objectives-panel,.objective-form,.objective-card) {
+body[data-theme="glass"] :is(.panel,.metric-card,.detail-panel,.home-toolbar,.profile-popover,.custom-select-options,.settings-section,.settings-reset-section,.update-entry,.objectives-panel,.objective-form,.objective-card) {
   background:var(--panel-solid) !important;
 }
 body[data-theme="glass"] :is(#dashboardPage .sheet-status-tooltip,.balance-help) { background:var(--panel-solid) !important; border-color:var(--line-strong) !important; color:var(--text) !important; }
@@ -993,7 +993,7 @@ body[data-theme="moulin"] [data-settings-panel="appearance"] .palette-choice { d
 
 /* Textes et titres */
 body[data-theme="moulin"] h1, body[data-theme="moulin"] h2, body[data-theme="moulin"] h3 { font-family:var(--font-heading); letter-spacing:-.025em; }
-body[data-theme="moulin"] .eyebrow, body[data-theme="moulin"] .latest-update-kicker { text-transform:none; letter-spacing:0; font-weight:600; font-size:.82rem; color:var(--muted); }
+body[data-theme="moulin"] .eyebrow { text-transform:none; letter-spacing:0; font-weight:600; font-size:.82rem; color:var(--muted); }
 body[data-theme="moulin"] .panel { border-radius:var(--panel-radius); }
 
 /* Accueil : le chiffre d'abord, puis les filtres */
@@ -1014,9 +1014,6 @@ body[data-theme="moulin"] .mobile-finance-summary-tabs button { background:trans
 body[data-theme="moulin"] .mobile-finance-summary-tabs button[aria-selected="true"] { background:var(--accent-fill); color:var(--on-accent-fill); border-color:var(--accent-fill); font-weight:600; }
 
 /* Mise à jour : une fine ligne */
-body[data-theme="moulin"] .latest-update-banner { border:0 !important; border-top:1px solid var(--line) !important; border-bottom:1px solid var(--line) !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; margin:0 !important; padding:10px 0 !important; }
-body[data-theme="moulin"] .latest-update-banner p { display:none; }
-body[data-theme="moulin"] .latest-update-banner strong { font:600 .95rem var(--font-body); }
 
 /* Objectif d'épargne et barres de progression */
 body[data-theme="moulin"] .savings-goal-card { background:transparent; border:0; border-top:1px solid var(--line); border-radius:0; box-shadow:none; padding:16px 0 0; }

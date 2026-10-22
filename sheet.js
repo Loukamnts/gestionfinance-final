@@ -1832,16 +1832,8 @@
   // ═══════════════ Boîtes de dialogue (toast / confirm) ══════════
   // Message bref ; un import long reste lisible plus longtemps et peut proposer « Annuler ».
   function toast(msg, ms, action) {
-    const old = document.querySelector(".sheet-toast"); if (old) old.remove();
-    const t = document.createElement("div"); t.className = "sheet-toast"; t.setAttribute("role", "status");
-    const text = document.createElement("span"); text.textContent = msg; t.appendChild(text);
-    if (action && typeof action.run === "function") {
-      t.classList.add("has-action");
-      const b = document.createElement("button"); b.type = "button"; b.className = "sheet-toast-action"; b.textContent = action.label;
-      b.addEventListener("click", () => { t.remove(); action.run(); });
-      t.appendChild(b);
-    }
-    document.body.appendChild(t); setTimeout(() => t.remove(), ms || 2600);
+    // Même confirmation brève que dans tout le site (notifications.js) ; « Annuler » reste proposé après un import.
+    if (window.GFNotify) window.GFNotify.toast(msg, { ms: ms, undo: action });
   }
   function confirmDialog(msg) {
     return new Promise((resolve) => {
