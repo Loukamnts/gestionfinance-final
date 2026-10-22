@@ -27,13 +27,13 @@
     <header class="public-header">
       <a class="public-brand" href="/" aria-label="Meuniance, accueil"><span><svg class="brand-m mk" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect class="lg-sq" width="28" height="28" rx="7.5"/><circle class="lg-t" cx="14" cy="14" r="9.4"/><circle class="lg-a" cx="14" cy="14" r="9.4" transform="rotate(-90 14 14)"/><g transform="rotate(30 14 14)"><path class="lg-s" d="M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z"/><path class="lg-c" d="M14 9.6c-.4 2.8-.4 5.8 0 8.6"/></g></svg><span class="brand-word">Meuniance</span></span></a>
       <nav class="public-nav">
-        <a class="btn btn-primary" href="/accueil">Ouvrir l'application</a>
+        <a class="btn btn-primary" href="/accueil">Ouvrir l’application</a>
       </nav>
     </header>
 
     <main class="doc">
       <h1>Politique de confidentialité</h1>
-      <p class="doc-updated">Dernière mise à jour : 15 octobre 2026</p>
+      <p class="doc-updated">Dernière mise à jour : 15 octobre 2026</p>
       <p class="doc-lead">Voici ce que Meuniance conserve, pourquoi, qui peut le voir et comment garder la main sur vos données.</p>
       <nav class="doc-toc" aria-label="Sections de la politique"><a href="#responsable">Responsable</a><a href="#donnees">Vos données</a><a href="#finalites">Pourquoi</a><a href="#stockage">Où</a><a href="#partage">Qui y accède</a><a href="#droits">Vos droits</a><a href="#contact">Contact</a></nav>
 
@@ -42,7 +42,9 @@
         <p>
           Meuniance est un outil de suivi budgétaire personnel. Aucune publicité,
           aucun traqueur, aucune revente de données. Vos données financières servent
-          uniquement à faire fonctionner votre tableau de bord, et à rien d'autre.
+          uniquement à faire fonctionner votre tableau de bord, et à rien d’autre.
+          Seuls nos prestataires techniques (hébergement, comptes, paiement) les traitent,
+          pour faire fonctionner Meuniance.
         </p>
       </section>
 
@@ -58,17 +60,19 @@
       <section id="donnees">
         <h2>Quelles données sont collectées</h2>
         <ul>
-          <li><strong>Compte :</strong> votre adresse e-mail et, si vous en choisissez un, votre pseudo. Le mot de passe est traité et haché par Supabase Auth ; Meuniance ne le voit jamais en clair.</li>
-          <li><strong>Données financières :</strong> le contenu de votre tableur (libellés, montants, dates), vos catégories, vos objectifs et vos notes.</li>
-          <li><strong>Réglages :</strong> thème, langue et préférences d'affichage.</li>
-          <li><strong>Partage :</strong> les accès que vous accordez à d'autres comptes, et ceux que l'on vous accorde.</li>
-          <li><strong>Rappels (si vous les activez) :</strong> l’adresse technique d’abonnement aux notifications fournie par votre navigateur, la fréquence choisie et la date du dernier rappel.</li>
-          <li><strong>Données techniques :</strong> adresse IP, date et type de navigateur, enregistrés dans les journaux de nos hébergeurs pour assurer la sécurité du service.</li>
+          <li><strong>Compte :</strong> votre adresse e-mail et, si vous en choisissez un, votre pseudo. Le mot de passe est traité et haché par Supabase Auth ; Meuniance ne le voit jamais en clair.</li>
+          <li><strong>Données financières :</strong> le contenu de votre tableur (libellés, montants, dates), vos catégories, vos objectifs et vos notes.</li>
+          <li><strong>Réglages :</strong> thème, langue et préférences d’affichage.</li>
+          <li><strong>Abonnement (formules payantes) :</strong> la formule choisie, l’état et les dates de l’abonnement, ainsi que les identifiants techniques fournis par Stripe. Ces informations ne sont collectées que lorsque les formules payantes sont ouvertes à la vente et que vous en souscrivez une.</li>
+          <li><strong>Partage :</strong> les accès que vous accordez à d’autres comptes, et ceux que l’on vous accorde.</li>
+          <li><strong>Rappels (si vous les activez) :</strong> l’adresse technique d’abonnement aux notifications fournie par votre navigateur, la fréquence choisie et la date du dernier rappel.</li>
+          <li><strong>Données techniques :</strong> adresse IP, date et type de navigateur, enregistrés dans les journaux de nos hébergeurs pour assurer la sécurité du service.</li>
         </ul>
         <p>
-          Aucune coordonnée bancaire, aucun identifiant de banque et aucun moyen de paiement
-          n'est demandé ni stocké. Si vous importez un relevé bancaire (fichier CSV), il est
-          lu <strong>uniquement dans votre navigateur</strong> : le fichier n’est jamais envoyé,
+          Meuniance ne voit ni ne stocke vos coordonnées bancaires (numéro de carte, identifiants
+          de banque) : le paiement d’une formule payante est entièrement traité par Stripe.
+          Si vous importez un relevé bancaire (fichier CSV), il est
+          lu <strong>uniquement dans votre navigateur</strong> : le fichier n’est jamais envoyé,
           seuls les totaux par catégorie et par mois sont ajoutés à votre tableur.
         </p>
       </section>
@@ -76,9 +80,10 @@
       <section id="finalites">
         <h2>Pourquoi et sur quelle base</h2>
         <ul>
-          <li><strong>Fournir le service</strong> (compte, tableur, tableau de bord, synchronisation, partage) : exécution des conditions d’utilisation que vous acceptez.</li>
-          <li><strong>Sécuriser le service</strong> (journaux techniques, limitation des abus comme les recherches d’amis répétées) : intérêt légitime à protéger le service et ses utilisateurs.</li>
-          <li><strong>Vous envoyer des rappels de saisie</strong> : votre consentement, que vous pouvez retirer à tout moment dans les paramètres ou les réglages de votre appareil.</li>
+          <li><strong>Fournir le service</strong> (compte, tableur, tableau de bord, synchronisation, partage) : exécution des conditions d’utilisation que vous acceptez.</li>
+          <li><strong>Sécuriser le service</strong> (journaux techniques, limitation des abus comme les recherches d’amis répétées) : intérêt légitime à protéger le service et ses utilisateurs.</li>
+          <li><strong>Vous envoyer des rappels de saisie</strong> : votre consentement, que vous pouvez retirer à tout moment dans les paramètres ou les réglages de votre appareil.</li>
+          <li><strong>Gérer votre abonnement</strong> (lorsque vous souscrivez une formule payante : paiement, facturation, résiliation) : exécution du contrat, et respect de nos obligations comptables et légales.</li>
         </ul>
         <p>Aucune décision automatisée ni aucun profilage n’est réalisé.</p>
       </section>
@@ -86,61 +91,64 @@
       <section id="stockage">
         <h2>Où vos données sont stockées</h2>
         <p>
-          Tant que vous n'êtes pas connecté, vos données restent dans votre navigateur.
+          Tant que vous n’êtes pas connecté, vos données restent dans votre navigateur.
           Une fois connecté, elles sont synchronisées avec votre compte sur une base de
-          données Supabase située dans l'Union européenne (Irlande), via une connexion
+          données Supabase située dans l’Union européenne (Irlande), via une connexion
           chiffrée (HTTPS). La base de données est aussi chiffrée au repos.
         </p>
-        <p>Pour s’ouvrir sans connexion, le site garde aussi sur l’appareil une copie de ses propres fichiers (pages, styles, scripts), qui ne contient aucune donnée personnelle. Pour fonctionner hors ligne, une copie locale de vos données reste aussi sur cet appareil. Elle est séparée par compte dans le navigateur, mais elle n'est pas chiffrée par un secret personnel. Protégez l'accès à votre appareil et effacez les données du navigateur sur un appareil partagé.</p>
+        <p>Pour s’ouvrir sans connexion, le site garde aussi sur l’appareil une copie de ses propres fichiers (pages, styles, scripts), qui ne contient aucune donnée personnelle. Pour fonctionner hors ligne, une copie locale de vos données reste aussi sur cet appareil. Elle est séparée par compte dans le navigateur, mais elle n’est pas chiffrée par un secret personnel. Protégez l’accès à votre appareil et effacez les données du navigateur sur un appareil partagé.</p>
       </section>
 
       <section id="partage">
         <h2>Qui peut y accéder</h2>
         <ul>
           <li><strong>Vous.</strong> Des règles de sécurité au niveau de la base de données (Row Level Security) limitent chaque ligne à son propriétaire.</li>
-          <li><strong>Les personnes que vous invitez</strong>, uniquement pour les éléments que vous partagez explicitement, et jusqu'à ce que vous retiriez l'accès.</li>
-          <li><strong>Nos sous-traitants techniques</strong>, uniquement pour faire fonctionner le service :
+          <li><strong>Les personnes que vous invitez</strong>, uniquement pour les éléments que vous partagez explicitement, et jusqu’à ce que vous retiriez l’accès.</li>
+          <li><strong>Nos sous-traitants techniques</strong>, uniquement pour faire fonctionner le service :
             <ul>
-              <li>Supabase : base de données, comptes et e-mails de connexion, hébergés dans l’Union européenne ;</li>
-              <li>Vercel Inc. : hébergement et diffusion du site, aux États-Unis. Ce transfert est encadré par le cadre de protection des données UE–États-Unis (Data Privacy Framework) et par des clauses contractuelles types de la Commission européenne ;</li>
-              <li>si vous activez les rappels, le service de notifications de votre appareil (Apple, Google ou Mozilla) achemine le rappel ; son contenu est chiffré et ne contient aucun montant.</li>
+              <li>Supabase : base de données, comptes et e-mails de connexion, hébergés dans l’Union européenne ;</li>
+              <li>Vercel Inc. : hébergement et diffusion du site, aux États-Unis. Ce transfert est encadré par le cadre de protection des données UE–États-Unis (Data Privacy Framework) et par des clauses contractuelles types de la Commission européenne ;</li>
+              <li>Stripe Payments Europe, Ltd. (Irlande), avec sa maison mère Stripe, Inc. (États-Unis) : traitement des paiements, de la facturation et des abonnements. Ce sous-traitant n’intervient que lorsque les formules payantes sont ouvertes à la vente et que vous en souscrivez une ; Meuniance ne voit ni ne stocke vos coordonnées bancaires ;</li>
+              <li>si vous activez les rappels, le service de notifications de votre appareil (Apple, Google ou Mozilla) achemine le rappel ; son contenu est chiffré et ne contient aucun montant.</li>
             </ul>
           </li>
-          <li>Personne d'autre : vos données ne sont ni vendues, ni louées, ni transmises à des tiers à des fins commerciales.</li>
+          <li>Personne d’autre : nous ne vendons pas vos données et ne les louons pas. Elles sont hébergées par Supabase et Vercel et, pour les paiements, traitées par Stripe ; elles ne sont transmises à aucun autre tiers à des fins commerciales.</li>
         </ul>
       </section>
 
       <section>
-        <h2>Cookies et mesure d'audience</h2>
+        <h2>Cookies et mesure d’audience</h2>
         <p>
           Aucun cookie publicitaire et aucun outil de statistiques. Seul un stockage local
           technique, indispensable au service, est utilisé pour vous garder connecté et
-          conserver vos préférences : il ne nécessite pas de consentement.
+          conserver vos préférences : il ne nécessite pas de consentement.
         </p>
       </section>
 
       <section>
         <h2>Durée de conservation</h2>
         <ul>
-          <li>Vos données sont conservées tant que votre compte existe. À sa suppression, elles sont effacées de la base de données ; les sauvegardes techniques éventuelles expirent sous 30 jours.</li>
+          <li>Vos données sont conservées tant que votre compte existe. À sa suppression, elles sont effacées de la base de données ; les sauvegardes techniques éventuelles sont supprimées selon la durée de rétention de notre hébergeur.</li>
           <li>Un compte inactif depuis 3 ans peut être supprimé, après un e-mail de prévenance vous laissant le temps de le conserver.</li>
           <li>Les données des rappels sont supprimées dès que vous les désactivez.</li>
           <li>Les journaux techniques sont conservés pour une durée limitée fixée par nos hébergeurs.</li>
+          <!-- À COMPLÉTER PAR L’ÉDITEUR : durée de conservation des données de facturation (pièces comptables et fiscales), à fixer avec un conseil juridique. Ne rien inventer. -->
+          <li>Les données de facturation liées à une formule payante sont conservées pendant la durée prévue par la loi pour les documents comptables. [Durée à compléter par l’éditeur.]</li>
         </ul>
       </section>
 
       <section id="droits">
         <h2>Vos droits (RGPD)</h2>
         <p>
-          Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation,
-          de portabilité et d'opposition, ainsi que du droit de retirer votre consentement
+          Vous disposez d’un droit d’accès, de rectification, d’effacement, de limitation,
+          de portabilité et d’opposition, ainsi que du droit de retirer votre consentement
           et de définir des directives sur le sort de vos données après votre décès.
-          Concrètement, depuis l'application :
+          Concrètement, depuis l’application :
         </p>
         <ul>
-          <li><strong>Accès et rectification :</strong> vos données sont modifiables directement dans le tableur.</li>
-          <li><strong>Portabilité :</strong> <em>Paramètres → Données et synchronisation → Télécharger mes données</em> fournit en un clic un fichier JSON avec votre tableur, vos objectifs, vos notes, vos réglages et la liste de vos partages. Le bouton « Exporter » du tableur produit aussi un fichier Excel.</li>
-          <li><strong>Effacement :</strong> <em>Paramètres → Données et synchronisation</em> permet de réinitialiser vos données, et <em>Paramètres → Profil</em> de supprimer votre compte.</li>
+          <li><strong>Accès et rectification :</strong> vos données sont modifiables directement dans le tableur.</li>
+          <li><strong>Portabilité :</strong> <em>Paramètres → Données → Télécharger mes données</em> fournit en un clic un fichier JSON avec votre tableur, vos objectifs, vos notes, vos réglages et la liste de vos partages. Le bouton « Exporter » du tableur produit aussi un fichier Excel.</li>
+          <li><strong>Effacement :</strong> <em>Paramètres → Données</em> permet d’effacer la copie de vos données sur cet appareil, et <em>Paramètres → Profil</em> de supprimer votre compte (ainsi que votre abonnement éventuel).</li>
         </ul>
         <p>
           Nous répondons à toute demande dans un délai d’un mois. Si vous estimez que vos
@@ -159,7 +167,7 @@
         <p>
           Le site est servi exclusivement en HTTPS, avec une politique de sécurité de
           contenu stricte, des bibliothèques hébergées par le site lui-même et des
-          vérifications d'intégrité empêchant l'exécution de code modifié. En cas de violation
+          vérifications d’intégrité empêchant l’exécution de code modifié. En cas de violation
           de données susceptible de vous exposer à un risque élevé, vous serez prévenu.
         </p>
       </section>
@@ -169,14 +177,14 @@
         <p>
            Pour toute question ou demande relative à vos données, écrivez à
            <a href="mailto:louka.meunier1@gmail.com">louka.meunier1@gmail.com</a> depuis
-           l'adresse e-mail associée à votre compte.
+           l’adresse e-mail associée à votre compte.
         </p>
       </section>
     </main>
 
     <footer class="public-footer">
       <p>© 2026 Meuniance</p>
-      <nav><a href="/mentions-legales">Mentions légales</a><a href="/conditions">Conditions d'utilisation</a></nav>
+      <nav><a href="/mentions-legales">Mentions légales</a><a href="/conditions">Conditions d’utilisation</a></nav>
     </footer>
   </div>
 </body>

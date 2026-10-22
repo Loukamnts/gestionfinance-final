@@ -114,7 +114,7 @@
     function section(title,sub,tiles){var s=el("section");s.append(el("h4","",title),el("p","",sub));var g=el("div","gfa-tiles");g.setAttribute("role","group");g.setAttribute("aria-label",title);tiles.forEach(function(t){g.append(t);});s.append(g);return s;}
     function tile(label,small,on,preview,act){var b=el("button","gfa-tile");b.type="button";b.setAttribute("aria-pressed",String(on));var s=el("strong","",label);b.append(preview,s,el("small","",small));b.addEventListener("click",function(){act();setTimeout(appearance,60);});return b;}
     var modeS=section(t2("Mode d’affichage","Display mode"),t2("Clair pour la journée, sombre pour le soir.","Light for daytime, dark for the evening."),[
-      tile(t2("Clair","Light"),t2("Fond crème, carte sombre","Cream background"),mode==="light",prev("light",layout),function(){var b=document.querySelector('[data-mode-option="light"]');if(b)b.click();}),
+      tile(t2("Clair","Light"),t2("Fond crème, carte sombre","Cream background, dark card"),mode==="light",prev("light",layout),function(){var b=document.querySelector('[data-mode-option="light"]');if(b)b.click();}),
       tile(t2("Sombre","Dark"),t2("Reposant pour les yeux","Easy on the eyes"),mode==="dark",prev("dark",layout),function(){var b=document.querySelector('[data-mode-option="dark"]');if(b)b.click();})]);
     var tog=byId("interfaceLayoutToggle");
     function setLayout(want){if(!tog)return;var on=tog.getAttribute("aria-checked")==="true";if(on!==want)tog.click();}

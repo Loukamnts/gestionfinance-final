@@ -1,4 +1,4 @@
-/* Abonnements Meuniance : offres, page « Abonnement », onboarding et limites par formule.
+/* Formules Meuniance : offres, page « Formule », onboarding et limites par formule.
    Paiement : la fonction Supabase « billing » (Stripe Checkout + portail client). Les ventes et les limites
    s'ouvrent d'elles-mêmes dès que la clé Stripe est enregistrée côté serveur (réponse « ready ») ;
    avant cela, période de lancement : tout reste ouvert. Qui a payé est décidé par le serveur (get_my_profile). */
@@ -108,7 +108,7 @@
   var returnFlag="";try{var q=new URLSearchParams(window.location.search);returnFlag=q.get("abonnement")||"";if(returnFlag){q.delete("abonnement");var rest=q.toString();history.replaceState(history.state,"",window.location.pathname+(rest?"?"+rest:"")+window.location.hash);}}catch(e){}
   function thanks(){
     var plan=planById(state.plan);if(!RANK[state.plan])return;
-    dialog(t2("Abonnement","Plan"),t2("Merci, "+plan.name+" est actif\u00a0!","Thank you, "+plan.name+" is active!"),t2("Toutes les fonctions de "+plan.name+" sont ouvertes sur ton compte, sur tous tes appareils. Tu peux gérer ou résilier ton abonnement à tout moment dans Paramètres › Abonnement.","Every "+plan.name+" feature is now open on your account, on all your devices. You can manage or cancel anytime in Settings › Plan."),[{label:t2("Super","Great"),primary:true}]);
+    dialog(t2("Formule","Plan"),t2("Merci, "+plan.name+" est actif\u00a0!","Thank you, "+plan.name+" is active!"),t2("Toutes les fonctions de "+plan.name+" sont ouvertes sur ton compte, sur tous tes appareils. Tu peux gérer ou résilier ta formule à tout moment dans Paramètres › Formule.","Every "+plan.name+" feature is now open on your account, on all your devices. You can manage or cancel anytime in Settings › Plan."),[{label:t2("Super","Great"),primary:true}]);
   }
 
   /* ── Cartes d'offres ─────────────────────────────── */
@@ -127,7 +127,7 @@
       var list=el("ul");plan.features.forEach(function(f){var li=el("li",f[2]?"is-dim":"",tr(f));if(f[3])li.append(el("small","gfs-soon",t2("bientôt","coming soon")));list.append(li);});card.append(list);
       var btn=el("button","gfs-btn"+(plan.featured&&!isCurrent?" is-primary":""));btn.type="button";
       if(isCurrent){btn.textContent=t2("Formule actuelle","Current plan");btn.disabled=true;}
-      else if(plan.id==="free"){btn.textContent=(RANK[state.plan]>0)?t2("Gérer mon abonnement","Manage my plan"):tr(plan.cta);btn.addEventListener("click",function(){if(options.onChoose&&RANK[state.plan]===0){options.onChoose("free");return;}manage();});}
+      else if(plan.id==="free"){btn.textContent=(RANK[state.plan]>0)?t2("Gérer ma formule","Manage my plan"):tr(plan.cta);btn.addEventListener("click",function(){if(options.onChoose&&RANK[state.plan]===0){options.onChoose("free");return;}manage();});}
       else if(!BILLING.live){btn.textContent=t2("Bientôt disponible","Coming soon");btn.disabled=true;btn.classList.add("is-soon");}
       else{btn.textContent=tr(plan.cta);btn.addEventListener("click",function(){(options.onChoose||startCheckout)(plan.id);});}
       if(options.pending)btn.disabled=true;// formule pas encore lue : on ne propose rien à l'aveugle
@@ -154,13 +154,13 @@
     var plan=planById(planId),user=account().user;
     var welcome=byId("accountWelcomeDialog");if(welcome&&welcome.open)welcome.close();
     if(!user){
-      dialog(t2("Abonnement","Plan"),t2("Connecte-toi d’abord","Sign in first"),t2("Ton abonnement est rattaché à ton compte Meuniance, pour le retrouver sur tous tes appareils.","Your plan is linked to your Meuniance account so you get it on every device."),[{label:t2("Plus tard","Later")},{label:t2("Se connecter","Sign in"),primary:true,run:function(){openSettings("account");}}]);
+      dialog(t2("Formule","Plan"),t2("Connecte-toi d’abord","Sign in first"),t2("Ta formule est rattachée à ton compte Meuniance, pour la retrouver sur tous tes appareils.","Your plan is linked to your Meuniance account so you get it on every device."),[{label:t2("Plus tard","Later")},{label:t2("Se connecter","Sign in"),primary:true,run:function(){openSettings("account");}}]);
       return;
     }
     if(BILLING.live){goStripe({action:"checkout",plan:plan.id});return;}
     dialog(t2("Meuniance "+plan.name,"Meuniance "+plan.name),t2("Le paiement en ligne arrive bientôt","Online payment is coming soon"),
       BILLING.enforce?t2("Tu pourras passer à "+plan.name+" ("+price(plan.price)+" par mois) dès l’ouverture des paiements. Tes données restent intactes en attendant.","You will be able to upgrade to "+plan.name+" ("+price(plan.price)+" per month) as soon as payments open. Your data stays intact meanwhile.")
-        :t2("Pendant le lancement, toutes les fonctions de "+plan.name+" sont déjà ouvertes sur ton compte. On te préviendra avant toute facturation.","During launch, every "+plan.name+" feature is already open on your account. We will let you know before any billing starts."),
+        :t2("Pendant le lancement, toutes les fonctions de "+plan.name+" sont déjà ouvertes sur ton compte. Tu seras prévenu avant toute facturation.","During launch, every "+plan.name+" feature is already open on your account. We will let you know before any billing starts."),
       [{label:t2("Compris","Got it"),primary:true}]);
   }
   // Ouvre la page Stripe (paiement ou portail). L'adresse vient du serveur et doit être une page stripe.com.
@@ -175,14 +175,14 @@
       throw new Error("billing");
     }).catch(function(e){
       busy=false;
-      dialog(t2("Abonnement","Plan"),t2("La page de paiement n’a pas pu s’ouvrir","The payment page couldn’t open"),
+      dialog(t2("Formule","Plan"),t2("La page de paiement n’a pas pu s’ouvrir","The payment page couldn’t open"),
         e&&e.status===429?t2("Une demande vient d’être faite. Réessaie dans 30 secondes.","A request was just made. Try again in 30 seconds.")
           :t2("Vérifie ta connexion puis réessaie. Aucun paiement n’a été fait.","Check your connection and try again. No payment was made."),[{label:t2("Fermer","Close"),primary:true}]);
     });
   }
   function manage(){
     if(BILLING.live&&state.billing&&state.billing.canManage){goStripe({action:"portal"});return;}
-    dialog(t2("Abonnement","Plan"),t2("Gérer ton abonnement","Manage your plan"),t2("Pour changer de formule ou résilier, écris-nous depuis la page Confidentialité et contact. La résiliation prend effet à la fin du mois payé.","To change plan or cancel, contact us from the Privacy and contact page. Cancellation takes effect at the end of the paid month."),[{label:t2("Fermer","Close"),primary:true}]);
+    dialog(t2("Formule","Plan"),t2("Gérer ta formule","Manage your plan"),t2("Pour changer de formule ou résilier, écris-nous depuis la page Confidentialité et contact. La résiliation prend effet à la fin du mois payé.","To change plan or cancel, contact us from the Privacy and contact page. Cancellation takes effect at the end of the paid month."),[{label:t2("Fermer","Close"),primary:true}]);
   }
   function openUpgrade(feature){
     var need=planById(FEATURE_PLAN[feature]||"plus");
@@ -191,19 +191,19 @@
       [{label:t2("Plus tard","Later")},{label:t2("Voir les formules","See plans"),primary:true,run:function(){openSettings("plan");}}]);
   }
 
-  /* ── Page « Abonnement » dans les paramètres ───── */
+  /* ── Page « Formule » dans les paramètres ───── */
   function ensurePanel(){
     var hub=byId("settingsHub");
     if(hub&&!hub.querySelector('[data-settings-view="plan"]')){
       var account=hub.querySelector('[data-settings-view="account"]'),item=el("button","settings-hub-item");
       item.type="button";item.dataset.settingsView="plan";
-      var span=el("span"),strong=el("strong","",t2("Abonnement","Plan")),small=el("small","",t2("Free, Plus ou Pro","Free, Plus or Pro"));
+      var span=el("span"),strong=el("strong","",t2("Formule","Plan")),small=el("small","",t2("Free, Plus ou Pro","Free, Plus or Pro"));
       strong.dataset.gfsText="plan";small.dataset.gfsText="planHint";span.append(strong,small);item.append(span);
       if(account&&account.nextSibling)hub.insertBefore(item,account.nextSibling);else hub.append(item);
     }
     if(!document.querySelector('[data-settings-panel="plan"]')){
       var after=document.querySelector('[data-settings-panel="account"]');if(!after)return;
-      var panel=el("section","settings-section panel gfplan-panel");panel.dataset.settingsPanel="plan";panel.hidden=true;panel.setAttribute("aria-label",t2("Abonnement","Plan"));panel.id="gfsPlanPanel";
+      var panel=el("section","settings-section panel gfplan-panel");panel.dataset.settingsPanel="plan";panel.hidden=true;panel.setAttribute("aria-label",t2("Formule","Plan"));panel.id="gfsPlanPanel";
       after.parentNode.insertBefore(panel,after.nextSibling);
     }
   }
@@ -217,7 +217,7 @@
       var name=el("strong");name.append(window.MeuniLoader.inline(t2("Chargement de ta formule…","Loading your plan…"),{size:"sm"}));
       copy.append(el("small","",t2("Ta formule actuelle","Your current plan")),name,el("span",""," "));
     }
-    else copy.append(el("small","",t2("Ta formule actuelle","Your current plan")),el("strong","",plan.name+(plan.price?" · "+price(plan.price)+t2(" / mois"," / month"):"")),el("span","",account().user?(state.since?t2("Abonné depuis le ","Subscribed since ")+date(state.since):t2("Aucun abonnement payant","No paid subscription")):t2("Connecte-toi pour retrouver ta formule sur tous tes appareils.","Sign in to keep your plan on every device.")));
+    else copy.append(el("small","",t2("Ta formule actuelle","Your current plan")),el("strong","",plan.name+(plan.price?" · "+price(plan.price)+t2(" / mois"," / month"):"")),el("span","",account().user?(state.since?t2("Formule payante depuis le ","Paid plan since ")+date(state.since):t2("Aucune formule payante","No paid plan")):t2("Connecte-toi pour retrouver ta formule sur tous tes appareils.","Sign in to keep your plan on every device.")));
     current.append(copy);
     if(pending){/* pas de bouton tant que la formule n'est pas connue */}
     else if(!account().user){var signin=el("button","gfs-btn is-inline",t2("Se connecter","Sign in"));signin.type="button";signin.addEventListener("click",function(){openSettings("account");});current.append(signin);}
@@ -245,16 +245,16 @@
   function addEntryPoints(){
     var nav=document.querySelector(".studio-sidebar-nav");
     if(nav&&!nav.querySelector("[data-open-plans]")){
-      var settings=nav.querySelector('[data-page="settings"]'),b=el("button");b.type="button";b.setAttribute("data-open-plans","");b.setAttribute("aria-label",t2("Abonnement","Plan"));b.title=t2("Abonnement","Plan");
+      var settings=nav.querySelector('[data-page="settings"]'),b=el("button");b.type="button";b.setAttribute("data-open-plans","");b.setAttribute("aria-label",t2("Formule","Plan"));b.title=t2("Formule","Plan");
       b.innerHTML='<span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5.5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.9"/><path d="M3 10h18" stroke="currentColor" stroke-width="1.9"/><path d="M7 15h4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></span>';
-      b.append(document.createTextNode(t2("Abonnement","Plan")));b.dataset.gfsLabel="1";
+      b.append(document.createTextNode(t2("Formule","Plan")));b.dataset.gfsLabel="1";
       if(settings)nav.insertBefore(b,settings);else nav.append(b);
     }
     var pop=byId("profilePopover");
     if(pop&&!pop.querySelector("[data-open-plans]")){
       var link=el("button","profile-menu-link");link.type="button";link.setAttribute("data-open-plans","");link.title=t2("Voir et changer ta formule","See and change your plan");
       link.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18" stroke="currentColor" stroke-width="1.8"/><path d="M7 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
-      var label=el("span","gfs-popover-label",t2("Abonnement","Plan"));link.append(label);
+      var label=el("span","gfs-popover-label",t2("Formule","Plan"));link.append(label);
       var badge=el("span","gfs-lock");badge.id="gfsPopoverPlan";link.append(badge);
       var identity=byId("profileIdentityButton");if(identity&&identity.nextSibling)pop.insertBefore(link,identity.nextSibling);else pop.append(link);
     }
@@ -263,7 +263,7 @@
   }
   function refresh(){
     var plan=planById(state.plan),badge=byId("gfsPopoverPlan");if(badge){badge.textContent=plan.name;badge.hidden=waiting();}
-    var fact=byId("identityPlan");if(fact&&account().user&&!waiting())fact.textContent=plan.id==="free"?t2("Gratuit","Free"):plan.name;
+    var fact=byId("identityPlan");if(fact&&account().user&&!waiting())fact.textContent=plan.name;
     renderPanel();updateLocks();keepTrendsView();
   }
   // Vue « Évolution » du graphique (Plus) : restée enregistrée sans l'offre, elle revient sur la vue précédente.
@@ -275,10 +275,10 @@
     ["btnSheetExport"].forEach(function(id){var b=byId(id);if(!b)return;var lock=b.querySelector(".gfs-lock");var locked=!can("excel");if(locked&&!lock){lock=el("span","gfs-lock","Plus");b.append(lock);}else if(!locked&&lock)lock.remove();});
   }
   function relabel(){
-    document.querySelectorAll('.studio-sidebar-nav [data-open-plans]').forEach(function(b){var node=b.lastChild;if(node&&node.nodeType===3)node.textContent=t2("Abonnement","Plan");b.setAttribute("aria-label",t2("Abonnement","Plan"));b.title=t2("Abonnement","Plan");});
-    document.querySelectorAll('[data-gfs-text="plan"]').forEach(function(n){n.textContent=t2("Abonnement","Plan");});
+    document.querySelectorAll('.studio-sidebar-nav [data-open-plans]').forEach(function(b){var node=b.lastChild;if(node&&node.nodeType===3)node.textContent=t2("Formule","Plan");b.setAttribute("aria-label",t2("Formule","Plan"));b.title=t2("Formule","Plan");});
+    document.querySelectorAll('[data-gfs-text="plan"]').forEach(function(n){n.textContent=t2("Formule","Plan");});
     document.querySelectorAll('[data-gfs-text="planHint"]').forEach(function(n){n.textContent=t2("Free, Plus ou Pro","Free, Plus or Pro");});
-    document.querySelectorAll(".gfs-popover-label").forEach(function(n){n.textContent=t2("Abonnement","Plan");});
+    document.querySelectorAll(".gfs-popover-label").forEach(function(n){n.textContent=t2("Formule","Plan");});
     var m=byId("gfsIdentityManage");if(m)m.textContent=t2("Changer","Change");
     refresh();
   }

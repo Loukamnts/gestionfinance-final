@@ -86,7 +86,7 @@
     if(!box){box=el("div");box.id="gfhSheetExample";anchor.parentNode.insertBefore(box,anchor);}
     if(on){box.className="";box.replaceChildren(exampleBar("sheet"));return;}
     box.className="gfh-sheet-empty";
-    var txt=el("div");txt.append(el("strong","",t2("Ton tableur est vide.","Your spreadsheet is empty.")),el("span","",t2(" Saisis tes montants mois par mois, importe un fichier Excel, ou pars d’un exemple."," Type your amounts month by month, import an Excel file, or start from a sample.")));
+    var txt=el("div");txt.append(el("strong","",t2("Ton moulin est prêt, il attend ses premiers grains…","The mill is ready and waiting for its first grain…")),el("span","",t2(" Saisis un montant, importe un relevé ou un fichier Excel, ou pars d’un exemple."," Type an amount, import a statement or an Excel file, or start from a sample.")));
     var b=el("button","gfh-btn",t2("Charger un exemple","Load a sample"));b.type="button";b.addEventListener("click",loadExample);
     box.replaceChildren(txt,b);
   }
@@ -271,7 +271,7 @@
       var txt=el("span","",it.name);r.append(txt,el("span","gfh-fixed-amt",eur(it.amount)),add);list.append(r);
     });
     var acts=el("div","gfh-acts"),all=el("button","gfh-btn is-primary",t2("Tout ajouter","Add all")),later=el("button","gfh-link",t2("Plus tard","Later"));all.type=later.type="button";
-    all.addEventListener("click",function(){writeEntries(sug.items.map(function(it){return{year:sug.year,mi:sug.mi,label:it.name,amount:-it.amount,onlyIfEmpty:true};}));toast(sug.items.length+t2(" dépenses fixes ajoutées à "," fixed expenses added to ")+mname(sug.mi));});
+    all.addEventListener("click",function(){writeEntries(sug.items.map(function(it){return{year:sug.year,mi:sug.mi,label:it.name,amount:-it.amount,onlyIfEmpty:true};}));toast(fixedAdded(sug.items.length,mname(sug.mi)));});
     later.addEventListener("click",function(){lsSet(FIX_KEY,tag);schedule();});
     acts.append(all,later);box.append(list,acts);return box;
   }
@@ -327,7 +327,11 @@
     if(quietAlerts){quietAlerts=false;return;}
     if(fresh.length){var sorted=fresh.sort(function(a,b){return b.lvl-a.lvl||b.spent/b.bud-a.spent/a.bud;});pushNow(sorted);whenFree(function(){if(document.body.dataset.page==="dashboard")budgetAlert(sorted);});}
   }
-  function alertText(a){return a.lvl>=100?t2(a.name+" : plafond atteint ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": limit reached ("+eur(a.spent)+" / "+eur(a.bud)+")"):t2(a.name+" : 80 % du plafond ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": 80% of the limit ("+eur(a.spent)+" / "+eur(a.bud)+")");}
+  /* Pluriel : « 1 dépense fixe ajoutée » / « 3 dépenses fixes ajoutées » */
+  function fixedAdded(n,month){return en()?n+" fixed expense"+(n===1?"":"s")+" added to "+month:n===1?"1 dépense fixe ajoutée à "+month:n+" dépenses fixes ajoutées à "+month;}
+  /* Texte des notifications poussées (écran verrouillé, autres appareils) : jamais de montant. */
+  function pushText(a){return a.lvl>=100?t2(a.name+" : plafond atteint",a.name+": limit reached"):t2(a.name+" : 80 % du plafond",a.name+": 80% of the limit");}
+  function pushBody(a){return a.lvl>=100?t2("Tu as atteint le plafond fixé pour ce mois.","You reached the limit set for this month."):t2("Tu approches du plafond fixé pour ce mois.","You are getting close to this month’s limit.");}
   // Bandeau fin au-dessus de la barre du bas : une ligne, une croix. Se ferme seul, ou en changeant de page.
   function budgetAlert(list){
     var first=list[0],more=list.length-1,over=first.lvl>=100;
@@ -341,7 +345,7 @@
     c.append(ic,tx,x);document.body.append(c);requestAnimationFrame(function(){c.classList.add("is-on");});
     setTimeout(function(){if(c.isConnected)closeAlert();},9000);
   }
-  function pushNow(list){var first=list[0],more=list.length-1,title=first.lvl>=100?t2("Plafond atteint","Limit reached"):t2("Bientôt au plafond","Close to the limit");pushBudget(list,title,alertText(first)+(more?t2(" · et "+more+" autre"+(more>1?"s":""),", and "+more+" more"):""));}
+  function pushNow(list){var first=list[0],more=list.length-1,title=first.lvl>=100?t2("Plafond atteint","Limit reached"):t2("Bientôt au plafond","Close to the limit");pushBudget(list,title,pushText(first)+(more?t2(" · et "+more+" autre"+(more>1?"s":""),", and "+more+" more"):""));}
   /* Notification sur tous mes appareils (compte connecté et notifications activées), même app fermée.
      Sinon, notification de cet appareil seulement si elle a déjà été autorisée (jamais de demande surprise). */
   function pushBudget(list,title,body){
@@ -352,9 +356,7 @@
       if(!ready){local();return;}
       var now=new Date(),month=now.getFullYear()+"-"+(now.getMonth()+1);
       list.forEach(function(a){
-        var t=a.lvl>=100?t2(a.name+" : plafond atteint",a.name+": limit reached"):t2(a.name+" : 80 % du plafond",a.name+": 80% of the limit");
-        var b=amountsHidden()?(a.lvl>=100?t2("Tu as atteint le plafond fixé pour ce mois.","You reached the limit set for this month."):t2("Tu approches du plafond fixé pour ce mois.","You are getting close to this month’s limit."))
-          :(a.lvl>=100?t2(eur(a.spent)+" dépensés pour un plafond de "+eur(a.bud)+".",eur(a.spent)+" spent for a "+eur(a.bud)+" limit."):t2("Il reste "+eur(Math.max(0,a.bud-a.spent))+" avant le plafond de "+eur(a.bud)+".",eur(Math.max(0,a.bud-a.spent))+" left before the "+eur(a.bud)+" limit."));
+        var t=pushText(a),b=pushBody(a);// jamais de montant dans une notification poussée
         R.notifyMe("budget","plafond:"+month+":"+normKey(a.name).slice(0,40)+":"+a.lvl,t,b,"/accueil");
       });
     }).catch(local);
@@ -380,7 +382,7 @@
     var R=window.GFReminders;if(!R||!R.notifyMe)return;
     fresh.forEach(function(x){
       var nm=String(x.g.title||t2("Ton objectif","Your goal")).slice(0,60);
-      R.notifyMe("goals","goal:"+String(x.g.id).slice(0,40)+":"+x.tar,title,amountsHidden()?t2("« "+nm+" » est atteint.","“"+nm+"” is reached."):t2("« "+nm+" » : "+eur(x.cur)+" sur "+eur(x.tar)+".","“"+nm+"”: "+eur(x.cur)+" of "+eur(x.tar)+"."),"/objectifs");
+      R.notifyMe("goals","goal:"+String(x.g.id).slice(0,40)+":"+x.tar,title,t2("« "+nm+" » est atteint.","“"+nm+"” is reached."),"/objectifs");
     });
   }
 
@@ -426,7 +428,7 @@
     var rate=R.salary?Math.round(R.savings/R.salary*100):null;
     stat(t2("Épargne","Savings"),eur(R.savings),rate!=null&&R.savings?rate+(en()?"%":" %")+t2(" de tes revenus"," of your income"):(R.savings?"":t2("Rien de côté","Nothing saved")));
     if(top)stat(t2("Plus grosse dépense","Biggest expense"),eur(cats[top]),top+(R.expenses?" · "+Math.round(cats[top]/R.expenses*100)+(en()?"% of spending":" % de tes dépenses"):""));
-    if(prev&&prev.expenses&&R.expenses){var dv=(R.expenses-prev.expenses)/prev.expenses*100,ab=Math.abs(dv);stat(t2("Dépenses","Spending"),(dv>0?"+":dv<0?"−":"")+ab.toLocaleString(en()?"en-IE":"fr-FR",{maximumFractionDigits:0})+(en()?"%":" %"),t2("vs ","vs ")+mname(prev.mi)+" · "+eur(R.expenses),dv>0?"is-up":"is-down");}
+    if(prev&&prev.expenses&&R.expenses){var dv=(R.expenses-prev.expenses)/prev.expenses*100,ab=Math.abs(dv);stat(t2("Dépenses","Spending"),(dv>0?"+":dv<0?"−":"")+ab.toLocaleString(en()?"en-IE":"fr-FR",{maximumFractionDigits:0})+(en()?"%":" %"),t2("face à ","vs ")+mname(prev.mi)+" · "+eur(R.expenses),dv>0?"is-up":"is-down");}
     else stat(t2("Dépenses","Spending"),eur(R.expenses),t2("Premier mois comparable","First comparable month"));
     box.append(grid);
     // Un fait marquant, le plus parlant d'abord
@@ -532,7 +534,7 @@
     var bigTxt=eur(sd); card.append(el("div","gfh-big"+(bigTxt.length>11?" is-xl":bigTxt.length>9?" is-long":""),bigTxt));
     var dl=el("div","gfh-dl");
     if(blank)dl.append(document.createTextNode(t2("Aucune donnée pour l’instant","No data yet")));
-    else if(prev&&psd){dl.append(el("b","",pct(sd,psd)),document.createTextNode(" vs "+mname(prev.mi)));}
+    else if(prev&&psd){dl.append(el("b","",pct(sd,psd)),document.createTextNode(t2(" face à "," vs ")+mname(prev.mi)));}
     else dl.append(document.createTextNode(t2("Premier mois suivi","First tracked month")));
     if(!hasStart){var su=el("button","gfh-setup",t2("Ajouter mon solde de départ","Add my starting balance"));su.type="button";su.addEventListener("click",function(){if(window.FinanceSheet&&window.FinanceSheet.openStartingBalance)window.FinanceSheet.openStartingBalance();else if(window.setPage)window.setPage("sheet");});dl.append(su);}
     card.append(dl);
@@ -553,7 +555,7 @@
       var ep=all.filter(function(m){return m.year===sel.year&&m.mi<=sel.mi;}).reduce(function(s,m){return s+m.savings;},0);
       var f1=el("div");f1.append(el("div","t",t2("Revenus","Income")),el("div","v"+(sel.salary?"":" none"),sel.salary?eurS(sel.salary):"—"),el("small","",sel.salary?t2("Reste ","Left ")+eur(rest):t2("Non saisis","Not entered")));
       var f2=el("div");f2.append(el("div","t",t2("Dépenses","Expenses")),el("div","v"+(sel.expenses?"":" none"),sel.expenses?eurS(sel.expenses):"—"));
-      var d2=el("small");if(!sel.expenses)d2.textContent=t2("Aucune ce mois","None this month");else if(prev&&prev.expenses){d2.append(el("b",sel.expenses<=prev.expenses?"up":"down",pct(sel.expenses,prev.expenses)),document.createTextNode(" vs "+mname(prev.mi).slice(0,4)+"."));}else d2.textContent=t2("Ce mois","This month");f2.append(d2);
+      var d2=el("small");if(!sel.expenses)d2.textContent=t2("Rien ce mois-ci","None this month");else if(prev&&prev.expenses){d2.append(el("b",sel.expenses<=prev.expenses?"up":"down",pct(sel.expenses,prev.expenses)),document.createTextNode(t2(" face à "," vs ")+mname(prev.mi).slice(0,4)+"."));}else d2.textContent=t2("Ce mois","This month");f2.append(d2);
       var f3=el("div");f3.append(el("div","t",t2("Épargne","Savings")),el("div","v"+(sel.savings?"":" none"),sel.savings?eurS(sel.savings):"—"),el("small","",ep?t2("Cumul ","Total ")+eur(ep):t2("Rien de côté","Nothing saved")));
       foot.append(f1,f2,f3);card.append(foot);
     }
@@ -564,7 +566,7 @@
       var start=el("div","gfh-panel gfh-start");
       start.append(el("span","gfh-kick",t2("Pour commencer","Get started")),el("h3","",t2("Ton accueil se remplit tout seul.","Your home fills itself in.")));
       var steps=el("ol","gfh-steps");[t2("Indique ton solde de départ","Enter your starting balance"),t2("Ajoute ou importe tes opérations","Add or import your transactions"),t2("Retrouve ici ton solde, tes dépenses et ton épargne","See your balance, spending and savings here")].forEach(function(x){steps.append(el("li","",x));});
-      var acts=el("div","gfh-acts"),a1=el("button","gfh-btn is-primary",t2("Ouvrir le tableur","Open the spreadsheet")),a2=el("button","gfh-btn",t2("Importer un fichier","Import a file"));a1.type=a2.type="button";
+      var acts=el("div","gfh-acts"),a1=el("button","gfh-btn is-primary",t2("Ouvrir le tableur","Open the spreadsheet")),a2=el("button","gfh-btn",t2("Importer un relevé ou un fichier Excel","Import a statement or an Excel file"));a1.type=a2.type="button";
       a1.addEventListener("click",function(){if(window.setPage)window.setPage("sheet");});
       a2.addEventListener("click",function(){if(window.setPage)window.setPage("sheet");requestAnimationFrame(function(){var b=byId("btnSheetImport");if(b)b.click();});});
       acts.append(a1,a2);start.append(steps,acts);
