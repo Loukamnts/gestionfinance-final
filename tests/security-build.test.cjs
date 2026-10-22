@@ -119,7 +119,7 @@ test('Offline service worker: versioned, same-origin only, network first',()=>{
   for(const url of list){assert(url.startsWith('/')&&!url.startsWith('//'),url);assert(!/supabase\.co|xlsx\.js/.test(url),url);}
   assert(sw.includes('url.origin !== self.location.origin'));
   assert(sw.includes('request.method !== "GET"'));
-  assert(/var net = network\(event\)/.test(sw),'pages : réseau d’abord');
+  assert(/var refresh = network\(event\)/.test(sw),'pages : copie d’abord, mise à jour en arrière-plan');
   assert(/if \(!navigate && url\.search\)/.test(sw),'fichiers versionnés : copie précopiée d’abord');
   // « network » interroge le réseau (ou la page déjà préchargée par le navigateur), jamais le cache d'abord.
   const network=sw.slice(sw.indexOf('function network('),sw.indexOf('self.addEventListener("fetch"'));

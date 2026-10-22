@@ -1,7 +1,7 @@
 /* Service worker de Meuniance : rappels de saisie et ouverture sans connexion.
    Sûr par construction :
-   - pages : réseau d'abord (la copie ne sert que hors ligne ou si le réseau met plus de 3 s) ; fichiers à adresse
-     versionnée (?v=…) : copie précopiée servie aussitôt, leur contenu ne changeant jamais sous la même adresse ;
+   - pages : la copie de la dernière visite s'ouvre aussitôt, la version à jour est récupérée en arrière-plan ;
+     fichiers à adresse versionnée (?v=…) : copie précopiée servie aussitôt, leur contenu ne changeant jamais sous la même adresse ;
    - seuls les fichiers publics du site (même origine, requêtes GET) sont copiés : jamais tes données,
      jamais Supabase ni aucun autre site, jamais une réponse en erreur ;
    - une seule copie par version : l'ancienne est supprimée à chaque mise en ligne.
@@ -72,23 +72,23 @@ self.addEventListener("fetch", function (event) {
     }));
     return;
   }
-  // Page : réseau d'abord, mais si le réseau met plus de 3 s à répondre (réseau mobile faible), la copie de la
-  // dernière visite s'ouvre aussitôt ; la page à jour arrive à l'ouverture suivante.
-  var net = network(event), attempt = net, slow = false;
-  if (navigate) {
-    attempt = Promise.race([net, new Promise(function (resolve, reject) { setTimeout(function () { slow = true; reject(new Error("slow")); }, 3000); })]);
-  }
-  event.respondWith(attempt.then(function (res) {
+  // Page : la copie de la dernière visite s'ouvre aussitôt (ouverture instantanée, même avec un réseau lent) et la
+  // version à jour est récupérée en arrière-plan pour la prochaine ouverture. Sans copie (toute première visite), réseau.
+  var offline = function () {
+    return new Response("<!doctype html><meta charset=utf-8><title>Meuniance</title><p style=\"font:16px system-ui;padding:24px\">Pas de connexion. Ouvre Meuniance une fois avec du réseau pour l’utiliser hors ligne.</p>", { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } });
+  };
+  var refresh = network(event).then(function (res) {
     if (res.ok && res.type === "basic") {
       var copy = res.clone();
       caches.open(CACHE).then(function (cache) { return cache.put(key, copy); }).catch(function () {});
     }
     return res;
-  }).catch(function () {
-    return caches.open(CACHE).then(function (cache) {
-      return cache.match(key).then(function (hit) {
-        return hit || (slow ? net : navigate ? new Response("<!doctype html><meta charset=utf-8><title>Meuniance</title><p style=\"font:16px system-ui;padding:24px\">Pas de connexion. Ouvre Meuniance une fois avec du réseau pour l’utiliser hors ligne.</p>", { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } }) : Response.error());
-      });
+  });
+  event.waitUntil(refresh.catch(function () {}));
+  event.respondWith(caches.open(CACHE).then(function (cache) {
+    return cache.match(key).then(function (hit) {
+      if (hit) return hit;
+      return refresh.catch(function () { return navigate ? offline() : Response.error(); });
     });
   }));
 });
