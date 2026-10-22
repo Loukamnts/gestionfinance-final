@@ -90,10 +90,10 @@
 
   /* ── Repérage des colonnes ─────────────────────────────────────────── */
   var H={
-    date:/^(date( de l.?)?( ?operation| ?op)?|date operation|date comptable|date de comptabilisation|dateop|date op\.?|booking date|transaction date|date|datum|buchungstag|buchungsdatum|boekingsdatum|fecha|fecha operacion|fecha contable|data|data operazione|data contabile|data registrazione|posting date)$/,
-    value:/date de valeur|dateval|value date|valuta|wertstellung|fecha valor|data valuta|valutadatum/,
+    date:/^(date( de l.?)?( ?operation| ?op)?|date operation|date comptable|date de comptabilisation|dateop|date op\.?|booking date|transaction date|date|datum|buchung|buchungstag|buchungsdatum|data mov\.?|data movimento|data lancamento|fecha movimiento|boekingsdatum|fecha|fecha operacion|fecha contable|data|data operazione|data contabile|data registrazione|posting date)$/,
+    value:/date de valeur|dateval|value date|data valor|valuta|wertstellung|fecha valor|data valuta|valutadatum/,
     label:/libelle|description|detail|operation|nature|intitule|label|motif|beneficiaire|tiers|payee/,
-    amount:/^montant|amount|somme|^value$|betrag|bedrag|importe|importo|^brut$|^gross$|^net$/,
+    amount:/^montant|amount|somme|^(eur|usd|gbp|chf|cad|aud|sek|nok|dkk|pln)$|^value$|betrag|bedrag|importe|importo|^brut$|^gross$|^net$/,
     debit:/debit|paid out|money out|^sortie|^ausgang|^soll$|^debet|^cargo|^addebito|^uscite/,
     credit:/credit|paid in|money in|^entree|^eingang|^haben$|^abono|^accredito|^entrate/
   };
@@ -203,7 +203,7 @@
     ["Loyer","Rent","Dépense",/loyer|miete|alquiler|affitto|foncia|nexity|bailleur|^(?!.*\b(carte|cb)\b).*habitat\b|action logement|immobiliere|\bopac\b|\bhlm\b/],
     // Carburant à part : « SNCF » ou « Uber » ne doivent jamais finir dans une ligne « Essence ».
     ["Carburant","Fuel","Dépense",/totalenergies station|total access|\besso\b|\bshell\b|\b(carte|cb)\b.*\b(bp|total ?energies)\b|\bavia\b|\bstation\b(?! f\b)|station.?service|carburant|essence|gazole|gasoil|\bsp ?9[58]\b|intermarche carbu|leclerc carbu|carrefour carbu|auchan carbu|super u carbu|dyneff|\beni\b|\bagip\b/],
-    ["Courses","Groceries","Dépense",/carrefour|tesco|sainsbury|asda\b|morrisons|waitrose|walmart|costco|rewe|edeka|kaufland|\bpenny\b|delhaize|colruyt|albert heijn|jumbo|mercadona|\bcoop\b|migros|\bmonop\b|leclerc|auchan|lidl|intermarche|super u|hyper u|\bu express|monoprix|franprix|\bcasino\b(?!.*(jeux|barriere|partouche|poker|\bbet\b|betclic|winamax))|\baldi\b|\bpicard\b|biocoop|netto|grand frais|naturalia|\bspar\b|\bmatch\b(?! (point|foot|de))|\bcora\b|g20|coccinelle|marche\b(?! (public|financier))/],
+    ["Courses","Groceries","Dépense",/carrefour|continente|pingo doce|minipreco|supermercad|supermarket|supermarkt|supermarche|tesco|sainsbury|asda\b|morrisons|waitrose|walmart|costco|rewe|edeka|kaufland|\bpenny\b|delhaize|colruyt|albert heijn|jumbo|mercadona|\bcoop\b|migros|\bmonop\b|leclerc|auchan|lidl|intermarche|super u|hyper u|\bu express|monoprix|franprix|\bcasino\b(?!.*(jeux|barriere|partouche|poker|\bbet\b|betclic|winamax))|\baldi\b|\bpicard\b|biocoop|netto|grand frais|naturalia|\bspar\b|\bmatch\b(?! (point|foot|de))|\bcora\b|g20|coccinelle|marche\b(?! (public|financier))/],
     ["Restaurants","Restaurants","Dépense",/restaurant|\bresto\b(?!s? du coeur)|mcdo|mc donald|mcdonald|burger king|\bkfc\b|uber\W*eats|deliveroo|just ?eat|starbucks|boulangerie|brasserie|sushi|pizza|kebab|cafe\b|bistro|o.?tacos|subway|five guys|\b(carte|cb)\b.*\bpaul\b/],
     ["Transports","Transport","Dépense",/sncf|\bg7\b|heetch|free ?now|\bratp\b|navigo|\buber\b|bolt|blablacar|\bstationnement\b|paybyphone|peage|autoroute|vinci|sanef|\baprr\b|parking|indigo|tisseo|\btcl\b|\brtm\b|keolis|transdev|\blime\b|velib|trainline|ouigo|tgv/],
     ["Abonnements","Subscriptions","Dépense",/abonnement(?!.*(edf|engie|gaz|electricite|\beau\b|energie))|\bovh\b|subscription|netflix|spotify|deezer|disney ?(\+|plus)|disneyplus|primevideo|canal\+?|amazon prime|prime video|apple\.com|icloud|google (one|storage|play)|youtube|free mobile|free telecom|freebox|\borange\b(?! ?(boutique|store|shop|magasin))|\bsosh\b|\bsfr\b|bouygues|b ?& ?you|red by|basic.?fit|fitness park|keep cool|crunch|audible|chatgpt|openai/],
@@ -552,7 +552,7 @@
   function preview(ops,fileName){
     return new Promise(function(resolve){
       var extra={},ovr={},inc={},ans={},mode=null,step="found",steps=[],conf=[],summary=null,rowMap={},T=targets(),rowsNow=sheetRows(),flashUndo=null;
-      var filt="all",query="",shown=PAGE,unkSnap=null,unkIdx=0,view=[],rendered=0,lastMk="",multiYear=false,confOpen={};
+      var dirty=true,filt="all",query="",shown=PAGE,unkSnap=null,unkIdx=0,view=[],rendered=0,lastMk="",confOpen={};
       var KINDS=[["Salaire",t2("Revenus","Income")],["Dépense",t2("Dépenses","Expenses")],["Épargne",t2("Épargne","Savings")]],titles={};KINDS.forEach(function(k){titles[k[0]]=k[1];});
       var isNew=function(name){return !rowsNow.some(function(r){return key(r)===key(name);});};
       var ICON_OK='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -634,10 +634,11 @@
       // Applique un choix à une opération de la liste : au marchand (retenu) ou à cette seule opération.
       function apply(r,ch){
         var rule=!!(r.mkey&&r.mkey.length>2&&!r.internal&&r.ig!=="wallet"),was,label=cleanLabel(r),to=ch[1]==="Ignorer"?t2("ignoré","ignored"):ch[0];
+        dirty=true;
         if(rule){var had=Object.prototype.hasOwnProperty.call(extra,r.mkey);was=extra[r.mkey];extra[r.mkey]=ch;flashUndo=function(){if(had)extra[r.mkey]=was;else delete extra[r.mkey];};}
         else{var had2=Object.prototype.hasOwnProperty.call(ovr,r.fp),was2=ovr[r.fp];ovr[r.fp]=ch;flashUndo=function(){if(had2)ovr[r.fp]=was2;else delete ovr[r.fp];};}
         flash.replaceChildren(document.createTextNode(q(label)+" → "+to+" · "));
-        var u=el("button","gfh-link gfb-undo",t2("Annuler","Undo"));u.type="button";u.addEventListener("click",function(){if(flashUndo)flashUndo();flashUndo=null;flash.hidden=true;draw(true);});flash.append(u);flash.hidden=false;
+        var u=el("button","gfh-link gfb-undo",t2("Annuler","Undo"));u.type="button";u.addEventListener("click",function(){if(flashUndo)flashUndo();flashUndo=null;flash.hidden=true;dirty=true;draw(true);});flash.append(u);flash.hidden=false;
         draw(true);
         var again=list.querySelector('[data-fp="'+cssq(r.fp)+'"] .gfb-chip');try{again&&again.focus({preventScroll:true});}catch(e){}
       }
@@ -695,13 +696,13 @@
       more.type="button";more.addEventListener("click",function(){var from=rendered;shown=rendered+PAGE;appendRows(from,shown);var left=view.length-rendered;more.hidden=left<=0;more.textContent=left>0?t2("Voir "+Math.min(PAGE,left)+" de plus ("+left+" restantes)","Show "+Math.min(PAGE,left)+" more ("+left+" left)"):"";moreLive.textContent=t2((rendered-from)+" opérations de plus affichées.",(rendered-from)+" more transactions shown.");
         var first=list.querySelectorAll(".gfb-op")[from];try{first&&first.querySelector("button,input")&&first.querySelector("button,input").focus({preventScroll:false});}catch(e){}});
       list.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-k=chip]");if(!b)return;var li=b.closest(".gfb-op"),r=rowMap[li.dataset.fp];if(r)openPicker(r,b);});
-      list.addEventListener("change",function(e){var i=e.target;if(!i||i.dataset.k!=="sw")return;var li=i.closest(".gfb-op"),fp=li.dataset.fp;if(i.checked)inc[fp]=true;else delete inc[fp];flash.hidden=true;
+      list.addEventListener("change",function(e){var i=e.target;if(!i||i.dataset.k!=="sw")return;var li=i.closest(".gfb-op"),fp=li.dataset.fp;if(i.checked)inc[fp]=true;else delete inc[fp];flash.hidden=true;dirty=true;
         draw(true);var again=list.querySelector('[data-fp="'+cssq(fp)+'"] .gfb-swi');try{again&&again.focus({preventScroll:true});}catch(e2){}});
 
       /* ── À classer, une par une ── */
       function groupLabel(g){return String(g.label||"").replace(/\s+/g," ").trim().slice(0,90);}
       function chooseUnknown(g,ch){
-        ans[g.gid]=ch;
+        ans[g.gid]=ch;dirty=true;
         if(g.key&&g.key.length>2)extra[g.key]=ch;else g.fps.forEach(function(fp){ovr[fp]=ch;});
         nextUnknown();
       }
@@ -776,10 +777,9 @@
       }
       function draw(keepPlace){
         var top=body.scrollTop;
-        summary=summarize(ops,extra,{ovr:ovr,inc:inc});rowMap={};summary.rows.forEach(function(r,i){r.i=i;rowMap[r.fp]=r;});
-        summary.rows.sort(function(a,b){return b.dkey-a.dkey||a.i-b.i;});
-        multiYear=!!(summary.from&&summary.to&&summary.from.y!==summary.to.y);
-        conf=conflictMonths(summary);
+        // Le résumé n'est recalculé que si un choix a changé (5 000 lignes : on évite de le refaire à chaque écran).
+        if(dirty||!summary){summary=summarize(ops,extra,{ovr:ovr,inc:inc});rowMap={};summary.rows.forEach(function(r,i){r.i=i;rowMap[r.fp]=r;});
+          summary.rows.sort(function(a,b){return b.dkey-a.dkey||a.i-b.i;});conf=conflictMonths(summary);dirty=false;}
         var hasUnk=unkSnap?unkSnap.length>0:summary.unknown.length>0;
         steps=["found","list"].concat(hasUnk?["unknown"]:[]).concat(conf.length?["months"]:[]).concat(["confirm"]);
         if(steps.indexOf(step)<0)step="list";
@@ -900,11 +900,11 @@
     });
   }
   function toast(text,ms){var t=document.getElementById("gfhToast");if(!t){t=el("div","gfh-toast");t.id="gfhToast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");document.body.append(t);}t.textContent=text;t.classList.add("is-on");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove("is-on");},ms||3600);}
-  // Message de fin avec « Annuler » (7 secondes), dans le style du tableur.
+  // Message de fin avec « Annuler » (7 secondes).
   function undoToast(text,onUndo,ms){
-    var old=document.querySelector(".sheet-toast");if(old)old.remove();
-    var t=el("div","sheet-toast has-action");t.setAttribute("role","status");t.append(el("span","",text));
-    var b=el("button","sheet-toast-action",t2("Annuler","Undo"));b.type="button";b.addEventListener("click",function(){clearTimeout(tm);t.remove();onUndo();});t.append(b);
+    var old=document.getElementById("gfbToast");if(old)old.remove();
+    var t=el("div","gfb-toast");t.id="gfbToast";t.setAttribute("role","status");t.append(el("span","",text));
+    var b=el("button","",t2("Annuler","Undo"));b.type="button";b.addEventListener("click",function(){clearTimeout(tm);t.remove();onUndo();});t.append(b);
     document.body.append(t);var tm=setTimeout(function(){t.remove();},ms||7000);
   }
   // Se place sur le dernier mois importé : bonne feuille (année) et bon mois.

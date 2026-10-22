@@ -3,7 +3,9 @@ const test = require('node:test'); const assert = require('node:assert/strict');
 const ctx = { window: {}, TextDecoder, Intl, document: {} }; vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'bank-import.js'), 'utf8'), ctx);
 const B = ctx.window.GFBankImport;
-const { cases, bytes } = require('./corpus/banks.cjs');
+const { cases: cases1, bytes } = require('./corpus/banks.cjs');
+const { cases: cases2 } = require('./corpus/banks2.cjs');
+const cases = cases1.concat(cases2);
 for (const c of cases) {
   test('Corpus : ' + c.name, () => {
     const b = bytes(c);
