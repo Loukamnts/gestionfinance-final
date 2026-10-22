@@ -29,7 +29,7 @@
       "@media (max-width: 768px) {" +
       "input[type='text'], input[type='email'], input[type='password'], input[type='number'], input[type='tel']," +
       "input[type='search'], input[type='date'], input:not([type]), textarea, select {" +
-      "font-size: 16px !important; -webkit-text-size-adjust: 100% !important; text-size-adjust: 100% !important; } }"
+      "font-size: max(16px, 1rem) !important; -webkit-text-size-adjust: 100% !important; text-size-adjust: 100% !important; } }"
     );
   }
 

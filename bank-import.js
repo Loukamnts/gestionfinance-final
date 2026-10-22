@@ -218,9 +218,11 @@
     ["Frais bancaires","Bank fees","Dépense",/\bfrais\b(?! de (port|livraison|dossier|scolarite|garde))|commission|cotisation(?! (syndicale|club|association|asso|sport|licence|adhesion))|agios|interets debiteurs|tenue de compte|carte bancaire/],
   ];
   var OTHER_OUT=["Autres dépenses","Other expenses","Dépense"],OTHER_IN=["Autres revenus","Other income","Salaire"];
-  // Virement entre tes propres comptes : il compte comme de l'épargne (argent qui sort du compte courant = épargne qui monte).
+  // Virement entre tes propres comptes vers un livret / de l'épargne (PEL, LDDS, assurance-vie…) : il compte comme de l'épargne
+  // (argent qui sort du compte courant = épargne qui monte). Un virement vers un compte courant ou joint n'est PAS de l'épargne : ignoré.
   var INTERNAL_SAV=["Épargne","Savings","Épargne",null,"internal"];
-  var INTERNAL=/virement interne|vir(ement)? (de|vers) (mon|ma|mes) (compte|livret|epargne|ldds|pel)\b|vir(ement)? (de|vers) (compte a compte|compte (joint|epargne|courant))\b|\bcompte a compte\b|transfert interne|^(to|from) [a-z]{3} savings|(vers|de) (mon )?(autre )?compte (courant|epargne|personnel)|own account transfer|transfer (to|from) (my )?(own|savings)/;
+  var OWN_CURRENT=/(vir(ement)?|transfert( interne)?) (de|vers|depuis) (mon |ma |mes |l )?(autre )?compte (joint|courant|personnel|principal)|(vers|de|depuis) (mon |le )?compte (joint|courant|personnel|principal)\b|^(to|from) [a-z]{3} (current|checking|joint)|transfer (to|from) (my )?(joint|current|checking)/;
+  var INTERNAL=/virement interne|vir(ement)? (de|vers) (mon|ma|mes) (livret|epargne|ldds|pel|assurance vie)\b|vir(ement)? (de|vers) compte epargne\b|\bcompte a compte\b|transfert interne|^(to|from) [a-z]{3} savings|(vers|de) (mon )?(autre )?compte epargne|own account transfer|transfer (to|from) (my )?(own|savings)/;
   // Simple mouvement de portefeuille (recharge, change) : ni dépense, ni revenu, ni épargne. Ignoré.
   var WALLET=/^top ?-?up\b|top ?-?up by|general card deposit|exchanged to|converted \d|^(to|from) [a-z]{3} (main|pocket)|recharge (depuis|par) (carte|cb)|virement bancaire sur le compte paypal|bank deposit to pp/;
   /* Marchand d'une opération : le libellé sans le bruit bancaire (« CARTE 01/09 », « PRLV SEPA », numéros…).
@@ -243,6 +245,7 @@
     // « Caisse d'Épargne » est le nom d'une banque : son prêt ou ses frais ne sont pas de l'épargne.
     var l=norm(op.label+(op.detail?" "+op.detail:"")).replace(/caisse d.?epargne/g,"caisse banque");
     if(WALLET.test(l)&&!CATS[0][3].test(l))return{ig:"wallet"};
+    if(OWN_CURRENT.test(l))return{ig:"wallet"};// compte courant / joint : un simple mouvement, pas de l'épargne
     if(INTERNAL.test(l))return{c:INTERNAL_SAV};
     // Un virement à une personne (« VIR SEPA M PICARD ») n'est pas un achat en magasin : seules les catégories
     // qui se paient par virement (loyer, épargne, salaire, aides, impôts, assurances, santé, énergie) restent possibles.

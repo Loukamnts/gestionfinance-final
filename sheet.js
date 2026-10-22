@@ -192,7 +192,7 @@
     state.active = { r: Math.min(row, sheet.rows - 1), c: state.active.c };
     state.range = { r0: state.active.r, c0: state.active.c, r1: state.active.r, c1: state.active.c };
     buildTable(); renderValues(); scheduleSave();
-    toast("Ligne supprimée.");
+    toast(tr("Ligne supprimée.", "Row deleted."), 7000, { label: tr("Annuler", "Undo"), run: undo });
   }
   function rowHeaderWidth(sheet) {
     const longest = Math.max(0, ...(sheet.rowHeaders || []).map((label) => String(label || "").trim().length));
@@ -200,6 +200,8 @@
   }
 
   // ═══════════════════════ Moteur de formules ═════════════════════
+  // Erreur de syntaxe : un seul message, clair, au lieu de détails techniques (jeton, parenthèse…).
+  const ERR_SYNTAX = "Formule incomplète ou incorrecte";
   function tokenize(formula) {
     const s = formula.replace(/^\s*=\s*/, "");
     const tokens = []; let i = 0;
@@ -219,7 +221,7 @@
         continue;
       }
       if ("+-*/(),:".indexOf(ch) >= 0) { tokens.push({ t: "op", v: ch }); i++; continue; }
-      throw new Error("Caractère inattendu: " + ch);
+      throw new Error(ERR_SYNTAX);
     }
     return tokens;
   }
@@ -241,38 +243,38 @@
       return node;
     }
     function parseFactor() {
-      const tok = peek(); if (!tok) throw new Error("Formule incomplète");
+      const tok = peek(); if (!tok) throw new Error(ERR_SYNTAX);
       if (tok.t === "op" && tok.v === "-") { next(); return { type: "unary", op: "-", expr: parseFactor() }; }
       if (tok.t === "op" && tok.v === "+") { next(); return parseFactor(); }
-      if (tok.t === "op" && tok.v === "(") { next(); const e = parseExpr(); if (!peek() || peek().v !== ")") throw new Error(") manquante"); next(); return e; }
+      if (tok.t === "op" && tok.v === "(") { next(); const e = parseExpr(); if (!peek() || peek().v !== ")") throw new Error(ERR_SYNTAX); next(); return e; }
       if (tok.t === "num") { next(); return { type: "num", v: tok.v }; }
       if (tok.t === "bool") { next(); return { type: "num", v: tok.v ? 1 : 0 }; }
       if (tok.t === "ref") {
         next();
         if (peek() && peek().t === "op" && peek().v === ":") {
-          next(); const end = next(); if (!end || end.t !== "ref") throw new Error("Plage invalide");
+          next(); const end = next(); if (!end || end.t !== "ref") throw new Error(ERR_SYNTAX);
           return { type: "range", start: tok.v, end: end.v };
         }
         return { type: "ref", v: tok.v };
       }
       if (tok.t === "func") {
         next();
-        if (!peek() || peek().v !== "(") throw new Error("( attendue");
+        if (!peek() || peek().v !== "(") throw new Error(ERR_SYNTAX);
         next(); const args = [];
         if (!(peek() && peek().v === ")")) { args.push(parseExpr()); while (peek() && peek().v === ",") { next(); args.push(parseExpr()); } }
-        if (!peek() || peek().v !== ")") throw new Error(") manquante"); next();
+        if (!peek() || peek().v !== ")") throw new Error(ERR_SYNTAX); next();
         return { type: "func", name: tok.v, args };
       }
-      throw new Error("Token inattendu");
+      throw new Error(ERR_SYNTAX);
     }
-    const ast = parseExpr(); if (pos < tokens.length) throw new Error("Syntaxe invalide");
+    const ast = parseExpr(); if (pos < tokens.length) throw new Error(ERR_SYNTAX);
     return ast;
   }
   function evalNode(node, getCellValue) {
     switch (node.type) {
       case "num": return node.v;
-      case "ref": { const rc = refToRC(node.v); if (!rc) throw new Error("Réf invalide: " + node.v); return getCellValue(rc.r, rc.c); }
-      case "range": throw new Error("Plage hors fonction");
+      case "ref": { const rc = refToRC(node.v); if (!rc) throw new Error("Cellule introuvable"); return getCellValue(rc.r, rc.c); }
+      case "range": throw new Error(ERR_SYNTAX);
       case "unary": { const v = num0(evalNode(node.expr, getCellValue)); return node.op === "-" ? -v : v; }
       case "bin": {
         const l = num0(evalNode(node.left, getCellValue)), r = num0(evalNode(node.right, getCellValue));
@@ -283,7 +285,7 @@
     }
   }
   function collectRangeValues(start, end, getCellValue) {
-    const a = refToRC(start), b = refToRC(end); if (!a || !b) throw new Error("Plage invalide");
+    const a = refToRC(start), b = refToRC(end); if (!a || !b) throw new Error(ERR_SYNTAX);
     const r0 = Math.min(a.r, b.r), r1 = Math.max(a.r, b.r), c0 = Math.min(a.c, b.c), c1 = Math.max(a.c, b.c);
     const vals = [];
     for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) vals.push(getCellValue(r, c));
@@ -304,7 +306,7 @@
       case "MIN": { const a = collect(); return a.length ? Math.min(...a) : 0; }
       case "MAX": { const a = collect(); return a.length ? Math.max(...a) : 0; }
       case "COUNT": case "NB": return collect().length;
-      default: throw new Error("Fonction inconnue: " + node.name);
+      default: throw new Error("Fonction inconnue : " + node.name);
     }
   }
   // Montant tapé → nombre, NaN si ce n'est pas un nombre. « 1 234,56 », « 1.234,56 » et « 1,234.56 »
@@ -403,8 +405,8 @@
     // ne doit jamais empêcher la sélection de se redessiner sur la nouvelle grille.
     cellMap.clear(); rowHeadEls = []; colHeadEls = [];
     prevInRange = new Set(); prevActiveKey = null;
-    const monthNav = document.createElement("div"); monthNav.className = "sheet-mobile-month"; monthNav.setAttribute("aria-label", "Mois affiché");
-    const previousMonth = document.createElement("button"); previousMonth.type = "button"; previousMonth.className = "sheet-mobile-month-button"; previousMonth.textContent = "‹"; previousMonth.setAttribute("aria-label", "Mois précédent");
+    const monthNav = document.createElement("div"); monthNav.className = "sheet-mobile-month"; monthNav.setAttribute("aria-label", tr("Mois affiché", "Month shown"));
+    const previousMonth = document.createElement("button"); previousMonth.type = "button"; previousMonth.className = "sheet-mobile-month-button"; previousMonth.textContent = "‹"; previousMonth.setAttribute("aria-label", tr("Mois précédent", "Previous month"));
     mobileMonthLabel = document.createElement("strong"); mobileMonthLabel.className = "sheet-mobile-month-label";
     const nextMonth = document.createElement("button"); nextMonth.type = "button"; nextMonth.className = "sheet-mobile-month-button"; nextMonth.textContent = "›"; nextMonth.setAttribute("aria-label", "Mois suivant");
     previousMonth.addEventListener("click", () => setMobileMonth(mobileMonth - 1));
@@ -837,14 +839,14 @@
     if (!tabsEl) return;
     sortSheetsByYear();
     tabsEl.innerHTML = "";
-    tabsEl.setAttribute("role", "tablist"); tabsEl.setAttribute("aria-label", "Années du tableur");
+    tabsEl.setAttribute("role", "tablist"); tabsEl.setAttribute("aria-label", tr("Années du tableur", "Spreadsheet years"));
     const years = state.sheets.map(sheetYear).filter(function (y) { return y !== null; });
     const first = years.length ? Math.min.apply(null, years) : new Date().getFullYear();
     const last = years.length ? Math.max.apply(null, years) : new Date().getFullYear();
     const lbl = document.createElement("span"); lbl.className = "sheet-years-label"; lbl.textContent = "Année";
     tabsEl.appendChild(lbl);
     const before = document.createElement("button"); before.type = "button"; before.className = "sheet-year-add";
-    before.textContent = "+ " + (first - 1); before.title = "Ajouter l'année " + (first - 1);
+    before.textContent = "+ " + (first - 1); before.title = tr("Ajouter l’année ", "Add year ") + (first - 1);
     before.addEventListener("click", function () { addYearSheet(first - 1); });
     tabsEl.appendChild(before);
     state.sheets.forEach(function (sheet) {
@@ -852,20 +854,23 @@
       const tab = document.createElement("div"); tab.className = "sheet-tab sheet-year" + (active ? " active" : ""); tab.dataset.sheetId = sheet.id;
       const label = document.createElement("button"); label.type = "button"; label.className = "sheet-tab-name";
       label.setAttribute("role", "tab"); label.setAttribute("aria-selected", String(active));
-      label.textContent = sheet.name; label.title = sheetYear(sheet) === null ? "Double-clic pour donner une année à cette feuille" : "Afficher " + sheet.name;
+      label.textContent = sheet.name; label.title = sheetYear(sheet) === null ? tr("Double-clic pour donner une année à cette feuille", "Double-click to give this sheet a year") : tr("Afficher ", "Show ") + sheet.name;
       label.addEventListener("click", function () { switchSheet(sheet.id); });
       label.addEventListener("dblclick", function () { renameSheet(sheet.id); });
       tab.appendChild(label);
+      let delX = null;
       if (active && state.sheets.length > 1) {
         const x = document.createElement("button"); x.type = "button"; x.className = "sheet-tab-x"; x.textContent = "×";
-        x.title = "Supprimer l'année " + sheet.name; x.setAttribute("aria-label", "Supprimer l'année " + sheet.name);
+        x.title = tr("Supprimer l’année ", "Delete year ") + sheet.name; x.setAttribute("aria-label", tr("Supprimer l’année ", "Delete year ") + sheet.name);
         x.addEventListener("click", function (e) { e.stopPropagation(); deleteSheet(sheet.id); });
-        tab.appendChild(x);
+        delX = x;
       }
       tabsEl.appendChild(tab);
+      // La croix est un bouton à part (44 px), à côté de la pastille : impossible de la toucher en visant l’année.
+      if (delX) tabsEl.appendChild(delX);
     });
     const after = document.createElement("button"); after.type = "button"; after.className = "sheet-year-add";
-    after.textContent = "+ " + (last + 1); after.title = "Ajouter l'année " + (last + 1);
+    after.textContent = "+ " + (last + 1); after.title = tr("Ajouter l’année ", "Add year ") + (last + 1);
     after.addEventListener("click", function () { addYearSheet(last + 1); });
     tabsEl.appendChild(after);
   }
@@ -903,8 +908,8 @@
     const finish = () => {
       if (done) return; done = true;
       const v = input.value.trim();
-      if (!/^(19|20|21)\d{2}$/.test(v)) { toast("Une feuille correspond à une année : écris par exemple " + new Date().getFullYear() + "."); renderTabs(); return; }
-      if (state.sheets.some(function (o) { return o !== sheet && String(o.name).trim() === v; })) { toast("L'année " + v + " existe déjà."); renderTabs(); return; }
+      if (!/^(19|20|21)\d{2}$/.test(v)) { toast(tr("Une feuille correspond à une année : écris par exemple ", "A sheet matches a year: type for example ") + new Date().getFullYear() + ".");  renderTabs(); return; }
+      if (state.sheets.some(function (o) { return o !== sheet && String(o.name).trim() === v; })) { toast(tr("L’année " + v + " existe déjà.", "Year " + v + " already exists.")); renderTabs(); return; }
       sheet.name = v;
       renderTabs(); scheduleSave(); notifyDashboard();
     };
@@ -912,13 +917,15 @@
     input.addEventListener("blur", finish);
   }
   async function deleteSheet(id) {
-    if (state.sheets.length <= 1) { toast("Impossible de supprimer la dernière feuille."); return; }
-    if (!await confirmDialog("Supprimer l\u2019année " + ((state.sheets.find(function (o) { return o.id === id; }) || {}).name || "") + " et tout son contenu ?")) return;
+    if (state.sheets.length <= 1) { toast(tr("Impossible de supprimer la dernière feuille.", "The last sheet can’t be deleted.")); return; }
+    const yearName = ((state.sheets.find(function (o) { return o.id === id; }) || {}).name || "");
+    if (!await confirmDialog(tr("Supprimer l’année " + yearName + " et tout son contenu ?", "Delete year " + yearName + " and everything in it?"))) return;
     const idx = state.sheets.findIndex((s) => s.id === id); if (idx < 0) return;
     state.sheets.splice(idx, 1);
     if (state.activeSheetId === id) state.activeSheetId = state.sheets[0].id;
     state.active = { r: 0, c: 0 }; state.range = { r0: 0, c0: 0, r1: 0, c1: 0 };
     buildTable(); renderValues(); renderTabs(); scheduleSave(); notifyDashboard();
+    toast(tr("Année " + yearName + " supprimée.", "Year " + yearName + " deleted."), 7000, { label: tr("Annuler", "Undo"), run: undo });
   }
 
   // ═════════════════════ Import / Export .xlsx (multi-feuilles) ════
@@ -1380,7 +1387,7 @@
       sources.push({ name: String(fileName || "").replace(/\.[^.]+$/, "") || "Feuille 1", g: gridFromText(decodeText(bytes)) });
     } else {
       if (kind === "binary") return { error: readErrorMessage("") };
-      if (typeof XLSX === "undefined") return { error: tr("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet.", "The Excel module couldn’t be loaded. Check your internet connection.") };
+      if (typeof XLSX === "undefined") return { error: tr("L’import Excel n’a pas pu démarrer. Vérifie ta connexion, puis réessaie.", "Excel import couldn’t start. Check your connection, then try again.") };
       let wb;
       try { wb = XLSX.read(bytes, { type: "array", cellDates: true, cellNF: false, cellHTML: false, sheetRows: IMPORT_SRC_ROWS }); }
       catch (err) { return { error: readErrorMessage(err) }; }
@@ -1489,7 +1496,7 @@
     if (summary.assumedYear) parts.push(tr("Aucune année dans le fichier : rangé dans " + summary.assumedYear + ".", "No year in the file: placed in " + summary.assumedYear + "."));
     if (summary.ignoredCols.length) parts.push(tr("Colonnes ignorées : ", "Ignored columns: ") + summary.ignoredCols.slice(0, 4).join(", ") + (summary.ignoredCols.length > 4 ? "…" : "") + ".");
     if (summary.skippedSheets.length) parts.push(tr("Feuilles sans mois ignorées : ", "Sheets without months skipped: ") + summary.skippedSheets.slice(0, 3).join(", ") + (summary.skippedSheets.length > 3 ? "…" : "") + ".");
-    if (summary.formulasAsValues) parts.push(summary.formulasAsValues + tr(" formule(s) remplacée(s) par leur valeur.", " formula(s) replaced by their value."));
+    if (summary.formulasAsValues) parts.push(summary.formulasAsValues === 1 ? tr("1 formule remplacée par sa valeur.", "1 formula replaced by its value.") : summary.formulasAsValues + tr(" formules remplacées par leur valeur.", " formulas replaced by their value."));
     if (summary.droppedRows || summary.droppedCells) parts.push(tr("Le fichier dépassait la taille gérée (2 000 lignes, 80 colonnes) : le surplus n’a pas été importé.", "The file exceeded the supported size (2,000 rows, 80 columns): the extra part wasn’t imported."));
     return parts.join(" ");
   }
@@ -1638,16 +1645,16 @@
     if (typeof XLSX === "undefined") {
       if (window.GFVendors) {
         toast(tr("Préparation de l’export…", "Preparing the export…"));
-        window.GFVendors.xlsx().then(exportXlsx).catch(function(){ toast(tr("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet.", "The Excel module couldn’t be loaded. Check your internet connection.")); });
+        window.GFVendors.xlsx().then(exportXlsx).catch(function(){ toast(tr("L’export Excel n’a pas pu démarrer. Vérifie ta connexion, puis réessaie.", "Excel export couldn’t start. Check your connection, then try again.")); });
         return;
       }
-      toast(tr("Le module Excel n’a pas pu être préparé. Vérifie ta connexion internet.", "The Excel module couldn’t be loaded. Check your internet connection.")); return;
+      toast(tr("L’export Excel n’a pas pu démarrer. Vérifie ta connexion, puis réessaie.", "Excel export couldn’t start. Check your connection, then try again.")); return;
     }
     try {
       const wb = buildExportWorkbook();
       XLSX.writeFile(wb, "tableau-finances.xlsx");
-      toast(state.sheets.length + " feuille(s) exportée(s).");
-    } catch (err) { toast("Export impossible : " + (err && err.message ? err.message : "erreur")); }
+      toast(state.sheets.length === 1 ? tr("1 feuille exportée.", "1 sheet exported.") : state.sheets.length + tr(" feuilles exportées.", " sheets exported."));
+    } catch (err) { console.warn("Meuniance : export impossible", err); toast(tr("L’export n’a pas pu être créé. Réessaie dans un instant.", "The export couldn’t be created. Try again in a moment.")); }
   }
   // Classeur d’export lisible par Excel : intitulés en colonne A, mois en ligne 1, donc chaque
   // référence de formule est décalée d’une ligne et d’une colonne (A1 du tableur = B2 d’Excel).
@@ -1906,7 +1913,7 @@
       try { if (window.__gfSync) window.__gfSync.markDirty(); } catch (_) {}
       notifyDashboard();
       close();
-      toast(rawAmount ? "Argent de départ enregistré" : "Argent de départ retiré");
+      toast(rawAmount ? tr("Solde de départ enregistré", "Starting balance saved") : tr("Solde de départ retiré", "Starting balance removed"));
     });
     overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
     actions.append(cancel, save);
@@ -2101,7 +2108,7 @@
       // Un relevé bancaire CSV est lu à part (regroupement par catégorie et par mois) ; sinon import Excel classique.
       const bank = window.GFBankImport ? window.GFBankImport.handle(f).catch(() => false) : Promise.resolve(false);
       bank.then((handled) => { if (handled) return; Promise.resolve(importXlsx(f)).then((ok) => { try { window.MeuniLoader && window.MeuniLoader.done(ok ? "Fichier importé." : undefined); } catch (e) {} }); }); }); inp.click(); });
-    bind("btnSheetClear", async () => { if (await confirmDialog("Vider la feuille active ?")) { const sheet = activeSheet(); sheet.cells = {}; sheet.rowHeaders = []; sheet.rows = DEFAULT_ROWS; enforceMonthHeaders(sheet); buildTable(); renderValues(); scheduleSave(); } });
+    bind("btnSheetClear", async () => { if (await confirmDialog(tr("Vider la feuille ?", "Clear this sheet?"))) { const sheet = activeSheet(); sheet.cells = {}; sheet.rowHeaders = []; sheet.rows = DEFAULT_ROWS; enforceMonthHeaders(sheet); buildTable(); renderValues(); scheduleSave(); toast(tr("Feuille vidée.", "Sheet cleared."), 7000, { label: tr("Annuler", "Undo"), run: undo }); } });
     bind("btnSheetDeleteRow", deleteSelectedRow);
     bind("btnSheetCalc", openCalculator);
     bind("btnSheetUndo", undo);

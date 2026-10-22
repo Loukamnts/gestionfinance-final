@@ -26,17 +26,19 @@
   <meta name="twitter:title" content="Meuniance | Tes finances, enfin lisibles" />
   <meta name="twitter:description" content="Un espace financier personnel pour comprendre ton budget, suivre tes objectifs et garder le contrôle." />
   <meta name="twitter:image" content="https://meuniance.vercel.app/share-card.png?v=20260930" />
+  <link rel="preload" href="vendor/fonts/bricolage-grotesque-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="vendor/fonts/instrument-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="vendor/fonts.css" />
-  <link rel="stylesheet" href="public.css?v=20261018-h1" />
+  <link rel="stylesheet" href="public.css?v=20261022-r3" />
   <style>
     /* Sélecteur FR / EN ajouté par i18n-manager.js (survol en CSS, seulement avec une souris). */
-    .language-selector{display:inline-flex;align-items:center;gap:6px;margin-top:2px}
+    .language-selector{display:inline-flex;align-items:center;gap:6px;margin-top:2px;min-width:72px;min-height:41px}
     .lang-btn{background:none;border:1px solid var(--line);color:var(--muted);padding:3px 8px;border-radius:var(--radius);cursor:pointer;font-family:inherit;font-size:.72rem;font-weight:600;line-height:1.3;transition:color .2s ease,border-color .2s ease,background .2s ease}
     .lang-btn[aria-pressed="true"]{background:var(--accent);color:var(--palette-on-accent,#fff);border-color:var(--accent)}
     @media (hover:hover){.lang-btn[aria-pressed="false"]:hover{color:var(--text);border-color:var(--line-strong)}}
   </style>
   <script src="public.js?v=20261013-r1"></script>
-  <script src="i18n-manager.js?v=20261019-r1" defer></script>
+  <script src="i18n-manager.js?v=20261022-r3" defer></script>
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://meuniance.vercel.app/#site","url":"https://meuniance.vercel.app/","name":"Meuniance","inLanguage":"fr-FR"},{"@type":"SoftwareApplication","name":"Meuniance","applicationCategory":"FinanceApplication","operatingSystem":"Web, iOS, Android","inLanguage":"fr-FR","description":"Un tableur intelligent, un tableau de bord et des objectifs pour suivre tes revenus, tes dépenses et ton épargne.","url":"https://meuniance.vercel.app/","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}]}</script>
 </head>
 <body>
@@ -55,19 +57,19 @@
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
           <h1 id="hero-title"><span data-i18n="presentation.heroTitle">Tes finances.</span> <span data-i18n="presentation.heroTitleEm">Enfin lisibles.</span></h1>
-          <p class="lead" data-i18n="presentation.lead">Meuniance transforme tes chiffres en décisions simples. Un tableau de bord personnel, un vrai tableur et tes objectifs réunis au même endroit.</p>
+          <p class="lead" data-i18n="presentation.lead">Meuniance transforme tes chiffres en repères simples. Un tableau de bord personnel, un vrai tableur et tes objectifs réunis au même endroit.</p>
           <div class="hero-actions"><a class="btn btn-primary btn-large" href="/accueil" data-i18n="presentation.ctaOpen">Ouvrir Meuniance</a></div>
-          <div class="trust-row" aria-label="Avantages" data-i18n-aria="presentation.trustRowLabel"><span data-i18n="presentation.trustNoAds">Sans publicité</span><span data-i18n="presentation.trustPrivate">Données privées</span><span data-i18n="presentation.trustFree">Gratuit</span></div>
+          <div class="trust-row" aria-label="Avantages" data-i18n-aria="presentation.trustRowLabel"><span data-i18n="presentation.trustNoAds">Sans publicité</span><span data-i18n="presentation.trustPrivate">Tes données, à toi</span><span data-i18n="presentation.trustFree">Gratuit</span></div>
         </div>
         <div class="product-stage" aria-label="Aperçu fictif de Meuniance" data-i18n-aria="presentation.previewStageLabel">
           <div class="dashboard-preview">
             <div class="pv-row"><span data-i18n="presentation.previewBalance">Solde disponible</span><span data-i18n="presentation.previewDate">Septembre 2026</span></div>
-            <div class="pv-big">3 842 €</div>
-            <div class="pv-delta"><b>+8,4%</b></div>
+            <div class="pv-big">3 842 €</div>
+            <div class="pv-delta"><b>+8,4 %</b></div>
             <div class="bars" aria-hidden="true"><i style="--h:39%;--i:0"></i><i style="--h:53%;--i:1"></i><i style="--h:44%;--i:2"></i><i style="--h:69%;--i:3"></i><i style="--h:58%;--i:4"></i><i style="--h:78%;--i:5"></i><i style="--h:100%;--i:6"></i></div>
             <div class="pv-two">
-              <div><small data-i18n="presentation.previewSavings">Épargne</small><strong>780 €</strong><div class="pv-prog"><b></b></div><em data-i18n="presentation.previewGoal">Objectif 65%</em></div>
-              <div><small data-i18n="presentation.previewExpenses">Dépenses</small><strong>1 426 €</strong><em>−4,2%</em></div>
+              <div><small data-i18n="presentation.previewSavings">Épargne</small><strong>780 €</strong><div class="pv-prog"><b></b></div><em data-i18n="presentation.previewGoal">Objectif 65 %</em></div>
+              <div><small data-i18n="presentation.previewExpenses">Dépenses</small><strong>1 426 €</strong><em>−4,2 %</em></div>
             </div>
           </div>
           <span class="preview-demo-label" data-i18n="presentation.previewDemoLabel">Exemple fictif, montants et pourcentages illustratifs</span>
@@ -75,7 +77,7 @@
       </section>
 
       <section class="section" id="fonctionnalites">
-        <div class="section-heading"><h2><span data-i18n="presentation.featuresTitle1">Moins de saisie.</span> <span data-i18n="presentation.featuresTitle2">Plus de visibilité.</span></h2><p data-i18n="presentation.featuresLead">Chaque outil répond à une question simple.</p></div>
+        <div class="section-heading"><h2><span data-i18n="presentation.featuresTitle1">Moins de saisie.</span> <span data-i18n="presentation.featuresTitle2">Plus de clarté.</span></h2><p data-i18n="presentation.featuresLead">Chaque outil répond à une question simple.</p></div>
         <div class="feature-grid">
           <article class="feature"><h3 data-i18n="presentation.feature1Title">Tout comprendre en un regard</h3><p data-i18n="presentation.feature1Text">Revenus, dépenses et épargne sont résumés clairement.</p></article>
           <article class="feature"><h3 data-i18n="presentation.feature2Title">Ton tableur, sans compromis</h3><p data-i18n="presentation.feature2Text">Saisie directe, formules, import et export Excel.</p></article>
@@ -87,11 +89,11 @@
       <section class="section" id="tarifs" aria-labelledby="tarifs-title">
         <div class="section-heading"><h2 id="tarifs-title" data-i18n="presentation.pricingTitle">Choisis ta formule. Garde ta vie privée.</h2><p data-i18n="presentation.pricingLead">Commence gratuitement. Passe à Plus ou Pro quand tu veux partager ou aller plus loin.</p></div>
         <div class="pricing-grid">
-          <article class="plan"><h3>Free</h3><p class="plan-pitch" data-i18n="presentation.freePitch">Tout ce qu’il faut pour y voir clair.</p><div class="plan-price"><b>0 €</b><small data-i18n="presentation.freePeriod">pour toujours</small></div><ul><li data-i18n="presentation.free1">Tableau de bord et sélecteur de mois</li><li data-i18n="presentation.free2">Tableur avec formules</li><li data-i18n="presentation.free3">1 objectif</li><li data-i18n="presentation.free4">Mode clair et sombre</li><li data-i18n="presentation.free5">Export et suppression de tes données</li><li class="is-dim" data-i18n="presentation.free6">Pas de partage</li></ul><a class="plan-cta" href="/accueil" data-i18n="presentation.freeCta">Commencer gratuitement</a></article>
-          <article class="plan is-featured"><span class="plan-tag" data-i18n="presentation.plusTag">Recommandé</span><h3>Plus</h3><p class="plan-pitch" data-i18n="presentation.plusPitch">Ton budget, à ton image, et à deux.</p><div class="plan-price"><b>4,99 €</b><small data-i18n="presentation.perMonth">par mois</small></div><ul><li data-i18n="presentation.plus1">Import et export Excel</li><li data-i18n="presentation.plus2">Objectifs illimités</li><li data-i18n="presentation.plus3">Partage avec 1 personne : tu choisis les mois et les lignes visibles</li><li data-i18n="presentation.plus4">Évolution mensuelle complète</li><li data-i18n="presentation.plus5">Tout ce qui est dans Free</li></ul><span class="plan-cta is-soon" aria-disabled="true" data-i18n="presentation.soonCta">Bientôt disponible</span></article>
-          <article class="plan"><h3>Pro</h3><p class="plan-pitch" data-i18n="presentation.proPitch">Pour partager sans limite et aller plus loin.</p><div class="plan-price"><b>7,99 €</b><small data-i18n="presentation.perMonth">par mois</small></div><ul><li data-i18n="presentation.pro1">Tout ce qui est dans Plus</li><li data-i18n="presentation.pro2">Partage avec plusieurs personnes</li><li data-i18n="presentation.pro3">Droits par personne : lecture seule ou modification</li><li data-i18n="presentation.pro4">Accès temporaire qui expire tout seul</li><li data-i18n="presentation.pro5">Historique de progression des objectifs</li></ul><span class="plan-cta is-soon" aria-disabled="true" data-i18n="presentation.soonCta">Bientôt disponible</span></article>
+          <article class="plan"><h3>Free</h3><p class="plan-pitch" data-i18n="presentation.freePitch">Tout ce qu’il faut pour y voir clair.</p><div class="plan-price"><b>0 €</b><small data-i18n="presentation.freePeriod">pour toujours</small></div><ul><li data-i18n="presentation.free1">Tableau de bord et sélecteur de mois</li><li data-i18n="presentation.free2">Tableur avec formules</li><li data-i18n="presentation.free3">1 objectif</li><li data-i18n="presentation.free4">Mode clair et sombre</li><li data-i18n="presentation.free5">Export et suppression de tes données</li><li class="is-dim" data-i18n="presentation.free6">Pas de partage</li></ul><a class="plan-cta" href="/accueil" data-i18n="presentation.freeCta">Commencer gratuitement</a></article>
+          <article class="plan is-featured"><span class="plan-tag" data-i18n="presentation.plusTag">Recommandé</span><h3>Plus</h3><p class="plan-pitch" data-i18n="presentation.plusPitch">Ton budget, à ton image, et à deux.</p><div class="plan-price"><b>4,99 €</b><small data-i18n="presentation.perMonth">par mois</small></div><ul><li data-i18n="presentation.plus1">Import et export Excel</li><li data-i18n="presentation.plus2">Objectifs illimités</li><li data-i18n="presentation.plus3">Partage avec 1 personne : tu choisis les mois et les lignes visibles</li><li data-i18n="presentation.plus4">Évolution mensuelle complète</li><li data-i18n="presentation.plus5">Tout ce qui est dans Free</li></ul><span class="plan-cta is-soon" aria-disabled="true" data-i18n="presentation.soonCta">Bientôt disponible</span></article>
+          <article class="plan"><h3>Pro</h3><p class="plan-pitch" data-i18n="presentation.proPitch">Pour partager sans limite et aller plus loin.</p><div class="plan-price"><b>7,99 €</b><small data-i18n="presentation.perMonth">par mois</small></div><ul><li data-i18n="presentation.pro1">Tout ce qui est dans Plus</li><li data-i18n="presentation.pro2">Partage avec plusieurs personnes</li><li data-i18n="presentation.pro3">Droits par personne : lecture seule ou modification</li><li data-i18n="presentation.pro4">Accès temporaire qui expire tout seul</li><li data-i18n="presentation.pro5">Historique de progression des objectifs</li></ul><span class="plan-cta is-soon" aria-disabled="true" data-i18n="presentation.soonCta">Bientôt disponible</span></article>
         </div>
-        <p class="pricing-note" data-i18n="presentation.pricingNote">Plus et Pro ne sont pas encore en vente : pendant le lancement, toutes les fonctions sont ouvertes gratuitement. Prix indicatifs, sans engagement à l’ouverture. Tes données restent les tiennes : aucune pub, aucun suivi, aucune revente.</p>
+        <p class="pricing-note" data-i18n="presentation.pricingNote">Les formules payantes Plus et Pro sont proposées selon les conditions de vente en vigueur au moment de la souscription. Prix indicatifs, sans engagement. Tes données restent les tiennes : aucune pub, aucun suivi, aucune revente.</p>
       </section>
       <section class="privacy-band" id="confiance">
         <h2 data-i18n="presentation.privacyTitle">Tes données financières ne sont pas un produit.</h2>
@@ -101,7 +103,7 @@
 
     <footer class="public-footer">
       <div><a class="public-brand" href="/"><span><svg class="brand-m mk" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect class="lg-sq" width="28" height="28" rx="7.5"/><circle class="lg-t" cx="14" cy="14" r="9.4"/><circle class="lg-a" cx="14" cy="14" r="9.4" transform="rotate(-90 14 14)"/><g transform="rotate(30 14 14)"><path class="lg-s" d="M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z"/><path class="lg-c" d="M14 9.6c-.4 2.8-.4 5.8 0 8.6"/></g></svg><span class="brand-word">Meuniance</span></span></a><p data-i18n="presentation.footerTagline">La finance personnelle, rendue claire.</p></div>
-      <nav><a href="/confidentialite" data-i18n="presentation.footerPrivacy">Confidentialité et contact</a><a href="/conditions" data-i18n="presentation.footerTerms">Conditions</a><a href="/mentions-legales" data-i18n="presentation.footerLegal">Mentions légales</a></nav>
+      <nav><a href="/confidentialite" data-i18n="presentation.footerPrivacy">Confidentialité et contact</a><a href="/conditions" data-i18n="presentation.footerTerms">Conditions</a><a href="/mentions-legales" data-i18n="presentation.footerLegal">Mentions légales</a><div id="language-selector" class="language-selector" role="group"></div></nav>
       <p data-i18n="presentation.footerCopyright">© 2026 Meuniance</p>
     </footer>
   </div></body>

@@ -69,7 +69,7 @@ body[data-mode="dark"] .account-section { --auth-surface: #22352D; }
   box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 14px;
   border: 1px solid var(--line-strong); border-radius: 12px;
   background: var(--input-bg); color: var(--text);
-  font: 400 16px/1.25 var(--font-body); /* 16 px : iOS ne zoome pas au focus */
+  font: 400 1rem/1.25 var(--font-body); /* 16 px : iOS ne zoome pas au focus */
   appearance: none; -webkit-appearance: none;
   transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
@@ -145,7 +145,7 @@ body[data-mode="dark"] .account-section { --auth-surface: #22352D; }
 .account-section:not(.is-connected) .account-status { text-align: center; color: var(--muted-2, var(--muted)); font-size: .75rem; }
 
 /* ── Réinitialisation du mot de passe (fenêtre) : mêmes champs ── */
-#passwordRecoveryFields input { box-sizing: border-box; min-height: 48px; padding: 0 14px; border-radius: 12px; font-size: 16px; }
+#passwordRecoveryFields input { box-sizing: border-box; min-height: 48px; padding: 0 14px; border-radius: 12px; font-size: 1rem; }
 .password-recovery-dialog .button { min-height: 48px; }
 body[data-mode="dark"] .password-recovery-dialog { background: #22352D; }
 

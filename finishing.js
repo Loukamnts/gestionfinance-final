@@ -100,3 +100,37 @@
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
 })();
+
+/* Menu du profil sur iPhone : poignée + glisser vers le bas pour fermer (la mise en forme est dans finishing.css). */
+(function(){
+  "use strict";
+  function init(){
+    var pop=document.getElementById("profilePopover"),btn=document.getElementById("profileMenuButton");
+    if(!pop||pop.querySelector(".gf-sheet-grab"))return;
+    var grab=document.createElement("div");grab.className="gf-sheet-grab";grab.setAttribute("aria-hidden","true");pop.insertBefore(grab,pop.firstChild);
+    var mq=window.matchMedia("(max-width:720px)"),y0=0,dy=0,t0=0,on=false;
+    function sheet(){return mq.matches&&document.body.dataset.interface!=="studio";}
+    function close(){pop.hidden=true;pop.style.transform="";pop.classList.remove("is-dragging");if(btn){btn.setAttribute("aria-expanded","false");try{btn.focus({preventScroll:true});}catch(e){}}}
+    grab.addEventListener("pointerdown",function(e){if(!sheet())return;on=true;y0=e.clientY;dy=0;t0=Date.now();pop.classList.add("is-dragging");try{grab.setPointerCapture(e.pointerId);}catch(x){}});
+    grab.addEventListener("pointermove",function(e){if(!on)return;dy=Math.max(0,e.clientY-y0);pop.style.transform="translateY("+dy+"px)";});
+    function end(){if(!on)return;on=false;var fast=dy/Math.max(1,Date.now()-t0)>0.5;if(dy>90||(fast&&dy>30))close();else{pop.classList.remove("is-dragging");pop.style.transform="";}}
+    grab.addEventListener("pointerup",end);grab.addEventListener("pointercancel",end);
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
+
+/* Grand texte : quand le réglage « Taille du texte » de l’iPhone dépasse ~130 %, la page reçoit une classe qui active
+   des mises en page plus aérées (étiquettes de la barre du bas raccourcies, colonnes empilées). Aucun texte n’est modifié. */
+(function(){
+  "use strict";
+  var root=document.documentElement;
+  function sync(){
+    var px=parseFloat(getComputedStyle(root).fontSize)||16;
+    root.classList.toggle("gf-bigtext",px>=21);
+    root.classList.toggle("gf-hugetext",px>=27);
+  }
+  sync();window.addEventListener("resize",sync);window.addEventListener("orientationchange",sync);
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",sync);
+  if(window.matchMedia){try{var mq=window.matchMedia("(min-resolution: 1dppx)");if(mq.addEventListener)mq.addEventListener("change",sync);}catch(e){}}
+  window.addEventListener("pageshow",sync);document.addEventListener("visibilitychange",function(){if(!document.hidden)sync();});
+})();

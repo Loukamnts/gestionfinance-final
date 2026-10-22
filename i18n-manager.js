@@ -17,7 +17,7 @@
   async function loadDictionary(lang) {
     if (dictionaries[lang]) return dictionaries[lang];
     try {
-      const response = await fetch(`/i18n/${lang}.json?v=20261019-r1`);
+      const response = await fetch(`/i18n/${lang}.json?v=20261022-r1`);
       if (!response.ok) throw new Error(`Failed to load ${lang}`);
       dictionaries[lang] = await response.json();
       return dictionaries[lang];
@@ -25,10 +25,6 @@
       console.warn(`Impossible de charger le dictionnaire ${lang}:`, error.message);
       return {};
     }
-  }
-
-  function loadAllDictionaries() {
-    return Promise.all(AVAILABLE_LANGS.map(loadDictionary));
   }
 
   // Langue enregistrée, sinon celle du navigateur.
@@ -49,7 +45,8 @@
     try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
     document.documentElement.lang = lang;
     updateLanguageButtons();
-    applyToAllElements();
+    // Seule la langue demandée est téléchargée, et seulement quand on la choisit.
+    loadDictionary(lang).then(function () { if (currentLang === lang) applyToAllElements(); });
   }
 
   // "presentation.lead" -> dict.presentation.lead ; clé inconnue -> la clé elle-même.
@@ -86,13 +83,18 @@
 
   // Sélecteur FR / EN du pied de page ; son apparence est dans presentation.html (.lang-btn).
   function createLanguageSelector() {
-    if (document.getElementById("language-selector")) return;
+    // L’emplacement est déjà dans la page (taille réservée, pas de décalage) ; sinon on le crée.
     const footer = document.querySelector(".public-footer");
-    if (!footer) return;
-    const selector = document.createElement("div");
-    selector.id = "language-selector";
-    selector.className = "language-selector";
-    selector.setAttribute("role", "group");
+    let selector = document.getElementById("language-selector");
+    if (selector && selector.querySelector(".lang-btn")) return;
+    const created = !selector;
+    if (!selector) {
+      if (!footer) return;
+      selector = document.createElement("div");
+      selector.id = "language-selector";
+      selector.className = "language-selector";
+      selector.setAttribute("role", "group");
+    }
     selector.setAttribute("data-i18n-aria", "presentation.languageLabel");
     AVAILABLE_LANGS.forEach(lang => {
       const button = document.createElement("button");
@@ -104,8 +106,7 @@
       button.addEventListener("click", () => setCurrentLanguage(lang));
       selector.appendChild(button);
     });
-    const nav = footer.querySelector("nav");
-    (nav || footer).appendChild(selector);
+    if (created) { const nav = footer.querySelector("nav"); (nav || footer).appendChild(selector); }
     updateLanguageButtons();
   }
 
@@ -118,7 +119,7 @@
   async function init() {
     currentLang = getCurrentLanguage();
     document.documentElement.lang = currentLang;
-    await loadAllDictionaries();
+    await loadDictionary(currentLang);
     createLanguageSelector();
     applyToAllElements();
   }
