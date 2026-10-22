@@ -9,6 +9,8 @@
   <meta name="theme-color" content="#F6F2E8" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0E1713" media="(prefers-color-scheme: dark)" />
   <style>
+    /* Taille du texte : suit le réglage « Taille du texte » de l’iPhone (Safari et appli installée). 1 rem = taille de base. */
+    @supports (font:-apple-system-body){html{font:-apple-system-body}}
     html{background:#F6F2E8;color-scheme:light}
     @media (prefers-color-scheme: dark){html{background:#0E1713;color-scheme:dark}}
     html:root[data-mode="light"]{background:#F6F2E8;color-scheme:light}
@@ -118,7 +120,7 @@
     /* Anti-zoom mobile : empêche le zoom automatique sur les inputs */
     @media (max-width: 768px) {
       input, select, textarea {
-        font-size: 16px !important;
+        font-size: max(16px, 1rem) !important;
       }
     }
     /* Empêche le scroll elastic sur iOS qui décale les overlays */

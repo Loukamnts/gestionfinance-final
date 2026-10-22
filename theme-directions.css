@@ -1071,7 +1071,7 @@ html:has(#meuniBoot.is-boot:not([hidden])),body:has(#meuniBoot.is-boot:not([hidd
 .meuni-loader-logo.srch .lg-a{stroke-dasharray:22 59.1}
 .meuni-loader-logo.srch .ml-spin{animation:meuniSpin 1.1s linear infinite}
 @keyframes meuniSpin{to{transform:rotate(360deg)}}
-.meuni-loader-text{font:500 15px var(--font-body,system-ui,sans-serif)}
+.meuni-loader-text{font:500 .9375rem var(--font-body,system-ui,sans-serif)}
 @media (prefers-reduced-motion:reduce){.meuni-loader-logo.srch .ml-spin{animation:none}}
 /* Bloc qui charge (MeuniLoader.inline) : la page autour reste affichée, seul le bloc attend.
    Invisible pendant 250 ms : un chargement instantané ne clignote pas. */

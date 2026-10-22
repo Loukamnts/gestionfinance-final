@@ -54,7 +54,7 @@
 .sheet-fx .fx-input {
   flex: 1; min-width: 0; border: none; outline: none;
   background: transparent; color: var(--text);
-  font-family: var(--font-body, monospace); font-size: 16px;
+  font-family: var(--font-body, monospace); font-size: 1rem;
   padding: 9px 12px;
 }
 .sheet-fx .fx-preview { padding: 0 12px; display: flex; align-items: center; font-size: 0.8rem; color: var(--muted); border-left: 1px solid var(--line); white-space: nowrap; }
@@ -112,7 +112,7 @@
 .sheet-table .corner-head { z-index: 7; min-width: 210px; width: 210px; }
 .sheet-table .row-head { min-width: 210px; width: 210px; text-align: left; }
 .sheet-table .row-head .rh-number { display: inline-flex; align-items: center; justify-content: center; width: 30px; min-width: 30px; min-height: 22px; margin: 6px 7px 6px 9px; border-right: 1px solid var(--line); color: var(--muted); font-size: .72rem; font-variant-numeric: tabular-nums; }
-.sheet-table .row-head .rh-label { display: inline-block; max-width: calc(100% - 86px); padding: 6px 38px 6px 0; text-align: left; font-size: .86rem; line-height: 22px; vertical-align: top; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sheet-table .row-head .rh-label { display: inline-block; max-width: calc(100% - 86px); padding: 6px 38px 6px 0; text-align: left; font-size: .86rem; line-height: 1.375rem; vertical-align: top; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sheet-table .row-head .rh-edit-btn { right: 7px; min-width: 28px; min-height: 28px; padding: 4px 6px; opacity: .78; }
 
 .sheet-table td.cell { position: relative; height: 34px; min-width: 116px; background: transparent; color: var(--text); cursor: cell; user-select: none; }
@@ -132,7 +132,7 @@
 }
 .sheet-table td.cell .cv {
   display: block; width: 100%; height: 100%; padding: 6px 9px; box-sizing: border-box;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 22px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.375rem;
 }
 .sheet-table td.cell.num .cv { text-align: right; }
 .sheet-table td.cell.error .cv { color: var(--red, #fb7185); }
@@ -141,17 +141,17 @@
 .sheet-table td.cell .cell-edit {
   position: absolute; inset: 0; width: 100%; height: 100%; padding: 6px 9px; box-sizing: border-box;
   border: 2px solid var(--accent, #c08457); background: var(--input-focus-bg, #fff); color: var(--text);
-  font-size: 16px; line-height: 22px; outline: none; z-index: 6;
+  font-size: 1rem; line-height: 1.375rem; outline: none; z-index: 6;
 }
 /* en-tête de colonne éditable */
 .sheet-table thead th.col-head { overflow: hidden; }
 .sheet-table th.col-head .h-label {
   display: block; width: 100%; height: 100%; padding: 6px 9px; box-sizing: border-box;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 22px; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.375rem; text-align: center;
 }
 .sheet-table th.col-head .h-edit {
   width: 100%; height: 100%; border: 2px solid var(--accent); background: var(--input-focus-bg);
-  color: var(--text); font-size: 16px; font-weight: 700; text-align: center; outline: none; box-sizing: border-box;
+  color: var(--text); font-size: 1rem; font-weight: 700; text-align: center; outline: none; box-sizing: border-box;
 }
 .sheet-addrows { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); background: var(--input-bg, rgba(0,0,0,0.03)); }
 .sheet-addrows .button { min-height: 30px; padding: 5px 9px; opacity: .78; font-size: .76rem; }
