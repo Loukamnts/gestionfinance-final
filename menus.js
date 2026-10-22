@@ -105,22 +105,28 @@
     }
     var d=el("div","gfa-prev "+mode);d.innerHTML=svg+'</svg>';return d;
   }
+  // Aperçu « Automatique » : moitié clair, moitié sombre.
+  function prevAuto(layout){
+    var d=el("div","gfa-prev auto"),a=prev("light",layout),b=prev("dark",layout);
+    a.classList.add("gfa-half-l");b.classList.add("gfa-half-d");d.append(a,b);return d;
+  }
   function appearance(){
     var panel=document.querySelector('[data-settings-panel="appearance"]');if(!panel)return;
     var head=panel.querySelector(".settings-section-head:not(.split) p");if(head)head.textContent=t2("Le mode, la disposition et ce que montre ton accueil.","Mode, layout and what your home shows.");
     var box=byId("gfaBox");
     if(!box){box=el("div","gfa");box.id="gfaBox";var h=panel.querySelector(".settings-section-head:not(.split)");if(h)h.after(box);else panel.append(box);}
-    var mode=document.body.dataset.mode==="dark"?"dark":"light",layout=document.body.dataset.interface==="studio"?"side":"top";
-    function section(title,sub,tiles){var s=el("section");s.append(el("h4","",title),el("p","",sub));var g=el("div","gfa-tiles");g.setAttribute("role","group");g.setAttribute("aria-label",title);tiles.forEach(function(t){g.append(t);});s.append(g);return s;}
+    var pref=document.body.dataset.modePref==="light"||document.body.dataset.modePref==="dark"?document.body.dataset.modePref:"auto",mode=document.body.dataset.mode==="dark"?"dark":"light",layout=document.body.dataset.interface==="studio"?"side":"top";
+    function section(title,sub,tiles,cls){var s=el("section",cls||"");s.append(el("h4","",title),el("p","",sub));var g=el("div","gfa-tiles"+(tiles.length===3?" is-three":""));g.setAttribute("role","group");g.setAttribute("aria-label",title);tiles.forEach(function(t){g.append(t);});s.append(g);return s;}
     function tile(label,small,on,preview,act){var b=el("button","gfa-tile");b.type="button";b.setAttribute("aria-pressed",String(on));var s=el("strong","",label);b.append(preview,s,el("small","",small));b.addEventListener("click",function(){act();setTimeout(appearance,60);});return b;}
     var modeS=section(t2("Mode d’affichage","Display mode"),t2("Clair pour la journée, sombre pour le soir.","Light for daytime, dark for the evening."),[
-      tile(t2("Clair","Light"),t2("Fond crème, carte sombre","Cream background, dark card"),mode==="light",prev("light",layout),function(){var b=document.querySelector('[data-mode-option="light"]');if(b)b.click();}),
-      tile(t2("Sombre","Dark"),t2("Reposant pour les yeux","Easy on the eyes"),mode==="dark",prev("dark",layout),function(){var b=document.querySelector('[data-mode-option="dark"]');if(b)b.click();})]);
+      tile(t2("Automatique","Automatic"),t2("Suit le réglage du téléphone","Follows your phone"),pref==="auto",prevAuto(layout),function(){var b=document.querySelector('[data-mode-option="auto"]');if(b)b.click();}),
+      tile(t2("Clair","Light"),t2("Fond crème, carte sombre","Cream background, dark card"),pref==="light",prev("light",layout),function(){var b=document.querySelector('[data-mode-option="light"]');if(b)b.click();}),
+      tile(t2("Sombre","Dark"),t2("Reposant pour les yeux","Easy on the eyes"),pref==="dark",prev("dark",layout),function(){var b=document.querySelector('[data-mode-option="dark"]');if(b)b.click();})]);
     var tog=byId("interfaceLayoutToggle");
     function setLayout(want){if(!tog)return;var on=tog.getAttribute("aria-checked")==="true";if(on!==want)tog.click();}
     var layS=section(t2("Disposition","Layout"),t2("Où se trouve la navigation sur ordinateur.","Where navigation sits on desktop."),[
       tile(t2("Barre en haut","Top bar"),t2("Simple et compacte","Simple and compact"),layout==="top",prev(mode,"top"),function(){setLayout(false);}),
-      tile(t2("Menu latéral","Side menu"),t2("Tout à portée de clic","Everything one click away"),layout==="side",prev(mode,"side"),function(){setLayout(true);})]);
+      tile(t2("Menu latéral","Side menu"),t2("Tout à portée de clic","Everything one click away"),layout==="side",prev(mode,"side"),function(){setLayout(true);})],"gfa-layout");
     box.replaceChildren(modeS,layS);
     var home=byId("gfhSettings");if(home&&home.previousSibling!==box){box.after(home);}
   }

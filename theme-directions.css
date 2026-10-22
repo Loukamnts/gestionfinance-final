@@ -933,7 +933,7 @@ body[data-theme] .settings-shell > .account-section[data-settings-panel] {
    Un seul accent (blé), un seul bloc plein par écran, filets plutôt que cadres.
    ======================================================================== */
 body[data-mode="dark"][data-palette="ble"] { --accent:#EDB73B; --accent-2:#7CC59B; --accent-3:#8FB0BD; --palette-on-accent:#0E1713; }
-body[data-mode="light"][data-palette="ble"] { --accent:#9A6410; --accent-2:#2F6B4A; --accent-3:#4F6F7C; --palette-on-accent:#17261F; }
+body[data-mode="light"][data-palette="ble"] { --accent:#855508; --accent-2:#2F6B4A; --accent-3:#4F6F7C; --palette-on-accent:#17261F; }
 
 body[data-theme="moulin"][data-mode="light"][data-palette] {
   color-scheme:light;
@@ -1063,7 +1063,7 @@ html:has(#meuniBoot.is-boot:not([hidden])),body:has(#meuniBoot.is-boot:not([hidd
 .meuni-loader-logo.srch .lg-a{stroke-dasharray:22 59.1}
 .meuni-loader-logo.srch .ml-spin{animation:meuniSpin 1.1s linear infinite}
 @keyframes meuniSpin{to{transform:rotate(360deg)}}
-.meuni-loader-text{font:500 15px var(--font-body,system-ui,sans-serif)}
+.meuni-loader-text{font:500 .9375rem var(--font-body,system-ui,sans-serif)}
 @media (prefers-reduced-motion:reduce){.meuni-loader-logo.srch .ml-spin{animation:none}}
 /* Bloc qui charge (MeuniLoader.inline) : la page autour reste affichée, seul le bloc attend.
    Invisible pendant 250 ms : un chargement instantané ne clignote pas. */

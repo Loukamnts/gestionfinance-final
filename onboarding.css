@@ -236,16 +236,16 @@ body[data-theme] .tutorial-tooltip {
 }
 body[data-theme] .tutorial-tooltip.is-placed { opacity: 1; transform: none; }
 .tutorial-head { display: flex; align-items: center; justify-content: space-between; margin: -6px -8px 4px 0; }
-.tutorial-count { font: 600 12px var(--font-body); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tutorial-count { font: 600 .75rem var(--font-body); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
 body[data-theme] .tutorial-tooltip .tutorial-skip {
   width: 44px; height: 44px; margin: 0; padding: 0; border: 0; border-radius: 50%;
-  background: transparent; color: var(--muted); font: 400 24px/1 var(--font-body); cursor: pointer;
+  background: transparent; color: var(--muted); font: 400 1.5rem/1 var(--font-body); cursor: pointer;
 }
 @media (hover:hover) {
 body[data-theme] .tutorial-tooltip .tutorial-skip:hover { background: var(--line); color: var(--text); }
 }
-body[data-theme] .tutorial-tooltip h4 { margin: 0 0 6px; font: 700 20px/1.2 var(--font-heading); letter-spacing: -.02em; color: var(--text); }
-body[data-theme] .tutorial-tooltip p { margin: 0; font: 400 15px/1.5 var(--font-body); color: var(--muted); }
+body[data-theme] .tutorial-tooltip h4 { margin: 0 0 6px; font: 700 1.25rem/1.2 var(--font-heading); letter-spacing: -.02em; color: var(--text); }
+body[data-theme] .tutorial-tooltip p { margin: 0; font: 400 .9375rem/1.5 var(--font-body); color: var(--muted); }
 .tutorial-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
 body[data-theme] .tutorial-progress { margin: 0; gap: 5px; }
 body[data-theme] .tutorial-progress-dot { width: 6px; height: 6px; border-radius: 3px; background: var(--line); transition: width .25s, background .25s; }
@@ -254,7 +254,7 @@ body[data-theme] .tutorial-progress-dot.active { width: 18px; background: var(--
 .tutorial-actions { display: flex; align-items: center; gap: 6px; }
 body[data-theme] .tutorial-tooltip .tutorial-back {
   height: 44px; padding: 0 12px; border: 0; border-radius: 14px; background: transparent;
-  color: var(--text); font: 600 15px var(--font-body); cursor: pointer;
+  color: var(--text); font: 600 .9375rem var(--font-body); cursor: pointer;
 }
 @media (hover:hover) {
 body[data-theme] .tutorial-tooltip .tutorial-back:hover { background: var(--line); }
@@ -262,7 +262,7 @@ body[data-theme] .tutorial-tooltip .tutorial-back:hover { background: var(--line
 body[data-theme] .tutorial-tooltip .tutorial-btn {
   height: 44px; padding: 0 20px; border: 0; border-radius: 14px;
   background: var(--accent-fill, #E3A82B); color: var(--on-accent-fill, #17261F);
-  font: 600 15px var(--font-body); box-shadow: none; transform: none; cursor: pointer;
+  font: 600 .9375rem var(--font-body); box-shadow: none; transform: none; cursor: pointer;
 }
 @media (hover:hover) {
 body[data-theme] .tutorial-tooltip .tutorial-btn:hover { filter: brightness(1.05); transform: none; }

@@ -858,13 +858,16 @@
       label.addEventListener("click", function () { switchSheet(sheet.id); });
       label.addEventListener("dblclick", function () { renameSheet(sheet.id); });
       tab.appendChild(label);
+      let delX = null;
       if (active && state.sheets.length > 1) {
         const x = document.createElement("button"); x.type = "button"; x.className = "sheet-tab-x"; x.textContent = "×";
         x.title = tr("Supprimer l’année ", "Delete year ") + sheet.name; x.setAttribute("aria-label", tr("Supprimer l’année ", "Delete year ") + sheet.name);
         x.addEventListener("click", function (e) { e.stopPropagation(); deleteSheet(sheet.id); });
-        tab.appendChild(x);
+        delX = x;
       }
       tabsEl.appendChild(tab);
+      // La croix est un bouton à part (44 px), à côté de la pastille : impossible de la toucher en visant l’année.
+      if (delX) tabsEl.appendChild(delX);
     });
     const after = document.createElement("button"); after.type = "button"; after.className = "sheet-year-add";
     after.textContent = "+ " + (last + 1); after.title = tr("Ajouter l’année ", "Add year ") + (last + 1);

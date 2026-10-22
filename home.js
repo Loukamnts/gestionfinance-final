@@ -332,12 +332,12 @@
     if(quietAlerts){quietAlerts=false;if(window.GFNotify)budgetMsgs.forEach(function(x){window.GFNotify.dismiss(x.id);});return;}
     if(fresh.length)pushNow(fresh.sort(function(a,b){return b.lvl-a.lvl||b.spent/b.bud-a.spent/a.bud;}));
   }
+  function alertText(a){return a.lvl>=100?t2(a.name+" : plafond atteint ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": limit reached ("+eur(a.spent)+" / "+eur(a.bud)+")"):t2(a.name+" : 80 % du plafond ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": 80% of the limit ("+eur(a.spent)+" / "+eur(a.bud)+")");}
   /* Pluriel : « 1 dépense fixe ajoutée » / « 3 dépenses fixes ajoutées » */
   function fixedAdded(n,month){return en()?n+" fixed expense"+(n===1?"":"s")+" added to "+month:n===1?"1 dépense fixe ajoutée à "+month:n+" dépenses fixes ajoutées à "+month;}
   /* Texte des notifications poussées (écran verrouillé, autres appareils) : jamais de montant. */
   function pushText(a){return a.lvl>=100?t2(a.name+"\u00a0: plafond atteint",a.name+": limit reached"):t2(a.name+"\u00a0: 80\u00a0% du plafond",a.name+": 80% of the limit");}
   function pushBody(a){return a.lvl>=100?t2("Tu as atteint le plafond fixé pour ce mois.","You reached the limit set for this month."):t2("Tu approches du plafond fixé pour ce mois.","You are getting close to this month’s limit.");}
-  function alertText(a){return a.lvl>=100?t2(a.name+" : plafond atteint ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": limit reached ("+eur(a.spent)+" / "+eur(a.bud)+")"):t2(a.name+" : 80 % du plafond ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": 80% of the limit ("+eur(a.spent)+" / "+eur(a.bud)+")");}
   // Un message par ligne dont le plafond est atteint (urgent) ou à 80 % ; identifiant stable par ligne, mois et seuil.
   function budgetMessage(a,ym){
     var over=a.lvl>=100,left=Math.max(0,a.bud-a.spent);

@@ -149,8 +149,8 @@ test('pluriels : « 1 dépense fixe », « 1 opération »', () => {
   assert.equal(f(1, 'March'), '1 fixed expense added to March');
   assert.equal(f(2, 'March'), '2 fixed expenses added to March');
   const bank = read('bank-import.js');
-  assert.ok(bank.includes('summary.count===1?" opération, "'));
-  assert.ok(bank.includes('cette opération était déjà importée'));
+  assert.ok(/plural\(summary\.newCount,"opération","opérations"/.test(bank));
+  assert.ok(bank.includes('ces opérations étaient déjà importées'));
   const sheet = read('sheet.js');
   assert.ok(sheet.includes('"1 feuille exportée."') && sheet.includes('"1 formule remplacée par sa valeur."'));
   assert.ok(!/feuille\(s\)|formule\(s\)/.test(sheet));
