@@ -27,9 +27,9 @@ test('Sans en-tête (LCL) : colonnes devinées sur le contenu',()=>{
   const {s}=sum('02/09/2026;-12,50;Carte;;SNCF INTERNET;\n05/09/2026;-850,00;Prélèvement;;LOYER FONCIA;\n07/09/2026;-9,99;Carte;;SPOTIFY;\n');
   assert.equal(total(s,'Transports'),12.5);assert.equal(total(s,'Loyer'),850);assert.equal(total(s,'Abonnements'),9.99);
 });
-test('Virgule anglaise, dates ISO, virement interne ignoré',()=>{
+test('Virgule anglaise, dates ISO, virement interne = épargne',()=>{
   const {s}=sum('Date,Description,Amount\n2026-09-01,"Transfert interne vers compte joint",-300.00\n2026-09-02,"Boulangerie Paul",-6.40\n2026-09-03,"Unknown shop",-15.00\n');
-  assert.equal(s.ignored,1);assert.equal(total(s,'Restaurants'),6.4);assert.equal(total(s,'Autres dépenses'),15);
+  assert.equal(s.ignored,0);assert.equal(total(s,'Épargne'),300);assert.equal(total(s,'Restaurants'),6.4);assert.equal(total(s,'Autres dépenses'),15);
 });
 test('Un fichier qui n\'est pas un relevé n\'est pas pris pour un relevé',()=>{
   assert.equal(B.parse(B._decode(enc('Ligne;Janvier;Février\nSalaire;2000;2000\nLoyer;-700;-700\n'))),null);
@@ -328,7 +328,7 @@ test('Argent reçu d’un proche, retraites, Caisse d’Épargne, prêts',()=>{
   const cat=(l,a)=>{const c=B.categorize({label:l,amount:a},{});return c?c[0]:'(ignoré)';};
   assert.equal(cat('VIREMENT DE MAMAN',100),'Autres revenus');assert.equal(cat('VIR DE MARIE DUPONT',50),'Autres revenus');
   assert.equal(cat('VIR VERS MATHIEU',-30),'Autres dépenses');assert.equal(cat('VIR VERS MON LIVRET A',-100),'Épargne');
-  assert.equal(cat('VIREMENT DE MON COMPTE COURANT',200),'(ignoré)');
+  assert.equal(cat('VIREMENT DE MON COMPTE COURANT',200),'Épargne');
   assert.equal(cat('AGIRC ARRCO RETRAITE COMPLEMENTAIRE',412),'Salaire');assert.equal(cat('CARSAT PENSION RETRAITE',1200),'Salaire');
   assert.equal(cat('RETRAIT DAB 12/09',-40),'Retraits');assert.equal(cat('PRLV PENSION ALIMENTAIRE',-300),'Autres dépenses');
   assert.equal(cat('PRLV SEPA CAISSE D EPARGNE ECHEANCE PRET',-350),'Crédits');assert.equal(cat('FRAIS CAISSE D EPARGNE COTISATION',-12),'Frais bancaires');
@@ -375,8 +375,8 @@ test('Revue finale : soldes, sens +/-, montants, virements, prêts',()=>{
 
   assert.notEqual(cat('CARTE 05/09 PRET A PORTER LYON'),'Crédits');
   assert.equal(cat('PRLV ECHEANCE PRET IMMO HABITAT'),'Crédits');
-  assert.equal(cat('VIR SEPA COMPTE A COMPTE'),null);
-  assert.equal(cat('VIR VERS COMPTE JOINT'),null);
+  assert.equal(cat('VIR SEPA COMPTE A COMPTE'),'Épargne');
+  assert.equal(cat('VIR VERS COMPTE JOINT'),'Épargne');
   assert.notEqual(cat('VIR SEPA VERS COMPTE DUPONT'),null);// un virement à quelqu'un n'est pas un transfert interne
   assert.notEqual(cat('CARTE TOP UP FITNESS'),null);
   assert.equal(cat('Top-up by *1234',50),null);
@@ -397,4 +397,85 @@ test('Lignes existantes : « Revenu » reçoit les autres revenus, « Essence »
   const env2=setupSheet(['Salaire','Transport']);
   const s2=env2.imp('Date;Libellé;Montant\n07/09/2026;CARTE ESSO EXPRESS;-50,00\n08/09/2026;CARTE SNCF;-20,00\n');
   assert.equal(total(s2,'Transport'),70);// pas de ligne « Essence » : le carburant va dans « Transport »
+});
+
+// ── Assistant d'import : virements entre comptes, doublons, opérations à classer, mois déjà remplis ──
+test('Virement entre tes comptes : compte comme de l’épargne (sortie = +, retour = −) ; recharges ignorées',()=>{
+  const {B,imp,cell}=setupSheet(['Salaire','Courses','Épargne']);
+  const s=imp('Date;Libellé;Montant\n02/09/2026;CARTE LIDL;-20,00\n05/09/2026;VIREMENT INTERNE VERS COMPTE EPARGNE;-300,00\n09/09/2026;VIR DE MON LIVRET A;100,00\n10/09/2026;TOP-UP BY *1234;50,00\n11/09/2026;Exchanged to USD;-40,00\n12/09/2026;VIREMENT DE MON COMPTE COURANT;80,00\n');
+  assert.equal(total(s,'Épargne'),120);// 300 − 100 − 80
+  assert.equal(s.wallet,2);assert.equal(s.ignored,2);
+  assert.equal(cell('Épargne',8),-120);// même sens que le reste du tableur (sorties en négatif)
+  const rows=s.rows;
+  assert.equal(rows.filter(r=>r.internal).length,3);// les trois virements entre tes comptes
+  assert.equal(rows.filter(r=>r.status==='ignored'&&r.ig==='wallet').length,2);
+  // Choisir « Ignorer » pour ce virement le sort du total
+  const fp=rows.find(r=>/INTERNE/.test(r.label)).fp;
+  const B2=setupSheet([]).B;const s2=B2.summarize(B2.parse(B2._decode(enc('Date;Libellé;Montant\n02/09/2026;CARTE LIDL;-20,00\n05/09/2026;VIREMENT INTERNE VERS COMPTE EPARGNE;-300,00\n'))),{},{ovr:{[fp]:['','Ignorer']}});
+  assert.equal(total(s2,'Épargne'),0);assert.equal(s2.byRule,1);
+  // Ou le ranger ailleurs
+  const s3=B2.summarize(B2.parse(B2._decode(enc('Date;Libellé;Montant\n05/09/2026;VIREMENT INTERNE VERS COMPTE EPARGNE;-300,00\n'))),{},{ovr:{[fp]:['Loisirs','Dépense']}});
+  assert.equal(total(s3,'Loisirs'),300);
+});
+test('Doublons : repérés, non repris par défaut, recomptés si on le demande',()=>{
+  const {B,imp,cell}=setupSheet(['Salaire','Courses']);
+  imp('Date;Libellé;Montant\n02/09/2026;CARTE LIDL;-20,00\n05/09/2026;VIR SALAIRE ACME;1500,00\n');
+  const csv='Date;Libellé;Montant\n02/09/2026;CARTE LIDL;-20,00\n05/09/2026;VIR SALAIRE ACME;1500,00\n07/09/2026;CARTE LIDL;-30,00\n';
+  const ops=B.parse(B._decode(enc(csv)));
+  const s=B.summarize(ops);
+  assert.equal(s.dupCount,2);assert.equal(s.newCount,1);
+  assert.equal(s.rows.map(r=>r.status).sort().join(),'dup,dup,ok');
+  assert.equal(total(s,'Courses'),30);// seul le nouveau est affiché dans les totaux
+  // Forcer l'import d'une opération déjà importée
+  const dupFp=s.rows.find(r=>r.status==='dup'&&/LIDL/.test(r.label)).fp;
+  const s2=B.summarize(B.parse(B._decode(enc(csv))),{},{inc:{[dupFp]:true}});
+  assert.equal(s2.dupCount,1);assert.equal(s2.newCount,2);assert.equal(total(s2,'Courses'),50);
+  assert.equal(s2.rows.find(r=>r.fp===dupFp).forced,true);
+  // Écrit en mode Ajouter : le doublon forcé s'ajoute, l'autre non
+  B.write(s2,'add');assert.equal(cell('Courses',8),-70);// −20 déjà là, + −20 forcé, + −30 nouveau
+});
+test('À classer : opérations inconnues regroupées par marchand, choix par marchand ou par opération',()=>{
+  const {B}=setupSheet(['Salaire','Courses']);
+  const csv='Date;Libellé;Montant\n02/09/2026;CARTE BOUTIQUE XYZ;-25,00\n09/09/2026;CARTE BOUTIQUE XYZ 0909;-12,00\n10/09/2026;VIR M DUPONT;120,00\n11/09/2026;CARTE LIDL;-10,00\n';
+  const s=B.summarize(B.parse(B._decode(enc(csv))));
+  assert.equal(s.unknown.length,2);
+  const x=s.unknown.find(u=>/XYZ/.test(u.label));assert.equal(x.count,2);assert.equal(x.total,-37);assert.equal(x.fps.length,2);
+  assert.equal(s.rows.filter(r=>r.unk).length,3);assert.ok(!s.rows.find(r=>/LIDL/.test(r.label)).unk);
+  // Un choix par marchand règle toutes ses opérations
+  const s2=B.summarize(B.parse(B._decode(enc(csv))),{[x.key]:['Loisirs','Dépense']});
+  assert.equal(s2.unknown.length,1);assert.equal(total(s2,'Loisirs'),37);
+  // Ignorer
+  const s3=B.summarize(B.parse(B._decode(enc(csv))),{[x.key]:['','Ignorer']});
+  assert.equal(s3.unknown.length,1);assert.equal(s3.ignored,2);
+});
+test('En attente / annulée / total différé : comptés à part, jamais importés',()=>{
+  const {B}=setupSheet([]);
+  const s=B.summarize(B.parse(B._decode(enc('Date;Libellé;Montant;Statut\n02/09/2026;CARTE LIDL;-20,00;\n03/09/2026;CARTE FNAC;-30,00;EN ATTENTE\n04/09/2026;CARTE ZARA;-40,00;REFUSÉ\n05/09/2026;CARTE SNCF;-15,00;\n06/09/2026;CARTE LIDL;-12,00;\n07/09/2026;FACTURE CARTE DU 30/09;-47,00;\n'))));
+  assert.equal(s.pending,2);assert.equal(s.deferred,1);assert.equal(s.rows.length,3);
+});
+test('Mois déjà remplis : montants du tableur et du relevé pour chaque ligne concernée',()=>{
+  const env=setupSheet(['Salaire','Courses','Loyer']);
+  env.imp('Date;Libellé;Montant\n02/09/2026;CARTE LIDL;-40,00\n03/09/2026;VIR SALAIRE ACME;1800,00\n');
+  const s=env.B.summarize(env.B.parse(env.B._decode(enc('Date;Libellé;Montant\n10/09/2026;CARTE LIDL;-25,00\n01/10/2026;PRLV LOYER FONCIA;-700,00\n'))));
+  const c=env.B._conflicts(s);
+  assert.equal(c.length,1);assert.equal(c[0].d.m,8);// septembre seulement : octobre est vide
+  assert.equal(c[0].rows.length,1);assert.equal(c[0].rows[0].name,'Courses');assert.equal(c[0].rows[0].stmt,25);
+  assert.equal(c[0].rows[0].sheet,-40);assert.equal(c[0].rows[0].sign,-1);
+});
+test('Plusieurs mois et plusieurs années : une feuille par année, créée si besoin',()=>{
+  const {B,snap}=setupSheet(['Salaire','Courses']);
+  const s=B.summarize(B.parse(B._decode(enc('Date;Libellé;Montant\n15/12/2025;CARTE LIDL;-40,00\n20/01/2026;CARTE LIDL;-50,00\n20/03/2027;CARTE LIDL;-60,00\n'))));
+  assert.equal(s.months.length,3);B.write(s,'replace');
+  assert.equal(snap().sheets.map(x=>x.name).sort().join(),'2025,2026,2027');
+});
+test('Devise étrangère : seul le montant en euros compte',()=>{
+  const {B}=setupSheet([]);
+  const s=B.summarize(B.parse(B._decode(enc('Date;Libellé;Montant (EUR);Montant (devise);Devise\n02/09/2026;CARTE TESCO LONDON;-23,50;-20,00;GBP\n'))));
+  assert.equal(total(s,'Courses'),23.5);
+});
+test('Confidentialité : le registre des doublons ne garde aucun libellé',()=>{
+  const mem={};const c={window:{safeStore:{getItem:k=>mem[k]??null,setItem:(k,v)=>{mem[k]=String(v);}},FinanceSheet:{getSnapshot:()=>({sheets:[{id:'y',name:'2026',cells:{},rowHeaders:[],rows:9,cols:12}]}),loadSnapshot:()=>{}}},TextDecoder,Intl,document:{}};
+  vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(__dirname,'..','bank-import.js'),'utf8'),c);const B2=c.window.GFBankImport;
+  B2.write(B2.summarize(B2.parse(B2._decode(enc('Date;Libellé;Montant\n02/09/2026;CARTE BOUTIQUE SECRETE DUPONT;-25,00\n')))),'replace');
+  const all=Object.values(mem).join('|');assert.ok(!/SECRETE|DUPONT|secrete|dupont/i.test(all),'un libellé est resté dans le stockage');
 });
