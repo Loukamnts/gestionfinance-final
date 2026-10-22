@@ -148,15 +148,15 @@ body[data-theme="moulin"] #sheetPage .sheet-bar .sheet-spacer{display:none!impor
 body[data-theme="moulin"] #sheetPage .sheet-bar .sheet-divider,body[data-theme="moulin"] #sheetPage .sheet-bar-right::before{content:"";display:block!important;flex:0 0 1px;width:1px;height:24px;margin:0!important;background:var(--line-strong,var(--line));border:0;border-radius:1px}
 body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn{height:44px!important;min-height:44px!important;margin:0!important;border-radius:14px!important;justify-content:center}
 body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn svg{width:21px!important;height:21px!important;flex:0 0 21px!important}
-body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc){flex:0 0 44px!important;width:44px!important;min-width:44px!important;padding:0!important}
+body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc){flex:0 0 37px!important;width:37px!important;min-width:37px!important;padding:0!important}
 body[data-theme="moulin"] #sheetPage #btnSheetCalc{flex:0 0 auto!important;width:auto!important;min-width:0!important;padding:0 7px!important;gap:6px;font-size:.9375rem!important;font-weight:600}
 body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{display:inline!important}
 }
 @media(max-width:399px){body[data-theme="moulin"] #sheetPage #btnSheetCalc{flex:0 0 44px!important;width:44px!important;min-width:44px!important;padding:0!important}body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}}
 /* Icône seule : boutons carrés aussi grands que la largeur le permet */
-@media(max-width:399px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 44px!important;width:44px!important;min-width:44px!important}}
-@media(max-width:359px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 40px!important;width:40px!important;min-width:40px!important}}
-@media(max-width:339px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 38px!important;width:38px!important;min-width:38px!important}}
+@media(max-width:399px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 42px!important;width:42px!important;min-width:42px!important}}
+@media(max-width:369px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 38px!important;width:38px!important;min-width:38px!important}}
+@media(max-width:339px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 34px!important;width:34px!important;min-width:34px!important}}
 /* Vues du graphique sur petit écran : deux colonnes lisibles plutôt que quatre mots tronqués */
 @media(max-width:400px){.gfc-views{display:grid;grid-template-columns:1fr 1fr;border-radius:20px}.gfc-views button{font-size:.875rem;padding:0 6px;min-height:44px}}
 
@@ -403,7 +403,6 @@ body :is(.bottom-nav-btn,.mode-segment button,.objectives-tabs button,.account-t
   .gfh-switch::after{content:"";position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
   body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab .sheet-tab-name{height:44px;margin-block:-1px}
   #sheetPage .sheet-addrows .button{min-height:44px}
-  #sheetPage .sheet-bar :is(.button,button){min-width:44px}
   .row-head .rh-edit-btn{position:relative}
   .row-head .rh-edit-btn::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
 }
@@ -467,7 +466,6 @@ body[data-page="dashboard"]:not(.gfh-ready) .app{visibility:hidden;animation:gfR
 .gf-bigtext .app-header .brand-copy h1{font-size:1.25rem}
 .gf-bigtext .gfa-tiles.is-three{grid-template-columns:1fr}
 .gf-bigtext :is(#objectiveForm,.objective-form) :is(label,input,select,.gfs-dd,.gfs-dd-btn,.gfo-row,.gfo-field,.gfo-hint,.gfo-link){min-width:0;max-width:100%;box-sizing:border-box}
-.gf-bigtext #sheetPage .sheet-bar{flex-wrap:wrap;row-gap:4px}
 .gf-bigtext .sheet-mobile-month-label{font-size:1.125rem}
 .gf-bigtext .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes){font-size:.9375rem;height:auto!important;min-height:44px;padding-block:6px!important;white-space:normal;line-height:1.1}
 .gf-bigtext :is(.gfplan-dialog,.gfh-dialog,.sf-dialog,dialog){max-width:calc(100vw - 16px)}
@@ -509,13 +507,6 @@ body[data-page="dashboard"]:not(.gfh-ready) .app{visibility:hidden;animation:gfR
 /* Onglets et pastilles (Paramètres, Mon espace, Objectifs) : le changement de couleur est immédiat */
 body[data-theme] :is(.settings-hub-item,.personal-workspace-link,.objectives-tabs button,.mode-segment button,.account-tab,.mobile-finance-summary-tabs button,.gfc-views button){transition:background-color .1s linear,border-color .1s linear,color .1s linear!important}
 
-/* Barre d'outils du tableur (téléphone) : une seule ligne, les boutons se partagent la largeur (jamais de défilement caché ni de retour à la ligne) */
-@media(max-width:720px){
-  body #sheetPage .sheet-bar{flex-wrap:nowrap!important;overflow:visible!important;gap:2px!important;padding:6px!important}
-  body #sheetPage .sheet-bar-left{flex:2 1 0!important;gap:2px!important}
-  body #sheetPage .sheet-bar-right{flex:5 1 0!important;gap:2px!important;margin-left:0!important}
-  body #sheetPage .sheet-bar :is(.button,button){flex:1 1 0!important;min-width:0!important;width:auto!important;padding-inline:0!important;justify-content:center}
-}
 body[data-theme="moulin"] #objectivesPage .objective-card-actions{align-items:center;gap:0 2px}
 body[data-theme="moulin"] #objectivesPage .objective-card-actions .button-ghost{flex:0 1 auto;min-width:0;padding:0 6px!important}
 body[data-theme="moulin"] #objectivesPage .objective-card-actions .objective-remove{order:99;margin-left:auto;flex:0 0 44px;width:44px;min-width:44px;height:44px!important;padding:0!important;display:inline-grid;place-items:center}
