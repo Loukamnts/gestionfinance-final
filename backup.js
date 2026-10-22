@@ -14,7 +14,7 @@
   function t2(fr,e){return en()?e:fr;}
   function el(tag,cls,text){var n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;}
   function store(){return window.safeStore;}
-  function toast(text){var t=byId("gfhToast");if(!t){t=el("div","gfh-toast");t.id="gfhToast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");document.body.append(t);}t.textContent=text;t.classList.add("is-on");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove("is-on");},3800);}
+  function toast(text){if(window.GFNotify)window.GFNotify.toast(text);}
 
   /* ── Téléchargement ─────────────────────────────── */
   async function sharing(){

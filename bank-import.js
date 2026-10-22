@@ -899,14 +899,10 @@
       document.body.append(d);d.showModal();if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();try{h.focus({preventScroll:true});}catch(e){}
     });
   }
-  function toast(text,ms){var t=document.getElementById("gfhToast");if(!t){t=el("div","gfh-toast");t.id="gfhToast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");document.body.append(t);}t.textContent=text;t.classList.add("is-on");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove("is-on");},ms||3600);}
+  // Confirmations : le message commun du site (même place, même style, même durée que partout).
+  function toast(text,ms){if(window.GFNotify)window.GFNotify.toast(text,{ms:ms});}
   // Message de fin avec « Annuler » (7 secondes).
-  function undoToast(text,onUndo,ms){
-    var old=document.getElementById("gfbToast");if(old)old.remove();
-    var t=el("div","gfb-toast");t.id="gfbToast";t.setAttribute("role","status");t.append(el("span","",text));
-    var b=el("button","",t2("Annuler","Undo"));b.type="button";b.addEventListener("click",function(){clearTimeout(tm);t.remove();onUndo();});t.append(b);
-    document.body.append(t);var tm=setTimeout(function(){t.remove();},ms||7000);
-  }
+  function undoToast(text,onUndo,ms){if(window.GFNotify)window.GFNotify.toast(text,{undo:onUndo,ms:ms||7000});}
   // Se place sur le dernier mois importé : bonne feuille (année) et bon mois.
   function showMonth(m){
     try{var FS=window.FinanceSheet,snap=FS.getSnapshot(),sh=sheetOf(snap,m.y);if(!sh)return;

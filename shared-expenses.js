@@ -225,7 +225,7 @@
     acts.append(u.action(t2("Annuler","Cancel"),function(){dlg.close();},"secondary"),ok);dlg.append(feedback,acts);
   }
 
-  function toast(text){var t=document.getElementById("gfhToast");if(!t){t=document.createElement("div");t.className="gfh-toast";t.id="gfhToast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");document.body.append(t);}t.textContent=text;t.classList.add("is-on");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove("is-on");},3200);}
+  function toast(text){if(window.GFNotify)window.GFNotify.toast(text);}
   if(window.addEventListener){window.addEventListener("authStateChanged",function(){cache={at:0,user:"",data:null,pending:null};mounted=[];});
     // Les cartes déjà affichées reprennent la langue choisie.
     window.addEventListener("gf:languagechange",function(){if(mounted.length)refreshAll();});}

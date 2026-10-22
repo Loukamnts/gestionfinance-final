@@ -130,7 +130,6 @@
         sw.addEventListener("click",async function(){
           var next=sw.getAttribute("aria-checked")!=="true";sw.setAttribute("aria-checked",String(next));msg.textContent="";
           if(chips)chips.hidden=!next;
-          if(k[0]==="budget"&&window.GFHome)window.GFHome.setAlertsOn(next);
           try{var patch={};patch[k[0]]=next;await saveSetting(patch);}catch(e){sw.setAttribute("aria-checked",String(!next));if(chips)chips.hidden=next;msg.textContent=t2("Impossible d’enregistrer. Réessaie.","Could not save. Try again.");}
         });
       });
@@ -149,16 +148,11 @@
       list.addEventListener("click",function(e){if(e.target.closest&&e.target.closest(".gfh-switch"))setTimeout(setSum,0);});
       card.append(tog,body);
       parts.push(card);
-    }else{
-      // Sans notifications sur l'appareil : l'alerte de plafond reste visible sur l'accueil.
-      var H=window.GFHome,item2=el("div","gfr-kinds"),k2=el("div","gfr-kind is-budget"),r2=el("div","gfr-kind-row"),c2=el("div","gfr-kind-tx");
-      c2.append(el("strong","",t2("Alertes de plafond sur l’accueil","Limit alerts on Home")),el("small","",t2("Une carte à 80 % puis à 100 % du plafond d’une ligne.","A card at 80% then 100% of a row’s limit.")));
-      var s2=switchBtn(t2("Alertes de plafond","Limit alerts"),!H||H.alertsOn());s2.addEventListener("click",function(){var next=s2.getAttribute("aria-checked")!=="true";s2.setAttribute("aria-checked",String(next));if(H)H.setAlertsOn(next);});
-      r2.append(icon("budget"),c2,s2);k2.append(r2);item2.append(k2);parts.push(item2);
     }
     var note=el("p","gfr-note");note.append(icon("info","gfr-note-ic"),document.createTextNode(t2("Les plafonds se fixent sur l’accueil, en touchant une ligne de « Où part ton argent ».","Limits are set on Home by tapping a row in “Where your money goes”.")));
     parts.push(msg,note);
     box.replaceChildren.apply(box,parts);
+    if(window.GFNotify)window.GFNotify.refresh();// l'invitation aux rappels dépend de cet état
   }
   // Notification envoyée à tous mes appareils (plafond, objectif). Renvoie false si rien n'a été mis en file.
   async function notifyMe(kind,tag,title,body,url){
@@ -171,53 +165,28 @@
   window.addEventListener("gf:languagechange",function(){schedule();if(account().user&&prefs().on)saveSetting({}).catch(function(){});});
   document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest('[data-settings-view="notifications"]'))schedule();});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",schedule);else schedule();
-  /* Invitation discrète : à un moment pris au hasard, sur l'accueil seulement (jamais pendant une saisie
-     dans le tableur), une petite carte propose d'activer les rappels. « Plus tard » la fait revenir dans
-     1 à 2 semaines ; une fois les rappels activés, elle ne revient plus. */
-  var INVITE="personalFinanceDashboard.reminderInvite";
-  function inviteState(){try{var v=JSON.parse(window.safeStore.getItem(INVITE)||"{}");return v&&typeof v==="object"?v:{};}catch(e){return{};}}
-  function setInviteState(v){try{window.safeStore.setItem(INVITE,JSON.stringify(v));}catch(e){}}
+  /* Invitation aux rappels : un message du site (notifications.js), tant que les rappels ne sont pas activés
+     et que cet appareil peut les recevoir. Fermé, il ne revient pas. */
   function openReminderSettings(){
     if(window.setPage)window.setPage("settings");
     setTimeout(function(){var hub=document.querySelector('[data-settings-view="notifications"]');if(hub)hub.click();
       setTimeout(function(){var box=byId("gfrReminders");if(box){box.scrollIntoView({behavior:"smooth",block:"center"});box.classList.remove("is-flash");void box.offsetWidth;box.classList.add("is-flash");}},450);},120);
   }
-  function hideInvite(){var c=byId("gfrInvite");if(!c)return;c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}
-  async function inviteEligible(){
-    if(!account().user||document.hidden||document.body.dataset.page!=="dashboard"||(window.__gfCoachUntil||0)>Date.now())return false;
-    // Rien d'ouvert à l'écran (fenêtre, tutoriel, repère, chargement) : on ne dérange pas.
-    if([].some.call(document.querySelectorAll("dialog[open],.sheet-modal-overlay,.tutorial-overlay,.gfd-coach,.meuni-loader"),function(e){return !e.hidden&&e.getClientRects().length>0;}))return false;
-    if(window.GFPopup&&window.GFPopup.busy(byId("gfrInvite")))return false;
-    var a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return false;
-    if(!supported()&&!(isIOS()&&!standalone()))return false;
-    if("Notification" in window&&Notification.permission==="denied")return false;
-    var p=prefs();if(p.on&&await currentSub())return false;
-    return Date.now()>=(Number(inviteState().next)||0);
+  async function inviteMessages(){
+    // Sur iPhone dans Safari, c'est le message « écran d'accueil » (install.js) qui explique la marche à suivre.
+    if(!account().user||!supported()||("Notification" in window&&Notification.permission==="denied"))return[];
+    if(prefs().on&&await currentSub())return[];
+    return[{id:"reminders-invite",kind:"reminders",priority:50,tone:"info",once:true,
+      title:t2("Active les rappels","Turn on reminders"),
+      body:t2("Une notification si tu oublies de noter tes dépenses.","A notification if you forget to log your expenses."),
+      action:{label:t2("Activer","Turn on"),run:openReminderSettings}}];
   }
-  async function showInvite(){
-    if(byId("gfrInvite")||!(await inviteEligible()))return;
-    var ios=!supported();
-    var c=el("div","gfr-invite");c.id="gfrInvite";c.setAttribute("role","status");
-    var ic=el("span","gfr-invite-ic");ic.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
-    var tx=el("div","gfr-invite-tx");tx.append(el("strong","",t2("Active les rappels","Turn on reminders")),el("span","",ios?t2("Ajoute Meuniance à ton écran d’accueil pour être prévenu si tu oublies de noter tes dépenses.","Add Meuniance to your Home Screen to be reminded when you forget to log expenses."):t2("Une notification si tu oublies de noter tes dépenses.","A notification if you forget to log your expenses.")));
-    var later=el("button","gfr-invite-later",t2("Plus tard","Later")),go=el("button","gfr-invite-go",ios?t2("Voir comment","Show me"):t2("Activer","Turn on"));later.type=go.type="button";
-    later.addEventListener("click",function(){setInviteState({next:Date.now()+(7+Math.random()*7)*864e5});hideInvite();});
-    go.addEventListener("click",function(){setInviteState({next:Date.now()+3*864e5});hideInvite();if(ios&&window.GFInstall)window.GFInstall.open();else openReminderSettings();});
-    var acts=el("div","gfr-invite-acts");acts.append(later,go);c.append(ic,tx,acts);document.body.append(c);
-    requestAnimationFrame(function(){c.classList.add("is-on");});
-  }
-  // Une chance sur trois par visite, après 20 à 90 secondes passées sur l'accueil.
-  function planInvite(){
-    if(planInvite.done||Math.random()>0.34)return;planInvite.done=true;
-    setTimeout(function tryShow(){showInvite().catch(function(){});},(20+Math.random()*70)*1000);
-  }
-  if(window.MutationObserver)new MutationObserver(function(){if(document.body.dataset.page!=="dashboard")hideInvite();}).observe(document.body,{attributes:true,attributeFilter:["data-page"]});
-  window.addEventListener("authStateChanged",function(e){if(e.detail&&e.detail.user)planInvite();});
+  if(window.GFNotify)window.GFNotify.register("reminders",inviteMessages);
   // Service worker enregistré à chaque ouverture : il permet aussi d'ouvrir Meuniance sans connexion.
   if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){
     window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js",{scope:"/"}).catch(function(){});});
   }
   // Déconnexion : cet appareil arrête de recevoir les notifications du compte (la personne suivante ne les verra pas).
   function forgetDevice(){return Promise.race([disable().catch(function(){}),new Promise(function(r){setTimeout(r,3000);})]);}
-  window.GFReminders={render:schedule,notifyMe:notifyMe,pushReady:pushReady,forgetDevice:forgetDevice,_invite:showInvite};
+  window.GFReminders={render:schedule,notifyMe:notifyMe,pushReady:pushReady,forgetDevice:forgetDevice};
 })();

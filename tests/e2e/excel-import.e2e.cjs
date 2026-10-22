@@ -70,7 +70,7 @@ const FR = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'A
         const before = JSON.stringify(FS.getSnapshot().sheets.map((s) => [s.name, s.cells, s.rowHeaders]));
         await FS.importXlsx(make([['', ...FR], ['Nouveau', 1]]), { mode: 'replace' });
         await new Promise((r) => setTimeout(r, 100));
-        const undoBtn = document.querySelector('.sheet-toast-action');
+        const undoBtn = document.querySelector('.gfh-toast-act');
         out.undoButton = !!undoBtn;
         if (undoBtn) undoBtn.click();
         out.undoRestored = JSON.stringify(FS.getSnapshot().sheets.map((s) => [s.name, s.cells, s.rowHeaders])) === before;

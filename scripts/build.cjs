@@ -24,7 +24,7 @@ const copy = (from, to = from) => put(to, fs.readFileSync(path.join(root, from))
 const integrity = content => 'sha384-' + crypto.createHash('sha384').update(content).digest('base64');
 const publicFiles = ['sheet.js','sheet.css','onboarding.js','onboarding.css','friends.js','shared-expenses.js','year-review.js','year-review.css','profile.js',
   'i18n.js','i18n/fr.json','i18n/en.json','ios-fix.js','i18n-manager.js','shared-dashboard.js','sharing.css','ui-controls.js','ui-polish.css','theme-directions.css','objectives.js',
-  'store-shim.js','meuni-loader.js','plans.js','plans.css','home.js','home.css','auth.css','sheet-balances.css','finishing.js','finishing.css','bank-import.js','subs.js','reminders.js','install.js','avatars.js','backup.js','menus.js','menus.css','discover.js','discover.css','favicon.ico','brand-mark.svg','app-icon-180.png','app-icon-180.webp','app-icon-512.png','app-icon-512.webp','manifest.webmanifest','supabase_config.json',
+  'store-shim.js','meuni-loader.js','plans.js','plans.css','home.js','home.css','auth.css','sheet-balances.css','finishing.js','finishing.css','bank-import.js','subs.js','reminders.js','install.js','avatars.js','backup.js','menus.js','menus.css','discover.js','discover.css','notifications.js','notifications.css','favicon.ico','brand-mark.svg','app-icon-180.png','app-icon-180.webp','app-icon-512.png','app-icon-512.webp','manifest.webmanifest','supabase_config.json',
   'robots.txt','sitemap.xml','public.css','public.js','share-card.png','share-card.webp'];
 for (const file of publicFiles) copy(file);
 // Écrans de lancement iPhone (scripts/generate-splash.cjs) : lus par iOS à l'ajout à l'écran d'accueil.

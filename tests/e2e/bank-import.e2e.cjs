@@ -61,11 +61,11 @@ const B = 'Date;Libellé;Montant;Statut\n02/09/2026;CARTE CARREFOUR CITY;-45,20;
         assert.equal(await page.evaluate(() => JSON.stringify(window.FinanceSheet.getSnapshot().sheets.map((s) => [s.name, s.cells]))), before, 'rien n’est écrit avant la validation');
         await primary().click(); assert.equal(await step(), 'confirm');
         await primary().click(); await page.waitForSelector('dialog[open]', { state: 'detached' });
-        assert(await page.locator('.gfb-toast button').count() === 1, 'bouton Annuler après l’import');
+        assert(await page.locator('#gfhToast .gfh-toast-act').count() === 1, 'bouton Annuler après l’import');
         const filled = await page.evaluate(() => JSON.stringify(window.FinanceSheet.getSnapshot().sheets.map((s) => [s.name, s.cells])));
         assert.notEqual(filled, before);
         // Annuler rend l’état d’avant
-        await page.locator('.gfb-toast button').click(); await page.waitForTimeout(200);
+        await page.locator('#gfhToast .gfh-toast-act').click(); await page.waitForTimeout(200);
         assert.equal(await page.evaluate(() => JSON.stringify(window.FinanceSheet.getSnapshot().sheets.map((s) => [s.name, s.cells]))), before, 'annulation de l’import');
         // Même relevé de nouveau, puis le 2e relevé qui le chevauche
         await page.evaluate((c) => { window.__h = window.GFBankImport.handle(new File([c], 'a.csv', { type: 'text/csv' })); }, A);

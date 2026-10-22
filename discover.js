@@ -1,10 +1,9 @@
-/* Nouveautés sur l'accueil : l'anneau du logo se remplit à chaque nouveauté essayée.
-   Chaque nouveauté a son bouton « Essayer » qui ouvre directement la fonction.
-   Pour une version sans parcours défini, le bloc annonce simplement la dernière nouveauté. */
+/* Nouveautés : chaque nouveauté est un message du site (notifications.js) avec son bouton « Essayer » qui ouvre
+   directement la fonction ; l'anneau du logo se remplit à chaque nouveauté essayée.
+   Pour une version sans parcours défini, un seul message annonce la dernière nouveauté. */
 (function(){
   "use strict";
   var KEY="personalFinanceDashboard.discover";
-  var RING=2*Math.PI*9.4;
   var byId=function(id){return document.getElementById(id);};
   function en(){return !!(window.GFI18n&&typeof window.GFI18n.getLanguage==="function"&&window.GFI18n.getLanguage()==="en");}
   function t2(fr,e){return en()?e:fr;}
@@ -34,12 +33,11 @@
   function release(){var r=window.GFReleaseNotes;return r&&r.notes&&r.notes[0]?r:null;}
   function read(){try{var v=JSON.parse((store()&&store().getItem(KEY))||"{}");return v&&typeof v==="object"?v:{};}catch(e){return{};}}
   function write(v){try{store()&&store().setItem(KEY,JSON.stringify(v));}catch(e){}}
-  function state(){var r=release(),s=read();if(!r)return null;if(s.v!==r.version)s={v:r.version,tried:[],hidden:false};if(!Array.isArray(s.tried))s.tried=[];return s;}
-  function markSeen(){var r=release();try{if(r&&store())store().setItem("personalFinanceDashboard.lastSeenRelease",r.version);}catch(e){}}
+  function state(){var r=release(),s=read();if(!r)return null;if(s.v!==r.version)s={v:r.version,tried:[]};if(!Array.isArray(s.tried))s.tried=[];return s;}
+  function markSeen(){var r=release();try{if(r&&store()&&store().getItem("personalFinanceDashboard.lastSeenRelease")!==r.version)store().setItem("personalFinanceDashboard.lastSeenRelease",r.version);}catch(e){}}
 
-  // reminders.js a fondu l’ancien bloc #gfrBudget dans les notifications : on vise la ligne « plafond »
-  // si elle est visible (dépliée), sinon tout le bloc des notifications.
-  function budgetTarget(){var box=byId("gfrReminders"),row=box&&box.querySelector(".gfr-kind.is-budget");return row&&row.getClientRects().length?row:box;}
+  // Les alertes de plafond se règlent dans Paramètres › Notifications › « Messages dans le site ».
+  function budgetTarget(){return byId("gfnSettings");}
   function goHome(after){if(typeof window.setPage==="function")window.setPage("dashboard");setTimeout(after,120);}
   function openPage(page,find,caption,before){
     if(typeof window.setPage==="function")window.setPage(page);
@@ -90,63 +88,24 @@
     },smooth?450:30);
   }
 
-  function ring(done,total,complete){
-    var ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");svg.setAttribute("viewBox","0 0 28 28");svg.setAttribute("class","gfd-ring"+(complete?" is-complete":""));svg.setAttribute("aria-hidden","true");
-    function node(tag,attrs){var n=document.createElementNS(ns,tag);Object.keys(attrs).forEach(function(k){n.setAttribute(k,attrs[k]);});svg.appendChild(n);return n;}
-    node("circle",{"class":"gfd-track",cx:14,cy:14,r:9.4});
-    var arc=node("circle",{"class":"gfd-arc",cx:14,cy:14,r:9.4,transform:"rotate(-90 14 14)"});
-    arc.style.strokeDasharray="0 "+RING;
-    var g=node("g",{transform:"rotate(30 14 14) translate(14 14) scale(.62) translate(-14 -14)"});
-    var seed=document.createElementNS(ns,"path");seed.setAttribute("class","gfd-seed");seed.setAttribute("d","M14 6.2C14.9 7.4 17.2 10 17.2 13.7 17.2 16.9 15.4 19.6 14 21.8 12.6 19.6 10.8 16.9 10.8 13.7 10.8 10 13.1 7.4 14 6.2Z");g.appendChild(seed);
-    // L'arc se remplit après l'affichage, pour que la progression se voie
-    var len=total?RING*done/total:0;requestAnimationFrame(function(){requestAnimationFrame(function(){arc.style.strokeDasharray=len+" "+RING;});});
-    return svg;
-  }
-
-  var focus=null;
-  function render(){
-    var page=byId("dashboardPage"),content=page&&page.querySelector(".content"),box=byId("gfdDiscover");
-    var s=state(),r=release(),tour=r&&TOURS[r.version];
-    var visible=!!(s&&r&&document.body.dataset.theme==="moulin"&&!s.hidden&&!document.body.classList.contains("tutorial-active")&&store()&&store().getItem("personalFinanceDashboard.onboardingCompleted"));
-    if(!visible||!content){if(box)box.remove();return;}
-    if(!box){box=el("section","gfd");box.id="gfdDiscover";box.setAttribute("aria-live","polite");var anchor=byId("latestUpdateBanner"),grid=content.querySelector(".gfh-dg");
-      // Sur l’accueil, le bloc se place dans la grille (sous le solde) ; l’accueil le reprend à chaque rafraîchissement.
-      if(grid&&grid.firstChild)grid.insertBefore(box,grid.firstChild.nextSibling);else content.insertBefore(box,anchor||null);}
-    box.setAttribute("aria-label",t2("Nouveautés","What’s new"));
-    var all=tour||[],left=all.filter(function(i){return s.tried.indexOf(i.id)<0;}),complete=!!tour&&!left.length;
-    // Anneau plein : il reste visible un moment (pour voir le résultat), puis le bloc disparaît
-    if(complete&&s.doneAt&&Date.now()-s.doneAt>15000){s.hidden=true;write(s);box.remove();markSeen();return;}
-    var item=complete||!tour?null:(left.filter(function(i){return i.id===focus;})[0]||left[0]);focus=item&&item.id;
-    var idx=item?all.indexOf(item):0;
-    var copy=el("div","gfd-copy"),actions=el("div","gfd-actions");
+  /* Messages du site : un par nouveauté pas encore essayée (identifiant : version + nouveauté). */
+  function messages(){
+    var r=release(),s=state();
+    if(!r||!s||!store()||!store().getItem("personalFinanceDashboard.onboardingCompleted"))return[];
+    var tour=TOURS[r.version],L=en()?1:0;
     if(!tour){
-      copy.append(el("p","gfd-kicker",t2("Nouveau","New")+" · "+r.notes[0].date),el("h3","gfd-title",r.notes[0].title));
-      var see=el("button","gfd-try",t2("Voir","View"));see.type="button";see.addEventListener("click",function(){s.hidden=true;write(s);markSeen();if(window.setPage)window.setPage("updates");});actions.append(see);
-    }else if(complete){
-      copy.append(el("p","gfd-kicker",t2("Tout est découvert","All discovered")),el("h3","gfd-title",t2("L’anneau est plein : tu as tout essayé.","The ring is full: you tried everything.")));
-      var list=el("button","gfd-next",t2("Toutes les nouveautés","All updates"));list.type="button";list.addEventListener("click",function(){s.hidden=true;write(s);markSeen();if(window.setPage)window.setPage("updates");});actions.append(list);
-      if(!s.doneAt){s.doneAt=Date.now();write(s);markSeen();setTimeout(schedule,15500);}
-    }else{
-      var n=all.length;
-      copy.append(el("p","gfd-kicker",t2(n+" nouveautés à découvrir",n+" new things to discover")+" · "+(idx+1)+"/"+n),el("h3","gfd-title",item.title[en()?1:0]),el("p","gfd-text",item.text[en()?1:0]));
-      var tryBtn=el("button","gfd-try",t2("Essayer","Try it"));tryBtn.type="button";
-      tryBtn.addEventListener("click",function(){var cur=state();if(cur.tried.indexOf(item.id)<0)cur.tried.push(item.id);write(cur);focus=null;item.run();setTimeout(render,50);});
-      actions.append(tryBtn);
-      if(left.length>1){var next=el("button","gfd-next",t2("Suivante","Next"));next.type="button";next.setAttribute("aria-label",t2("Nouveauté suivante","Next new feature"));
-        next.addEventListener("click",function(){var i=left.indexOf(item);focus=left[(i+1)%left.length].id;render();var b=byId("gfdDiscover");var f=b&&b.querySelector(".gfd-next");if(f)f.focus();});actions.append(next);}
+      var note=r.notes[0];
+      return[{id:"news:"+r.version,kind:"news",priority:40,tone:"info",once:true,kicker:t2("Nouveau","New")+" · "+note.date,title:note.title,body:note.text||"",
+        action:{label:t2("Voir","View"),run:function(){markSeen();if(window.setPage)window.setPage("updates");}}}];
     }
-    var close=el("button","gfd-close");close.type="button";close.setAttribute("aria-label",t2("Masquer les nouveautés","Hide what’s new"));close.textContent="×";
-    close.addEventListener("click",function(){var cur=state();cur.hidden=true;write(cur);markSeen();render();});
-    var main=el("div","gfd-main");main.append(copy,actions);
-    box.replaceChildren(ring(tour?all.length-left.length:1,tour?all.length:1,complete||!tour),main,close);
+    var left=tour.filter(function(i){return s.tried.indexOf(i.id)<0;}),n=tour.length;
+    if(!left.length){markSeen();return[];}
+    return left.map(function(item){
+      return{id:"news:"+r.version+":"+item.id,kind:"news",priority:40,tone:"info",once:true,ring:{done:n-left.length,total:n},
+        kicker:t2(n+" nouveautés à découvrir",n+" new things to discover")+" · "+(tour.indexOf(item)+1)+"/"+n,title:item.title[L],body:item.text[L],
+        action:{label:t2("Essayer","Try it"),run:function(){var cur=state();if(cur.tried.indexOf(item.id)<0)cur.tried.push(item.id);write(cur);item.run();if(window.GFNotify)window.GFNotify.refresh();}}};
+    });
   }
-
-  var queued=false;
-  function schedule(){if(queued)return;queued=true;requestAnimationFrame(function(){queued=false;try{render();}catch(e){console.warn("Nouveautés Meuniance",e);}});}
-  window.GFDiscover={coach:coach,render:schedule,reset:function(){var r=release();if(!r)return;write({v:r.version,tried:[],hidden:false});focus=null;schedule();}};
-  window.addEventListener("gf:dashboardupdate",schedule);
-  window.addEventListener("gf:languagechange",schedule);
-  window.addEventListener("authStateChanged",schedule);
-  if(window.MutationObserver)new MutationObserver(schedule).observe(document.body,{attributes:true,attributeFilter:["class","data-page","data-theme"]});
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",schedule);else schedule();
+  if(window.GFNotify)window.GFNotify.register("news",messages);
+  window.GFDiscover={coach:coach,reset:function(){var r=release();if(!r)return;write({v:r.version,tried:[]});if(window.GFNotify){window.GFNotify.restore("news:"+r.version);window.GFNotify.refresh();}}};
 })();
