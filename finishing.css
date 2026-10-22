@@ -502,8 +502,6 @@ body[data-page="dashboard"]:not(.gfh-ready) .app{visibility:hidden;animation:gfR
 @media(max-width:360px){.gfh-mon button{width:40px}}
 
 /* Objectifs : la corbeille est un bouton de 44 px, calé à droite de la ligne d'actions */
-.objective-card-actions{align-items:center}
-.objective-card-actions .objective-remove{order:99;margin-left:auto;flex:0 0 44px!important;width:44px;min-width:44px;height:44px;min-height:44px;padding:0;display:inline-grid;place-items:center}
 
 /* Le titre « Notifications » reçoit le focus à l'ouverture (lecteurs d'écran) sans encadré visible */
 .gfn-p-title:focus,.gfn-p-title:focus-visible{outline:none!important}
@@ -515,3 +513,7 @@ body[data-theme] :is(.settings-hub-item,.personal-workspace-link,.objectives-tab
   body #sheetPage .sheet-bar{flex-wrap:wrap!important;overflow:visible!important;justify-content:space-between;row-gap:6px}
   body #sheetPage .sheet-bar-left,body #sheetPage .sheet-bar-right{flex-wrap:wrap}
 }
+body[data-theme="moulin"] #objectivesPage .objective-card-actions{align-items:center;gap:0 2px}
+body[data-theme="moulin"] #objectivesPage .objective-card-actions .button-ghost{flex:0 1 auto;min-width:0;padding:0 6px!important}
+body[data-theme="moulin"] #objectivesPage .objective-card-actions .objective-remove{order:99;margin-left:auto;flex:0 0 44px;width:44px;min-width:44px;height:44px!important;padding:0!important;display:inline-grid;place-items:center}
+@media(min-width:390px){body[data-theme="moulin"] #objectivesPage .objective-card-actions .button-ghost:not(.objective-remove){padding:0 10px!important}}
