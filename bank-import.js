@@ -68,11 +68,19 @@
     else s=s.replace(",",".");
     if(!/^-?\d+(\.\d+)?$/.test(s))return null;var n=Number(s);return neg?-Math.abs(n):n;
   }
+  // Nom de mois (français, anglais, abrégé ou non) → 1..12, sinon 0.
+  var MON_NAMES=["janvier january jan janv","fevrier february feb fev fevr","mars march mar","avril april apr avr","mai may","juin june jun","juillet july jul juil","aout august aug aou","septembre september sep sept","octobre october oct","novembre november nov","decembre december dec"].map(function(x){return " "+x+" ";});
+  function monthIndex(w){w=norm(w).replace(/[^a-z]/g,"");if(w.length<3)return 0;for(var i=0;i<12;i++)if(MON_NAMES[i].indexOf(" "+w+" ")>=0)return i+1;return 0;}
   // Ordre des dates du fichier : jour/mois (France) sauf si le fichier montre clairement mois/jour (« 09/25/2026 »).
   var MONTH_FIRST=false;
   function parseDate(v){
     var s=String(v||"").trim(),m;
     if((m=s.match(/^(\d{4})[\-\/.](\d{1,2})[\-\/.](\d{1,2})(?:[ T]\d{1,2}:\d{2}(:\d{2})?.*)?$/)))return mk(+m[1],+m[2],+m[3]);
+    // 20260902 (ING, certaines banques belges et allemandes)
+    if((m=s.match(/^(\d{4})(\d{2})(\d{2})(?:[ T]\d{1,2}:?\d{2}.*)?$/)))return mk(+m[1],+m[2],+m[3]);
+    // « 02 Sep 2026 », « 2 sept. 2026 », « 2-Sep-26 », « Sep 2, 2026 », « September 2 2026 »
+    if((m=s.match(/^(\d{1,2})(?:st|nd|rd|th)?[ \-.\/]+([^\W\d_]{3,12})\.?[ \-.,\/]+(\d{2,4})(?:[ T,]+\d{1,2}:\d{2}.*)?$/))){var mo1=monthIndex(m[2]);if(mo1)return mk(m[3].length===2?2000+Number(m[3]):+m[3],mo1,+m[1]);}
+    if((m=s.match(/^([^\W\d_]{3,12})\.?[ \-.]+(\d{1,2})(?:st|nd|rd|th)?,?[ \-.]+(\d{4})(?:[ T,]+\d{1,2}:\d{2}.*)?$/))){var mo2=monthIndex(m[1]);if(mo2)return mk(+m[3],mo2,+m[2]);}
     if((m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})(?:[ T]\d{1,2}:\d{2}(:\d{2})?.*)?$/))){var y=m[3].length===2?2000+Number(m[3]):+m[3];return MONTH_FIRST?mk(y,+m[1],+m[2]):mk(y,+m[2],+m[1]);}
     return null;
     function mk(y,mo,d){return y>1990&&y<2100&&mo>=1&&mo<=12&&d>=1&&d<=31?{y:y,m:mo-1,d:d}:null;}
@@ -80,18 +88,18 @@
 
   /* ── Repérage des colonnes ─────────────────────────────────────────── */
   var H={
-    date:/^(date( de l.?)?( ?operation| ?op)?|date operation|date comptable|date de comptabilisation|dateop|date op\.?|booking date|transaction date|date)$/,
-    value:/date de valeur|dateval|value date/,
+    date:/^(date( de l.?)?( ?operation| ?op)?|date operation|date comptable|date de comptabilisation|dateop|date op\.?|booking date|transaction date|date|datum|buchungstag|buchungsdatum|boekingsdatum|fecha|fecha operacion|fecha contable|data|data operazione|data contabile|data registrazione|posting date)$/,
+    value:/date de valeur|dateval|value date|valuta|wertstellung|fecha valor|data valuta|valutadatum/,
     label:/libelle|description|detail|operation|nature|intitule|label|motif|beneficiaire|tiers|payee/,
-    amount:/^montant|amount|somme|^value$|betrag|bedrag|^brut$|^gross$|^net$/,
-    debit:/debit|paid out|money out|^sortie|^ausgang/,
-    credit:/credit|paid in|money in|^entree|^eingang/
+    amount:/^montant|amount|somme|^value$|betrag|bedrag|importe|importo|^brut$|^gross$|^net$/,
+    debit:/debit|paid out|money out|^sortie|^ausgang|^soll$|^debet|^cargo|^addebito|^uscite/,
+    credit:/credit|paid in|money in|^entree|^eingang|^haben$|^abono|^accredito|^entrate/
   };
   function labelScore(c){
-    if(!c||/date|montant|amount|debit|credit|categor|numero|^n( |$)|^no$|solde|balance|devise|currency|^type|pointage|statut|state|status|compte|account|iban|bic|exchange|fee|frais/.test(c))return 0;
+    if(!c||/date|datum|fecha|montant|amount|betrag|importe|importo|debit|credit|categor|kategorie|numero|^n( |$)|^no$|solde|balance|devise|currency|^type|pointage|statut|state|status|compte|account|iban|bic|exchange|fee|frais/.test(c))return 0;
     if(/libelle|intitule/.test(c))return 3;
-    if(/description|label|payee|beneficiaire|counterparty|contrepartie|tiers|merchant|commercant|^nom$|^name$|texte|buchungstext|^text$|notification|avis/.test(c))return 2;
-    if(/detail|motif|reference|nature|operation|communication|transaction/.test(c))return 1;
+    if(/description|label|payee|beneficiaire|counter ?party|contrepartie|tiers|merchant|commercant|^nom$|^name$|texte|buchungstext|^text$|notification|avis|empfanger|zahlungsempfanger|auftraggeber|naam|beneficiario|denominazione|descricao/.test(c))return 2;
+    if(/detail|motif|reference|nature|operation|communication|transaction|transaktion|mitteilung|movimiento|operazione|verwendungszweck|omschrijving|mededeling|concepto|descripcion|descrizione|causale/.test(c))return 1;
     return 0;
   }
   function findColumns(lines,sep){
@@ -104,9 +112,9 @@
         var sc=labelScore(c);if(sc>0)cand.push([j,sc,c]);
         // Montant : celui en euros, jamais le montant d'origine en devise ni le solde
         var exact=/eur|^montant$|^amount$/;
-        if(H.amount.test(c)&&!/date|orig|devise|foreign|currency|solde|balance/.test(c)&&(cols.amount==null||(exact.test(c)&&!exact.test(cols.amountName)))){cols.amount=j;cols.amountName=c;}
+        if(H.amount.test(c)&&!/date|orig|devise|foreign|fremd|extranjer|estero|currency|solde|balance|saldo|total fee|fee/.test(c)&&(cols.amount==null||(exact.test(c)&&!exact.test(cols.amountName)))){cols.amount=j;cols.amountName=c;}
         // « Débit/Crédit » ou « Sens » : colonne qui donne le signe, pas deux colonnes de montants
-        if((H.debit.test(c)&&H.credit.test(c))||/^(sens|d ?c)$/.test(c)){if(cols.sense==null)cols.sense=j;}
+        if((H.debit.test(c)&&H.credit.test(c))||/^(sens|d ?c|af ?bij|soll ?haben|s ?h|debet ?credit|debit ?credit|dare ?avere)$/.test(c)){if(cols.sense==null)cols.sense=j;}
         else{if(cols.debit==null&&H.debit.test(c))cols.debit=j;
         if(cols.credit==null&&H.credit.test(c)&&!/carte/.test(c))cols.credit=j;}
         if(cols.state==null&&/^(state|status|statut|etat)$/.test(c))cols.state=j;
@@ -118,7 +126,7 @@
         var avg=function(j){var t=0,n=0;lines.slice(i+1,i+41).forEach(function(l){var v=splitRow(l,sep)[j];if(v!=null){t+=String(v).length;n++;}});return n?t/n:0;};
         cand.forEach(function(x){x[3]=avg(x[0]);});
         cand.sort(function(a,b){return b[1]-a[1]||b[3]-a[3]||a[0]-b[0];});
-        if(cand.length){cols.label=cand[0][0];cols.extra=cand.slice(1).filter(function(x){return /detail|motif|reference|description|libelle|communication|transaction|texte/.test(x[2]);}).map(function(x){return x[0];});}
+        if(cand.length){cols.label=cand[0][0];cols.alts=cand.slice(1).map(function(x){return x[0];});cols.extra=cand.slice(1).filter(function(x){return /detail|motif|reference|description|libelle|communication|transaction|texte|verwendungszweck|omschrijving|mededeling|concepto|descripcion|descrizione|causale/.test(x[2]);}).map(function(x){return x[0];});}
         return{header:i,cols:cols};
       }
     }
@@ -164,10 +172,10 @@
       if(amt==null&&(c.debit!=null||c.credit!=null)){var db=parseAmount(r[c.debit]),cr=parseAmount(r[c.credit]);if(db)amt=-Math.abs(db);else if(cr)amt=Math.abs(cr);}
       if(amt==null||amt===0)continue;
       // Colonne de sens (D/C, Débit/Crédit) avec des montants sans signe
-      if(c.sense!=null){var sv=norm(r[c.sense]).trim();if(/^(d|db|deb|debit|-)$/.test(sv))amt=-Math.abs(amt);else if(/^(c|cr|cred|credit|\+)$/.test(sv))amt=Math.abs(amt);}
+      if(c.sense!=null){var sv=norm(r[c.sense]).trim();if(/^(d|db|deb|debit|debet|-|af|s|soll|dr|out)$/.test(sv))amt=-Math.abs(amt);else if(/^(c|cr|cred|credit|\+|bij|h|haben|in)$/.test(sv))amt=Math.abs(amt);}
       var osrc=c.account!=null&&String(r[c.account]||"").trim()?hash(String(r[c.account]).trim()):"";
       if(c.state!=null&&NOT_DONE.test(norm(r[c.state]))){dropped.push({date:d,amount:Math.round(amt*100)/100,label:String(c.label!=null?r[c.label]:"").replace(/\s+/g," ").trim(),src:osrc});continue;}
-      var label=c.label!=null?r[c.label]:r.filter(function(x,j){return j!==c.date&&j!==c.amount&&j!==c.debit&&j!==c.credit&&j!==c.state;}).join(" ");
+      var label=c.label!=null?(String(r[c.label]||"").trim()?r[c.label]:((c.alts||[]).map(function(j){return r[j];}).filter(function(x){return String(x||"").trim();})[0]||"")):r.filter(function(x,j){return j!==c.date&&j!==c.amount&&j!==c.debit&&j!==c.credit&&j!==c.state;}).join(" ");
       label=String(label||"").replace(/\s+/g," ").trim();
       var detail=(c.extra||[]).map(function(j){return String(r[j]||"").replace(/\s+/g," ").trim();}).filter(function(x){return x&&norm(label).indexOf(norm(x))<0;}).join(" ");
       if(!label&&detail){label=detail;detail="";}
@@ -187,16 +195,16 @@
   // [libellé de ligne FR, EN, type, motifs]. L'ordre compte : le premier motif trouvé l'emporte.
   var CATS=[
     ["Épargne","Savings","Épargne",/livret|ldds|lep\b|\bpel\b|\bcel\b|epargne|assurance vie|\bpea\b|versement programme|savings plan|plan d.?epargne|sparplan|virement vers.*(livret|epargne)/],
-    ["Salaire","Salary","Salaire",/salaire|salary|retraite|pension(?! alimentaire)|carsat|\bcnav\b|agirc|arrco|paie\b|\bpaye\b|remuneration|payroll|traitement mensuel/],
+    ["Salaire","Salary","Salaire",/salaire|salary|salario|nomina|stipendio|gehalt|\blohn\b|salaris|\bloon\b|\bwages?\b|retraite|pension(?! alimentaire)|carsat|\bcnav\b|agirc|arrco|paie\b|\bpaye\b|remuneration|payroll|traitement mensuel/],
     ["Aides (CAF)","Benefits (CAF)","Salaire",/\bcaf\b|\bcnaf\b|\bmsa\b|chomage|\bapl\b|allocation|pole emploi|france travail|\brsa\b|prime d.activite/],
     ["Crédits","Loans","Dépense",/echeance (de |du )?pret|\bpret (immo|perso|auto|etudiant)|credit (immo|conso|auto)|remboursement (de |du )?pret|cofidis|cetelem|sofinco|franfinance|younited|\boney\b|\bfloa\b|\bdiac\b|carrefour banque|\bpret\b(?! a porter)/],
-    ["Loyer","Rent","Dépense",/loyer|foncia|nexity|bailleur|^(?!.*\b(carte|cb)\b).*habitat\b|action logement|immobiliere|\bopac\b|\bhlm\b/],
+    ["Loyer","Rent","Dépense",/loyer|miete|alquiler|affitto|foncia|nexity|bailleur|^(?!.*\b(carte|cb)\b).*habitat\b|action logement|immobiliere|\bopac\b|\bhlm\b/],
     // Carburant à part : « SNCF » ou « Uber » ne doivent jamais finir dans une ligne « Essence ».
     ["Carburant","Fuel","Dépense",/totalenergies station|total access|\besso\b|\bshell\b|\b(carte|cb)\b.*\b(bp|total ?energies)\b|\bavia\b|\bstation\b(?! f\b)|station.?service|carburant|essence|gazole|gasoil|\bsp ?9[58]\b|intermarche carbu|leclerc carbu|carrefour carbu|auchan carbu|super u carbu|dyneff|\beni\b|\bagip\b/],
-    ["Courses","Groceries","Dépense",/carrefour|\bcoop\b|migros|\bmonop\b|leclerc|auchan|lidl|intermarche|super u|hyper u|\bu express|monoprix|franprix|\bcasino\b(?!.*(jeux|barriere|partouche|poker|\bbet\b|betclic|winamax))|\baldi\b|\bpicard\b|biocoop|netto|grand frais|naturalia|\bspar\b|\bmatch\b(?! (point|foot|de))|\bcora\b|g20|coccinelle|marche\b(?! (public|financier))/],
+    ["Courses","Groceries","Dépense",/carrefour|tesco|sainsbury|asda\b|morrisons|waitrose|walmart|costco|rewe|edeka|kaufland|\bpenny\b|delhaize|colruyt|albert heijn|jumbo|mercadona|\bcoop\b|migros|\bmonop\b|leclerc|auchan|lidl|intermarche|super u|hyper u|\bu express|monoprix|franprix|\bcasino\b(?!.*(jeux|barriere|partouche|poker|\bbet\b|betclic|winamax))|\baldi\b|\bpicard\b|biocoop|netto|grand frais|naturalia|\bspar\b|\bmatch\b(?! (point|foot|de))|\bcora\b|g20|coccinelle|marche\b(?! (public|financier))/],
     ["Restaurants","Restaurants","Dépense",/restaurant|\bresto\b(?!s? du coeur)|mcdo|mc donald|mcdonald|burger king|\bkfc\b|uber\W*eats|deliveroo|just ?eat|starbucks|boulangerie|brasserie|sushi|pizza|kebab|cafe\b|bistro|o.?tacos|subway|five guys|\b(carte|cb)\b.*\bpaul\b/],
     ["Transports","Transport","Dépense",/sncf|\bg7\b|heetch|free ?now|\bratp\b|navigo|\buber\b|bolt|blablacar|\bstationnement\b|paybyphone|peage|autoroute|vinci|sanef|\baprr\b|parking|indigo|tisseo|\btcl\b|\brtm\b|keolis|transdev|\blime\b|velib|trainline|ouigo|tgv/],
-    ["Abonnements","Subscriptions","Dépense",/netflix|spotify|deezer|disney ?(\+|plus)|disneyplus|primevideo|canal\+?|amazon prime|prime video|apple\.com|icloud|google (one|storage|play)|youtube|free mobile|free telecom|freebox|\borange\b(?! ?(boutique|store|shop|magasin))|\bsosh\b|\bsfr\b|bouygues|b ?& ?you|red by|basic.?fit|fitness park|keep cool|crunch|audible|chatgpt|openai/],
+    ["Abonnements","Subscriptions","Dépense",/abonnement(?!.*(edf|engie|gaz|electricite|\beau\b|energie))|\bovh\b|subscription|netflix|spotify|deezer|disney ?(\+|plus)|disneyplus|primevideo|canal\+?|amazon prime|prime video|apple\.com|icloud|google (one|storage|play)|youtube|free mobile|free telecom|freebox|\borange\b(?! ?(boutique|store|shop|magasin))|\bsosh\b|\bsfr\b|bouygues|b ?& ?you|red by|basic.?fit|fitness park|keep cool|crunch|audible|chatgpt|openai/],
     ["Énergie et eau","Energy and water","Dépense",/\bedf\b|engie|total ?energies|ekwateur|\beau de (paris|.*(ville|agglo|metropole|syndicat))|\bsyndicat des eaux|veolia|suez|saur\b|gaz\b|electricite|mint energie|octopus/],
     ["Assurances","Insurance","Dépense",/assurance|\baxa\b|maif|macif|matmut|allianz|groupama|\bgmf\b|\bmma\b|generali|\bapril\b(?! \d)|luko|lovys/],
     ["Santé","Health","Dépense",/pharmacie|docteur|medecin|dentiste|laboratoire|opticien|doctolib|hopital|clinique|\bkine\b|kinesi|mutuelle|harmonie|ameli|\bcpam\b|\bcnam\b|\bmgen\b|\balan\b/],
