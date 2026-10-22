@@ -403,3 +403,57 @@ body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x::before{content:n
    (il ne se dessine jamais, puis il est remplacé par l’accueil). Sécurité : il réapparaît seul au bout de 3,5 s si l’accueil échoue. */
 @keyframes gfRevealApp{to{visibility:visible}}
 body[data-page="dashboard"]:not(.gfh-ready) .app{visibility:hidden;animation:gfRevealApp 0s linear 3.5s forwards}
+
+/* 1) Grand texte (réglage « Taille du texte » de l’iPhone) : la classe .gf-bigtext (≥ ~130 %) / .gf-hugetext (≥ ~170 %) est posée par finishing.js.
+   Rien ne doit être rogné, se chevaucher ou faire défiler la page de côté. */
+:is(.gfa-tile strong,.update-row-body,.settings-section-head h3){overflow-wrap:anywhere}
+.update-day{min-width:2.5rem}
+.gf-pie-pc{min-width:max-content}
+.gf-bigtext .bottom-nav-label{font-size:.875rem;white-space:normal;text-align:center;line-height:1.1;overflow-wrap:anywhere}
+.gf-bigtext .bottom-nav-btn{min-width:0;padding-inline:4px}
+.gf-hugetext .bottom-nav-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.gf-bigtext .gfh-mon-l{display:none}
+.gf-bigtext .gfh-mon-s{display:inline}
+.gf-bigtext .gfh-mon>span{font-size:1rem}
+.gf-bigtext .gfh-big,.gf-bigtext .gfh-big.is-long,.gf-bigtext .gfh-big.is-xl{font-size:min(2.875rem,11vw)}
+.gf-bigtext .gfh-foot{grid-template-columns:1fr;gap:12px}
+.gf-bigtext .gfh-foot .v{font-size:min(1.375rem,6vw);white-space:normal}
+.gf-bigtext :is(.gfc-views,#gfcViews){grid-template-columns:1fr;border-radius:20px}
+.gf-bigtext :is(.gfc-views,#gfcViews) button{white-space:normal;line-height:1.15;padding-block:8px}
+.gf-bigtext .gfh-yr-only,.gf-bigtext .gfh-yrs .gfs-dd-btn{font-size:1rem;padding-inline:12px}
+.gf-bigtext .gfh-topbar{flex-wrap:wrap}
+.gf-bigtext .gfd-actions{flex-wrap:wrap}
+.gf-bigtext .gfd-next{white-space:normal;height:auto;min-height:44px}
+.gf-bigtext :is(.gfh-btn,.button,.account-btn-primary,.account-btn-secondary,.sf-button){white-space:normal;line-height:1.2}
+.gf-bigtext .app-header .brand-copy h1{font-size:1.25rem}
+.gf-bigtext .gfa-tiles.is-three{grid-template-columns:1fr}
+.gf-bigtext :is(#objectiveForm,.objective-form) :is(label,input,select,.gfs-dd,.gfs-dd-btn,.gfo-row,.gfo-field,.gfo-hint,.gfo-link){min-width:0;max-width:100%;box-sizing:border-box}
+.gf-bigtext #sheetPage .sheet-bar{flex-wrap:wrap;row-gap:4px}
+.gf-bigtext .sheet-mobile-month-label{font-size:1.125rem}
+.gf-bigtext .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes){font-size:.9375rem;height:auto!important;min-height:44px;padding-block:6px!important;white-space:normal;line-height:1.1}
+.gf-bigtext :is(.gfplan-dialog,.gfh-dialog,.sf-dialog,dialog){max-width:calc(100vw - 16px)}
+.gf-bigtext dialog :is(h2,p,button){overflow-wrap:anywhere}
+.gf-bigtext .legal-section,.gf-bigtext .legal-section *{overflow-wrap:anywhere}
+.objective-form{grid-template-columns:minmax(0,1fr)}
+.objective-form :is(input,select,textarea){min-width:0;width:100%;box-sizing:border-box}
+.gf-bigtext :is(.gfa-tile small,summary,.personal-workspace-content h3){overflow-wrap:anywhere;white-space:normal}
+.gf-bigtext .account-tab{white-space:normal;overflow-wrap:normal;hyphens:auto;font-size:.875rem;line-height:1.15}
+.gf-hugetext .account-tab{font-size:.75rem}
+.gf-bigtext .gfh-topbar{display:flex;flex-wrap:wrap;gap:8px}
+.gf-bigtext .gfh-topbar .gfh-mon{order:3;flex:1 1 100%;min-width:0}
+.gf-bigtext .gfh-mon>span{font-size:.875rem}
+
+.gf-bigtext .app-header .brand-copy h1{font-size:.8125rem!important;max-width:none}
+.gf-bigtext .app-header .brand-copy{min-width:0}
+.gf-bigtext :is(.gfh-card,.gfh-panel,.gfh-dialog,.gfh-home) :is(button,.gfh-btn){height:auto!important;min-height:44px;white-space:normal;line-height:1.2;padding-block:8px}
+.gf-bigtext :is(.gfh-card,.gfh-panel) :is(.gfh-link){white-space:normal}
+.gf-bigtext .gfh-big{font-size:min(2.25rem,10vw)}
+.gf-bigtext .gfh-card .gfh-bars button{height:100%!important;min-height:0;padding:0}
+.gf-bigtext body[data-theme="moulin"] .personal-workspace-nav,.gf-bigtext .personal-workspace-nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));border-radius:22px!important;gap:4px!important}
+.gf-bigtext .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes){width:100%;flex:none!important}
+.gf-bigtext .objective-stat strong{overflow-wrap:normal}
+.gf-bigtext :has(>.objective-stat){grid-template-columns:1fr!important}
+.gf-bigtext .objective-stat{border-right:0!important;border-bottom:1px solid var(--line)}
+.gf-bigtext .gfa-tile strong{overflow-wrap:normal;hyphens:auto}
+.gf-bigtext .gfa-tiles.is-three .gfa-tile:first-child{grid-template-columns:1fr;grid-template-rows:auto}
+.gf-bigtext .gfa-tiles.is-three .gfa-tile:first-child .gfa-prev{grid-row:auto}

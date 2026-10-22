@@ -118,3 +118,19 @@
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
+
+/* Grand texte : quand le réglage « Taille du texte » de l’iPhone dépasse ~130 %, la page reçoit une classe qui active
+   des mises en page plus aérées (étiquettes de la barre du bas raccourcies, colonnes empilées). Aucun texte n’est modifié. */
+(function(){
+  "use strict";
+  var root=document.documentElement;
+  function sync(){
+    var px=parseFloat(getComputedStyle(root).fontSize)||16;
+    root.classList.toggle("gf-bigtext",px>=21);
+    root.classList.toggle("gf-hugetext",px>=27);
+  }
+  sync();window.addEventListener("resize",sync);window.addEventListener("orientationchange",sync);
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",sync);
+  if(window.matchMedia){try{var mq=window.matchMedia("(min-resolution: 1dppx)");if(mq.addEventListener)mq.addEventListener("change",sync);}catch(e){}}
+  window.addEventListener("pageshow",sync);document.addEventListener("visibilitychange",function(){if(!document.hidden)sync();});
+})();
