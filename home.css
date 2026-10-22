@@ -562,8 +562,8 @@ body[data-mode="dark"] .gfh-bpanel{box-shadow:0 22px 48px -22px rgba(0,0,0,.75)}
 .gfb-tools{display:grid;gap:10px}
 .gfb-search input{display:block;width:100%;box-sizing:border-box;height:44px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--input-bg,transparent);color:var(--text);font:400 1rem var(--font-body)}
 .gfb-search input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.gfb-filters{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}
-.gfb-fbtn{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;text-align:center;gap:0 5px;min-height:44px;padding:4px 4px;border:1px solid var(--line);border-radius:14px;background:transparent;color:var(--text);font:500 0.8125rem/1.2 var(--font-body);cursor:pointer}
+.gfb-filters{display:flex;gap:6px}
+.gfb-fbtn{display:flex;flex:1 1 auto;flex-wrap:nowrap;white-space:nowrap;align-items:center;justify-content:center;text-align:center;gap:0 5px;min-height:44px;padding:4px 10px;border:1px solid var(--line);border-radius:14px;background:transparent;color:var(--text);font:500 0.8125rem/1.2 var(--font-body);cursor:pointer}
 .gfb-fbtn span{min-width:0}
 .gfb-fbtn small{font:500 0.75rem var(--font-body);color:var(--muted);font-variant-numeric:tabular-nums}
 .gfb-fbtn[aria-pressed="true"]{border-color:var(--accent-fill,var(--accent));background:color-mix(in srgb,var(--accent-fill,var(--accent)) 14%,transparent)}

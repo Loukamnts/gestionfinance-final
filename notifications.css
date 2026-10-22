@@ -63,7 +63,7 @@ body.gf-hide-amounts .gfn-sensitive{filter:blur(6px)}
 }
 
 /* ── Cloche de l'en-tête, à gauche de l'engrenage ── */
-.gfn-bell{--gfn-badge-bg:#B2452F;--gfn-badge-fg:#fff;position:relative;display:grid;place-items:center;flex:none;width:42px;height:42px;padding:0;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s,border-color .15s,transform .12s}
+.gfn-bell{--gfn-badge-bg:#B2452F;--gfn-badge-fg:#fff;position:relative;display:grid;place-items:center;flex:none;width:42px;height:42px;padding:0;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}
 .gfn-bell::after{content:"";position:absolute;inset:-2px}
 .gfn-bell-ic,.gfn-bell-ic svg{display:block;width:20px;height:20px}
 .gfn-bell[aria-expanded="true"]{background:var(--accent-fill,var(--accent));border-color:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F)}

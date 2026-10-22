@@ -384,9 +384,10 @@
     if(!mountBell())return;
     returnFocus=document.activeElement&&document.activeElement!==document.body?document.activeElement:bell;
     if(!panel)buildPanel();
+    bell.setAttribute("aria-expanded","true");
     panelSig="";renderPanel();place();
     panel.classList.remove("is-closing");panel.style.transform="";
-    panel.showModal();bell.setAttribute("aria-expanded","true");
+    panel.showModal();
     window.addEventListener("resize",place);
     panel.querySelector(".gfn-p-title").focus({preventScroll:true});
   }

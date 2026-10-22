@@ -1,6 +1,7 @@
 /* Service worker de Meuniance : rappels de saisie et ouverture sans connexion.
    Sûr par construction :
-   - réseau d'abord : avec du réseau, on reçoit toujours la dernière version ; la copie ne sert que hors ligne ;
+   - pages : réseau d'abord (la copie ne sert que hors ligne ou si le réseau met plus de 3 s) ; fichiers à adresse
+     versionnée (?v=…) : copie précopiée servie aussitôt, leur contenu ne changeant jamais sous la même adresse ;
    - seuls les fichiers publics du site (même origine, requêtes GET) sont copiés : jamais tes données,
      jamais Supabase ni aucun autre site, jamais une réponse en erreur ;
    - une seule copie par version : l'ancienne est supprimée à chaque mise en ligne.
@@ -57,7 +58,27 @@ self.addEventListener("fetch", function (event) {
   var navigate = request.mode === "navigate";
   // Toutes les routes de l'app partagent la même page ; une page publique garde sa propre copie.
   var key = navigate ? (APP_ROUTES.indexOf(url.pathname) >= 0 ? "/app" : url.pathname) : url.pathname + url.search;
-  event.respondWith(network(event).then(function (res) {
+  // Fichiers à adresse versionnée (?v=…) : leur contenu ne change jamais sous la même adresse, donc la copie
+  // précopiée est servie tout de suite, sans aller-retour réseau (ouverture bien plus rapide sur iPhone).
+  if (!navigate && url.search) {
+    event.respondWith(caches.open(CACHE).then(function (cache) {
+      return cache.match(key).then(function (hit) {
+        if (hit) return hit;
+        return network(event).then(function (res) {
+          if (res.ok && res.type === "basic") cache.put(key, res.clone()).catch(function () {});
+          return res;
+        });
+      });
+    }));
+    return;
+  }
+  // Page : réseau d'abord, mais si le réseau met plus de 3 s à répondre (réseau mobile faible), la copie de la
+  // dernière visite s'ouvre aussitôt ; la page à jour arrive à l'ouverture suivante.
+  var net = network(event), attempt = net, slow = false;
+  if (navigate) {
+    attempt = Promise.race([net, new Promise(function (resolve, reject) { setTimeout(function () { slow = true; reject(new Error("slow")); }, 3000); })]);
+  }
+  event.respondWith(attempt.then(function (res) {
     if (res.ok && res.type === "basic") {
       var copy = res.clone();
       caches.open(CACHE).then(function (cache) { return cache.put(key, copy); }).catch(function () {});
@@ -66,7 +87,7 @@ self.addEventListener("fetch", function (event) {
   }).catch(function () {
     return caches.open(CACHE).then(function (cache) {
       return cache.match(key).then(function (hit) {
-        return hit || (navigate ? new Response("<!doctype html><meta charset=utf-8><title>Meuniance</title><p style=\"font:16px system-ui;padding:24px\">Pas de connexion. Ouvre Meuniance une fois avec du réseau pour l’utiliser hors ligne.</p>", { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } }) : Response.error());
+        return hit || (slow ? net : navigate ? new Response("<!doctype html><meta charset=utf-8><title>Meuniance</title><p style=\"font:16px system-ui;padding:24px\">Pas de connexion. Ouvre Meuniance une fois avec du réseau pour l’utiliser hors ligne.</p>", { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } }) : Response.error());
       });
     });
   }));
