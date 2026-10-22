@@ -6,7 +6,8 @@
 
 /* ── Emplacement du haut de l'accueil : au plus un message ── */
 .gfn-slot{order:-4;margin:0 0 14px;min-width:0}
-.gfn-slot:empty,body.tutorial-active .gfn-slot{display:none}
+/* Accueil vide : la carte d'import reste seule et entière à l'écran ; les messages restent dans la cloche. */
+.gfn-slot:empty,body.tutorial-active .gfn-slot,body.gfh-empty .gfn-slot{display:none}
 
 /* ── Carte (identique dans l'accueil et dans la cloche) ── */
 .gfn-card{--tone:var(--accent-fill,var(--accent,#E3A82B));--tone-ic:var(--text);position:relative;display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:2px;align-items:start;min-width:0;padding:14px 52px 12px 14px;border:1px solid var(--line);border-radius:20px;background:var(--panel-solid,var(--bg));color:var(--text);font-family:var(--font-body)}
