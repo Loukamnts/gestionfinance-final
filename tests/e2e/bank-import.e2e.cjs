@@ -76,8 +76,8 @@ const B = 'Date;Libellé;Montant;Statut\n02/09/2026;CARTE CARREFOUR CITY;-45,20;
         await primary().click(); assert.equal(await step(), 'list');
         const statuses = await page.evaluate(() => ({ dup: document.querySelectorAll('dialog[open] .gfb-op.is-dup').length, todo: document.querySelectorAll('dialog[open] .gfb-op.is-todo').length, internal: document.querySelectorAll('dialog[open] .gfb-chip.is-int').length, sw: document.querySelectorAll('dialog[open] .gfb-swi').length }));
         assert.deepEqual(statuses, { dup: 3, todo: 3, internal: 1, sw: 3 });
-        const head = await page.locator('dialog[open] .gfb-pane[data-step=list] .gfb-stats').innerText();
-        assert(/3/.test(head) && /(attente|pending)/i.test(head), 'compte des doublons et des opérations en attente : ' + head);
+        const head = await page.locator('dialog[open] .gfb-pane[data-step=list]').innerText();
+        assert(/Ne sera pas importé|Will not be imported/.test(head) && /(attente|pending)/i.test(head) && /(Déjà importée|Already imported)/.test(head), 'bloc « Ne sera pas importé » avec les raisons : ' + head);
         await noOverflow('list');
         // Une opération déjà importée peut être forcée
         await page.locator('dialog[open] .gfb-sw').first().click();
