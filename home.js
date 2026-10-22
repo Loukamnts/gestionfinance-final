@@ -140,10 +140,8 @@
     try{FS.saveNow&&FS.saveNow();}catch(e){}
     refreshAll();return true;
   }
-  function toast(text){
-    var t=byId("gfhToast");if(!t){t=el("div","gfh-toast");t.id="gfhToast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");document.body.append(t);}
-    t.textContent=text;t.classList.add("is-on");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove("is-on");},3200);
-  }
+  /* Confirmation brève : un seul toast pour toute l'app (notifications.js). */
+  function toast(text,opts){if(window.GFNotify)window.GFNotify.toast(text,opts);}
   function knownLabels(){var snap=snapshot(),set={},out=[];(snap&&snap.sheets||[]).forEach(function(s){(s.rowHeaders||[]).forEach(function(h){h=String(h||"").trim();if(h&&!set[normKey(h)]){set[normKey(h)]=1;out.push(h);}});});return out;}
 
   // Même lecture que le tableur : « 1 234,56 », « 1.234,56 » et « 1,234.56 » valent 1234,56.
@@ -183,9 +181,13 @@
     var monL=el("label","gfh-field"),mon=document.createElement("select");monL.append(el("span","",t2("Mois","Month")),mon);
     for(var i=0;i<12;i++){var o=new Option(cap(mname(i))+" "+ctx.year,String(i));if(i===ctx.mi)o.selected=true;mon.append(o);}
     if(window.GFSelect)setTimeout(function(){window.GFSelect.enhance(mon);},0);
-    var err=el("p","gfh-err");err.setAttribute("role","alert");
+    var err=el("p","gfh-err");err.id="gfhQuickErr";err.setAttribute("role","alert");
     var row=el("div","gfh-dialog-actions"),cancel=el("button","gfh-btn",t2("Annuler","Cancel")),ok=el("button","gfh-btn is-primary",t2("Ajouter","Add"));cancel.type="button";ok.type="submit";row.append(cancel,ok);
-    var form=document.createElement("form");form.append(h,typeRow,amtL,lineBox,newWrap,monL,err,row);d.append(form);
+    var form=document.createElement("form");form.append(h,typeRow,amtL,err,lineBox,newWrap,monL,row);d.append(form);
+    // Le message d'erreur se place juste sous le champ concerné et lui est relié (aria-invalid / aria-describedby).
+    function clearErr(){err.textContent="";[amt,newInp,pick].forEach(function(f){f.removeAttribute("aria-invalid");f.removeAttribute("aria-describedby");});}
+    function fail(msg,anchor,field){err.textContent=msg;anchor.after(err);field.setAttribute("aria-describedby","gfhQuickErr");if(field.tagName==="INPUT")field.setAttribute("aria-invalid","true");field.focus();}
+    amt.addEventListener("input",function(){if(amt.getAttribute("aria-invalid"))clearErr();});
 
     function allLines(){var seen={},out=[];knownLabels().forEach(function(l){var k=lineKind(l);if(k&&!seen[normKey(l)]){seen[normKey(l)]=1;out.push({label:l,kind:k});}});(ctx.expenseLines||[]).forEach(function(l){if(!seen[normKey(l)]){seen[normKey(l)]=1;out.push({label:l,kind:"Dépense"});}});return out;}
     function setKind(k,fromUser){kind=k;seg.querySelectorAll("button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.kind===k[0]));});newLab.textContent=t2("Nom de la catégorie (","Category name (")+k[1].toLowerCase()+")";if(fromUser&&chosen&&lineKind(chosen)!==k[0]&&!creating){chosen="";pickTxt.textContent=t2("Choisir une catégorie","Choose a category");pick.classList.remove("has-value");}buildMenu();buildChips();}
@@ -220,11 +222,11 @@
     setKind(kind,false);
     cancel.addEventListener("click",function(){d.close();});
     form.addEventListener("submit",function(e){
-      e.preventDefault();err.textContent="";
+      e.preventDefault();clearErr();
       var v=amountOf(amt.value);
-      if(!isFinite(v)||v<=0){err.textContent=t2("Indique un montant positif.","Enter a positive amount.");amt.focus();return;}
+      if(!isFinite(v)||v<=0){fail(t2("Indique un montant positif.","Enter a positive amount."),amtL,amt);return;}
       var lab=creating?String(newInp.value||"").trim():chosen;
-      if(!lab){err.textContent=creating?t2("Donne un nom à la catégorie.","Name the category."):t2("Choisis une catégorie.","Choose a category.");(creating?newInp:(pick.hidden?chips.querySelector(".gfh-chip")||pick:pick)).focus();return;}
+      if(!lab){fail(creating?t2("Donne un nom à la catégorie.","Name the category."):t2("Choisis une catégorie.","Choose a category."),creating?newWrap:lineBox,creating?newInp:(pick.hidden?chips.querySelector(".gfh-chip")||pick:pick));return;}
       var mi=Number(mon.value);
       writeEntries([{year:ctx.year,mi:mi,label:lab,amount:kind[2]*v,kind:kind[0]}]);
       d.close();toast(t2("Ajouté : ","Added: ")+eur(v)+" · "+lab+" · "+mname(mi));
@@ -295,51 +297,49 @@
   }
 
   /* ── Alertes de plafond : 80 % puis 100 %, une fois par seuil et par mois ─────── */
-  /* Une seule carte flottante à la fois (alerte de plafond, installation, rappels, bravo…) :
-     les autres attendent qu'elle soit fermée. */
-  var POPUPS="#gfhBudgetAlert,#gfiCard,#gfrInvite,#gfhToast.is-on,.gfd-coach";
+  /* Ce qui peut occuper l'écran par-dessus l'accueil : confirmation brève, repère des nouveautés, fenêtre ouverte.
+     (Les messages du site, eux, ont leur propre emplacement : notifications.js.) */
+  var POPUPS="#gfhToast.is-on,.gfd-coach";
   function popupBusy(self){
     if(document.hidden)return true;
     return [].some.call(document.querySelectorAll(POPUPS+",dialog[open]"),function(e){return e!==self&&!e.hidden&&e.getClientRects().length>0;});
   }
   window.GFPopup={busy:popupBusy,selector:POPUPS};
   function whenFree(fn,tries){tries=tries||0;if(!popupBusy()){fn();return;}if(tries>40)return;setTimeout(function(){whenFree(fn,tries+1);},1500);}
-  function closeAlert(){var c=byId("gfhBudgetAlert");if(!c)return;c.classList.remove("is-on");setTimeout(function(){c.remove();},250);}
-  // L'alerte appartient à l'accueil : elle se ferme quand on change de page.
-  if(window.MutationObserver)new MutationObserver(function(){if(document.body.dataset.page!=="dashboard")closeAlert();}).observe(document.body,{attributes:true,attributeFilter:["data-page"]});
   var ALERT_KEY="personalFinanceDashboard.budgetAlerts",ALERT_ON="personalFinanceDashboard.budgetAlertsOn",quietAlerts=false;
+  // Messages du site en cours, relus par GFNotify à chaque affichage de l'accueil.
+  var budgetMsgs=[],recapMsg=null;
   function alertsOn(){return lsGet(ALERT_ON)!=="0";}
   function checkBudgets(all){
+    budgetMsgs=[];
     if(!alertsOn())return;
     var now=new Date(),m=all.filter(function(x){return x.year===now.getFullYear()&&x.mi===now.getMonth();})[0];if(!m)return;
     var b=budgets();if(!Object.keys(b).length)return;
     var state={};try{state=JSON.parse(lsGet(ALERT_KEY)||"{}")||{};}catch(e){}
-    var month=m.year+"-"+m.mi,fresh=[];
+    var month=m.year+"-"+m.mi,fresh=[],active=[];
     Object.keys(state).forEach(function(k){if(k.split("|")[0]!==month)delete state[k];});// les mois passés sont oubliés
     (m.cats||[]).forEach(function(c){
       var name=String(c.name||""),bud=budgetOf(name);if(!bud)return;
       var spent=Math.abs(Number(c.value||0)),lvl=spent>=bud?100:spent>=bud*.8?80:0,k=month+"|"+normKey(name),prev=Number(state[k]||0);
+      if(lvl)active.push({name:name,spent:spent,bud:bud,lvl:lvl});
       if(lvl>prev)fresh.push({name:name,spent:spent,bud:bud,lvl:lvl});
       if(lvl!==prev){if(lvl)state[k]=lvl;else delete state[k];}
     });
     lsSet(ALERT_KEY,JSON.stringify(state));
+    var ym=m.year+"-"+String(m.mi+1).padStart(2,"0");
+    budgetMsgs=active.map(function(a){return budgetMessage(a,ym);});
     // Juste après avoir fixé un plafond, on note le niveau actuel sans prévenir.
-    if(quietAlerts){quietAlerts=false;return;}
-    if(fresh.length){var sorted=fresh.sort(function(a,b){return b.lvl-a.lvl||b.spent/b.bud-a.spent/a.bud;});pushNow(sorted);whenFree(function(){if(document.body.dataset.page==="dashboard")budgetAlert(sorted);});}
+    if(quietAlerts){quietAlerts=false;if(window.GFNotify)budgetMsgs.forEach(function(x){window.GFNotify.dismiss(x.id);});return;}
+    if(fresh.length)pushNow(fresh.sort(function(a,b){return b.lvl-a.lvl||b.spent/b.bud-a.spent/a.bud;}));
   }
   function alertText(a){return a.lvl>=100?t2(a.name+" : plafond atteint ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": limit reached ("+eur(a.spent)+" / "+eur(a.bud)+")"):t2(a.name+" : 80 % du plafond ("+eur(a.spent)+" / "+eur(a.bud)+")",a.name+": 80% of the limit ("+eur(a.spent)+" / "+eur(a.bud)+")");}
-  // Bandeau fin au-dessus de la barre du bas : une ligne, une croix. Se ferme seul, ou en changeant de page.
-  function budgetAlert(list){
-    var first=list[0],more=list.length-1,over=first.lvl>=100;
-    var old=byId("gfhBudgetAlert");if(old)old.remove();
-    var c=el("div","gfh-banner"+(over?" is-over":""));c.id="gfhBudgetAlert";c.setAttribute("role","status");
-    var ic=el("span","gfh-banner-ic");ic.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4L12 4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4.4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.2" fill="currentColor"/></svg>';
-    var tx=el("span","gfh-banner-tx");
-    tx.append(el("b","",first.name),document.createTextNode(" · "+(over?t2("plafond atteint","limit reached"):t2("80 % du plafond","80% of the limit"))+" · "),el("span","gfh-banner-amt",eur(Math.round(first.spent))+" / "+eur(Math.round(first.bud))));
-    if(more)tx.append(document.createTextNode(t2(" · +"+more+" autre"+(more>1?"s":"")," · +"+more+" more")));
-    var x=el("button","gfh-banner-x");x.type="button";x.setAttribute("aria-label",t2("Fermer","Close"));x.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';x.addEventListener("click",closeAlert);
-    c.append(ic,tx,x);document.body.append(c);requestAnimationFrame(function(){c.classList.add("is-on");});
-    setTimeout(function(){if(c.isConnected)closeAlert();},9000);
+  // Un message par ligne dont le plafond est atteint (urgent) ou à 80 % ; identifiant stable par ligne, mois et seuil.
+  function budgetMessage(a,ym){
+    var over=a.lvl>=100,left=Math.max(0,a.bud-a.spent);
+    return{id:"budget:"+normKey(a.name)+":"+ym+":"+a.lvl,kind:"budget",priority:over?100:90,tone:"warning",sensitive:true,
+      title:over?t2(a.name+"\u00a0: plafond atteint",a.name+": limit reached"):t2(a.name+"\u00a0: 80\u00a0% du plafond",a.name+": 80% of the limit"),
+      body:over?t2(eur(a.spent)+" dépensés pour un plafond de "+eur(a.bud)+".",eur(a.spent)+" spent for a "+eur(a.bud)+" limit."):t2("Il reste "+eur(left)+" avant le plafond de "+eur(a.bud)+".",eur(left)+" left before the "+eur(a.bud)+" limit."),
+      action:{label:t2("Régler le plafond","Adjust the limit"),run:function(){budgetDialog(a.name,a.spent);}}};
   }
   function pushNow(list){var first=list[0],more=list.length-1,title=first.lvl>=100?t2("Plafond atteint","Limit reached"):t2("Bientôt au plafond","Close to the limit");pushBudget(list,title,alertText(first)+(more?t2(" · et "+more+" autre"+(more>1?"s":""),", and "+more+" more"):""));}
   /* Notification sur tous mes appareils (compte connecté et notifications activées), même app fermée.
@@ -398,37 +398,23 @@
     return (d<0?t2("Tu as dépensé "+pct1+" % de moins qu’en "+pmn,"You spent "+pct1+"% less than in "+pmn):t2("Tu as dépensé "+pct1+" % de plus qu’en "+pmn,"You spent "+pct1+"% more than in "+pmn))+why+"."+tail;
   }
 
-  /* ── Bilan du mois écoulé : affiché dès le début du mois suivant, jusqu'à « J'ai vu » ─── */
+  /* ── Bilan du mois écoulé : proposé dès le début du mois suivant (message du site), jusqu'à ce qu'on le ferme ─── */
   var RECAP_KEY="personalFinanceDashboard.recapSeen",flashMonth=0;
   function recapMonth(all){
     var now=new Date(),cur=now.getFullYear()*12+now.getMonth();
     var past=all.filter(function(m){return !m.blank&&m.year*12+m.mi<cur&&(m.salary||m.expenses||m.savings);});
     return past.length?past[past.length-1]:null;
   }
-  function recapPanel(all,bal,force){
+  function recapMessage(all){
     var R=recapMonth(all);if(!R)return null;
     var pinned=blocks().recapPin;
-    var tag=R.year+"-"+String(R.mi+1).padStart(2,"0");if(!force&&!pinned&&lsGet(RECAP_KEY)===tag)return null;
+    var tag=R.year+"-"+String(R.mi+1).padStart(2,"0");
+    // « J'ai vu » d'avant les messages du site : ce bilan ne revient pas.
+    if(!pinned&&lsGet(RECAP_KEY)===tag)return null;
     var prev=all.filter(function(m){return m.year*12+m.mi===R.year*12+R.mi-1&&!m.blank;})[0]||null;
-    var rest=flow(R),cats=catMap(R),names=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a];}),top=names[0];
+    var rest=flow(R),cats=catMap(R),names=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a];});
     var year=all.filter(function(m){return m.year===R.year&&!m.blank&&(m.salary||m.expenses||m.savings);});
-    var box=el("section","gfh-recap");box.setAttribute("aria-labelledby","gfhRecapT");
-    var head=el("div","gfh-recap-head"),ht=el("div");
-    ht.append(el("span","gfh-kick",t2("Bilan du mois","Monthly recap")));
     var ys=R.year!==new Date().getFullYear()?" "+R.year:"",fr=MN[R.mi];
-    var h=el("h3","",en()?"Your "+MN_EN[R.mi]+ys+" in review":"Ton mois "+(/^[aeiou]/.test(fr)?"d’":"de ")+fr+ys);h.id="gfhRecapT";ht.append(h);
-    var x=el("button","gfh-recap-x","×");x.type="button";x.setAttribute("aria-label",t2("Masquer le bilan","Hide recap"));
-    x.addEventListener("click",function(){lsSet(RECAP_KEY,tag);schedule();});
-    head.append(ht);if(!pinned)head.append(x);box.append(head);
-    var grid=el("div","gfh-recap-grid");
-    function stat(label,value,note,cls){var d=el("div","gfh-recap-stat"+(cls?" "+cls:""));d.append(el("span","t",label),el("b","v gf-amount",value));if(note)d.append(el("small","",note));grid.append(d);}
-    stat(t2("Reste du mois","Left this month"),(rest<0?"−":"")+eur(Math.abs(rest)),R.salary?t2("sur ","of ")+eur(R.salary)+t2(" de revenus"," income"):t2("Revenus non saisis","Income not entered"),rest<0?"is-neg":"");
-    var rate=R.salary?Math.round(R.savings/R.salary*100):null;
-    stat(t2("Épargne","Savings"),eur(R.savings),rate!=null&&R.savings?rate+(en()?"%":" %")+t2(" de tes revenus"," of your income"):(R.savings?"":t2("Rien de côté","Nothing saved")));
-    if(top)stat(t2("Plus grosse dépense","Biggest expense"),eur(cats[top]),top+(R.expenses?" · "+Math.round(cats[top]/R.expenses*100)+(en()?"% of spending":" % de tes dépenses"):""));
-    if(prev&&prev.expenses&&R.expenses){var dv=(R.expenses-prev.expenses)/prev.expenses*100,ab=Math.abs(dv);stat(t2("Dépenses","Spending"),(dv>0?"+":dv<0?"−":"")+ab.toLocaleString(en()?"en-IE":"fr-FR",{maximumFractionDigits:0})+(en()?"%":" %"),t2("vs ","vs ")+mname(prev.mi)+" · "+eur(R.expenses),dv>0?"is-up":"is-down");}
-    else stat(t2("Dépenses","Spending"),eur(R.expenses),t2("Premier mois comparable","First comparable month"));
-    box.append(grid);
     // Un fait marquant, le plus parlant d'abord
     var others=year.filter(function(m){return m.id!==R.id;}),fact="",savs=others.map(function(m){return m.savings;}),exps=others.filter(function(m){return m.expenses;}).map(function(m){return m.expenses;});
     var over=names.filter(function(n){var b=budgetOf(n);return b&&cats[n]>b;});
@@ -437,13 +423,14 @@
     else if(year.length>=3&&R.expenses&&exps.length&&R.expenses<Math.min.apply(null,exps))fact=t2("Tes dépenses les plus basses de l’année.","Your lowest spending of the year.");
     else if(prev){var pm=catMap(prev),best=null;names.forEach(function(n){var d=cats[n]-(pm[n]||0);if(pm[n]&&d>0&&(!best||d>best.d))best={n:n,d:d};});
       if(best&&best.d>=20)fact=t2("«\u00a0"+best.n+"\u00a0» a augmenté de ","“"+best.n+"” went up by ")+eur(best.d)+t2(" par rapport à "," compared with ")+mname(prev.mi)+".";}
-    if(!fact&&rest>0)fact=t2("Mois bouclé dans le vert : ","Month closed in the green: ")+eur(rest)+t2(" de reste."," left.");
-    if(fact)box.append(el("p","gfh-recap-fact",fact));
-    var acts=el("div","gfh-recap-acts"),see=el("button","gfh-btn",t2("Voir ","See ")+mname(R.mi)),ok=el("button","gfh-link",t2("J’ai vu","Got it"));see.type=ok.type="button";
-    // Ouvre le mois sur l'accueil : le bilan se range et on remonte au mois choisi, bien visible.
-    see.addEventListener("click",function(){if(!pinned)lsSet(RECAP_KEY,tag);flashMonth=Date.now();select(R);schedule();setTimeout(function(){var t=document.querySelector("#gfhHome .gfh-topbar");if(t)t.scrollIntoView({behavior:"smooth",block:"start"});},350);});ok.addEventListener("click",function(){lsSet(RECAP_KEY,tag);schedule();});
-    acts.append(see);if(!pinned)acts.append(ok);box.append(acts);
-    return box;
+    if(!fact&&rest>0)fact=t2("Mois bouclé dans le vert.","Month closed in the green.");
+    // Les chiffres de l'ancienne carte, en une phrase
+    var lead=R.salary?(rest>=0?t2("Il te reste "+eur(rest)+" sur "+eur(R.salary)+" de revenus.","You have "+eur(rest)+" left out of "+eur(R.salary)+" income."):t2("Tu as dépensé "+eur(-rest)+" de plus que tes revenus.","You spent "+eur(-rest)+" more than your income.")):t2("Dépenses du mois : "+eur(R.expenses)+".","Spending for the month: "+eur(R.expenses)+".");
+    return{id:"recap:"+tag,kind:"recap",priority:80,tone:rest>0?"success":"info",sensitive:true,sticky:!!pinned,once:!pinned,
+      title:en()?"Your "+MN_EN[R.mi]+ys+" in review":"Ton mois "+(/^[aeiou]/.test(fr)?"d’":"de ")+fr+ys,
+      body:lead+(fact?" "+fact:""),
+      // Ouvre le mois sur l'accueil : on remonte au mois choisi, bien visible.
+      action:{label:t2("Voir ","See ")+mname(R.mi),run:function(){flashMonth=Date.now();select(R);schedule();setTimeout(function(){var t=document.querySelector("#gfhHome .gfh-topbar");if(t)t.scrollIntoView({behavior:"smooth",block:"start"});},350);}}};
   }
 
   /* ── Objectifs sur l'accueil (avec les montants liés au tableur) ─────────── */
@@ -475,6 +462,47 @@
     ms.value=m.id;ms.dispatchEvent(new Event("change",{bubbles:true}));
   }
 
+  /* ── Accueil vide : tout l’accueil en filigrane (formes seulement), une carte d’import posée dessus.
+     Un seul bouton principal : il clique #btnSheetImport dans le geste du toucher (obligatoire sur iPhone). */
+  var emptyIn=false;
+  var EIC={
+    file:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    lock:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  };
+  function emptyImport(){
+    var imp=el("button","gfh-e-main",t2("Importer mon relevé bancaire","Import my bank statement"));imp.type="button";
+    // Le sélecteur de fichier s’ouvre dans le geste du toucher (obligatoire sur iPhone) : on réutilise le bouton d’import du tableur.
+    imp.addEventListener("click",function(){var b=byId("btnSheetImport");if(b)b.click();if(window.setPage)window.setPage("sheet");});
+    return imp;
+  }
+  function emptyWhy(){
+    var why=el("ul","gfh-e-why"),w1=el("li"),w2=el("li");
+    w1.innerHTML=EIC.file;w1.append(el("span","",t2("CSV ou Excel, toutes les banques","CSV or Excel, any bank")));
+    w2.innerHTML=EIC.lock;w2.append(el("span","",t2("Le fichier reste sur ton appareil","Your file stays on your device")));
+    why.append(w1,w2);return why;
+  }
+  function emptyAlt(){
+    var alt=el("div","gfh-e-alt"),hand=el("button","gfh-e-link",t2("ou remplir le tableur à la main","or fill in the spreadsheet by hand")),exb=el("button","gfh-e-link",t2("voir un exemple","see an example"));hand.type=exb.type="button";
+    hand.addEventListener("click",function(){if(window.setPage)window.setPage("sheet");});exb.addEventListener("click",loadExample);
+    alt.append(hand,exb);return alt;
+  }
+  function emptyGhost(){
+    // Formes seulement (aucun faux chiffre), non interactif
+    var hts=[34,42,38,52,48,60,56,68,64,76,72,86],bars="",mos="",rows="";
+    for(var i=0;i<12;i++){bars+='<b'+(i===emptyMi?' class="on"':'')+' style="height:'+hts[i]+'%"></b>';mos+="<i></i>";}
+    [[44,34,72],[30,24,48],[38,28,30],[34,22,20]].forEach(function(r){rows+='<div class="gfh-g-ln"><div class="gfh-g-r"><i style="width:'+r[0]+'%"></i><i style="width:'+r[1]+'%"></i></div><div class="gfh-g-pg"><b style="width:'+r[2]+'%"></b></div></div>';});
+    var gh=el("div","gfh-ghost");gh.setAttribute("aria-hidden","true");
+    gh.innerHTML='<div class="gfh-g-card"><div class="gfh-g-r"><i style="width:34%"></i><i class="c"></i></div><i class="gfh-g-big"></i><div class="gfh-g-bars">'+bars+'</div><div class="gfh-g-mo">'+mos+'</div></div>'+'<div class="gfh-g-where"><div class="gfh-g-r"><i style="width:46%"></i><i style="width:16%"></i></div>'+rows+'</div>';
+    return gh;
+  }
+  function emptyHero(){
+    var ew=el("div","gfh-ew v-b"+(emptyIn?"":" is-in"));emptyIn=true;
+    var box=el("div","gfh-hero gfh-bpanel");
+    box.append(el("h3","gfh-e-title gfh-b-title",t2("Ton accueil attend ton relevé.","Your home is waiting for your statement.")),emptyImport(),emptyWhy(),emptyAlt());
+    ew.append(emptyGhost(),box);
+    return ew;
+  }
+
   function render(){
     var page=byId("dashboardPage"),content=page&&page.querySelector(".content");if(!content)return;
     var data=typeof window.__gfHomeData==="function"?window.__gfHomeData():null;
@@ -497,6 +525,8 @@
     var empty=sel.salary+sel.expenses+sel.savings===0;
 
     if(!root){root=el("section","gfh-home");root.id="gfhHome";root.setAttribute("aria-label",t2("Accueil","Home"));content.insertBefore(root,content.firstChild);}
+    // Emplacement des messages du site, juste au-dessus de l'accueil : il n'est jamais redessiné avec lui.
+    var slotNode=window.GFNotify?window.GFNotify.slot():null;if(slotNode&&slotNode.parentNode!==content)content.insertBefore(slotNode,root);
 
     // Années : un seul menu compact (2026 ▾), qui reste lisible avec 2 comme avec 20 années
     var years=Array.from(new Set(all.map(function(m){return m.year;}))).sort(function(a,b){return b-a;});
@@ -524,11 +554,16 @@
     // Salutation
     var hi=el("div","gfh-hi"),nm=name();
     hi.append(el("h2","",(t2("Bonjour","Hello")+(nm?" "+nm:"")).trim()));
-    hi.append(el("p","gfh-bilan",blank?t2("Rien de saisi pour l’instant : commence dans le Tableur ou avec le bouton +.","Nothing entered yet: start in the Spreadsheet or with the + button."):bilan(sel,prev,empty)));
+    if(!blank)hi.append(el("p","gfh-bilan",bilan(sel,prev,empty)));
 
     // Carte solde
     var card=el("div","gfh-card");
-    var lab=el("div","gfh-lab");lab.append(el("span","",hasStart?t2("Solde disponible","Available balance"):t2("Solde calculé","Calculated balance")),eyeButton());card.append(lab);
+    if(blank){
+      card=emptyHero();
+    }else{
+    // Le solde affiché est celui de la fin du mois choisi (le tableur, lui, montre celui du dernier mois saisi).
+    var lab=el("div","gfh-lab"),endOf=(en()?"":"à fin ")+mname(sel.mi);
+    lab.append(el("span","",hasStart?t2("Solde disponible "+endOf,"Available balance, end of "+endOf):t2("Solde calculé "+endOf,"Calculated balance, end of "+endOf)),eyeButton());card.append(lab);
     var bigTxt=eur(sd); card.append(el("div","gfh-big"+(bigTxt.length>11?" is-xl":bigTxt.length>9?" is-long":""),bigTxt));
     var dl=el("div","gfh-dl");
     if(blank)dl.append(document.createTextNode(t2("Aucune donnée pour l’instant","No data yet")));
@@ -557,19 +592,12 @@
       var f3=el("div");f3.append(el("div","t",t2("Épargne","Savings")),el("div","v"+(sel.savings?"":" none"),sel.savings?eurS(sel.savings):"—"),el("small","",ep?t2("Cumul ","Total ")+eur(ep):t2("Rien de côté","Nothing saved")));
       foot.append(f1,f2,f3);card.append(foot);
     }
+    }
 
     // Colonne droite
-    var right=el("div","gfh-right"),goal=mainGoal(p);
+    var right=el("div","gfh-right"),goal=mainGoal(p),goalEl=null;
     if(blank){
-      var start=el("div","gfh-panel gfh-start");
-      start.append(el("span","gfh-kick",t2("Pour commencer","Get started")),el("h3","",t2("Ton accueil se remplit tout seul.","Your home fills itself in.")));
-      var steps=el("ol","gfh-steps");[t2("Indique ton solde de départ","Enter your starting balance"),t2("Ajoute ou importe tes opérations","Add or import your transactions"),t2("Retrouve ici ton solde, tes dépenses et ton épargne","See your balance, spending and savings here")].forEach(function(x){steps.append(el("li","",x));});
-      var acts=el("div","gfh-acts"),a1=el("button","gfh-btn is-primary",t2("Ouvrir le tableur","Open the spreadsheet")),a2=el("button","gfh-btn",t2("Importer un fichier","Import a file"));a1.type=a2.type="button";
-      a1.addEventListener("click",function(){if(window.setPage)window.setPage("sheet");});
-      a2.addEventListener("click",function(){if(window.setPage)window.setPage("sheet");requestAnimationFrame(function(){var b=byId("btnSheetImport");if(b)b.click();});});
-      acts.append(a1,a2);start.append(steps,acts);
-      var ex=el("button","gfh-link",t2("Ou charge un exemple dans le tableur","Or load a sample into the spreadsheet"));ex.type="button";ex.addEventListener("click",loadExample);start.append(ex);
-      right.append(start);if(B.goal)right.append(goalsPanel(p));
+      /* Accueil vide : une seule action, dans la carte. Pas d’objectif ni de solde de départ avant les premiers chiffres. */
     }else{
       var where=el("div","gfh-panel gfh-where"),wh=el("div","gfh-row");
       wh.append(el("h3","",t2("Où part ton argent","Where your money goes")),el("span","gfh-muted",cap(mname(sel.mi))));
@@ -584,34 +612,37 @@
         if(cats.length>7)where.append(el("small","gfh-muted","+ "+(cats.length-7)+t2(" autres lignes"," more rows")));
         where.append(el("p","gfh-hint",t2("Touche une ligne pour lui fixer un plafond.","Tap a row to set a limit.")));}
       else where.append(el("p","gfh-empty",t2("Aucune dépense ce mois-ci.","No expenses this month.")));
-      var fx=(B.fixed!==false)&&sel.id===all[all.length-1].id?fixedSuggestion(all):null,fp=fx?fixedPanel(fx):null;if(B.where)right.append(where);if(fp)right.append(fp);if(B.subs&&window.GFSubs){var sp=window.GFSubs.panel();if(sp)right.append(sp);}if(B.goal)right.append(goalsPanel(p));
+      var fx=(B.fixed!==false)&&sel.id===all[all.length-1].id?fixedSuggestion(all):null,fp=fx?fixedPanel(fx):null;if(B.where)right.append(where);if(fp)right.append(fp);if(B.subs&&window.GFSubs){var sp=window.GFSubs.panel();if(sp)right.append(sp);}if(B.goal)goalEl=goalsPanel(p);
     }
 
-    var rc=!blank&&B.recap?recapPanel(all,bal):null;
+    recapMsg=!blank&&B.recap?recapMessage(all):null;
     var yc=!blank&&B.year!==false&&window.GFYear?window.GFYear.card():null;
     var left=el("div","gfh-left");left.append(card);
-    var dg=el("div","gfh-dg"+(right.childNodes.length?"":" is-solo"));dg.append(left);if(right.childNodes.length)dg.append(right);
+    var dg=el("div","gfh-dg"+(right.childNodes.length||goalEl?"":" is-solo"));dg.append(left);
+    if(right.childNodes.length){right.classList.add("gfh-right");dg.append(right);}
+    if(goalEl){goalEl.classList.add("gfh-goal-slot");dg.append(goalEl);}
     var top=[];
     if(demo)top.push(exampleBar("home"));
     var bar=el("div","gfh-topbar");
-    bar.append(yrs);
-    bar.append(mon);
+    if(blank)bar.append(hi,yrs);else{bar.append(yrs);bar.append(mon);}
     var plus=el("button","gfh-add");plus.type="button";plus.setAttribute("aria-label",t2("Ajouter une dépense ou un revenu","Add an expense or income"));
     plus.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>'+t2("Ajouter","Add")+'</span>';
     var expLines=[];all.slice().reverse().forEach(function(m){(m.cats||[]).forEach(function(c){if(expLines.indexOf(c.name)<0)expLines.push(c.name);});});
     plus.addEventListener("click",function(){quickAdd({year:sel.year,mi:sel.mi,expenseLines:expLines});});
-    bar.append(plus);
+    if(!blank)bar.append(plus);
     // Redessiner l'accueil ne doit ni faire remonter la page ni perdre le focus (sinon, après un toucher sur
     // une barre de mois, le navigateur remonte tout en haut et la barre jaune sort de l'écran).
     var keepY=window.scrollY,hadFocus=document.activeElement&&root.contains(document.activeElement),focusBar=hadFocus&&document.activeElement.closest(".gfh-bars");
-    root.replaceChildren.apply(root,top.concat([bar,hi],yc?[yc]:[],rc?[rc]:[],[dg]));
+    root.replaceChildren.apply(root,top.concat(blank?[bar]:[bar,hi],yc?[yc]:[],[dg]));
     if(focusBar){var nf=root.querySelector(".gfh-bars button.on");if(nf)try{nf.focus({preventScroll:true});}catch(e){}}
     if(Math.abs(window.scrollY-keepY)>1)window.scrollTo(0,keepY);
     document.body.classList.add("gfh-ready");
     if(document.body.classList.contains("tutorial-active"))setTimeout(function(){window.dispatchEvent(new Event("resize"));},30);
     openFromLink(plus);
     if(window.GFYear&&!blank)window.GFYear.fromLink();
+    budgetMsgs=[];
     if(!blank&&!demo){checkBudgets(all);checkGoals(p);}
+    if(window.GFNotify)window.GFNotify.refresh();
     if(window.GFSubs)setTimeout(function(){try{window.GFSubs.afterRender();}catch(e){}},700);
   }
   /* Raccourci « Ajouter une dépense » (appui long sur l'icône de l'app, ou /accueil?ajout=depense|revenu|epargne) :
@@ -662,8 +693,14 @@
     all.forEach(function(m){var k=m.year+"-"+String(m.mi+1).padStart(2,"0");if(!hasStart||!ref||k>=ref)run+=Number(m.salary||0)-Math.abs(Number(m.expenses||0))-Math.abs(Number(m.savingsTotal||0));});
     return run;
   }
+  // Dernier mois saisi (celui du solde global), pour l'écrire à côté du chiffre dans le tableur.
+  function totalBalanceMonth(){
+    var data=typeof window.__gfHomeData==="function"?window.__gfHomeData():null,all=(data&&data.all||[]).filter(function(m){return m.year&&m.mi>=0;});if(!all.length)return "";
+    var last=all.reduce(function(a,m){return Number(m.year)*12+m.mi>Number(a.year)*12+a.mi?m:a;});return mname(last.mi)+" "+last.year;
+  }
   window.addEventListener("gf:dashboardupdate",function(){setTimeout(function(){try{window.FinanceSheet&&window.FinanceSheet.updateSheetBalanceCards&&window.FinanceSheet.updateSheetBalanceCards();}catch(e){}},0);});
-  window.GFHome={alertsOn:alertsOn,setAlertsOn:function(v){lsSet(ALERT_ON,v?null:"0");},render:schedule,totalBalance:totalBalance,loadExample:loadExample,removeExample:removeExample};
+  if(window.GFNotify){window.GFNotify.register("budget",function(){return budgetMsgs;});window.GFNotify.register("recap",function(){return recapMsg?[recapMsg]:[];});}
+  window.GFHome={alertsOn:alertsOn,setAlertsOn:function(v){lsSet(ALERT_ON,v?null:"0");},setBlock:setBlock,render:schedule,totalBalance:totalBalance,totalBalanceMonth:totalBalanceMonth,loadExample:loadExample,removeExample:removeExample};
   document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest("[data-page]"))setTimeout(sheetBanner,60);});
   window.addEventListener("gf:dashboardupdate",function(){sheetBanner();});
   document.addEventListener("focusout",function(e){if(e.target&&e.target.closest&&e.target.closest("#sheetApp"))setTimeout(sheetBanner,400);});

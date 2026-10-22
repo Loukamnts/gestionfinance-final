@@ -1832,16 +1832,8 @@
   // ═══════════════ Boîtes de dialogue (toast / confirm) ══════════
   // Message bref ; un import long reste lisible plus longtemps et peut proposer « Annuler ».
   function toast(msg, ms, action) {
-    const old = document.querySelector(".sheet-toast"); if (old) old.remove();
-    const t = document.createElement("div"); t.className = "sheet-toast"; t.setAttribute("role", "status");
-    const text = document.createElement("span"); text.textContent = msg; t.appendChild(text);
-    if (action && typeof action.run === "function") {
-      t.classList.add("has-action");
-      const b = document.createElement("button"); b.type = "button"; b.className = "sheet-toast-action"; b.textContent = action.label;
-      b.addEventListener("click", () => { t.remove(); action.run(); });
-      t.appendChild(b);
-    }
-    document.body.appendChild(t); setTimeout(() => t.remove(), ms || 2600);
+    // Même confirmation brève que dans tout le site (notifications.js) ; « Annuler » reste proposé après un import.
+    if (window.GFNotify) window.GFNotify.toast(msg, { ms: ms, undo: action });
   }
   function confirmDialog(msg) {
     return new Promise((resolve) => {
@@ -2272,7 +2264,7 @@
 
     balStart.textContent = hasStartingCash ? fmt(startingCash) : "Facultatif";
     if (balRemaining) balRemaining.textContent = fmt(remaining);
-    try { var cardS = document.getElementById("balCardStart"), noteS = cardS && cardS.querySelector(".balance-note"), editS = document.getElementById("startingBalanceEdit"), noteR = document.querySelector("#balCardRemaining .balance-note"), labR = document.querySelector("#balCardRemaining .balance-label"); if (cardS) cardS.classList.toggle("is-empty", !hasStartingCash); if (noteS) noteS.textContent = hasStartingCash ? "Avant revenus, dépenses et épargne" : "Ajoute-le pour connaître ton vrai solde disponible."; if (editS) editS.textContent = hasStartingCash ? "Modifier" : "Ajouter"; if (labR) labR.textContent = hasStartingCash ? "Solde disponible" : "Solde calculé"; if (noteR) noteR.textContent = hasStartingCash ? "Départ + revenus − dépenses − épargne" : "Revenus − dépenses − épargne des mois saisis"; } catch (e) {}
+    try { var cardS = document.getElementById("balCardStart"), noteS = cardS && cardS.querySelector(".balance-note"), editS = document.getElementById("startingBalanceEdit"), noteR = document.querySelector("#balCardRemaining .balance-note"), labR = document.querySelector("#balCardRemaining .balance-label"); if (cardS) cardS.classList.toggle("is-empty", !hasStartingCash); if (noteS) noteS.textContent = hasStartingCash ? "Avant revenus, dépenses et épargne" : "Ajoute-le pour connaître ton vrai solde disponible."; if (editS) editS.textContent = hasStartingCash ? "Modifier" : "Ajouter"; if (labR) { var lastM = ""; try { lastM = window.GFHome && window.GFHome.totalBalanceMonth ? window.GFHome.totalBalanceMonth() : ""; } catch (e) {} labR.textContent = (hasStartingCash ? tr("Solde disponible", "Available balance") : tr("Solde calculé", "Calculated balance")) + (lastM ? tr(" à fin ", ", end of ") + lastM : ""); } if (noteR) noteR.textContent = hasStartingCash ? "Départ + revenus − dépenses − épargne" : "Revenus − dépenses − épargne des mois saisis"; } catch (e) {}
   }
 
   // Sources proposées aux objectifs : chaque ligne chiffrée peut alimenter

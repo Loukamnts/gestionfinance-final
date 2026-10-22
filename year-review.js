@@ -271,7 +271,7 @@
     raf=requestAnimationFrame(tick);
   }
   function syncLock(){if(window.GFUI&&window.GFUI.syncModalLock)window.GFUI.syncModalLock();}
-  function toast(text){var t=document.getElementById("gfhToast");if(!t){t=el("div","gfh-toast");t.id="gfhToast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");document.body.append(t);}t.textContent=text;t.classList.add("is-on");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove("is-on");},3600);}
+  function toast(text){if(window.GFNotify)window.GFNotify.toast(text);}
 
   /* ── Carte sur l'accueil (décembre et janvier) ────────────────────────────── */
   function card(){

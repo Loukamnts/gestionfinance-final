@@ -67,7 +67,7 @@
   /* Appelé après un import : mémorise, par service et par mois, le montant et le nombre de prélèvements. */
   function ingest(ops){
     var B=window.GFBankImport;if(!B||!ops||!ops.length)return 0;
-    var d=load(),per={};
+    var d=load(),per={},had=list(true).map(function(i){return i.key;});
     // Dernier mois importé (même sans abonnement dedans) : sert à savoir qu'un abonnement s'est arrêté.
     ops.forEach(function(op){if(op.date)d.last=Math.max(d.last||0,mk(op.date.y,op.date.m));});
     ops.forEach(function(op){
@@ -91,7 +91,17 @@
     // Les marchands vus une seule fois depuis longtemps ne servent à rien : on les oublie
     var latest=0;Object.keys(d.items).forEach(function(m){Object.keys(d.items[m].months).forEach(function(k){latest=Math.max(latest,Number(k));});});
     Object.keys(d.items).forEach(function(m){var it=d.items[m],ks=Object.keys(it.months).map(Number);if(ks.length<2&&latest-Math.max.apply(null,ks)>3)delete d.items[m];});
-    save(d);return list().length;
+    save(d);
+    noteFresh(had);
+    return list().length;
+  }
+  // Abonnements apparus avec cet import : ils deviennent des messages du site (« Netflix : abonnement repéré »).
+  function noteFresh(had){
+    var d=load();if(d._noSave)return;
+    var fresh=list(true).filter(function(i){return i.active&&!i.hidden&&had.indexOf(i.key)<0;}).map(function(i){return i.key;});
+    if(!fresh.length)return;
+    d.fresh=(Array.isArray(d.fresh)?d.fresh:[]).filter(function(k){return fresh.indexOf(k)<0;}).concat(fresh).slice(-12);d.freshAt=Date.now();save(d);
+    if(window.GFNotify)window.GFNotify.refresh();
   }
 
   // Apple/Google sans produit : la plupart des mois (2 sur 3) au même montant, à 10 % près ; un achat ponctuel
@@ -201,6 +211,25 @@
     // Pendant le tutoriel (et entre deux repères), aucune autre invitation ne doit s'afficher.
     (function go(i){if(i>=steps.length){window.__gfCoachUntil=0;return;}window.__gfCoachUntil=Date.now()+20000;D.coach(byId(steps[i][0]),steps[i][1],{step:i+1,total:steps.length,last:i===steps.length-1,onNext:function(){go(i+1);}});})(0);
   }
+
+  /* Messages du site : un par abonnement repéré (au plus trois), sinon un message pour l'ensemble. */
+  function messages(){
+    var d=load(),keys=Array.isArray(d.fresh)?d.fresh:[];if(!keys.length)return[];
+    var items=list().filter(function(i){return i.active&&keys.indexOf(i.key)>=0;});if(!items.length)return[];
+    var see=t2("Voir mes abonnements","See my subscriptions");
+    if(items.length>3){
+      var sum=Math.round(items.reduce(function(s,i){return s+i.amount;},0)*100)/100;
+      return[{id:"subs:many:"+(d.freshAt||0),kind:"subs",priority:70,tone:"info",sensitive:true,once:true,
+        title:t2(items.length+" abonnements repérés",items.length+" subscriptions found"),
+        body:t2("Pour "+eur(sum)+" par mois en tout, d’après ton relevé.","For "+eur(sum)+" a month in total, from your statement."),
+        action:{label:see,run:function(){openAll();}}}];
+    }
+    return items.map(function(i){return{id:"subs:"+i.key,kind:"subs",priority:70,tone:"info",sensitive:true,once:true,
+      title:t2(i.name+"\u00a0: abonnement repéré",i.name+": subscription found"),
+      body:t2(eur(i.amount)+" par mois, soit "+eur(i.yearly)+" sur un an.",eur(i.amount)+" a month, "+eur(i.yearly)+" a year."),
+      action:{label:see,run:function(){openAll(i.key);}}};});
+  }
+  if(window.GFNotify)window.GFNotify.register("subs",messages);
 
   window.GFSubs={ingest:ingest,list:list,totals:totals,panel:panel,openAll:openAll,afterRender:afterRender,setHidden:setHidden};
 })();
