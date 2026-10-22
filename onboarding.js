@@ -187,6 +187,9 @@
     // Désactive le calque bloquant — le site redevient cliquable
     const blocker = $("tutorialBlocker");
     if (blocker) blocker.classList.add("hidden");
+    var appEl = document.querySelector("main.app");
+    if (appEl) { appEl.style.transition = "none"; appEl.style.transform = ""; }
+    tutorialShift = 0;
     document.body.classList.remove("tutorial-active");
     store(STORAGE.tutorial, true);
     // Nettoie les références pour arrêter le repositionnement au scroll
@@ -309,6 +312,7 @@
   }
 
   // Fait défiler pour que l'élément soit centré dans la zone laissée libre par la bulle
+  var tutorialShift = 0; // décalage du contenu appliqué pendant le tutoriel (page verrouillée)
   function scrollTutorialTarget(target, overlay) {
     if (tutorialIsInNav(target)) return;
     var tooltip = overlay.querySelector(".tutorial-tooltip");
@@ -319,12 +323,17 @@
     var body = document.body;
     // Page verrouillée pendant le tutoriel (body en position fixe) : on déplace le décalage du verrou
     if (getComputedStyle(body).position === "fixed") {
-      var current = -(parseFloat(body.style.top) || 0);
+      // Le défilement du tutoriel est une transformation du contenu (et non un déplacement du corps de page) :
+      // déplacer « top » compte comme un décalage de mise en page (CLS), une transformation non.
+      var app = document.querySelector("main.app");
+      var lockY = -(parseFloat(body.style.top) || 0);
+      var current = lockY + tutorialShift;
       var max = Math.max(0, body.scrollHeight - window.innerHeight + tutorialNavHeight());
       var next = Math.max(0, Math.min(max, current + rect.top - offset));
-      body.style.transition = "top .35s cubic-bezier(.2,.8,.2,1)";
-      body.style.top = (-next) + "px";
-      setTimeout(function () { body.style.transition = ""; }, 400);
+      if (!app) { body.style.top = (-next) + "px"; return; }
+      tutorialShift = next - lockY;
+      app.style.transition = (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? "none" : "transform .35s cubic-bezier(.2,.8,.2,1)";
+      app.style.transform = tutorialShift ? "translateY(" + (-tutorialShift) + "px)" : "";
       return;
     }
     var y = window.scrollY + rect.top - offset;
