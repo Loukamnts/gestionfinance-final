@@ -938,7 +938,7 @@ body[data-theme] .settings-shell > .account-section[data-settings-panel] {
    Un seul accent (blé), un seul bloc plein par écran, filets plutôt que cadres.
    ======================================================================== */
 body[data-mode="dark"][data-palette="ble"] { --accent:#EDB73B; --accent-2:#7CC59B; --accent-3:#8FB0BD; --palette-on-accent:#0E1713; }
-body[data-mode="light"][data-palette="ble"] { --accent:#9A6410; --accent-2:#2F6B4A; --accent-3:#4F6F7C; --palette-on-accent:#17261F; }
+body[data-mode="light"][data-palette="ble"] { --accent:#855508; --accent-2:#2F6B4A; --accent-3:#4F6F7C; --palette-on-accent:#17261F; }
 
 body[data-theme="moulin"][data-mode="light"][data-palette] {
   color-scheme:light;
