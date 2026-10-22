@@ -17,7 +17,6 @@ body[data-theme="moulin"] #dashboardPage .chart-head p{margin:4px 0 0;font-size:
 .gfc-views button{height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--muted);font:500 14px var(--font-body);cursor:pointer;white-space:nowrap}
 @media (hover:hover){
 .gfc-views button:hover{color:var(--text)}}
-.gfc-views button[aria-pressed="true"]{background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);font-weight:600}
 .gfc-views button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 @media(max-width:560px){.gfc-views{display:flex;width:100%}.gfc-views button{flex:1 1 0;min-width:0;padding:0 4px;font-size:12.5px}}
 /* Très petits écrans (iPhone SE…) : les 4 vues passent sur deux lignes au lieu de déborder */
@@ -31,7 +30,7 @@ body[data-theme="moulin"] .studio-sidebar-brand{column-gap:10px!important}
 body[data-theme="moulin"] .app-header .brand-copy h1{display:flex!important;align-items:center;gap:9px}
 body[data-theme="moulin"] .loader{display:none!important}
 /* Navigation : Mon espace en bas ; Paramètres = engrenage en haut, à gauche du profil (mobile) */
-@media(max-width:720px){body[data-theme="moulin"] .app-header .top-actions{gap:8px}body[data-theme="moulin"] .mobile-settings-button{width:40px;height:40px;border-radius:12px;border-color:var(--line);background:transparent;color:var(--text)}body[data-theme="moulin"] .mobile-settings-button.is-active{background:var(--accent-fill);border-color:var(--accent-fill);color:var(--on-accent-fill)}}
+@media(max-width:720px){body[data-theme="moulin"] .app-header .top-actions{gap:8px}body[data-theme="moulin"] .mobile-settings-button{width:40px;height:40px;border-radius:12px;border-color:var(--line);background:transparent;color:var(--text)}}
 
 .gfp-short{display:none}
 @media(max-width:900px){.gfp-long{display:none}.gfp-short{display:inline}}
@@ -44,14 +43,15 @@ body[data-theme="moulin"] .personal-workspace-nav{gap:4px!important}
 body[data-theme="moulin"] .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes){min-height:48px!important;border-radius:14px!important;font:500 15px var(--font-body)!important;color:var(--muted)!important;background:transparent!important;border:0!important;box-shadow:none!important}
 @media (hover:hover){
 body[data-theme="moulin"] .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes):hover{color:var(--text)!important;background:var(--line)!important}}
-body[data-theme="moulin"] .personal-workspace-nav .personal-workspace-link.is-active{background:var(--accent-fill,var(--accent))!important;color:var(--on-accent-fill,#17261F)!important;font-weight:600!important}
 body[data-theme="moulin"] .personal-workspace-nav .personal-workspace-link.is-active::before{background:currentColor!important}
 @media(max-width:900px){
-  body[data-theme="moulin"] .personal-workspace-title{font-size:22px!important;margin:0 0 2px!important}
-  body[data-theme="moulin"] .personal-workspace-nav{display:flex!important;flex-direction:row!important;gap:2px!important;padding:4px!important;border:1px solid var(--line)!important;border-radius:999px!important;overflow:visible!important;width:100%}
-  body[data-theme="moulin"] .personal-workspace-nav{align-items:center!important}
-  body[data-theme="moulin"] .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes){flex:1 1 0!important;min-width:0;height:38px!important;min-height:38px!important;margin:0!important;padding:0 4px!important;border:0!important;border-radius:999px!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:12.5px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:static!important}
-  body[data-theme="moulin"] .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes)::before{display:none!important}
+  body[data-theme="moulin"] .personal-workspace-title{font-size:22px!important}
+  /* Même famille de pastilles que les onglets de Paramètres : rangée qui défile jusqu'au bord, fondu, pastilles de 44 px */
+  body[data-theme="moulin"] .personal-workspace-nav{--gfp-edge:clamp(14px,2.6vw,40px);display:flex!important;flex-direction:row!important;align-items:center!important;gap:8px!important;width:calc(100% + 2*var(--gfp-edge))!important;margin:0 calc(-1*var(--gfp-edge))!important;padding:0 var(--gfp-edge) 2px!important;border:0!important;border-radius:0!important;background:transparent!important;overflow-x:auto!important;overscroll-behavior-x:contain;scrollbar-width:none;scroll-padding-inline:var(--gfp-edge);box-sizing:border-box;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 32px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 32px),transparent 100%)}
+  body[data-theme="moulin"] .personal-workspace-nav::-webkit-scrollbar{display:none;height:0}
+  body[data-theme="moulin"] .personal-workspace-nav .personal-workspace-link{flex:0 0 auto!important;width:auto!important;min-width:0;height:auto!important;min-height:44px!important;margin:0!important;padding:10px 15px!important;border:0!important;border-radius:99px!important;background:var(--input-bg)!important;color:var(--muted)!important;display:block!important;font:650 .82rem/1.25 var(--font-body)!important;white-space:nowrap;position:static!important;scroll-snap-align:none}
+  body[data-theme="moulin"] .personal-workspace-nav .personal-workspace-link::before{display:none!important}
   body[data-theme="moulin"] #objectivesPage .objective-stat{padding:10px 12px!important}
   body[data-theme="moulin"] #objectivesPage .objective-stat strong{font-size:18px!important}
 }
@@ -93,7 +93,6 @@ body[data-theme="moulin"] #objectivesPage .objective-stat span{display:block;fon
 body[data-theme="moulin"] #objectivesPage .objective-stat strong{display:block;margin-top:2px;font:600 22px var(--font-heading)!important;letter-spacing:-.02em;color:var(--text)}
 body[data-theme="moulin"] #objectivesPage .objectives-tabs{display:inline-flex;gap:6px;padding:0!important;border:0!important;background:transparent!important}
 body[data-theme="moulin"] #objectivesPage .objectives-tabs button{height:40px;padding:0 16px;border:1px solid var(--line)!important;border-radius:20px!important;background:transparent!important;color:var(--text)!important;font:500 14px var(--font-body)!important;box-shadow:none!important}
-body[data-theme="moulin"] #objectivesPage .objectives-tabs button.is-active{background:var(--accent-fill,var(--accent))!important;border-color:var(--accent-fill,var(--accent))!important;color:var(--on-accent-fill,#17261F)!important;font-weight:600!important}
 body[data-theme="moulin"] #objectivesPage .objectives-panel{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
 body[data-theme="moulin"] #objectivesPage .objectives-panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 16px!important;border-bottom:1px solid var(--line)}
 body[data-theme="moulin"] #objectivesPage .objectives-panel-head h3{margin:0;font:600 18px var(--font-body)!important;letter-spacing:0;color:var(--text)}
@@ -201,7 +200,6 @@ body[data-theme="moulin"] #objectivesPage .objective-stat span{white-space:norma
   body:not([data-interface="studio"]) .app-header .mobile-settings-button svg{width:20px;height:20px}
   @media (hover:hover){
   body:not([data-interface="studio"]) .app-header .mobile-settings-button:hover{border-color:var(--line-strong,var(--line));background:var(--button-active-bg)}}
-  body:not([data-interface="studio"]) .app-header .mobile-settings-button.is-active{background:var(--accent-fill,var(--accent));border-color:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F)}
   body:not([data-interface="studio"]) .app-header .top-actions{gap:8px}
 }
 
@@ -315,3 +313,60 @@ html body[data-theme="moulin"]:not([data-interface="studio"]) .app-page{padding-
 .gf-pie-total span{font-size:14px;color:var(--muted)}
 body.gf-hide-amounts .gf-pie-legend .gf-amount{filter:blur(7px)}
 @media(hover:hover){.gf-pie-toggle:hover{background:color-mix(in srgb,var(--text) 6%,transparent)}}
+
+/* Feuille Notes sur téléphone : poignée en haut (la tirer vers le bas ferme la feuille), hauteur ajustée au contenu. */
+.personal-notes-grabber{display:none}
+@media (max-width:720px){
+  .personal-notes-grabber{display:block;flex:none;align-self:center;width:44px;height:28px;margin:-12px 0 -10px;cursor:grab;touch-action:none;position:relative}
+  .personal-notes-grabber::before{content:"";position:absolute;left:4px;right:4px;top:12px;height:5px;border-radius:3px;background:var(--line-strong,rgba(0,0,0,.2))}
+  .personal-notes-panel{min-height:min(64dvh,600px)!important}
+}
+/* Mode sombre : les fenêtres et feuilles se détachent nettement du fond (surface plus claire, voile plus sombre). */
+body[data-theme="moulin"][data-mode="dark"] :is(.gfh-dialog,.gfplan-dialog,.sf-dialog,.welcome-dialog,.password-recovery-dialog,.sheet-status-mobile-dialog,.tutorial-tooltip,.personal-notes-panel,#renameModal .modal-container){--panel-solid:#22352D;background:#22352D!important;border-color:rgba(243,238,226,.14)!important;box-shadow:0 28px 70px rgba(0,0,0,.55)!important}
+body[data-theme="moulin"][data-mode="dark"] :is(.gfh-dialog,.gfplan-dialog,.sf-dialog,.welcome-dialog,.password-recovery-dialog,.sheet-status-mobile-dialog)::backdrop{background:rgba(3,6,5,.7)}
+body[data-theme="moulin"][data-mode="dark"] .personal-notes-overlay{background:rgba(3,6,5,.7)!important}
+
+/* ═══ « Sélectionné » : un seul langage pour tous les onglets et segments ═══
+   Blé plein + texte foncé (jeu --sel-bg / --sel-fg défini une fois, clair et sombre, dans theme-directions.css).
+   Aucune autre couleur ne signifie « sélectionné » (HIG : une couleur = un sens). Les éléments non
+   sélectionnés gardent leur style discret propre. Pour ajouter un onglet : l'ajouter à cette liste. */
+body[data-theme] :is(
+  .settings-hub-item[aria-current="true"],
+  .desktop-nav-link.is-active,
+  .personal-workspace-nav .personal-workspace-link.is-active,
+  #objectivesPage .objectives-tabs button.is-active,
+  .mobile-finance-summary-tabs button[aria-selected="true"],
+  .gfc-views button[aria-pressed="true"],
+  .bottom-nav-btn.is-active,
+  .app-header .mobile-settings-button.is-active,
+  .mode-segment button.is-active,
+  .sheet-tab.active
+){
+  background:var(--sel-bg)!important;border-color:var(--sel-bg)!important;color:var(--sel-fg)!important;box-shadow:none!important;font-weight:600!important}
+
+.sheet-tab.active :is(.sheet-tab-name,.sheet-tab-x){color:var(--sel-fg)}
+
+/* Navigation principale : vrais liens (<a href>) — on annule le style de lien du navigateur, l'apparence reste celle des boutons */
+a.desktop-nav-link,a.bottom-nav-btn,a.mobile-settings-button,.studio-sidebar-nav a[data-page]{text-decoration:none;-webkit-user-drag:none}
+a.desktop-nav-link{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
+a.mobile-settings-button{box-sizing:border-box}
+
+body[data-theme="moulin"] :is(#sharingPage,#sharingAccessPage,#updatesPage,#objectivesPage) > .content.personal-workspace-layout{padding-top:0!important}
+body[data-theme="moulin"] #objectivesPage .objectives-tabs button{height:44px!important}
+
+/* Mon espace : titre + bouton Notes (icône) sur une ligne de hauteur fixe, pour que le haut de page ne bouge pas d'un onglet à l'autre */
+body[data-theme="moulin"] .personal-workspace-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;margin:0;width:100%;box-sizing:border-box}
+body[data-theme="moulin"] .personal-workspace-head .personal-workspace-title{margin:0!important;min-width:0}
+@media(min-width:901px){body[data-theme="moulin"] .personal-workspace-head{width:auto;justify-self:start;justify-content:flex-start;gap:14px}}
+body[data-theme="moulin"] .personal-workspace-head .personal-workspace-notes{flex:0 0 44px;display:grid!important;place-items:center;width:44px!important;height:44px;min-height:44px!important;margin:0!important;padding:0!important;gap:0;border:1px solid var(--line)!important;border-radius:50%!important;background:transparent!important;color:var(--text)!important;box-shadow:none!important;cursor:pointer}
+body[data-theme="moulin"] .personal-workspace-head .personal-workspace-notes::before{display:block!important;width:20px;height:20px}
+body[data-theme="moulin"] .personal-workspace-head .personal-workspace-notes:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (hover:hover){body[data-theme="moulin"] .personal-workspace-head .personal-workspace-notes:hover{background:color-mix(in srgb,var(--text) 6%,transparent)!important}}
+/* Paramètres : pastilles de 44 px minimum (zone tactile) */
+body[data-theme="moulin"] .settings-hub-item{min-height:44px}
+
+/* Paramètres (téléphone) : titre de page, comme « Mon espace » */
+.settings-mobile-title{display:none}
+@media(max-width:720px){
+  body[data-theme="moulin"] .settings-mobile-title{display:block;margin:0 0 2px;font:700 22px/1.1 var(--font-heading);letter-spacing:-.03em;color:var(--text)}
+}

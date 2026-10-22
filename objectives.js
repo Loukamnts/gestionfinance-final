@@ -272,6 +272,44 @@
     }
   }
 
+  // Poignée de la feuille Notes (téléphone) : on la tire vers le bas pour fermer, comme une feuille iOS.
+  function setupNotesGrabber() {
+    const panel = document.querySelector("#personalNotesDrawer .personal-notes-panel");
+    if (!panel || panel.querySelector(".personal-notes-grabber")) return;
+    const grip = document.createElement("div");
+    grip.className = "personal-notes-grabber";
+    grip.setAttribute("aria-hidden", "true");
+    panel.prepend(grip);
+    let startY = 0, dy = 0, startT = 0, dragging = false;
+    function begin(event) {
+      if (!window.matchMedia("(max-width: 720px)").matches) return;
+      dragging = true; startY = event.clientY; dy = 0; startT = Date.now();
+      panel.style.transition = "none";
+      try { grip.setPointerCapture(event.pointerId); } catch (e) {}
+    }
+    function move(event) {
+      if (!dragging) return;
+      dy = Math.max(0, event.clientY - startY);
+      panel.style.transform = "translateY(" + dy + "px)";
+    }
+    function end() {
+      if (!dragging) return;
+      dragging = false;
+      const fast = dy > 40 && dy / Math.max(1, Date.now() - startT) > 0.6;
+      panel.style.transition = "transform .22s ease-out";
+      if (dy > Math.min(140, panel.offsetHeight * 0.3) || fast) {
+        panel.style.transform = "translateY(100%)";
+        setTimeout(function () { setNotesOpen(false); panel.style.transform = ""; panel.style.transition = ""; }, 220);
+      } else {
+        panel.style.transform = "";
+      }
+    }
+    grip.addEventListener("pointerdown", begin);
+    grip.addEventListener("pointermove", move);
+    grip.addEventListener("pointerup", end);
+    grip.addEventListener("pointercancel", end);
+  }
+
   function init() {
     const form = document.getElementById("objectiveForm");
     const add = document.getElementById("objectiveAddButton");
@@ -288,6 +326,7 @@
     document.querySelectorAll("[data-objective-filter]").forEach(function(button) { button.addEventListener("click", function() { activeFilter = button.dataset.objectiveFilter || "active"; document.querySelectorAll("[data-objective-filter]").forEach(item => { const selected = item === button; item.classList.toggle("is-active", selected); item.setAttribute("aria-selected", String(selected)); }); render(); }); });
     document.querySelectorAll("[data-open-notes]").forEach(function (button) { button.addEventListener("click", function () { setNotesOpen(true); }); });
     document.getElementById("personalNotesClose")?.addEventListener("click", function () { setNotesOpen(false); });
+    setupNotesGrabber();
     // Le voile ne ferme pas la note : cela évite une fermeture accidentelle
     // pendant l'écriture. La croix et la touche Échap restent disponibles.
     document.addEventListener("keydown", function (event) { if (event.key === "Escape") setNotesOpen(false); });

@@ -181,9 +181,13 @@
     var monL=el("label","gfh-field"),mon=document.createElement("select");monL.append(el("span","",t2("Mois","Month")),mon);
     for(var i=0;i<12;i++){var o=new Option(cap(mname(i))+" "+ctx.year,String(i));if(i===ctx.mi)o.selected=true;mon.append(o);}
     if(window.GFSelect)setTimeout(function(){window.GFSelect.enhance(mon);},0);
-    var err=el("p","gfh-err");err.setAttribute("role","alert");
+    var err=el("p","gfh-err");err.id="gfhQuickErr";err.setAttribute("role","alert");
     var row=el("div","gfh-dialog-actions"),cancel=el("button","gfh-btn",t2("Annuler","Cancel")),ok=el("button","gfh-btn is-primary",t2("Ajouter","Add"));cancel.type="button";ok.type="submit";row.append(cancel,ok);
-    var form=document.createElement("form");form.append(h,typeRow,amtL,lineBox,newWrap,monL,err,row);d.append(form);
+    var form=document.createElement("form");form.append(h,typeRow,amtL,err,lineBox,newWrap,monL,row);d.append(form);
+    // Le message d'erreur se place juste sous le champ concerné et lui est relié (aria-invalid / aria-describedby).
+    function clearErr(){err.textContent="";[amt,newInp,pick].forEach(function(f){f.removeAttribute("aria-invalid");f.removeAttribute("aria-describedby");});}
+    function fail(msg,anchor,field){err.textContent=msg;anchor.after(err);field.setAttribute("aria-describedby","gfhQuickErr");if(field.tagName==="INPUT")field.setAttribute("aria-invalid","true");field.focus();}
+    amt.addEventListener("input",function(){if(amt.getAttribute("aria-invalid"))clearErr();});
 
     function allLines(){var seen={},out=[];knownLabels().forEach(function(l){var k=lineKind(l);if(k&&!seen[normKey(l)]){seen[normKey(l)]=1;out.push({label:l,kind:k});}});(ctx.expenseLines||[]).forEach(function(l){if(!seen[normKey(l)]){seen[normKey(l)]=1;out.push({label:l,kind:"Dépense"});}});return out;}
     function setKind(k,fromUser){kind=k;seg.querySelectorAll("button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.kind===k[0]));});newLab.textContent=t2("Nom de la catégorie (","Category name (")+k[1].toLowerCase()+")";if(fromUser&&chosen&&lineKind(chosen)!==k[0]&&!creating){chosen="";pickTxt.textContent=t2("Choisir une catégorie","Choose a category");pick.classList.remove("has-value");}buildMenu();buildChips();}
@@ -218,11 +222,11 @@
     setKind(kind,false);
     cancel.addEventListener("click",function(){d.close();});
     form.addEventListener("submit",function(e){
-      e.preventDefault();err.textContent="";
+      e.preventDefault();clearErr();
       var v=amountOf(amt.value);
-      if(!isFinite(v)||v<=0){err.textContent=t2("Indique un montant positif.","Enter a positive amount.");amt.focus();return;}
+      if(!isFinite(v)||v<=0){fail(t2("Indique un montant positif.","Enter a positive amount."),amtL,amt);return;}
       var lab=creating?String(newInp.value||"").trim():chosen;
-      if(!lab){err.textContent=creating?t2("Donne un nom à la catégorie.","Name the category."):t2("Choisis une catégorie.","Choose a category.");(creating?newInp:(pick.hidden?chips.querySelector(".gfh-chip")||pick:pick)).focus();return;}
+      if(!lab){fail(creating?t2("Donne un nom à la catégorie.","Name the category."):t2("Choisis une catégorie.","Choose a category."),creating?newWrap:lineBox,creating?newInp:(pick.hidden?chips.querySelector(".gfh-chip")||pick:pick));return;}
       var mi=Number(mon.value);
       writeEntries([{year:ctx.year,mi:mi,label:lab,amount:kind[2]*v,kind:kind[0]}]);
       d.close();toast(t2("Ajouté : ","Added: ")+eur(v)+" · "+lab+" · "+mname(mi));
@@ -458,6 +462,47 @@
     ms.value=m.id;ms.dispatchEvent(new Event("change",{bubbles:true}));
   }
 
+  /* ── Accueil vide : tout l’accueil en filigrane (formes seulement), une carte d’import posée dessus.
+     Un seul bouton principal : il clique #btnSheetImport dans le geste du toucher (obligatoire sur iPhone). */
+  var emptyIn=false;
+  var EIC={
+    file:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    lock:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  };
+  function emptyImport(){
+    var imp=el("button","gfh-e-main",t2("Importer mon relevé bancaire","Import my bank statement"));imp.type="button";
+    // Le sélecteur de fichier s’ouvre dans le geste du toucher (obligatoire sur iPhone) : on réutilise le bouton d’import du tableur.
+    imp.addEventListener("click",function(){var b=byId("btnSheetImport");if(b)b.click();if(window.setPage)window.setPage("sheet");});
+    return imp;
+  }
+  function emptyWhy(){
+    var why=el("ul","gfh-e-why"),w1=el("li"),w2=el("li");
+    w1.innerHTML=EIC.file;w1.append(el("span","",t2("CSV ou Excel, toutes les banques","CSV or Excel, any bank")));
+    w2.innerHTML=EIC.lock;w2.append(el("span","",t2("Le fichier reste sur ton appareil","Your file stays on your device")));
+    why.append(w1,w2);return why;
+  }
+  function emptyAlt(){
+    var alt=el("div","gfh-e-alt"),hand=el("button","gfh-e-link",t2("ou remplir le tableur à la main","or fill in the spreadsheet by hand")),exb=el("button","gfh-e-link",t2("voir un exemple","see an example"));hand.type=exb.type="button";
+    hand.addEventListener("click",function(){if(window.setPage)window.setPage("sheet");});exb.addEventListener("click",loadExample);
+    alt.append(hand,exb);return alt;
+  }
+  function emptyGhost(){
+    // Formes seulement (aucun faux chiffre), non interactif
+    var hts=[34,42,38,52,48,60,56,68,64,76,72,86],bars="",mos="",rows="";
+    for(var i=0;i<12;i++){bars+='<b'+(i===emptyMi?' class="on"':'')+' style="height:'+hts[i]+'%"></b>';mos+="<i></i>";}
+    [[44,34,72],[30,24,48],[38,28,30],[34,22,20]].forEach(function(r){rows+='<div class="gfh-g-ln"><div class="gfh-g-r"><i style="width:'+r[0]+'%"></i><i style="width:'+r[1]+'%"></i></div><div class="gfh-g-pg"><b style="width:'+r[2]+'%"></b></div></div>';});
+    var gh=el("div","gfh-ghost");gh.setAttribute("aria-hidden","true");
+    gh.innerHTML='<div class="gfh-g-card"><div class="gfh-g-r"><i style="width:34%"></i><i class="c"></i></div><i class="gfh-g-big"></i><div class="gfh-g-bars">'+bars+'</div><div class="gfh-g-mo">'+mos+'</div></div>'+'<div class="gfh-g-where"><div class="gfh-g-r"><i style="width:46%"></i><i style="width:16%"></i></div>'+rows+'</div>';
+    return gh;
+  }
+  function emptyHero(){
+    var ew=el("div","gfh-ew v-b"+(emptyIn?"":" is-in"));emptyIn=true;
+    var box=el("div","gfh-hero gfh-bpanel");
+    box.append(el("h3","gfh-e-title gfh-b-title",t2("Ton accueil attend ton relevé.","Your home is waiting for your statement.")),emptyImport(),emptyWhy(),emptyAlt());
+    ew.append(emptyGhost(),box);
+    return ew;
+  }
+
   function render(){
     var page=byId("dashboardPage"),content=page&&page.querySelector(".content");if(!content)return;
     var data=typeof window.__gfHomeData==="function"?window.__gfHomeData():null;
@@ -509,11 +554,16 @@
     // Salutation
     var hi=el("div","gfh-hi"),nm=name();
     hi.append(el("h2","",(t2("Bonjour","Hello")+(nm?" "+nm:"")).trim()));
-    hi.append(el("p","gfh-bilan",blank?t2("Rien de saisi pour l’instant : commence dans le Tableur ou avec le bouton +.","Nothing entered yet: start in the Spreadsheet or with the + button."):bilan(sel,prev,empty)));
+    if(!blank)hi.append(el("p","gfh-bilan",bilan(sel,prev,empty)));
 
     // Carte solde
     var card=el("div","gfh-card");
-    var lab=el("div","gfh-lab");lab.append(el("span","",hasStart?t2("Solde disponible","Available balance"):t2("Solde calculé","Calculated balance")),eyeButton());card.append(lab);
+    if(blank){
+      card=emptyHero();
+    }else{
+    // Le solde affiché est celui de la fin du mois choisi (le tableur, lui, montre celui du dernier mois saisi).
+    var lab=el("div","gfh-lab"),endOf=(en()?"":"à fin ")+mname(sel.mi);
+    lab.append(el("span","",hasStart?t2("Solde disponible "+endOf,"Available balance, end of "+endOf):t2("Solde calculé "+endOf,"Calculated balance, end of "+endOf)),eyeButton());card.append(lab);
     var bigTxt=eur(sd); card.append(el("div","gfh-big"+(bigTxt.length>11?" is-xl":bigTxt.length>9?" is-long":""),bigTxt));
     var dl=el("div","gfh-dl");
     if(blank)dl.append(document.createTextNode(t2("Aucune donnée pour l’instant","No data yet")));
@@ -542,19 +592,12 @@
       var f3=el("div");f3.append(el("div","t",t2("Épargne","Savings")),el("div","v"+(sel.savings?"":" none"),sel.savings?eurS(sel.savings):"—"),el("small","",ep?t2("Cumul ","Total ")+eur(ep):t2("Rien de côté","Nothing saved")));
       foot.append(f1,f2,f3);card.append(foot);
     }
+    }
 
     // Colonne droite
-    var right=el("div","gfh-right"),goal=mainGoal(p);
+    var right=el("div","gfh-right"),goal=mainGoal(p),goalEl=null;
     if(blank){
-      var start=el("div","gfh-panel gfh-start");
-      start.append(el("span","gfh-kick",t2("Pour commencer","Get started")),el("h3","",t2("Ton accueil se remplit tout seul.","Your home fills itself in.")));
-      var steps=el("ol","gfh-steps");[t2("Indique ton solde de départ","Enter your starting balance"),t2("Ajoute ou importe tes opérations","Add or import your transactions"),t2("Retrouve ici ton solde, tes dépenses et ton épargne","See your balance, spending and savings here")].forEach(function(x){steps.append(el("li","",x));});
-      var acts=el("div","gfh-acts"),a1=el("button","gfh-btn is-primary",t2("Ouvrir le tableur","Open the spreadsheet")),a2=el("button","gfh-btn",t2("Importer un fichier","Import a file"));a1.type=a2.type="button";
-      a1.addEventListener("click",function(){if(window.setPage)window.setPage("sheet");});
-      a2.addEventListener("click",function(){if(window.setPage)window.setPage("sheet");requestAnimationFrame(function(){var b=byId("btnSheetImport");if(b)b.click();});});
-      acts.append(a1,a2);start.append(steps,acts);
-      var ex=el("button","gfh-link",t2("Ou charge un exemple dans le tableur","Or load a sample into the spreadsheet"));ex.type="button";ex.addEventListener("click",loadExample);start.append(ex);
-      right.append(start);if(B.goal)right.append(goalsPanel(p));
+      /* Accueil vide : une seule action, dans la carte. Pas d’objectif ni de solde de départ avant les premiers chiffres. */
     }else{
       var where=el("div","gfh-panel gfh-where"),wh=el("div","gfh-row");
       wh.append(el("h3","",t2("Où part ton argent","Where your money goes")),el("span","gfh-muted",cap(mname(sel.mi))));
@@ -569,27 +612,28 @@
         if(cats.length>7)where.append(el("small","gfh-muted","+ "+(cats.length-7)+t2(" autres lignes"," more rows")));
         where.append(el("p","gfh-hint",t2("Touche une ligne pour lui fixer un plafond.","Tap a row to set a limit.")));}
       else where.append(el("p","gfh-empty",t2("Aucune dépense ce mois-ci.","No expenses this month.")));
-      var fx=(B.fixed!==false)&&sel.id===all[all.length-1].id?fixedSuggestion(all):null,fp=fx?fixedPanel(fx):null;if(B.where)right.append(where);if(fp)right.append(fp);if(B.subs&&window.GFSubs){var sp=window.GFSubs.panel();if(sp)right.append(sp);}if(B.goal)right.append(goalsPanel(p));
+      var fx=(B.fixed!==false)&&sel.id===all[all.length-1].id?fixedSuggestion(all):null,fp=fx?fixedPanel(fx):null;if(B.where)right.append(where);if(fp)right.append(fp);if(B.subs&&window.GFSubs){var sp=window.GFSubs.panel();if(sp)right.append(sp);}if(B.goal)goalEl=goalsPanel(p);
     }
 
     recapMsg=!blank&&B.recap?recapMessage(all):null;
     var yc=!blank&&B.year!==false&&window.GFYear?window.GFYear.card():null;
     var left=el("div","gfh-left");left.append(card);
-    var dg=el("div","gfh-dg"+(right.childNodes.length?"":" is-solo"));dg.append(left);if(right.childNodes.length)dg.append(right);
+    var dg=el("div","gfh-dg"+(right.childNodes.length||goalEl?"":" is-solo"));dg.append(left);
+    if(right.childNodes.length){right.classList.add("gfh-right");dg.append(right);}
+    if(goalEl){goalEl.classList.add("gfh-goal-slot");dg.append(goalEl);}
     var top=[];
     if(demo)top.push(exampleBar("home"));
     var bar=el("div","gfh-topbar");
-    bar.append(yrs);
-    bar.append(mon);
+    if(blank)bar.append(hi,yrs);else{bar.append(yrs);bar.append(mon);}
     var plus=el("button","gfh-add");plus.type="button";plus.setAttribute("aria-label",t2("Ajouter une dépense ou un revenu","Add an expense or income"));
     plus.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>'+t2("Ajouter","Add")+'</span>';
     var expLines=[];all.slice().reverse().forEach(function(m){(m.cats||[]).forEach(function(c){if(expLines.indexOf(c.name)<0)expLines.push(c.name);});});
     plus.addEventListener("click",function(){quickAdd({year:sel.year,mi:sel.mi,expenseLines:expLines});});
-    bar.append(plus);
+    if(!blank)bar.append(plus);
     // Redessiner l'accueil ne doit ni faire remonter la page ni perdre le focus (sinon, après un toucher sur
     // une barre de mois, le navigateur remonte tout en haut et la barre jaune sort de l'écran).
     var keepY=window.scrollY,hadFocus=document.activeElement&&root.contains(document.activeElement),focusBar=hadFocus&&document.activeElement.closest(".gfh-bars");
-    root.replaceChildren.apply(root,top.concat([bar,hi],yc?[yc]:[],[dg]));
+    root.replaceChildren.apply(root,top.concat(blank?[bar]:[bar,hi],yc?[yc]:[],[dg]));
     if(focusBar){var nf=root.querySelector(".gfh-bars button.on");if(nf)try{nf.focus({preventScroll:true});}catch(e){}}
     if(Math.abs(window.scrollY-keepY)>1)window.scrollTo(0,keepY);
     document.body.classList.add("gfh-ready");
@@ -649,9 +693,14 @@
     all.forEach(function(m){var k=m.year+"-"+String(m.mi+1).padStart(2,"0");if(!hasStart||!ref||k>=ref)run+=Number(m.salary||0)-Math.abs(Number(m.expenses||0))-Math.abs(Number(m.savingsTotal||0));});
     return run;
   }
+  // Dernier mois saisi (celui du solde global), pour l'écrire à côté du chiffre dans le tableur.
+  function totalBalanceMonth(){
+    var data=typeof window.__gfHomeData==="function"?window.__gfHomeData():null,all=(data&&data.all||[]).filter(function(m){return m.year&&m.mi>=0;});if(!all.length)return "";
+    var last=all.reduce(function(a,m){return Number(m.year)*12+m.mi>Number(a.year)*12+a.mi?m:a;});return mname(last.mi)+" "+last.year;
+  }
   window.addEventListener("gf:dashboardupdate",function(){setTimeout(function(){try{window.FinanceSheet&&window.FinanceSheet.updateSheetBalanceCards&&window.FinanceSheet.updateSheetBalanceCards();}catch(e){}},0);});
   if(window.GFNotify){window.GFNotify.register("budget",function(){return budgetMsgs;});window.GFNotify.register("recap",function(){return recapMsg?[recapMsg]:[];});}
-  window.GFHome={alertsOn:alertsOn,setAlertsOn:function(v){lsSet(ALERT_ON,v?null:"0");},setBlock:setBlock,render:schedule,totalBalance:totalBalance,loadExample:loadExample,removeExample:removeExample};
+  window.GFHome={alertsOn:alertsOn,setAlertsOn:function(v){lsSet(ALERT_ON,v?null:"0");},setBlock:setBlock,render:schedule,totalBalance:totalBalance,totalBalanceMonth:totalBalanceMonth,loadExample:loadExample,removeExample:removeExample};
   document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest("[data-page]"))setTimeout(sheetBanner,60);});
   window.addEventListener("gf:dashboardupdate",function(){sheetBanner();});
   document.addEventListener("focusout",function(e){if(e.target&&e.target.closest&&e.target.closest("#sheetApp"))setTimeout(sheetBanner,400);});
