@@ -317,8 +317,9 @@ body.gf-hide-amounts .gf-pie-legend .gf-amount{filter:blur(7px)}
 /* Feuille Notes sur téléphone : poignée en haut (la tirer vers le bas ferme la feuille), hauteur ajustée au contenu. */
 .personal-notes-grabber{display:none}
 @media (max-width:720px){
-  .personal-notes-grabber{display:block;flex:none;align-self:stretch;height:36px;margin:-18px -18px -14px;cursor:grab;touch-action:none;position:relative;-webkit-user-select:none;user-select:none}
-  .personal-notes-grabber::before{content:"";position:absolute;left:50%;width:44px;margin-left:-22px;top:14px;height:5px;border-radius:3px;background:var(--line-strong,rgba(0,0,0,.2))}
+  .personal-notes-grabber{display:block;flex:none;align-self:center;width:40px;height:5px;margin:0 auto -4px;border-radius:3px;background:var(--line-strong,var(--line));cursor:grab;touch-action:none}
+  .personal-notes-head{touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
+  .personal-notes-head button{touch-action:manipulation;cursor:pointer}
   .personal-notes-panel{min-height:min(64dvh,600px)!important;will-change:transform}
 }
 /* Mode sombre : les fenêtres et feuilles se détachent nettement du fond (surface plus claire, voile plus sombre). */
@@ -508,10 +509,12 @@ body[data-page="dashboard"]:not(.gfh-ready) .app{visibility:hidden;animation:gfR
 /* Onglets et pastilles (Paramètres, Mon espace, Objectifs) : le changement de couleur est immédiat */
 body[data-theme] :is(.settings-hub-item,.personal-workspace-link,.objectives-tabs button,.mode-segment button,.account-tab,.mobile-finance-summary-tabs button,.gfc-views button){transition:background-color .1s linear,border-color .1s linear,color .1s linear!important}
 
-/* Barre d'outils du tableur : jamais de défilement caché, elle passe sur deux lignes quand l'écran (ou la taille du texte) est trop étroit */
+/* Barre d'outils du tableur (téléphone) : une seule ligne, les boutons se partagent la largeur (jamais de défilement caché ni de retour à la ligne) */
 @media(max-width:720px){
-  body #sheetPage .sheet-bar{flex-wrap:wrap!important;overflow:visible!important;justify-content:space-between;row-gap:6px}
-  body #sheetPage .sheet-bar-left,body #sheetPage .sheet-bar-right{flex-wrap:wrap}
+  body #sheetPage .sheet-bar{flex-wrap:nowrap!important;overflow:visible!important;gap:2px!important;padding:6px!important}
+  body #sheetPage .sheet-bar-left{flex:2 1 0!important;gap:2px!important}
+  body #sheetPage .sheet-bar-right{flex:5 1 0!important;gap:2px!important;margin-left:0!important}
+  body #sheetPage .sheet-bar :is(.button,button){flex:1 1 0!important;min-width:0!important;width:auto!important;padding-inline:0!important;justify-content:center}
 }
 body[data-theme="moulin"] #objectivesPage .objective-card-actions{align-items:center;gap:0 2px}
 body[data-theme="moulin"] #objectivesPage .objective-card-actions .button-ghost{flex:0 1 auto;min-width:0;padding:0 6px!important}

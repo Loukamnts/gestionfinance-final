@@ -310,10 +310,17 @@
         setTimeout(function () { panel.style.transform = ""; panel.style.transition = ""; }, 220);
       }
     }
-    grip.addEventListener("pointerdown", begin);
-    grip.addEventListener("pointermove", move);
-    grip.addEventListener("pointerup", end);
-    grip.addEventListener("pointercancel", end);
+    const zones = [grip, panel.querySelector(".personal-notes-head")].filter(Boolean);
+    zones.forEach(function (zone) {
+      zone.addEventListener("pointerdown", function (event) {
+        if (event.target.closest && event.target.closest("button")) return;
+        begin(event);
+        try { zone.setPointerCapture(event.pointerId); } catch (e) {}
+      });
+      zone.addEventListener("pointermove", move);
+      zone.addEventListener("pointerup", end);
+      zone.addEventListener("pointercancel", end);
+    });
   }
 
   function init() {

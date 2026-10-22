@@ -582,7 +582,7 @@
       flash.setAttribute("role","status");flash.hidden=true;moreLive.setAttribute("role","status");
       var sLab=el("label","gfb-search"),sIn=document.createElement("input");sIn.type="search";sIn.autocomplete="off";sIn.setAttribute("enterkeyhint","search");sIn.placeholder=t2("Chercher une opération","Search a transaction");sIn.setAttribute("aria-label",t2("Chercher une opération","Search a transaction"));sLab.append(sIn);
       var fBar=el("div","gfb-filters");fBar.setAttribute("role","group");fBar.setAttribute("aria-label",t2("Filtrer les opérations","Filter transactions"));
-      var FB={};[["all",t2("Toutes","All")],["todo",t2("À classer","To sort")],["dup",t2("Déjà importées","Already imported")],["out",t2("Non importées","Not imported")]].forEach(function(f){var b=el("button","gfb-fbtn");b.type="button";b.dataset.f=f[0];b.append(el("span","",f[1]));b.append(el("small","",""));b.addEventListener("click",function(){filt=f[0];shown=PAGE;paintList();});FB[f[0]]=b;fBar.append(b);});
+      var FB={};[["all",t2("Toutes","All")],["todo",t2("À classer","To sort")],["out",t2("Non importées","Not imported")]].forEach(function(f){var b=el("button","gfb-fbtn");b.type="button";b.dataset.f=f[0];b.append(el("span","",f[1]));b.append(el("small","",""));b.addEventListener("click",function(){filt=f[0];shown=PAGE;paintList();});FB[f[0]]=b;fBar.append(b);});
       tools.append(sLab,fBar);
       P.list.append(lLead,lStats,flash,tools,lEmpty,list,more,moreLive);
       var st=null;sIn.addEventListener("input",function(){clearTimeout(st);st=setTimeout(function(){query=sIn.value;shown=PAGE;paintList();},140);});
@@ -654,8 +654,8 @@
         var qn=norm(query).trim(),rs=summary.rows;
         return rs.filter(function(r){
           if(filt==="todo"&&!r.unk)return false;
-          if(filt==="dup"&&r.status!=="dup"&&!r.forced)return false;
           if(filt==="out"&&r.status==="ok")return false;
+          if(filt!=="out"&&r.status==="dropped")return false;
           if(qn&&norm(r.label).indexOf(qn)<0&&norm(cleanLabel(r)).indexOf(qn)<0&&norm(r.name||"").indexOf(qn)<0)return false;
           return true;});
       }
@@ -692,7 +692,7 @@
         list.append(frag);rendered=Math.min(to,view.length);
       }
       function paintList(){
-        var n={all:summary.rows.length,todo:0,dup:0,out:0};summary.rows.forEach(function(r){if(r.unk)n.todo++;if(r.status==="dup"||r.forced)n.dup++;if(r.status!=="ok")n.out++;});
+        var n={all:0,todo:0,out:0};summary.rows.forEach(function(r){if(r.status!=="dropped")n.all++;if(r.unk)n.todo++;if(r.status!=="ok")n.out++;});
         Object.keys(FB).forEach(function(k){var b=FB[k];b.setAttribute("aria-pressed",filt===k?"true":"false");b.lastChild.textContent=String(n[k]);b.hidden=(k!=="all"&&!n[k]&&filt!==k);});
         view=visibleRows();lastMk="";list.replaceChildren();rendered=0;
         appendRows(0,shown);
@@ -809,13 +809,13 @@
         // Pane actif seulement
         Object.keys(P).forEach(function(id){P[id].hidden=id!==step;});
         if(step==="list"){
-          var dated=summary.rows.length;
-          lLead.textContent=t2("Voici les "+dated+" opérations du fichier, de la plus récente à la plus ancienne. Touche une catégorie pour la changer. Celles qui ne seront pas importées sont grisées : le filtre « Non importées » les réunit.","Here are the "+dated+" transactions in the file, newest first. Tap a category to change it. Greyed-out ones will not be imported: the “Not imported” filter groups them.");
+          var dated=summary.rows.filter(function(r){return r.status!=="dropped";}).length;
+          lLead.textContent=t2(plural(dated,"opération dans ton fichier.","opérations dans ton fichier.","","")+" Touche une catégorie pour la changer.",plural(dated,"","","transaction in your file.","transactions in your file.")+" Tap a category to change it.");
           var stats=[];
           if(summary.dupCount)stats.push(t2(plural(summary.dupCount,"déjà importée (non reprise)","déjà importées (non reprises)","",""),plural(summary.dupCount,"","","already imported (skipped)","already imported (skipped)")));
           if(summary.pending)stats.push(t2(plural(summary.pending,"en attente ou refusée, ignorée","en attente, refusées ou annulées, ignorées","",""),plural(summary.pending,"","","pending or declined, ignored","pending, declined or cancelled, ignored")));
           if(summary.wallet)stats.push(t2(plural(summary.wallet,"recharge ou mouvement interne ignoré","recharges ou mouvements internes ignorés","",""),plural(summary.wallet,"","","top-up or internal movement ignored","top-ups or internal movements ignored")));
-          lStats.replaceChildren.apply(lStats,stats.map(function(s){return el("li","",s);}));lStats.hidden=!stats.length;
+          lStats.replaceChildren.apply(lStats,stats.map(function(s){return el("li","",s);}));lStats.hidden=true;
           if(!summary.newCount&&!summary.groups.length)lEmpty.textContent="";
           paintList();
           if(!summary.newCount)lLead.textContent+=" "+t2("Rien de nouveau à importer"+NB+": active « Importer quand même » sur une opération pour la recompter.","Nothing new to import: switch on “Import anyway” on a transaction to count it again.");
