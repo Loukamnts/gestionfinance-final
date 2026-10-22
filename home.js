@@ -479,6 +479,47 @@
     ms.value=m.id;ms.dispatchEvent(new Event("change",{bubbles:true}));
   }
 
+  /* ── Accueil vide : tout l’accueil en filigrane (formes seulement), une carte d’import posée dessus.
+     Un seul bouton principal : il clique #btnSheetImport dans le geste du toucher (obligatoire sur iPhone). */
+  var emptyIn=false;
+  var EIC={
+    file:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    lock:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  };
+  function emptyImport(){
+    var imp=el("button","gfh-e-main",t2("Importer mon relevé bancaire","Import my bank statement"));imp.type="button";
+    // Le sélecteur de fichier s’ouvre dans le geste du toucher (obligatoire sur iPhone) : on réutilise le bouton d’import du tableur.
+    imp.addEventListener("click",function(){var b=byId("btnSheetImport");if(b)b.click();if(window.setPage)window.setPage("sheet");});
+    return imp;
+  }
+  function emptyWhy(){
+    var why=el("ul","gfh-e-why"),w1=el("li"),w2=el("li");
+    w1.innerHTML=EIC.file;w1.append(el("span","",t2("CSV ou Excel, toutes les banques","CSV or Excel, any bank")));
+    w2.innerHTML=EIC.lock;w2.append(el("span","",t2("Le fichier reste sur ton appareil","Your file stays on your device")));
+    why.append(w1,w2);return why;
+  }
+  function emptyAlt(){
+    var alt=el("div","gfh-e-alt"),hand=el("button","gfh-e-link",t2("ou remplir le tableur à la main","or fill in the spreadsheet by hand")),exb=el("button","gfh-e-link",t2("voir un exemple","see an example"));hand.type=exb.type="button";
+    hand.addEventListener("click",function(){if(window.setPage)window.setPage("sheet");});exb.addEventListener("click",loadExample);
+    alt.append(hand,exb);return alt;
+  }
+  function emptyGhost(){
+    // Formes seulement (aucun faux chiffre), non interactif
+    var hts=[34,42,38,52,48,60,56,68,64,76,72,86],bars="",mos="",rows="";
+    for(var i=0;i<12;i++){bars+='<b'+(i===emptyMi?' class="on"':'')+' style="height:'+hts[i]+'%"></b>';mos+="<i></i>";}
+    [[44,34,72],[30,24,48],[38,28,30],[34,22,20]].forEach(function(r){rows+='<div class="gfh-g-ln"><div class="gfh-g-r"><i style="width:'+r[0]+'%"></i><i style="width:'+r[1]+'%"></i></div><div class="gfh-g-pg"><b style="width:'+r[2]+'%"></b></div></div>';});
+    var gh=el("div","gfh-ghost");gh.setAttribute("aria-hidden","true");
+    gh.innerHTML='<div class="gfh-g-card"><div class="gfh-g-r"><i style="width:34%"></i><i class="c"></i></div><i class="gfh-g-big"></i><div class="gfh-g-bars">'+bars+'</div><div class="gfh-g-mo">'+mos+'</div></div>'+'<div class="gfh-g-where"><div class="gfh-g-r"><i style="width:46%"></i><i style="width:16%"></i></div>'+rows+'</div>';
+    return gh;
+  }
+  function emptyHero(){
+    var ew=el("div","gfh-ew v-b"+(emptyIn?"":" is-in"));emptyIn=true;
+    var box=el("div","gfh-hero gfh-bpanel");
+    box.append(el("h3","gfh-e-title gfh-b-title",t2("Ton accueil attend ton relevé.","Your home is waiting for your statement.")),emptyImport(),emptyWhy(),emptyAlt());
+    ew.append(emptyGhost(),box);
+    return ew;
+  }
+
   function render(){
     var page=byId("dashboardPage"),content=page&&page.querySelector(".content");if(!content)return;
     var data=typeof window.__gfHomeData==="function"?window.__gfHomeData():null;
@@ -528,18 +569,12 @@
     // Salutation
     var hi=el("div","gfh-hi"),nm=name();
     hi.append(el("h2","",(t2("Bonjour","Hello")+(nm?" "+nm:"")).trim()));
-    hi.append(el("p","gfh-bilan",blank?t2("Rien de saisi pour l’instant. Le plus rapide : importe ton relevé bancaire.","Nothing entered yet. The quickest way: import your bank statement."):bilan(sel,prev,empty)));
+    if(!blank)hi.append(el("p","gfh-bilan",bilan(sel,prev,empty)));
 
     // Carte solde
-    var card=el("div","gfh-card"+(blank?" gfh-card-empty":""));
+    var card=el("div","gfh-card");
     if(blank){
-      card.append(el("p","gfh-e-kick",t2("Pour commencer","Get started")),el("h3","gfh-e-title",t2("Ton relevé fait le travail.","Your statement does the work.")),el("p","gfh-e-text",t2("Je classe tes dépenses et je calcule ton solde, mois par mois.","I sort your spending and work out your balance, month by month.")));
-      var imp=el("button","gfh-e-main",t2("Importer mon relevé bancaire","Import my bank statement"));imp.type="button";
-      // Le sélecteur de fichier s’ouvre dans le geste du toucher (obligatoire sur iPhone) : on réutilise le bouton d’import du tableur.
-      imp.addEventListener("click",function(){var b=byId("btnSheetImport");if(b)b.click();if(window.setPage)window.setPage("sheet");});
-      var alt=el("div","gfh-e-alt"),hand=el("button","gfh-e-link",t2("ou remplir le tableur à la main","or fill in the spreadsheet by hand")),exb=el("button","gfh-e-link",t2("voir un exemple","see an example"));hand.type=exb.type="button";
-      hand.addEventListener("click",function(){if(window.setPage)window.setPage("sheet");});exb.addEventListener("click",loadExample);
-      alt.append(hand,exb);card.append(imp,alt);
+      card=emptyHero();
     }else{
     // Le solde affiché est celui de la fin du mois choisi (le tableur, lui, montre celui du dernier mois saisi).
     var lab=el("div","gfh-lab"),endOf=(en()?"":"à fin ")+mname(sel.mi);
@@ -606,16 +641,16 @@
     var top=[];
     if(demo)top.push(exampleBar("home"));
     var bar=el("div","gfh-topbar");
-    if(!blank){bar.append(yrs);bar.append(mon);}
+    if(blank)bar.append(hi,yrs);else{bar.append(yrs);bar.append(mon);}
     var plus=el("button","gfh-add");plus.type="button";plus.setAttribute("aria-label",t2("Ajouter une dépense ou un revenu","Add an expense or income"));
     plus.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>'+t2("Ajouter","Add")+'</span>';
     var expLines=[];all.slice().reverse().forEach(function(m){(m.cats||[]).forEach(function(c){if(expLines.indexOf(c.name)<0)expLines.push(c.name);});});
     plus.addEventListener("click",function(){quickAdd({year:sel.year,mi:sel.mi,expenseLines:expLines});});
-    bar.append(plus);
+    if(!blank)bar.append(plus);
     // Redessiner l'accueil ne doit ni faire remonter la page ni perdre le focus (sinon, après un toucher sur
     // une barre de mois, le navigateur remonte tout en haut et la barre jaune sort de l'écran).
     var keepY=window.scrollY,hadFocus=document.activeElement&&root.contains(document.activeElement),focusBar=hadFocus&&document.activeElement.closest(".gfh-bars");
-    root.replaceChildren.apply(root,top.concat([bar,hi],yc?[yc]:[],rc?[rc]:[],[dg]));
+    root.replaceChildren.apply(root,top.concat(blank?[bar]:[bar,hi],yc?[yc]:[],rc?[rc]:[],[dg]));
     if(focusBar){var nf=root.querySelector(".gfh-bars button.on");if(nf)try{nf.focus({preventScroll:true});}catch(e){}}
     if(Math.abs(window.scrollY-keepY)>1)window.scrollTo(0,keepY);
     document.body.classList.add("gfh-ready");
