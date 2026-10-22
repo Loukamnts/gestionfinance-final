@@ -27,9 +27,9 @@ test('Sans en-tête (LCL) : colonnes devinées sur le contenu',()=>{
   const {s}=sum('02/09/2026;-12,50;Carte;;SNCF INTERNET;\n05/09/2026;-850,00;Prélèvement;;LOYER FONCIA;\n07/09/2026;-9,99;Carte;;SPOTIFY;\n');
   assert.equal(total(s,'Transports'),12.5);assert.equal(total(s,'Loyer'),850);assert.equal(total(s,'Abonnements'),9.99);
 });
-test('Virgule anglaise, dates ISO, virement interne ignoré',()=>{
+test('Virgule anglaise, dates ISO, virement interne = épargne',()=>{
   const {s}=sum('Date,Description,Amount\n2026-09-01,"Transfert interne vers compte joint",-300.00\n2026-09-02,"Boulangerie Paul",-6.40\n2026-09-03,"Unknown shop",-15.00\n');
-  assert.equal(s.ignored,1);assert.equal(total(s,'Restaurants'),6.4);assert.equal(total(s,'Autres dépenses'),15);
+  assert.equal(s.ignored,0);assert.equal(total(s,'Épargne'),300);assert.equal(total(s,'Restaurants'),6.4);assert.equal(total(s,'Autres dépenses'),15);
 });
 test('Un fichier qui n\'est pas un relevé n\'est pas pris pour un relevé',()=>{
   assert.equal(B.parse(B._decode(enc('Ligne;Janvier;Février\nSalaire;2000;2000\nLoyer;-700;-700\n'))),null);
@@ -328,7 +328,7 @@ test('Argent reçu d’un proche, retraites, Caisse d’Épargne, prêts',()=>{
   const cat=(l,a)=>{const c=B.categorize({label:l,amount:a},{});return c?c[0]:'(ignoré)';};
   assert.equal(cat('VIREMENT DE MAMAN',100),'Autres revenus');assert.equal(cat('VIR DE MARIE DUPONT',50),'Autres revenus');
   assert.equal(cat('VIR VERS MATHIEU',-30),'Autres dépenses');assert.equal(cat('VIR VERS MON LIVRET A',-100),'Épargne');
-  assert.equal(cat('VIREMENT DE MON COMPTE COURANT',200),'(ignoré)');
+  assert.equal(cat('VIREMENT DE MON COMPTE COURANT',200),'Épargne');
   assert.equal(cat('AGIRC ARRCO RETRAITE COMPLEMENTAIRE',412),'Salaire');assert.equal(cat('CARSAT PENSION RETRAITE',1200),'Salaire');
   assert.equal(cat('RETRAIT DAB 12/09',-40),'Retraits');assert.equal(cat('PRLV PENSION ALIMENTAIRE',-300),'Autres dépenses');
   assert.equal(cat('PRLV SEPA CAISSE D EPARGNE ECHEANCE PRET',-350),'Crédits');assert.equal(cat('FRAIS CAISSE D EPARGNE COTISATION',-12),'Frais bancaires');
@@ -375,8 +375,8 @@ test('Revue finale : soldes, sens +/-, montants, virements, prêts',()=>{
 
   assert.notEqual(cat('CARTE 05/09 PRET A PORTER LYON'),'Crédits');
   assert.equal(cat('PRLV ECHEANCE PRET IMMO HABITAT'),'Crédits');
-  assert.equal(cat('VIR SEPA COMPTE A COMPTE'),null);
-  assert.equal(cat('VIR VERS COMPTE JOINT'),null);
+  assert.equal(cat('VIR SEPA COMPTE A COMPTE'),'Épargne');
+  assert.equal(cat('VIR VERS COMPTE JOINT'),'Épargne');
   assert.notEqual(cat('VIR SEPA VERS COMPTE DUPONT'),null);// un virement à quelqu'un n'est pas un transfert interne
   assert.notEqual(cat('CARTE TOP UP FITNESS'),null);
   assert.equal(cat('Top-up by *1234',50),null);

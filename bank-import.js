@@ -174,7 +174,7 @@
       // Colonne de sens (D/C, Débit/Crédit) avec des montants sans signe
       if(c.sense!=null){var sv=norm(r[c.sense]).trim();if(/^(d|db|deb|debit|debet|-|af|s|soll|dr|out)$/.test(sv))amt=-Math.abs(amt);else if(/^(c|cr|cred|credit|\+|bij|h|haben|in)$/.test(sv))amt=Math.abs(amt);}
       var osrc=c.account!=null&&String(r[c.account]||"").trim()?hash(String(r[c.account]).trim()):"";
-      if(c.state!=null&&NOT_DONE.test(norm(r[c.state]))){dropped.push({date:d,amount:Math.round(amt*100)/100,label:String(c.label!=null?r[c.label]:"").replace(/\s+/g," ").trim(),src:osrc});continue;}
+      if(c.state!=null&&NOT_DONE.test(norm(r[c.state]))){dropped.push({date:d,amount:Math.round(amt*100)/100,label:String(c.label!=null?r[c.label]:"").replace(/\s+/g," ").trim(),src:osrc,why:"pending"});continue;}
       var label=c.label!=null?(String(r[c.label]||"").trim()?r[c.label]:((c.alts||[]).map(function(j){return r[j];}).filter(function(x){return String(x||"").trim();})[0]||"")):r.filter(function(x,j){return j!==c.date&&j!==c.amount&&j!==c.debit&&j!==c.credit&&j!==c.state;}).join(" ");
       label=String(label||"").replace(/\s+/g," ").trim();
       var detail=(c.extra||[]).map(function(j){return String(r[j]||"").replace(/\s+/g," ").trim();}).filter(function(x){return x&&norm(label).indexOf(norm(x))<0;}).join(" ");
@@ -185,7 +185,7 @@
       var op={date:d,amount:Math.round(amt*100)/100,label:label,src:osrc};if(detail)op.detail=detail;ops.push(op);
     }
     // Si le fichier détaille les paiements par carte, la ligne de total du débit différé ferait compter deux fois.
-    if(cards>=3)ops=ops.filter(function(op){var drop=op.amount<0&&isDeferred(op.label);if(drop)dropped.push(op);return !drop;});
+    if(cards>=3)ops=ops.filter(function(op){var drop=op.amount<0&&isDeferred(op.label);if(drop){op.why="deferred";dropped.push(op);}return !drop;});
     if(ops.length<(found.header>=0?1:2))return null;
     ops.dropped=dropped;// pour retirer du registre ce qui avait été compté lors d'un import précédent
     return ops;
@@ -215,7 +215,12 @@
     ["Impôts","Taxes","Dépense",/impot|urssaf|\bsie\b|\bcfe\b|cotisations? sociales|cipav|dgfip|tresor public|taxe|finances publiques|amende|antai/],
     ["Frais bancaires","Bank fees","Dépense",/\bfrais\b(?! de (port|livraison|dossier|scolarite|garde))|commission|cotisation(?! (syndicale|club|association|asso|sport|licence|adhesion))|agios|interets debiteurs|tenue de compte|carte bancaire/],
   ];
-  var OTHER_OUT=["Autres dépenses","Other expenses","Dépense"],OTHER_IN=["Autres revenus","Other income","Salaire"],TRANSFER=/virement interne|vir(ement)? (de|vers) (mon|ma|mes) (compte|livret|epargne|ldds|pel)\b|vir(ement)? (de|vers) (compte a compte|compte (joint|epargne|courant))\b|\bcompte a compte\b|transfert interne|^top ?-?up\b|top ?-?up by|general card deposit|exchanged to|converted \d|^(to|from) [a-z]{3} (savings|main|pocket)|recharge (depuis|par) (carte|cb)|virement bancaire sur le compte paypal|bank deposit to pp/;
+  var OTHER_OUT=["Autres dépenses","Other expenses","Dépense"],OTHER_IN=["Autres revenus","Other income","Salaire"];
+  // Virement entre tes propres comptes : il compte comme de l'épargne (argent qui sort du compte courant = épargne qui monte).
+  var INTERNAL_SAV=["Épargne","Savings","Épargne",null,"internal"];
+  var INTERNAL=/virement interne|vir(ement)? (de|vers) (mon|ma|mes) (compte|livret|epargne|ldds|pel)\b|vir(ement)? (de|vers) (compte a compte|compte (joint|epargne|courant))\b|\bcompte a compte\b|transfert interne|^(to|from) [a-z]{3} savings|(vers|de) (mon )?(autre )?compte (courant|epargne|personnel)|own account transfer|transfer (to|from) (my )?(own|savings)/;
+  // Simple mouvement de portefeuille (recharge, change) : ni dépense, ni revenu, ni épargne. Ignoré.
+  var WALLET=/^top ?-?up\b|top ?-?up by|general card deposit|exchanged to|converted \d|^(to|from) [a-z]{3} (main|pocket)|recharge (depuis|par) (carte|cb)|virement bancaire sur le compte paypal|bank deposit to pp/;
   /* Marchand d'une opération : le libellé sans le bruit bancaire (« CARTE 01/09 », « PRLV SEPA », numéros…).
      « CARTE 01/09/26 CARREFOUR CITY » → « carrefour city ». Sert de clé pour retenir tes choix. */
   var NOISE=/\b(paiement|paiemt|carte|cb|prlv|prelevement|prelev|sepa|vir|virement|achat|facture|fact|retrait|dab|gab|en votre faveur|votre|faveur|recu|emis|inst|instantane|de|du|des|le|la|les|par|pour|chez|ref|reference|mandat|ech|echeance|eu|fr|sas|sa|sarl|ltd|inc)\b/g;
@@ -229,23 +234,26 @@
   function saveLearned(extra){var all=learned();Object.keys(extra||{}).forEach(function(k){if(extra[k])all[k]=extra[k];else delete all[k];});var keys=Object.keys(all);if(keys.length>2000)keys.slice(0,keys.length-2000).forEach(function(k){delete all[k];});try{window.safeStore.setItem(RULES_KEY,JSON.stringify(all));}catch(e){}}
   // Virement (vers ou depuis une personne ou un compte), reconnu au début du libellé.
   function transferLabel(l){l=norm(l);return /^(vir|virement|vrt)\b/.test(l)||/\bvir(ement)? (sepa |inst |instantane )?(recu|emis|de|vers|a|en faveur)\b/.test(l);}
-  function categorize(op,rules){
-    var m=merchantOf(op.label),r=rules&&Object.prototype.hasOwnProperty.call(rules,m)?rules[m]:null;
-    if(r){if(r[1]==="Ignorer")return null;return [r[0],r[0],r[1]];}
+  // Décision pour une opération : { c: catégorie } ou { ig: raison } quand elle est ignorée (« rule » : ton choix, « wallet » : recharge).
+  function classify(op,rules){
+    var m=merchantOf(op.label),r=rules&&m&&Object.prototype.hasOwnProperty.call(rules,m)?rules[m]:null;
+    if(r){if(r[1]==="Ignorer")return{ig:"rule"};return{c:[r[0],r[0],r[1]],rule:true};}
     // « Caisse d'Épargne » est le nom d'une banque : son prêt ou ses frais ne sont pas de l'épargne.
     var l=norm(op.label+(op.detail?" "+op.detail:"")).replace(/caisse d.?epargne/g,"caisse banque");
-    if(TRANSFER.test(l)&&!CATS[0][3].test(l))return null; // simple mouvement entre tes comptes : ignoré
+    if(WALLET.test(l)&&!CATS[0][3].test(l))return{ig:"wallet"};
+    if(INTERNAL.test(l))return{c:INTERNAL_SAV};
     // Un virement à une personne (« VIR SEPA M PICARD ») n'est pas un achat en magasin : seules les catégories
     // qui se paient par virement (loyer, épargne, salaire, aides, impôts, assurances, santé, énergie) restent possibles.
     var isTransfer=transferLabel(l);
     for(var i=0;i<CATS.length;i++){var c=CATS[i];if(c[3].test(l)){
       if(isTransfer&&!/^(Épargne|Salaire|Aides \(CAF\)|Crédits|Loyer|Impôts|Assurances|Santé|Énergie et eau|Abonnements)$/.test(c[0]))continue;
-      if(op.amount>0&&c[2]==="Dépense")return c; // remboursement : vient en déduction de la catégorie
-      if(op.amount>0&&c[2]==="Épargne")return c; // retrait d'épargne : diminue l'épargne du mois
+      if(op.amount>0&&c[2]==="Dépense")return{c:c}; // remboursement : vient en déduction de la catégorie
+      if(op.amount>0&&c[2]==="Épargne")return{c:c}; // retrait d'épargne : diminue l'épargne du mois
       if(op.amount<0&&c[2]==="Salaire")continue; // un prélèvement « retraite » n'est pas un revenu : on cherche plus loin
-      return c;}}
-    return op.amount>0?OTHER_IN:OTHER_OUT;
+      return{c:c};}}
+    return{c:op.amount>0?OTHER_IN:OTHER_OUT};
   }
+  function categorize(op,rules){var x=classify(op,rules);return x.ig?null:x.c;}
   /* Ligne du tableur qui correspond déjà à une catégorie : même nom, singulier/pluriel, ou nom voisin
      (« Abonnement », « Abos » pour « Abonnements »…). Évite de créer une deuxième ligne pour la même chose. */
   var SYN={abonnements:["abonnement","abos","abo","subscriptions","subscription"],courses:["alimentation","supermarche","nourriture","groceries"],
@@ -303,26 +311,50 @@
   // Marchand qui a déjà sa propre ligne (une ligne « Netflix » dans le tableur) : on la remplit au lieu de « Abonnements ».
   var GENERIC=/^(prime|banque|bank|credit|carte|frais|total|service|services|paiement|achat|magasin|super|hyper|cafe|station|compte|pret|assurance|mutuelle|epargne|salaire|loyer|courses|impots?)$/;
   function merchantRow(m,rows){var w=String(m||"").split(" ")[0];if(!w||w.length<4||GENERIC.test(w))return null;for(var i=0;i<rows.length;i++){var r=key(rows[i]);if((r===key(w)||r===key(m))&&kindOf(rows[i])==="Dépense")return rows[i];}return null;}
-  function summarize(ops,extra){
-    var groups={},months={},ignored=0,rules=learned(),rowsBy={},items=[],seenFp={},all=[];
+  /* Résumé d'un fichier : totaux par ligne et par mois, plus le détail opération par opération (rows) pour l'aperçu.
+     extra : choix par marchand ; opt.ovr : choix pour une seule opération ; opt.inc : opérations déjà importées qu'on veut recompter. */
+  function summarize(ops,extra,opt){
+    opt=opt||{};var ovr=opt.ovr||{},inc=opt.inc||{};
+    var groups={},months={},ignored=0,rules=learned(),rowsBy={},items=[],seenFp={},all=[],rows=[],unk={},led=ledger().m,drop=ops.dropped||[];
+    var nWallet=0,nRule=0,nDup=0,nNew=0,nPending=0,nDeferred=0,bm={},from=null,to=null;
     var rowsOf=function(y){return rowsBy[y]||(rowsBy[y]=sheetRows(y));};
+    Object.keys(extra||{}).forEach(function(k){rules[k]=extra[k];});
     // Empreinte de chaque opération du fichier, même ignorée : une opération désormais ignorée sort du registre.
-    ops.concat(ops.dropped||[]).forEach(function(op){var fp=fingerprint(op),n=seenFp[fp]=(seenFp[fp]||0)+1;op._fp=fp+"#"+n;all.push({fp:op._fp,mk:op.date.y+"-"+op.date.m});});Object.keys(extra||{}).forEach(function(k){rules[k]=extra[k];});
+    ops.concat(drop).forEach(function(op,i){
+      var fp=fingerprint(op),n=seenFp[fp]=(seenFp[fp]||0)+1,mk0=op.date.y+"-"+op.date.m,real=i<ops.length;
+      op._base=fp+"#"+n;var inLed=real&&!!(led[mk0]&&led[mk0][op._base]);
+      op._dup=inLed&&!inc[op._base];op._fp=inLed&&inc[op._base]?op._base+"~":op._base;
+      all.push({fp:op._fp,mk:mk0});
+    });
+    drop.forEach(function(op){if(op.why==="deferred")nDeferred++;else nPending++;});
     ops.forEach(function(op){
-      var c=categorize(op,rules);if(!c){ignored++;return;}
-      var rows=rowsOf(op.date.y),mo=merchantOf(op.label),own=!Object.prototype.hasOwnProperty.call(rules,mo)&&c[2]==="Dépense"&&op.amount<0?merchantRow(mo,rows):null;
-      if(!own&&c[2]==="Épargne")own=savingsRow(op,rows);
-      var isOther=!own&&(c===OTHER_OUT||c===OTHER_IN),name=own||existingRow(en()?c[1]:c[0],rows,op.date.y)||existingRow(en()?c[0]:c[1],rows,op.date.y)||(en()?c[1]:c[0]),kind=c[2],g=groups[name]||(groups[name]={name:name,kind:kind,count:0,total:0,byMonth:{},merchants:{}});if(isOther)g.other=true;
+      var o=ovr[op._base],x=o?(o[1]==="Ignorer"?{ig:"rule"}:{c:[o[0],o[0],o[1]],rule:true}):classify(op,rules),c=x.c;
+      var dkey=op.date.y*10000+op.date.m*100+op.date.d;if(from==null||dkey<from)from=dkey;if(to==null||dkey>to)to=dkey;
+      var row={fp:op._base,date:op.date,dkey:dkey,label:op.label,amount:op.amount,mkey:merchantOf(op.label),status:"ok",forced:op._fp!==op._base};rows.push(row);
+      if(!c){ignored++;if(x.ig==="wallet")nWallet++;else nRule++;row.status="ignored";row.ig=x.ig;return;}
+      var rws=rowsOf(op.date.y),mo=row.mkey,own=!x.rule&&c[2]==="Dépense"&&op.amount<0?merchantRow(mo,rws):null;
+      if(!own&&c[2]==="Épargne")own=savingsRow(op,rws);
+      var isOther=!own&&(c===OTHER_OUT||c===OTHER_IN),name=own||existingRow(en()?c[1]:c[0],rws,op.date.y)||existingRow(en()?c[0]:c[1],rws,op.date.y)||(en()?c[1]:c[0]),kind=c[2];
       // Dépenses et épargne comptées en positif ; un remboursement vient en déduction
       var v=kind==="Salaire"?op.amount:-op.amount,mk=op.date.y+"-"+op.date.m;
+      row.name=name;row.kind=kind;row.v=v;row.mk=mk;row.internal=c===INTERNAL_SAV;row.rule=!!x.rule;
+      items.push({fp:op._fp,mk:mk,name:name,cat:en()?c[1]:c[0],kind:kind,v:v,dup:op._dup});
+      if(op._dup){nDup++;row.status="dup";return;}
+      nNew++;
+      var g=groups[name]||(groups[name]={name:name,kind:kind,count:0,total:0,byMonth:{},merchants:{}});if(isOther)g.other=true;
       g.count++;g.total+=v;g.byMonth[mk]=(g.byMonth[mk]||0)+v;months[mk]=op.date;
-      items.push({fp:op._fp,mk:mk,name:name,cat:en()?c[1]:c[0],kind:kind,v:v});
-      var mid=merchantOf(op.label)||norm(op.label).slice(0,24),mm=g.merchants[mid]||(g.merchants[mid]={key:mid,label:op.label,count:0,total:0});mm.count++;mm.total+=v;
+      var b=bm[mk]||(bm[mk]={"Salaire":0,"Dépense":0,"Épargne":0});b[kind]+=v;
+      var mid=mo||norm(op.label).slice(0,24),mm=g.merchants[mid]||(g.merchants[mid]={key:mid,label:op.label,count:0,total:0});mm.count++;mm.total+=v;
+      // Opération que Meuniance n'a pas su classer : à demander une par une (regroupées par marchand)
+      if(isOther){row.unk=true;var gid=mo||"~"+norm(op.label).replace(/\s+/g," ").slice(0,30),u=unk[gid]||(unk[gid]={gid:gid,key:mo,label:op.label,count:0,total:0,fps:[],last:dkey});u.count++;u.total+=op.amount;u.fps.push(op._base);if(dkey>u.last)u.last=dkey;}
     });
     var list=Object.keys(groups).map(function(k){return groups[k];}).filter(function(g){return Math.abs(g.total)>=0.005;});
     var order={"Salaire":0,"Dépense":1,"Épargne":2};list.sort(function(a,b){return order[a.kind]-order[b.kind]||Math.abs(b.total)-Math.abs(a.total);});
     var mlist=Object.keys(months).map(function(k){return months[k];}).sort(function(a,b){return a.y-b.y||a.m-b.m;});
-    return{groups:list,months:mlist,count:ops.length-ignored,ignored:ignored,items:items,all:all};
+    var unknown=Object.keys(unk).map(function(k){return unk[k];}).sort(function(a,b){return Math.abs(b.total)-Math.abs(a.total);});
+    var dk=function(k){return k==null?null:{y:Math.floor(k/10000),m:Math.floor(k/100)%100,d:k%100};};
+    return{groups:list,months:mlist,count:ops.length-ignored,newCount:nNew,dupCount:nDup,ignored:ignored,items:items,all:all,rows:rows,unknown:unknown,
+      wallet:nWallet,byRule:nRule,pending:nPending,deferred:nDeferred,monthKinds:bm,from:dk(from),to:dk(to)};
   }
 
   /* ── Écriture dans le tableur ───────────────────────────────────────── */
@@ -344,12 +376,17 @@
   }
   /* Opérations déjà importées, mois par mois : { "2026-8": { empreinte: [ligne, type, montant] } }.
      L'empreinte (date, montant, libellé haché) permet de réimporter un relevé qui chevauche le précédent
-     sans perdre ni compter deux fois. Le libellé lui-même n'est pas gardé. 24 mois au plus. */
+     sans perdre ni compter deux fois. Le libellé lui-même n'est pas gardé. 24 mois au moins, jusqu à 10 ans tant que le registre reste léger. */
   var LEDGER_KEY="personalFinanceDashboard.importLedger";
   function hash(t){var h=5381;for(var i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return (h>>>0).toString(36);}
   function fingerprint(op){return op.date.y+"-"+op.date.m+"-"+op.date.d+"|"+op.amount+"|"+hash(norm(op.label).replace(/\s+/g," ").trim())+(op.src?"|"+op.src:"");}
   function ledger(){try{var v=JSON.parse(window.safeStore&&window.safeStore.getItem(LEDGER_KEY)||"{}");return v&&v.m&&typeof v.m==="object"?v:{v:1,m:{}};}catch(e){return{v:1,m:{}};}}
-  function saveLedger(L){var ks=Object.keys(L.m).sort(function(a,b){var x=a.split("-"),y=b.split("-");return (x[0]*12+ +x[1])-(y[0]*12+ +y[1]);});ks.slice(0,Math.max(0,ks.length-24)).forEach(function(k){delete L.m[k];});try{window.safeStore.setItem(LEDGER_KEY,JSON.stringify(L));}catch(e){}}
+  function saveLedger(L){
+    // Les plus anciens mois sortent d'abord : 24 mois au moins, jusqu'à 10 ans tant que le registre reste léger (12 000 opérations).
+    var ks=Object.keys(L.m).sort(function(a,b){var x=a.split("-"),y=b.split("-");return (x[0]*12+ +x[1])-(y[0]*12+ +y[1]);}),tot=0;
+    ks.forEach(function(k){tot+=Object.keys(L.m[k]).length;});
+    while(ks.length>24&&(ks.length>120||tot>12000)){var k=ks.shift();tot-=Object.keys(L.m[k]).length;delete L.m[k];}
+    try{window.safeStore.setItem(LEDGER_KEY,JSON.stringify(L));}catch(e){}}
   /* Ce qu'il faut écrire, mois par mois et ligne par ligne.
      « Remplacer » : total de toutes les opérations connues du mois (anciennes + nouvelles), donc un relevé partiel
      ne fait pas disparaître le reste du mois. « Ajouter » : seulement les opérations jamais importées. */
