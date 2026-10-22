@@ -366,7 +366,7 @@ body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x::before{content:n
 .sheet-table .row-head .rh-number,.sheet-table thead th.col-letter{font-size:.6875rem!important}
 
 /* 5) « Bientôt disponible » : un libellé, pas un bouton */
-.gfs-btn.is-soon,.gfs-btn.is-soon:hover{border-color:transparent!important;background:transparent!important;color:var(--muted)!important;opacity:1;cursor:default;font-weight:500;box-shadow:none;filter:none}
+.gfs-btn.is-soon{border-color:transparent!important;background:transparent!important;color:var(--muted)!important;opacity:1;cursor:default;font-weight:500;box-shadow:none;filter:none}
 .gfs-card.is-featured .gfs-btn.is-soon{color:var(--block-muted,#B7C2BB)!important}
 
 /* 6) Tableur iPhone : noms de ligne centrés comme les montants, un seul en-tête de mois, plus d’ombre sur chaque nom */
