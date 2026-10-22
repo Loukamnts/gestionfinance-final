@@ -50,7 +50,7 @@ body[data-theme="moulin"] .personal-workspace-nav .personal-workspace-link.is-ac
   body[data-theme="moulin"] .personal-workspace-title{font-size:1.375rem!important;margin:0 0 2px!important}
   body[data-theme="moulin"] .personal-workspace-nav{display:flex!important;flex-direction:row!important;gap:2px!important;padding:4px!important;border:1px solid var(--line)!important;border-radius:999px!important;overflow:visible!important;width:100%}
   body[data-theme="moulin"] .personal-workspace-nav{align-items:center!important}
-  body[data-theme="moulin"] .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes){flex:1 1 0!important;min-width:0;height:38px!important;min-height:38px!important;margin:0!important;padding:0 4px!important;border:0!important;border-radius:999px!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:.7812rem!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:static!important}
+  body[data-theme="moulin"] .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes){flex:1 1 0!important;min-width:0;height:44px!important;min-height:44px!important;margin:0!important;padding:0 4px!important;border:0!important;border-radius:999px!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:.7812rem!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:static!important}
   body[data-theme="moulin"] .personal-workspace-nav :is(.personal-workspace-link,.personal-workspace-notes)::before{display:none!important}
   body[data-theme="moulin"] #objectivesPage .objective-stat{padding:10px 12px!important}
   body[data-theme="moulin"] #objectivesPage .objective-stat strong{font-size:1.125rem!important}
@@ -149,17 +149,17 @@ body[data-theme="moulin"] #sheetPage .sheet-bar .sheet-spacer{display:none!impor
 body[data-theme="moulin"] #sheetPage .sheet-bar .sheet-divider,body[data-theme="moulin"] #sheetPage .sheet-bar-right::before{content:"";display:block!important;flex:0 0 1px;width:1px;height:24px;margin:0!important;background:var(--line-strong,var(--line));border:0;border-radius:1px}
 body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn{height:44px!important;min-height:44px!important;margin:0!important;border-radius:14px!important;justify-content:center}
 body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn svg{width:21px!important;height:21px!important;flex:0 0 21px!important}
-body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc){flex:0 0 37px!important;width:37px!important;min-width:37px!important;padding:0!important}
+body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc){flex:0 0 44px!important;width:44px!important;min-width:44px!important;padding:0!important}
 body[data-theme="moulin"] #sheetPage #btnSheetCalc{flex:0 0 auto!important;width:auto!important;min-width:0!important;padding:0 7px!important;gap:6px;font-size:.9375rem!important;font-weight:600}
 body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{display:inline!important}
 }
-@media(max-width:399px){body[data-theme="moulin"] #sheetPage #btnSheetCalc{flex:0 0 37px!important;width:37px!important;min-width:37px!important;padding:0!important}body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}}
+@media(max-width:399px){body[data-theme="moulin"] #sheetPage #btnSheetCalc{flex:0 0 44px!important;width:44px!important;min-width:44px!important;padding:0!important}body[data-theme="moulin"] #sheetPage #btnSheetCalc .lbl{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}}
 /* Icône seule : boutons carrés aussi grands que la largeur le permet */
-@media(max-width:399px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 42px!important;width:42px!important;min-width:42px!important}}
-@media(max-width:369px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 38px!important;width:38px!important;min-width:38px!important}}
-@media(max-width:339px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 34px!important;width:34px!important;min-width:34px!important}}
+@media(max-width:399px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 44px!important;width:44px!important;min-width:44px!important}}
+@media(max-width:359px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 40px!important;width:40px!important;min-width:40px!important}}
+@media(max-width:339px){body[data-theme="moulin"] #sheetPage .sheet-bar .icon-btn:not(#btnSheetCalc),body[data-theme="moulin"] #sheetPage .sheet-bar #btnSheetCalc{flex:0 0 38px!important;width:38px!important;min-width:38px!important}}
 /* Vues du graphique sur petit écran : deux colonnes lisibles plutôt que quatre mots tronqués */
-@media(max-width:400px){.gfc-views{display:grid;grid-template-columns:1fr 1fr;border-radius:20px}.gfc-views button{font-size:.875rem;padding:0 6px}}
+@media(max-width:400px){.gfc-views{display:grid;grid-template-columns:1fr 1fr;border-radius:20px}.gfc-views button{font-size:.875rem;padding:0 6px;min-height:44px}}
 
 /* Barre du bas : la couleur change instantanément au toucher (aucune transition de couleur),
    puis un petit rebond doux sur l'onglet choisi. */
@@ -315,3 +315,70 @@ html body[data-theme="moulin"]:not([data-interface="studio"]) .app-page{padding-
 .gf-pie-total span{font-size:.875rem;color:var(--muted)}
 body.gf-hide-amounts .gf-pie-legend .gf-amount{filter:blur(7px)}
 @media(hover:hover){.gf-pie-toggle:hover{background:color-mix(in srgb,var(--text) 6%,transparent)}}
+
+/* ═══ Revue Apple HIG ═══════════════════════════════════════════════════════════════════════════
+   1) Anneau de focus unique au clavier  2) cibles tactiles ≥ 44 px  3) pastille « Plus »
+   4) petits textes ≥ 11 px  5) « Bientôt disponible » en simple libellé  6) tableur iPhone  */
+
+/* 1) Focus clavier : un seul anneau (couleur du texte, 2 px, écart de 2 px). Sur les cartes sombres il prend la couleur du texte de la carte.
+   Variante intérieure pour les boutons dans un conteneur qui rogne (barre du bas, segments, onglets). */
+:root{--focus-ring:var(--text,#17261F)}
+.gfh-card,.gfh-toast,.gfs-card.is-featured,body[data-theme="moulin"] .mobile-finance-summary{--focus-ring:var(--block-text,#F6F2E8)}
+body :is(a[href],button,summary,[role="button"],[role="tab"],[role="switch"],[tabindex]:not([tabindex="-1"])):focus-visible{outline:2px solid var(--focus-ring)!important;outline-offset:2px!important}
+body :is(input,textarea,select):focus-visible{outline:2px solid var(--focus-ring)!important;outline-offset:-2px!important}
+body :is(.bottom-nav-btn,.mode-segment button,.objectives-tabs button,.account-tab,.mobile-finance-summary-tabs button,.gfh-bars button,.sheet-mobile-month-button):focus-visible{outline-offset:-4px!important}
+
+/* 2) Cibles tactiles : la zone qui réagit au doigt dépasse la forme visible (pseudo-élément transparent) sans bouger la mise en page. */
+:is(.gfh-link,.gfh-setup,#startingBalanceEdit,#startingBalanceInfo,#accountForgotBtn,.settings-footer-link,#personalNotesClose,.gfs-link,.sheet-status-info){position:relative}
+:is(.gfh-link,.gfh-setup,#startingBalanceEdit,#accountForgotBtn,.settings-footer-link,.gfs-link)::after{content:"";position:absolute;left:-6px;right:-6px;top:50%;height:44px;transform:translateY(-50%)}
+#startingBalanceInfo::after,.sheet-status-info::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
+.gfh-link{min-width:44px}
+.gfh-bars{gap:0}
+.gfh-bars button span{width:calc(100% - 5px);margin:0 auto}
+.gfh-mo{gap:0;font-size:.6875rem}
+@media(max-width:720px){
+  body[data-theme="moulin"]:not([data-interface="studio"]) .app-header :is(.mobile-settings-button,.profile-trigger){width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}
+  .gf-pie-toggle{width:44px;height:44px}
+  .settings-hub-item,.personal-workspace-link,.personal-workspace-notes,.account-tab,.sf-button,.objectives-tabs button,.mobile-finance-summary-tabs button{min-height:44px}
+  .personal-workspace-link,.personal-workspace-notes{padding-block:0;display:inline-flex;align-items:center}
+  .settings-reset-section .settings-reset-btn,.settings-reset-section .settings-delete-btn,#settingsResetBtn{min-height:44px}
+  .settings-field input,.input-wrapper input,#accountLoginEmail,#accountLoginPw{min-height:44px}
+  .eye-button{width:44px;height:44px;right:0}
+  .gfh-switch{position:relative}
+  .gfh-switch::after{content:"";position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
+  body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab .sheet-tab-name{height:44px;margin-block:-1px}
+  #sheetPage .sheet-addrows .button{min-height:44px}
+  #sheetPage .sheet-bar :is(.button,button){min-width:44px}
+  .row-head .rh-edit-btn{position:relative}
+  .row-head .rh-edit-btn::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
+}
+/* Croix « supprimer l’année » : un vrai bouton de 44 px, à côté de la pastille (hors de celle-ci). */
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x{position:relative!important;top:auto!important;right:auto!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;margin:0 0 0 4px!important;border:1px solid var(--line)!important;border-radius:50%!important;background:transparent!important;color:var(--muted)!important;font-size:1.25rem!important;box-shadow:none!important;opacity:1}
+body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x::before{content:none}
+@media(hover:hover){body[data-theme="moulin"] #sheetPage .sheet-years .sheet-tab-x:hover{color:var(--text)!important;border-color:var(--text)!important;background:transparent!important}}
+
+/* 3) Pastille « Plus » sur le bouton d’export : petite étiquette dans le coin, sans pousser ni masquer le bouton suivant. */
+#btnSheetExport{position:relative;overflow:visible}
+#btnSheetExport .gfs-lock{position:absolute;top:-6px;right:-6px;margin:0;padding:1px 6px;font-size:.75rem;line-height:1.35;background:var(--accent-fill,var(--accent));color:var(--on-accent-fill,#17261F);box-shadow:0 0 0 2px var(--panel-solid,var(--bg));z-index:2}
+.gfs-lock{font-size:.75rem}
+
+/* 4) Texte jamais sous 11 px */
+.sheet-table .row-head .rh-number,.sheet-table thead th.col-letter{font-size:.6875rem!important}
+
+/* 5) « Bientôt disponible » : un libellé, pas un bouton */
+.gfs-btn.is-soon,.gfs-btn.is-soon:hover{border-color:transparent!important;background:transparent!important;color:var(--muted)!important;opacity:1;cursor:default;font-weight:500;box-shadow:none;filter:none}
+.gfs-card.is-featured .gfs-btn.is-soon{color:var(--block-muted,#B7C2BB)!important}
+
+/* 6) Tableur iPhone : noms de ligne centrés comme les montants, un seul en-tête de mois, plus d’ombre sur chaque nom */
+@media(max-width:720px){
+  .sheet-table thead{display:none}
+  .sheet-table .row-head{box-shadow:none!important;border-right:1px solid var(--line-strong,var(--line));vertical-align:middle}
+  .sheet-table .row-head .row-head-content{align-items:center;min-height:48px}
+  .sheet-table .row-head .rh-label{display:flex;align-items:center;min-height:48px;padding-block:6px}
+  .sheet-table .row-head .rh-number{align-self:center;margin-block:0}
+  .sheet-table .row-head .rh-edit-btn{align-self:center}
+}
+@media(max-width:720px){
+  body .account-btn-primary,body .account-btn-secondary,body .language-options button{min-height:44px}
+  body[data-theme="moulin"] .settings-hub-item,body[data-theme="moulin"] .settings-hub .settings-hub-item{min-height:44px!important;height:auto}
+}
