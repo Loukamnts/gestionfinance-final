@@ -457,3 +457,8 @@ body[data-page="dashboard"]:not(.gfh-ready) .app{visibility:hidden;animation:gfR
 .gf-bigtext .gfa-tile strong{overflow-wrap:normal;hyphens:auto}
 .gf-bigtext .gfa-tiles.is-three .gfa-tile:first-child{grid-template-columns:1fr;grid-template-rows:auto}
 .gf-bigtext .gfa-tiles.is-three .gfa-tile:first-child .gfa-prev{grid-row:auto}
+/* Liens dans les textes (pages légales, pied de page) : zone de toucher de 44 px sans changer la mise en page du texte */
+.legal-section a,.settings-section p a,.settings-reset-copy a{position:relative}
+.legal-section a::after,.settings-section p a::after,.settings-reset-copy a::after{content:"";position:absolute;left:-4px;right:-4px;top:50%;height:44px;transform:translateY(-50%)}
+.gfc-views button{min-height:44px}
+@media(max-width:360px){.gfh-mon button{width:40px}}
