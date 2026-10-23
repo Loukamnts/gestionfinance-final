@@ -4273,7 +4273,7 @@
     var panel=document.querySelector(".account-section .account-panel");if(panel)panel.dataset.authMode=name;
   }
   function accountEmail(kind){var id=kind==="register"?"accountRegisterEmail":"accountLoginEmail";return String(el(id)&&el(id).value||"").trim();}
-  function showEmailConfirmation(email){sb.pendingSignupEmail=email;accountPane("confirm");var description=el("accountConfirmDescription");if(description)description.textContent="Nous avons envoyé un lien sécurisé à "+email+".";var heading=el("accountConfirmTitle");if(heading){try{heading.focus({preventScroll:true});}catch(e){}keepVisible(heading,true);}}
+  function showEmailConfirmation(email,existing){sb.pendingSignupEmail=email;accountPane("confirm");var description=el("accountConfirmDescription");if(description)description.textContent=existing?"Aucun lien n’est envoyé si "+email+" a déjà un compte. Dans ce cas, connecte-toi, ou choisis « Mot de passe oublié » pour en créer un nouveau. Sinon, le lien arrive dans quelques minutes (pense aux spams).":"Nous avons envoyé un lien sécurisé à "+email+".";var heading=el("accountConfirmTitle");if(heading){try{heading.focus({preventScroll:true});}catch(e){}keepVisible(heading,true);}}
 
   async function register(){
     var email = accountEmail("register");
@@ -4294,8 +4294,10 @@
       sb.lastWasSignup = true;
       if(res.data.session){ msg("Compte créé — tu es connecté.", "ok"); }
       else {
-        showEmailConfirmation(email);
-        msg("Lien de confirmation envoyé. Vérifie ta boîte de réception.", "ok");
+        // Supabase répond « succès » sans rien envoyer quand l'adresse a déjà un compte (identities vide) : on l'explique.
+        var already = !!(res.data && res.data.user && Array.isArray(res.data.user.identities) && res.data.user.identities.length === 0);
+        showEmailConfirmation(email, already);
+        msg(already ? "Cette adresse a peut-être déjà un compte : aucun lien n’est envoyé dans ce cas." : "Lien de confirmation envoyé. Vérifie ta boîte de réception.", already ? "error" : "ok");
       }
     }catch(e){
       console.error("Register error:", e);
