@@ -77,9 +77,9 @@ test('page de présentation : un seul dictionnaire téléchargé, emplacement du
   assert.match(page, /rel="preload"[^>]*instrument-sans-latin-400-normal\.woff2/);
 });
 
-test('cibles tactiles : la croix de l’année est un bouton à part, la pastille « Plus » est un coin', () => {
-  assert.match(read('sheet.js'), /tabsEl\.appendChild\(delX\)/);
+test('cibles tactiles : la croix de l’année reste dans l’angle de la pastille, la pastille « Plus » est un coin', () => {
+  assert.match(read('sheet.js'), /tab\.appendChild\(x\)/);
   const css = read('finishing.css');
   assert.match(css, /#btnSheetExport \.gfs-lock\{position:absolute;top:-6px;right:-6px/);
-  assert.match(css, /\.sheet-tab-x\{[^}]*width:44px!important;height:44px!important/);
+  assert.match(read('sheet-balances.css'), /\.sheet-tab-x\{position:absolute;top:-7px;right:-7px/);
 });
