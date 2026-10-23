@@ -232,15 +232,17 @@
     var l=norm(label).replace(/x\d{2,}|\d+[\/.\-]\d+([\/.\-]\d+)?|\d+/g," ").replace(/[^a-z ]/g," ").replace(NOISE," ").replace(/\s+/g," ").trim();
     return l.split(" ").filter(function(w){return w.length>1;}).slice(0,3).join(" ");
   }
+  // Clé retenue pour un choix : les deux premiers mots du commerçant (« qwerty shop » pour « qwerty shop paris » et « qwerty shop lyon »).
+  function mk2(m){return String(m||"").split(" ").slice(0,2).join(" ");}
   // Choix retenus : { marchand : [ligne, type] } ; type « Ignorer » pour un virement entre tes comptes.
   var RULES_KEY="personalFinanceDashboard.merchantRules";
   function learned(){try{var v=JSON.parse(window.safeStore&&window.safeStore.getItem(RULES_KEY)||"{}");return v&&typeof v==="object"?v:{};}catch(e){return{};}}
-  function saveLearned(extra){var all=learned();Object.keys(extra||{}).forEach(function(k){if(extra[k])all[k]=extra[k];else delete all[k];});var keys=Object.keys(all);if(keys.length>2000)keys.slice(0,keys.length-2000).forEach(function(k){delete all[k];});try{window.safeStore.setItem(RULES_KEY,JSON.stringify(all));}catch(e){}}
+  function saveLearned(extra){var all=learned();Object.keys(extra||{}).forEach(function(k){Object.keys(all).forEach(function(x){if(x!==k&&x.indexOf(k+" ")===0)delete all[x];});if(extra[k])all[k]=extra[k];else delete all[k];});var keys=Object.keys(all);if(keys.length>2000)keys.slice(0,keys.length-2000).forEach(function(k){delete all[k];});try{window.safeStore.setItem(RULES_KEY,JSON.stringify(all));}catch(e){}}
   // Virement (vers ou depuis une personne ou un compte), reconnu au début du libellé.
   function transferLabel(l){l=norm(l);return /^(vir|virement|vrt)\b/.test(l)||/\bvir(ement)? (sepa |inst |instantane )?(recu|emis|de|vers|a|en faveur)\b/.test(l);}
   // Décision pour une opération : { c: catégorie } ou { ig: raison } quand elle est ignorée (« rule » : ton choix, « wallet » : recharge).
   function classify(op,rules){
-    var m=merchantOf(op.label),r=rules&&m&&Object.prototype.hasOwnProperty.call(rules,m)?rules[m]:null;
+    var m=merchantOf(op.label),has=function(k){return !!(rules&&k&&Object.prototype.hasOwnProperty.call(rules,k));},r=has(m)?rules[m]:has(mk2(m))?rules[mk2(m)]:null;
     if(r){if(r[1]==="Ignorer")return{ig:"rule"};return{c:[r[0],r[0],r[1]],rule:true};}
     // « Caisse d'Épargne » est le nom d'une banque : son prêt ou ses frais ne sont pas de l'épargne.
     var l=norm(op.label+(op.detail?" "+op.detail:"")).replace(/caisse d.?epargne/g,"caisse banque");
@@ -323,7 +325,7 @@
     var groups={},months={},ignored=0,rules=learned(),rowsBy={},items=[],seenFp={},all=[],rows=[],unk={},led=ledger().m,drop=ops.dropped||[];
     var nWallet=0,nRule=0,nDup=0,nNew=0,nPending=0,nDeferred=0,bm={},from=null,to=null;
     var rowsOf=function(y){return rowsBy[y]||(rowsBy[y]=sheetRows(y));};
-    Object.keys(extra||{}).forEach(function(k){rules[k]=extra[k];});
+    Object.keys(extra||{}).forEach(function(k){Object.keys(rules).forEach(function(x){if(x!==k&&x.indexOf(k+" ")===0)delete rules[x];});rules[k]=extra[k];});
     // Empreinte de chaque opération du fichier, même ignorée : une opération désormais ignorée sort du registre.
     ops.concat(drop).forEach(function(op,i){
       var fp=fingerprint(op),n=seenFp[fp]=(seenFp[fp]||0)+1,mk0=op.date.y+"-"+op.date.m,real=i<ops.length;
@@ -351,7 +353,7 @@
       var b=bm[mk]||(bm[mk]={"Salaire":0,"Dépense":0,"Épargne":0});b[kind]+=v;
       var mid=mo||norm(op.label).slice(0,24),mm=g.merchants[mid]||(g.merchants[mid]={key:mid,label:op.label,count:0,total:0});mm.count++;mm.total+=v;
       // Opération que Meuniance n'a pas su classer : à demander une par une (regroupées par marchand)
-      if(isOther){row.unk=true;var gid=mo||"~"+norm(op.label).replace(/\s+/g," ").slice(0,30),u=unk[gid]||(unk[gid]={gid:gid,key:mo,label:op.label,count:0,total:0,fps:[],last:dkey});u.count++;u.total+=op.amount;u.fps.push(op._base);if(dkey>u.last)u.last=dkey;}
+      if(isOther){row.unk=true;var gid=mk2(mo)||"~"+norm(op.label).replace(/\s+/g," ").slice(0,30),u=unk[gid]||(unk[gid]={gid:gid,key:mk2(mo),label:op.label,count:0,total:0,fps:[],last:dkey});u.count++;u.total+=op.amount;u.fps.push(op._base);if(dkey>u.last)u.last=dkey;}
     });
     // Opérations en attente, refusées, annulées (ou total de carte différé) : jamais importées, mais visibles dans la liste
     drop.forEach(function(op){var dkey=op.date.y*10000+op.date.m*100+op.date.d;rows.push({i:rows.length,fp:op._base,date:op.date,dkey:dkey,label:op.label,amount:op.amount,mkey:"",status:"dropped",ig:op.why==="deferred"?"deferred":"pending"});});
@@ -376,11 +378,9 @@
     if(/ (epargne|livrets?|pea|pel|cel|ldds|lep|placements?|assurance vie) /.test(w))return"Épargne";return"Dépense";
   }
   // Signe déjà utilisé dans le tableur pour ce type de ligne (dépenses en négatif ou en positif)
-  function signFor(snap,kind){
-    var vals=[];(snap.sheets||[]).forEach(function(sh){(sh.rowHeaders||[]).forEach(function(h,i){if(!String(h||"").trim()||kindOf(h)!==kind)return;
-      Object.keys(sh.cells||{}).forEach(function(k){var p=k.split(",");if(Number(p[0])!==i)return;var raw=String((sh.cells[k]||{}).raw||"").replace(",",".").trim();if(raw&&raw.charAt(0)!=="="&&isFinite(Number(raw)))vals.push(Number(raw));});});});
-    return signIn(vals)||(kind==="Salaire"?1:-1);
-  }
+  // Montants toujours écrits en positif : un loyer de 735 € s'écrit 735, jamais « −735 » (le tableau de bord compte
+  // revenus, dépenses et épargne en valeur absolue). Un « − » n'apparaît que pour un remboursement net.
+  function signFor(snap,kind){return 1;}
   /* Opérations déjà importées, mois par mois : { "2026-8": { empreinte: [ligne, type, montant] } }.
      L'empreinte (date, montant, libellé haché) permet de réimporter un relevé qui chevauche le précédent
      sans perdre ni compter deux fois. Le libellé lui-même n'est pas gardé. 24 mois au moins, jusqu à 10 ans tant que le registre reste léger. */
@@ -484,7 +484,7 @@
         }
         sh.rows=Math.max(Number(sh.rows)||0,sh.rowHeaders.length+2);
         var v=Math.round(amount*signs[g.kind]*100)/100,cell=sh.cells[r+","+mi],old=cell&&String(cell.raw||"").trim();
-        if(mode==="add"&&old){var n=Number(old.replace(",","."));sh.cells[r+","+mi]={raw:old.charAt(0)!=="="&&isFinite(n)?String(Math.round((n+v)*100)/100):"="+(old.charAt(0)==="="?old.slice(1):old)+(v<0?"-":"+")+Math.abs(v)};}
+        if(mode==="add"&&old){var n=Number(old.replace(",","."));if(g.kind!=="Salaire"&&isFinite(n))n=Math.abs(n);sh.cells[r+","+mi]={raw:old.charAt(0)!=="="&&isFinite(n)?String(Math.round((n+v)*100)/100):"="+(old.charAt(0)==="="?old.slice(1):old)+(v<0?"-":"+")+Math.abs(v)};}
         else if(v===0&&mode!=="add")delete sh.cells[r+","+mi];
         else sh.cells[r+","+mi]={raw:String(v)};
         // Deux lignes du même nom (renommage) : le total est dans la première, l'autre ne doit pas le compter une 2e fois.
@@ -507,7 +507,8 @@
   var NB=" ";
   function q(s){return t2("«"+NB+s+NB+"»","“"+s+"”");}
   function plural(n,fr1,frN,en1,enN){return n+NB+(n>1?t2(frN,enN):t2(fr1,en1));}
-  function sgn(v){return (v<0?"−":"+")+eur(Math.abs(v));}
+  // Montant d'une opération du relevé : « + » pour une entrée d'argent, rien pour une sortie (pas de « − » partout).
+  function sgn(v){return (v>0?"+":"")+eur(Math.abs(v));}
   // Montant d'une ligne selon son type : toujours le montant « naturel » (un loyer de 735 € s'écrit 735 €) ; « − » seulement pour un remboursement net.
   function signed(kind,v){return (v<0?"−":"")+eur(Math.abs(v));}
   function weekday(d){try{return new Date(d.y,d.m,d.d).toLocaleDateString(en()?"en-GB":"fr-FR",{weekday:"short"}).replace(/\.$/,"");}catch(e){return "";}}
@@ -544,7 +545,7 @@
         if(!c||String(c.raw||"").trim()==="")return;
         var e=seen[mk]||(seen[mk]={d:summary.months.filter(function(d){return d.y+"-"+d.m===mk;})[0]||{y:+p[0],m:+p[1]},rows:[]});
         var v=vals[sh.name]||(vals[sh.name]=FS.recompute?FS.recompute(sh.cells):{}),cur=v&&v[r+","+p[1]]&&typeof v[r+","+p[1]].value==="number"?v[r+","+p[1]].value:Number(String(c.raw).replace(",","."));
-        e.rows.push({name:g.name,kind:g.kind,sheet:isFinite(cur)?cur:null,sign:signFor(snap,g.kind),stmt:g.byMonth[mk],raw:c.raw});});});
+        e.rows.push({name:g.name,kind:g.kind,sheet:isFinite(cur)?(g.kind==="Salaire"?cur:Math.abs(cur)):null,sign:1,stmt:g.byMonth[mk],raw:c.raw});});});
     }catch(e){}
     out=Object.keys(seen).map(function(k){return seen[k];});
     return out.sort(function(a,b){return a.d.y-b.d.y||a.d.m-b.d.m;});
@@ -583,6 +584,12 @@
       var sLab=el("label","gfb-search"),sIn=document.createElement("input");sIn.type="search";sIn.autocomplete="off";sIn.setAttribute("enterkeyhint","search");sIn.placeholder=t2("Chercher une opération","Search a transaction");sIn.setAttribute("aria-label",t2("Chercher une opération","Search a transaction"));sLab.append(sIn);
       tools.append(sLab);
       var blkIn=makeBlock(t2("Sera importé","Will be imported")),blkOut=makeBlock(t2("Ne sera pas importé","Will not be imported"));
+      // « Tout réimporter » : recompte d'un coup les opérations déjà importées ; « Ne plus réimporter » les remet de côté.
+      var reAll=el("button","gfh-btn gfb-reall");reAll.type="button";
+      reAll.addEventListener("click",function(){summary.rows.forEach(function(r){if(r.status==="dup")inc[r.fp]=true;});flash.hidden=true;dirty=true;draw(true);});
+      var reNone=el("button","gfh-link gfb-reall");reNone.type="button";
+      reNone.addEventListener("click",function(){summary.rows.forEach(function(r){if(r.forced)delete inc[r.fp];});flash.hidden=true;dirty=true;draw(true);});
+      blkOut.box.insertBefore(reAll,blkOut.list);blkIn.box.insertBefore(reNone,blkIn.list);
       P.list.append(lLead,flash,tools,lEmpty,blkIn.box,blkOut.box);
       var st=null;sIn.addEventListener("input",function(){clearTimeout(st);st=setTimeout(function(){query=sIn.value;blkIn.shown=blkOut.shown=PAGE;paintList();},140);});
 
@@ -639,7 +646,7 @@
       function apply(r,ch){
         var rule=!!(r.mkey&&r.mkey.length>2&&!r.internal&&r.ig!=="wallet"),was,label=cleanLabel(r),to=ch[1]==="Ignorer"?t2("ignoré","ignored"):ch[0];
         dirty=true;
-        if(rule){var had=Object.prototype.hasOwnProperty.call(extra,r.mkey);was=extra[r.mkey];extra[r.mkey]=ch;flashUndo=function(){if(had)extra[r.mkey]=was;else delete extra[r.mkey];};}
+        if(rule){var rk=mk2(r.mkey),had=Object.prototype.hasOwnProperty.call(extra,rk);was=extra[rk];extra[rk]=ch;flashUndo=function(){if(had)extra[rk]=was;else delete extra[rk];};}
         else{var had2=Object.prototype.hasOwnProperty.call(ovr,r.fp),was2=ovr[r.fp];ovr[r.fp]=ch;flashUndo=function(){if(had2)ovr[r.fp]=was2;else delete ovr[r.fp];};}
         flash.replaceChildren(document.createTextNode(q(label)+" → "+to+" · "));
         var u=el("button","gfh-link gfb-undo",t2("Annuler","Undo"));u.type="button";u.addEventListener("click",function(){if(flashUndo)flashUndo();flashUndo=null;flash.hidden=true;dirty=true;draw(true);});flash.append(u);flash.hidden=false;
@@ -712,6 +719,9 @@
         blkIn.sub.textContent=!blkIn.view.length&&!query?"":todo?t2("Les lignes jaunes seront à classer à l’étape suivante.","The yellow lines are for you to sort in the next step."):t2("Tout est classé.","Everything is sorted.");
         blkOut.sub.textContent=blkOut.view.length||query?t2("Je te dis pourquoi à chaque ligne. Rien n’est perdu : tu peux en rajouter.","Each line says why. Nothing is lost: you can add any of them."):"";
         blkOut.box.hidden=!summary.rows.some(function(r){return !inImport(r);});
+        var nDup=summary.rows.filter(function(r){return r.status==="dup";}).length,nForced=summary.rows.filter(function(r){return r.forced;}).length;
+        reAll.hidden=!nDup;reAll.textContent=t2("Tout réimporter ("+nDup+")","Import all again ("+nDup+")");
+        reNone.hidden=!nForced;reNone.textContent=t2("Ne plus réimporter les "+nForced+" opérations déjà importées","Stop re-importing the "+nForced+" transactions already imported");
       }
 
       /* ── À classer, une par une ── */
@@ -750,6 +760,10 @@
         qn.append(document.createTextNode(t2("Où ranger ","Where should ")),lab,document.createTextNode(" ("+(g.count>1?plural(g.count,"opération","opérations","transaction","transactions")+", ":"")+sgn(g.total)+")"+t2(NB+"?"," go?")));
         var note=el("p","gfb-note",g.key&&g.key.length>2?t2("Meuniance retiendra ton choix pour les prochains relevés.","Meuniance will remember your choice for future statements."):t2("Ce choix ne concerne que cette opération.","This choice only applies to this transaction."));
         kids.push(cnt,pg,qn,note,choiceBlock(curChoice(sel[g.gid]||ans[g.gid]),function(ch){sel[g.gid]=ch;drawUnknown();updateOk();},g.total,recommend(g)));
+        // Beaucoup de commerçants à classer : un seul geste pour ranger tout le reste dans « Autres dépenses » / « Autres revenus ».
+        var left=unkSnap.slice(unkIdx).filter(function(x){return !ans[x.gid]&&!sel[x.gid];}).length;
+        if(left>=3){var all=el("button","gfh-link gfb-skipall",t2("Ranger les "+left+" restantes dans « Autres » et continuer","File the remaining "+left+" under “Other” and continue"));all.type="button";
+          all.addEventListener("click",function(){var i=steps.indexOf("unknown");go(steps[Math.min(i+1,steps.length-1)]);});kids.push(all);}
         uBody.replaceChildren.apply(uBody,kids);
       }
 
@@ -802,7 +816,7 @@
 
       /* ── Pilotage ── */
       var acts=el("div","gfb-actions"),back=el("button","gfh-btn"),ok=el("button","gfh-btn is-primary");back.type="button";ok.type="submit";acts.append(back,ok);
-      function focusHead(){var hh=P[step]._h;try{hh.focus({preventScroll:true});}catch(e){}}
+      function focusHead(){var hh=P[step]._h;try{hh.focus({preventScroll:true});}catch(e){}body.scrollTop=0;requestAnimationFrame(function(){body.scrollTop=0;});}
       function updateOk(){
         var last=step===steps[steps.length-1];
         if(step==="unknown"){var g=unkSnap&&unkSnap[unkIdx];ok.textContent=g&&(sel[g.gid]||ans[g.gid])?(unkIdx===unkSnap.length-1?t2("Continuer","Continue"):t2("Suivant","Next")):t2("Passer","Skip");ok.disabled=false;}
@@ -846,7 +860,7 @@
           lLead.textContent=t2("Touche une catégorie pour la changer.","Tap a category to change it.");
           lEmpty.textContent="";lEmpty.hidden=true;
           paintList();
-          if(!summary.newCount)lLead.textContent+=" "+t2("Rien de nouveau à importer"+NB+": active « Importer quand même » sur une opération pour la recompter.","Nothing new to import: switch on “Import anyway” on a transaction to count it again.");
+          if(!summary.newCount)lLead.textContent+=" "+t2("Rien de nouveau à importer"+NB+": touche « Tout réimporter » (ou « Importer quand même » sur une opération) pour la recompter.","Nothing new to import: tap “Import all again” (or “Import anyway” on a transaction) to count it again.");
         }
         if(step==="unknown"&&unkSnap&&unkSnap.length)drawUnknown();
         if(step==="months")drawMonths();
@@ -971,7 +985,8 @@
       }
       return preview(ops,name).then(function(res){
         if(!res)return true;
-        var FS=window.FinanceSheet,keys=[LEDGER_KEY,RULES_KEY,"personalFinanceDashboard.categoryRules","personalFinanceDashboard.subscriptions"],before={},snapBefore=null;
+        var FS=window.FinanceSheet,keys=[LEDGER_KEY,"personalFinanceDashboard.categoryRules","personalFinanceDashboard.subscriptions"]// les choix de rangement (RULES_KEY) restent appris même si l'import est annulé
+          ,before={},snapBefore=null;
         try{snapBefore=JSON.stringify(FS.getSnapshot());keys.forEach(function(k){before[k]=window.safeStore.getItem(k);});}catch(e){}
         // Les choix faits dans l'aperçu sont retenus pour les prochains imports.
         if(Object.keys(res.extra).length)saveLearned(res.extra);
