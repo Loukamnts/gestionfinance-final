@@ -508,8 +508,8 @@
   function q(s){return t2("«"+NB+s+NB+"»","“"+s+"”");}
   function plural(n,fr1,frN,en1,enN){return n+NB+(n>1?t2(frN,enN):t2(fr1,en1));}
   function sgn(v){return (v<0?"−":"+")+eur(Math.abs(v));}
-  // Montant d'une ligne selon son type : revenus « + », dépenses « − », épargne tel quel.
-  function signed(kind,v){return kind==="Salaire"?(v<0?"−":"+")+eur(Math.abs(v)):kind==="Dépense"?(v>0?"−":"+")+eur(Math.abs(v)):eur(v);}
+  // Montant d'une ligne selon son type : toujours le montant « naturel » (un loyer de 735 € s'écrit 735 €) ; « − » seulement pour un remboursement net.
+  function signed(kind,v){return (v<0?"−":"")+eur(Math.abs(v));}
   function weekday(d){try{return new Date(d.y,d.m,d.d).toLocaleDateString(en()?"en-GB":"fr-FR",{weekday:"short"}).replace(/\.$/,"");}catch(e){return "";}}
   // Lignes proposées pour classer un marchand : catégories connues, lignes déjà dans ton tableur, « autres ».
   function targets(){
@@ -604,10 +604,10 @@
       P.confirm.append(kLead,kMonths,kH2,recap,kNotes,kAfter);
 
       /* ── Choix d'une ligne (liste de boutons) ── */
-      function choiceBlock(cur,pick,sign){
+      function choiceBlock(cur,pick,sign,reco){
         var box=el("div","gfb-choices");
         function sec(label,arr,cls){if(!arr.length)return;box.append(el("p","gfb-ch-h",label));var w=el("div","gfb-ch-w"+(cls?" "+cls:""));
-          arr.forEach(function(t){var b=el("button","gfb-choice"+(t.ignore?" is-ignore":""),t.name);b.type="button";b.setAttribute("translate","no");if(cur&&key(t.name)===key(cur.name||""))b.setAttribute("aria-pressed","true");if(t.ignore&&cur&&cur.ignore)b.setAttribute("aria-pressed","true");
+          arr.forEach(function(t){var b=el("button","gfb-choice"+(t.ignore?" is-ignore":""),t.name);b.type="button";b.setAttribute("translate","no");if(cur&&key(t.name)===key(cur.name||""))b.setAttribute("aria-pressed","true");if(t.ignore&&cur&&cur.ignore)b.setAttribute("aria-pressed","true");if(reco&&!t.ignore&&key(t.name)===key(reco)){b.classList.add("is-reco");b.append(el("small","gfb-reco",t2("Conseillé","Suggested")));}
             b.addEventListener("click",function(){pick(t.ignore?["","Ignorer"]:[t.name,t.kind]);});w.append(b);});box.append(w);}
         var sheet=T.filter(function(t){return t.group==="sheet";}),cats=T.filter(function(t){return t.group==="cat";}),oth=T.filter(function(t){return t.group==="other";});
         if(sign!=null)oth=oth.filter(function(t){return sign<0?t.kind==="Dépense":t.kind==="Salaire";}).concat(oth.filter(function(t){return sign<0?t.kind!=="Dépense":t.kind!=="Salaire";}));
@@ -716,10 +716,30 @@
 
       /* ── À classer, une par une ── */
       function groupLabel(g){return String(g.label||"").replace(/\s+/g," ").trim().slice(0,90);}
-      function chooseUnknown(g,ch){
+      // Le choix se valide avec « Suivant » : toucher une catégorie la sélectionne, on peut en essayer plusieurs.
+      var sel={};
+      function commitUnknown(g,ch){
         ans[g.gid]=ch;dirty=true;
         if(g.key&&g.key.length>2)extra[g.key]=ch;else g.fps.forEach(function(fp){ovr[fp]=ch;});
-        nextUnknown();
+      }
+      var HINTS=[[/bricol|leroy|castorama|ikea|zara|kiabi|h&m|decathlon|amazon|fnac|cdiscount|boutique|vinted|zalando|action\b/,"Shopping"],
+        [/pharmac|docteur|medecin|dentiste|optic|hopital|clinique|laboratoire|kine/,"Santé"],
+        [/restaurant|resto|mcdo|mcdonald|burger|pizz|sushi|boulang|uber eats|deliveroo|brasserie|cafe\b|kebab|starbucks|kfc/,"Restaurants"],
+        [/cinema|pathe|gaumont|steam|playstation|nintendo|bowling|concert|ticketmaster|fnac spectacle|spotify|deezer/,"Loisirs"],
+        [/hotel|airbnb|booking|ryanair|easyjet|air france|volotea|trainline|blablacar/,"Voyages"],
+        [/sncf|ratp|navigo|uber\b|bolt\b|taxi|peage|vinci autoroute|parking|velib|lime\b/,"Transports"],
+        [/total ?energies|esso|shell|bp\b|carburant|station|intermarche station|leclerc station/,"Carburant"],
+        [/carrefour|leclerc|lidl|aldi|auchan|intermarche|monoprix|casino|franprix|picard|biocoop|grand frais|supermarche/,"Courses"],
+        [/assurance|maif|macif|matmut|axa|allianz|groupama/,"Assurances"],
+        [/edf|engie|veolia|eau\b|gaz\b|electricite/,"Énergie et eau"]];
+      function recommend(g){
+        var name="";
+        if(g.total>0){var inc=T.filter(function(t){return t.group==="sheet"&&t.kind==="Salaire";})[0];name=inc?inc.name:"";}
+        else{var l=norm(g.label||"");for(var i=0;i<HINTS.length;i++){if(HINTS[i][0].test(l)){name=HINTS[i][1];break;}}}
+        if(!name)return "";
+        // Le nom d'une ligne déjà présente dans le tableur a priorité (« Alimentation » pour Courses, par exemple).
+        var hit=T.filter(function(t){return key(t.name)===key(name);})[0]||T.filter(function(t){return t.group==="sheet"&&existingRow(name,[t.name]);})[0];
+        return hit?hit.name:"";
       }
       function nextUnknown(){if(unkIdx<unkSnap.length-1){unkIdx++;draw(false);focusHead();}else{var i=steps.indexOf("unknown");go(steps[Math.min(i+1,steps.length-1)]);}}
       function drawUnknown(){
@@ -729,7 +749,7 @@
         var qn=el("p","gfb-q"),lab=el("strong","",q(groupLabel(g)));lab.setAttribute("translate","no");
         qn.append(document.createTextNode(t2("Où ranger ","Where should ")),lab,document.createTextNode(" ("+(g.count>1?plural(g.count,"opération","opérations","transaction","transactions")+", ":"")+sgn(g.total)+")"+t2(NB+"?"," go?")));
         var note=el("p","gfb-note",g.key&&g.key.length>2?t2("Meuniance retiendra ton choix pour les prochains relevés.","Meuniance will remember your choice for future statements."):t2("Ce choix ne concerne que cette opération.","This choice only applies to this transaction."));
-        kids.push(cnt,pg,qn,note,choiceBlock(curChoice(ans[g.gid]),function(ch){chooseUnknown(g,ch);},g.total));
+        kids.push(cnt,pg,qn,note,choiceBlock(curChoice(sel[g.gid]||ans[g.gid]),function(ch){sel[g.gid]=ch;drawUnknown();updateOk();},g.total,recommend(g)));
         uBody.replaceChildren.apply(uBody,kids);
       }
 
@@ -785,7 +805,7 @@
       function focusHead(){var hh=P[step]._h;try{hh.focus({preventScroll:true});}catch(e){}}
       function updateOk(){
         var last=step===steps[steps.length-1];
-        if(step==="unknown"){var g=unkSnap&&unkSnap[unkIdx];ok.textContent=g&&ans[g.gid]?(unkIdx===unkSnap.length-1?t2("Continuer","Continue"):t2("Suivant","Next")):t2("Passer","Skip");ok.disabled=false;}
+        if(step==="unknown"){var g=unkSnap&&unkSnap[unkIdx];ok.textContent=g&&(sel[g.gid]||ans[g.gid])?(unkIdx===unkSnap.length-1?t2("Continuer","Continue"):t2("Suivant","Next")):t2("Passer","Skip");ok.disabled=false;}
         else{ok.textContent=last?t2("Importer","Import"):t2("Continuer","Continue");
           ok.disabled=(step==="months"&&!mode)||((step==="list"||step==="confirm")&&!summary.newCount);}
         ok.classList.toggle("is-primary",!(step==="unknown"&&ok.textContent===t2("Passer","Skip")));
@@ -857,7 +877,7 @@
       // Les raccourcis du tableur (Entrée, flèches) écoutent le document : ils ne doivent pas agir sous la fenêtre.
       d.addEventListener("keydown",function(e){e.stopPropagation();if(e.key==="Enter"&&e.target&&e.target.tagName==="INPUT"&&e.target.type==="search")e.preventDefault();});
       form.addEventListener("submit",function(e){e.preventDefault();if(ok.disabled)return;
-        if(step==="unknown"){nextUnknown();return;}
+        if(step==="unknown"){var cg=unkSnap&&unkSnap[unkIdx];if(cg&&sel[cg.gid]){commitUnknown(cg,sel[cg.gid]);delete sel[cg.gid];}nextUnknown();return;}
         var i=steps.indexOf(step);
         if(i<steps.length-1){go(steps[i+1]);return;}
         finish({mode:conf.length?mode:"replace",summary:summary,extra:extra});});
