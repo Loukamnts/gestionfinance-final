@@ -741,7 +741,7 @@
         var hit=T.filter(function(t){return key(t.name)===key(name);})[0]||T.filter(function(t){return t.group==="sheet"&&existingRow(name,[t.name]);})[0];
         return hit?hit.name:"";
       }
-      function nextUnknown(){if(unkIdx<unkSnap.length-1){unkIdx++;draw(false);focusHead();}else{var i=steps.indexOf("unknown");go(steps[Math.min(i+1,steps.length-1)]);}}
+      function nextUnknown(){if(unkIdx<unkSnap.length-1){unkIdx++;draw(false);body.scrollTop=0;focusHead();}else{var i=steps.indexOf("unknown");go(steps[Math.min(i+1,steps.length-1)]);}}
       function drawUnknown(){
         var g=unkSnap[unkIdx],kids=[];
         var cnt=el("p","gfb-unk-n",unkIdx+1+NB+t2("sur","of")+NB+unkSnap.length);
@@ -854,7 +854,7 @@
 
         back.textContent=idx||(step==="unknown"&&unkIdx>0)?t2("Retour","Back"):t2("Annuler","Cancel");
         updateOk();
-        if(keepPlace)body.scrollTop=top;
+        body.scrollTop=keepPlace?top:0;// changer d'étape ou de carte : on repart du titre
       }
       function go(id){
         var cur=steps.indexOf(step),tgt=steps.indexOf(id);
