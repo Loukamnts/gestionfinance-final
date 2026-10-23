@@ -508,8 +508,8 @@
   function q(s){return t2("«"+NB+s+NB+"»","“"+s+"”");}
   function plural(n,fr1,frN,en1,enN){return n+NB+(n>1?t2(frN,enN):t2(fr1,en1));}
   function sgn(v){return (v<0?"−":"+")+eur(Math.abs(v));}
-  // Montant d'une ligne selon son type : revenus « + », dépenses « − », épargne tel quel.
-  function signed(kind,v){return kind==="Salaire"?(v<0?"−":"+")+eur(Math.abs(v)):kind==="Dépense"?(v>0?"−":"+")+eur(Math.abs(v)):eur(v);}
+  // Montant d'une ligne selon son type : toujours le montant « naturel » (un loyer de 735 € s'écrit 735 €) ; « − » seulement pour un remboursement net.
+  function signed(kind,v){return (v<0?"−":"")+eur(Math.abs(v));}
   function weekday(d){try{return new Date(d.y,d.m,d.d).toLocaleDateString(en()?"en-GB":"fr-FR",{weekday:"short"}).replace(/\.$/,"");}catch(e){return "";}}
   // Lignes proposées pour classer un marchand : catégories connues, lignes déjà dans ton tableur, « autres ».
   function targets(){
@@ -780,16 +780,15 @@
         var mn=summary.months.map(function(m,i){var k=m.y+"-"+m.m,b=summary.monthKinds[k]||{},det=document.createElement("details");det.className="gfb-group gfb-mdet";det.open=summary.months.length<=3||confOpen[k]===true||(confOpen[k]==null&&i===0);
           det.addEventListener("toggle",function(){confOpen[k]=det.open;});
           var sm=document.createElement("summary");sm.className="gfb-row";sm.append(el("span","gfb-name",monthTitle(m)),el("span","gfb-count",plural(mc[k]||0,"opération","opérations","transaction","transactions")));det.append(sm);
-          var inner=el("div","gfb-merchants");KINDS.forEach(function(kd){var v=b[kd[0]]||0;if(Math.abs(v)<0.005)return;var r=el("div","gfb-merchant");r.append(el("span","gfb-mname",kd[1]),el("b","gf-amount"+(kd[0]==="Dépense"?" is-out":kd[0]==="Salaire"?" is-in":""),signed(kd[0],v)));inner.append(r);});det.append(inner);return det;});
+          var inner=el("div","gfb-merchants");KINDS.forEach(function(kd){var v=b[kd[0]]||0;if(Math.abs(v)<0.005)return;var r=el("div","gfb-merchant");r.append(el("span","gfb-mname",kd[1]),el("b","gf-amount",signed(kd[0],v)));inner.append(r);});det.append(inner);return det;});
         kMonths.replaceChildren.apply(kMonths,mn);kMonths.hidden=!mn.length;
         kH2.textContent=t2("Par catégorie","By category");kH2.hidden=!summary.groups.length;
         var rnodes=[],lastKind="";
         summary.groups.forEach(function(g){if(g.kind!==lastKind){rnodes.push(el("div","gfb-kind",titles[g.kind]));lastKind=g.kind;}
-          var r=el("div","gfb-row gfb-rrow"),nm=el("span","gfb-name",g.name);if(isNew(g.name))nm.append(el("small","gfb-new",t2("nouvelle ligne","new row")));r.append(nm,el("b","gf-amount"+(g.kind==="Dépense"?" is-out":g.kind==="Salaire"?" is-in":""),signed(g.kind,g.total)));rnodes.push(r);});
+          var r=el("div","gfb-row gfb-rrow"),nm=el("span","gfb-name",g.name);if(isNew(g.name))nm.append(el("small","gfb-new",t2("nouvelle ligne","new row")));r.append(nm,el("b","gf-amount",signed(g.kind,g.total)));rnodes.push(r);});
         recap.replaceChildren.apply(recap,rnodes);recap.hidden=!rnodes.length;
         // Notes
         var notes=[];
-        if(summary.groups.some(function(g){return g.kind==="Dépense";}))notes.push(t2("Les dépenses sont écrites en négatif, comme dans ton tableur : « −45,00 € » veut dire que tu as dépensé 45 €.","Expenses are written as negatives, as in your spreadsheet: “−45.00 €” means you spent 45 €."));
         notes.push(t2(plural(summary.newCount,"opération sera importée","opérations seront importées","transaction will be imported","transactions will be imported")+".",plural(summary.newCount,"","","transaction will be imported","transactions will be imported")+"."));
         if(summary.dupCount)notes.push(t2(plural(summary.dupCount,"opération déjà importée n’est pas reprise","opérations déjà importées ne sont pas reprises","","")+".",plural(summary.dupCount,"","","transaction already imported is skipped","transactions already imported are skipped")+"."));
         var ig=[];if(summary.pending)ig.push(t2(plural(summary.pending,"en attente ou refusée","en attente, refusées ou annulées","pending or declined","pending, declined or cancelled"),plural(summary.pending,"pending or declined","pending, declined or cancelled","pending or declined","pending, declined or cancelled")));
