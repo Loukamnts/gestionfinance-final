@@ -91,7 +91,12 @@ const B = 'Date;Libellé;Montant;Statut\n02/09/2026;CARTE CARREFOUR CITY;-45,20;
         // À classer, une par une
         await primary().click(); assert.equal(await step(), 'unknown'); await noOverflow('unknown');
         assert.match(await page.locator('dialog[open] .gfb-unk-n').innerText(), /^1\s(sur|of)\s2$/);
-        await page.locator('dialog[open] .gfb-choice').first().click(); // 1re carte : répondue
+        await page.locator('dialog[open] .gfb-choice').first().click(); // 1re carte : sélectionnée, on ne passe pas à la suivante toute seule
+        assert.match(await page.locator('dialog[open] .gfb-unk-n').innerText(), /^1\s(sur|of)\s2$/);
+        assert.equal(await page.locator('dialog[open] .gfb-choice[aria-pressed="true"]').count(), 1, 'une catégorie sélectionnée');
+        await page.locator('dialog[open] .gfb-choice').nth(1).click(); // on peut changer d’avis
+        assert.equal(await page.locator('dialog[open] .gfb-choice[aria-pressed="true"]').count(), 1, 'toujours une seule catégorie sélectionnée');
+        await primary().click(); // « Suivant » valide
         assert.match(await page.locator('dialog[open] .gfb-unk-n').innerText(), /^2\s(sur|of)\s2$/);
         await primary().click(); // 2e carte : passer
         // Mois déjà remplis : on doit choisir
