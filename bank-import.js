@@ -378,11 +378,9 @@
     if(/ (epargne|livrets?|pea|pel|cel|ldds|lep|placements?|assurance vie) /.test(w))return"Épargne";return"Dépense";
   }
   // Signe déjà utilisé dans le tableur pour ce type de ligne (dépenses en négatif ou en positif)
-  function signFor(snap,kind){
-    var vals=[];(snap.sheets||[]).forEach(function(sh){(sh.rowHeaders||[]).forEach(function(h,i){if(!String(h||"").trim()||kindOf(h)!==kind)return;
-      Object.keys(sh.cells||{}).forEach(function(k){var p=k.split(",");if(Number(p[0])!==i)return;var raw=String((sh.cells[k]||{}).raw||"").replace(",",".").trim();if(raw&&raw.charAt(0)!=="="&&isFinite(Number(raw)))vals.push(Number(raw));});});});
-    return signIn(vals)||(kind==="Salaire"?1:-1);
-  }
+  // Montants toujours écrits en positif : un loyer de 735 € s'écrit 735, jamais « −735 » (le tableau de bord compte
+  // revenus, dépenses et épargne en valeur absolue). Un « − » n'apparaît que pour un remboursement net.
+  function signFor(snap,kind){return 1;}
   /* Opérations déjà importées, mois par mois : { "2026-8": { empreinte: [ligne, type, montant] } }.
      L'empreinte (date, montant, libellé haché) permet de réimporter un relevé qui chevauche le précédent
      sans perdre ni compter deux fois. Le libellé lui-même n'est pas gardé. 24 mois au moins, jusqu à 10 ans tant que le registre reste léger. */
@@ -486,7 +484,7 @@
         }
         sh.rows=Math.max(Number(sh.rows)||0,sh.rowHeaders.length+2);
         var v=Math.round(amount*signs[g.kind]*100)/100,cell=sh.cells[r+","+mi],old=cell&&String(cell.raw||"").trim();
-        if(mode==="add"&&old){var n=Number(old.replace(",","."));sh.cells[r+","+mi]={raw:old.charAt(0)!=="="&&isFinite(n)?String(Math.round((n+v)*100)/100):"="+(old.charAt(0)==="="?old.slice(1):old)+(v<0?"-":"+")+Math.abs(v)};}
+        if(mode==="add"&&old){var n=Number(old.replace(",","."));if(g.kind!=="Salaire"&&isFinite(n))n=Math.abs(n);sh.cells[r+","+mi]={raw:old.charAt(0)!=="="&&isFinite(n)?String(Math.round((n+v)*100)/100):"="+(old.charAt(0)==="="?old.slice(1):old)+(v<0?"-":"+")+Math.abs(v)};}
         else if(v===0&&mode!=="add")delete sh.cells[r+","+mi];
         else sh.cells[r+","+mi]={raw:String(v)};
         // Deux lignes du même nom (renommage) : le total est dans la première, l'autre ne doit pas le compter une 2e fois.
@@ -509,7 +507,8 @@
   var NB=" ";
   function q(s){return t2("«"+NB+s+NB+"»","“"+s+"”");}
   function plural(n,fr1,frN,en1,enN){return n+NB+(n>1?t2(frN,enN):t2(fr1,en1));}
-  function sgn(v){return (v<0?"−":"+")+eur(Math.abs(v));}
+  // Montant d'une opération du relevé : « + » pour une entrée d'argent, rien pour une sortie (pas de « − » partout).
+  function sgn(v){return (v>0?"+":"")+eur(Math.abs(v));}
   // Montant d'une ligne selon son type : toujours le montant « naturel » (un loyer de 735 € s'écrit 735 €) ; « − » seulement pour un remboursement net.
   function signed(kind,v){return (v<0?"−":"")+eur(Math.abs(v));}
   function weekday(d){try{return new Date(d.y,d.m,d.d).toLocaleDateString(en()?"en-GB":"fr-FR",{weekday:"short"}).replace(/\.$/,"");}catch(e){return "";}}
@@ -546,7 +545,7 @@
         if(!c||String(c.raw||"").trim()==="")return;
         var e=seen[mk]||(seen[mk]={d:summary.months.filter(function(d){return d.y+"-"+d.m===mk;})[0]||{y:+p[0],m:+p[1]},rows:[]});
         var v=vals[sh.name]||(vals[sh.name]=FS.recompute?FS.recompute(sh.cells):{}),cur=v&&v[r+","+p[1]]&&typeof v[r+","+p[1]].value==="number"?v[r+","+p[1]].value:Number(String(c.raw).replace(",","."));
-        e.rows.push({name:g.name,kind:g.kind,sheet:isFinite(cur)?cur:null,sign:signFor(snap,g.kind),stmt:g.byMonth[mk],raw:c.raw});});});
+        e.rows.push({name:g.name,kind:g.kind,sheet:isFinite(cur)?(g.kind==="Salaire"?cur:Math.abs(cur)):null,sign:1,stmt:g.byMonth[mk],raw:c.raw});});});
     }catch(e){}
     out=Object.keys(seen).map(function(k){return seen[k];});
     return out.sort(function(a,b){return a.d.y-b.d.y||a.d.m-b.d.m;});
@@ -808,7 +807,7 @@
 
       /* ── Pilotage ── */
       var acts=el("div","gfb-actions"),back=el("button","gfh-btn"),ok=el("button","gfh-btn is-primary");back.type="button";ok.type="submit";acts.append(back,ok);
-      function focusHead(){var hh=P[step]._h;try{hh.focus({preventScroll:true});}catch(e){}}
+      function focusHead(){var hh=P[step]._h;try{hh.focus({preventScroll:true});}catch(e){}body.scrollTop=0;requestAnimationFrame(function(){body.scrollTop=0;});}
       function updateOk(){
         var last=step===steps[steps.length-1];
         if(step==="unknown"){var g=unkSnap&&unkSnap[unkIdx];ok.textContent=g&&(sel[g.gid]||ans[g.gid])?(unkIdx===unkSnap.length-1?t2("Continuer","Continue"):t2("Suivant","Next")):t2("Passer","Skip");ok.disabled=false;}
