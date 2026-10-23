@@ -584,6 +584,12 @@
       var sLab=el("label","gfb-search"),sIn=document.createElement("input");sIn.type="search";sIn.autocomplete="off";sIn.setAttribute("enterkeyhint","search");sIn.placeholder=t2("Chercher une opération","Search a transaction");sIn.setAttribute("aria-label",t2("Chercher une opération","Search a transaction"));sLab.append(sIn);
       tools.append(sLab);
       var blkIn=makeBlock(t2("Sera importé","Will be imported")),blkOut=makeBlock(t2("Ne sera pas importé","Will not be imported"));
+      // « Tout réimporter » : recompte d'un coup les opérations déjà importées ; « Ne plus réimporter » les remet de côté.
+      var reAll=el("button","gfh-btn gfb-reall");reAll.type="button";
+      reAll.addEventListener("click",function(){summary.rows.forEach(function(r){if(r.status==="dup")inc[r.fp]=true;});flash.hidden=true;dirty=true;draw(true);});
+      var reNone=el("button","gfh-link gfb-reall");reNone.type="button";
+      reNone.addEventListener("click",function(){summary.rows.forEach(function(r){if(r.forced)delete inc[r.fp];});flash.hidden=true;dirty=true;draw(true);});
+      blkOut.box.insertBefore(reAll,blkOut.list);blkIn.box.insertBefore(reNone,blkIn.list);
       P.list.append(lLead,flash,tools,lEmpty,blkIn.box,blkOut.box);
       var st=null;sIn.addEventListener("input",function(){clearTimeout(st);st=setTimeout(function(){query=sIn.value;blkIn.shown=blkOut.shown=PAGE;paintList();},140);});
 
@@ -713,6 +719,9 @@
         blkIn.sub.textContent=!blkIn.view.length&&!query?"":todo?t2("Les lignes jaunes seront à classer à l’étape suivante.","The yellow lines are for you to sort in the next step."):t2("Tout est classé.","Everything is sorted.");
         blkOut.sub.textContent=blkOut.view.length||query?t2("Je te dis pourquoi à chaque ligne. Rien n’est perdu : tu peux en rajouter.","Each line says why. Nothing is lost: you can add any of them."):"";
         blkOut.box.hidden=!summary.rows.some(function(r){return !inImport(r);});
+        var nDup=summary.rows.filter(function(r){return r.status==="dup";}).length,nForced=summary.rows.filter(function(r){return r.forced;}).length;
+        reAll.hidden=!nDup;reAll.textContent=t2("Tout réimporter ("+nDup+")","Import all again ("+nDup+")");
+        reNone.hidden=!nForced;reNone.textContent=t2("Ne plus réimporter les "+nForced+" opérations déjà importées","Stop re-importing the "+nForced+" transactions already imported");
       }
 
       /* ── À classer, une par une ── */
@@ -851,7 +860,7 @@
           lLead.textContent=t2("Touche une catégorie pour la changer.","Tap a category to change it.");
           lEmpty.textContent="";lEmpty.hidden=true;
           paintList();
-          if(!summary.newCount)lLead.textContent+=" "+t2("Rien de nouveau à importer"+NB+": active « Importer quand même » sur une opération pour la recompter.","Nothing new to import: switch on “Import anyway” on a transaction to count it again.");
+          if(!summary.newCount)lLead.textContent+=" "+t2("Rien de nouveau à importer"+NB+": touche « Tout réimporter » (ou « Importer quand même » sur une opération) pour la recompter.","Nothing new to import: tap “Import all again” (or “Import anyway” on a transaction) to count it again.");
         }
         if(step==="unknown"&&unkSnap&&unkSnap.length)drawUnknown();
         if(step==="months")drawMonths();
