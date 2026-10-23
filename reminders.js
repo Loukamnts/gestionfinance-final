@@ -184,7 +184,16 @@
   if(window.GFNotify)window.GFNotify.register("reminders",inviteMessages);
   // Service worker enregistré à chaque ouverture : il permet aussi d'ouvrir Meuniance sans connexion.
   if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){
-    window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js",{scope:"/"}).catch(function(){});});
+    var hadController=!!navigator.serviceWorker.controller,t0=Date.now(),pendingReload=false;
+    window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js",{scope:"/"}).then(function(reg){
+      // À chaque retour dans l'app, on cherche une nouvelle version (l'app d'iPhone reste souvent en mémoire sans se recharger).
+      document.addEventListener("visibilitychange",function(){if(!document.hidden){if(pendingReload){location.reload();return;}try{reg.update();}catch(e){}}});
+    }).catch(function(){});});
+    // Une nouvelle version vient de prendre la main : on recharge tout de suite à l'ouverture, ou au prochain retour dans l'app.
+    navigator.serviceWorker.addEventListener("controllerchange",function(){
+      if(!hadController){hadController=true;return;}
+      if(Date.now()-t0<12000)location.reload();else pendingReload=true;
+    });
   }
   // Déconnexion : cet appareil arrête de recevoir les notifications du compte (la personne suivante ne les verra pas).
   function forgetDevice(){return Promise.race([disable().catch(function(){}),new Promise(function(r){setTimeout(r,3000);})]);}
