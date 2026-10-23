@@ -684,3 +684,4 @@ body[data-mode="dark"] .gfh-bpanel{box-shadow:0 22px 48px -22px rgba(0,0,0,.75)}
 .gfb-choice.is-reco[aria-pressed="true"] .gfb-reco{background:var(--on-accent-fill,#17261F);color:var(--accent-fill,var(--accent))}
 .gfb-wiz .gf-amount.is-out{color:var(--red)}
 .gfb-wiz .gf-amount.is-in{color:var(--green)}
+.gfb-skipall{display:block;margin:18px 0 4px;min-height:44px;padding:0 4px;text-align:left}

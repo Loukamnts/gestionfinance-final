@@ -232,15 +232,17 @@
     var l=norm(label).replace(/x\d{2,}|\d+[\/.\-]\d+([\/.\-]\d+)?|\d+/g," ").replace(/[^a-z ]/g," ").replace(NOISE," ").replace(/\s+/g," ").trim();
     return l.split(" ").filter(function(w){return w.length>1;}).slice(0,3).join(" ");
   }
+  // Clé retenue pour un choix : les deux premiers mots du commerçant (« qwerty shop » pour « qwerty shop paris » et « qwerty shop lyon »).
+  function mk2(m){return String(m||"").split(" ").slice(0,2).join(" ");}
   // Choix retenus : { marchand : [ligne, type] } ; type « Ignorer » pour un virement entre tes comptes.
   var RULES_KEY="personalFinanceDashboard.merchantRules";
   function learned(){try{var v=JSON.parse(window.safeStore&&window.safeStore.getItem(RULES_KEY)||"{}");return v&&typeof v==="object"?v:{};}catch(e){return{};}}
-  function saveLearned(extra){var all=learned();Object.keys(extra||{}).forEach(function(k){if(extra[k])all[k]=extra[k];else delete all[k];});var keys=Object.keys(all);if(keys.length>2000)keys.slice(0,keys.length-2000).forEach(function(k){delete all[k];});try{window.safeStore.setItem(RULES_KEY,JSON.stringify(all));}catch(e){}}
+  function saveLearned(extra){var all=learned();Object.keys(extra||{}).forEach(function(k){Object.keys(all).forEach(function(x){if(x!==k&&x.indexOf(k+" ")===0)delete all[x];});if(extra[k])all[k]=extra[k];else delete all[k];});var keys=Object.keys(all);if(keys.length>2000)keys.slice(0,keys.length-2000).forEach(function(k){delete all[k];});try{window.safeStore.setItem(RULES_KEY,JSON.stringify(all));}catch(e){}}
   // Virement (vers ou depuis une personne ou un compte), reconnu au début du libellé.
   function transferLabel(l){l=norm(l);return /^(vir|virement|vrt)\b/.test(l)||/\bvir(ement)? (sepa |inst |instantane )?(recu|emis|de|vers|a|en faveur)\b/.test(l);}
   // Décision pour une opération : { c: catégorie } ou { ig: raison } quand elle est ignorée (« rule » : ton choix, « wallet » : recharge).
   function classify(op,rules){
-    var m=merchantOf(op.label),r=rules&&m&&Object.prototype.hasOwnProperty.call(rules,m)?rules[m]:null;
+    var m=merchantOf(op.label),has=function(k){return !!(rules&&k&&Object.prototype.hasOwnProperty.call(rules,k));},r=has(m)?rules[m]:has(mk2(m))?rules[mk2(m)]:null;
     if(r){if(r[1]==="Ignorer")return{ig:"rule"};return{c:[r[0],r[0],r[1]],rule:true};}
     // « Caisse d'Épargne » est le nom d'une banque : son prêt ou ses frais ne sont pas de l'épargne.
     var l=norm(op.label+(op.detail?" "+op.detail:"")).replace(/caisse d.?epargne/g,"caisse banque");
@@ -323,7 +325,7 @@
     var groups={},months={},ignored=0,rules=learned(),rowsBy={},items=[],seenFp={},all=[],rows=[],unk={},led=ledger().m,drop=ops.dropped||[];
     var nWallet=0,nRule=0,nDup=0,nNew=0,nPending=0,nDeferred=0,bm={},from=null,to=null;
     var rowsOf=function(y){return rowsBy[y]||(rowsBy[y]=sheetRows(y));};
-    Object.keys(extra||{}).forEach(function(k){rules[k]=extra[k];});
+    Object.keys(extra||{}).forEach(function(k){Object.keys(rules).forEach(function(x){if(x!==k&&x.indexOf(k+" ")===0)delete rules[x];});rules[k]=extra[k];});
     // Empreinte de chaque opération du fichier, même ignorée : une opération désormais ignorée sort du registre.
     ops.concat(drop).forEach(function(op,i){
       var fp=fingerprint(op),n=seenFp[fp]=(seenFp[fp]||0)+1,mk0=op.date.y+"-"+op.date.m,real=i<ops.length;
@@ -351,7 +353,7 @@
       var b=bm[mk]||(bm[mk]={"Salaire":0,"Dépense":0,"Épargne":0});b[kind]+=v;
       var mid=mo||norm(op.label).slice(0,24),mm=g.merchants[mid]||(g.merchants[mid]={key:mid,label:op.label,count:0,total:0});mm.count++;mm.total+=v;
       // Opération que Meuniance n'a pas su classer : à demander une par une (regroupées par marchand)
-      if(isOther){row.unk=true;var gid=mo||"~"+norm(op.label).replace(/\s+/g," ").slice(0,30),u=unk[gid]||(unk[gid]={gid:gid,key:mo,label:op.label,count:0,total:0,fps:[],last:dkey});u.count++;u.total+=op.amount;u.fps.push(op._base);if(dkey>u.last)u.last=dkey;}
+      if(isOther){row.unk=true;var gid=mk2(mo)||"~"+norm(op.label).replace(/\s+/g," ").slice(0,30),u=unk[gid]||(unk[gid]={gid:gid,key:mk2(mo),label:op.label,count:0,total:0,fps:[],last:dkey});u.count++;u.total+=op.amount;u.fps.push(op._base);if(dkey>u.last)u.last=dkey;}
     });
     // Opérations en attente, refusées, annulées (ou total de carte différé) : jamais importées, mais visibles dans la liste
     drop.forEach(function(op){var dkey=op.date.y*10000+op.date.m*100+op.date.d;rows.push({i:rows.length,fp:op._base,date:op.date,dkey:dkey,label:op.label,amount:op.amount,mkey:"",status:"dropped",ig:op.why==="deferred"?"deferred":"pending"});});
@@ -639,7 +641,7 @@
       function apply(r,ch){
         var rule=!!(r.mkey&&r.mkey.length>2&&!r.internal&&r.ig!=="wallet"),was,label=cleanLabel(r),to=ch[1]==="Ignorer"?t2("ignoré","ignored"):ch[0];
         dirty=true;
-        if(rule){var had=Object.prototype.hasOwnProperty.call(extra,r.mkey);was=extra[r.mkey];extra[r.mkey]=ch;flashUndo=function(){if(had)extra[r.mkey]=was;else delete extra[r.mkey];};}
+        if(rule){var rk=mk2(r.mkey),had=Object.prototype.hasOwnProperty.call(extra,rk);was=extra[rk];extra[rk]=ch;flashUndo=function(){if(had)extra[rk]=was;else delete extra[rk];};}
         else{var had2=Object.prototype.hasOwnProperty.call(ovr,r.fp),was2=ovr[r.fp];ovr[r.fp]=ch;flashUndo=function(){if(had2)ovr[r.fp]=was2;else delete ovr[r.fp];};}
         flash.replaceChildren(document.createTextNode(q(label)+" → "+to+" · "));
         var u=el("button","gfh-link gfb-undo",t2("Annuler","Undo"));u.type="button";u.addEventListener("click",function(){if(flashUndo)flashUndo();flashUndo=null;flash.hidden=true;dirty=true;draw(true);});flash.append(u);flash.hidden=false;
@@ -750,6 +752,10 @@
         qn.append(document.createTextNode(t2("Où ranger ","Where should ")),lab,document.createTextNode(" ("+(g.count>1?plural(g.count,"opération","opérations","transaction","transactions")+", ":"")+sgn(g.total)+")"+t2(NB+"?"," go?")));
         var note=el("p","gfb-note",g.key&&g.key.length>2?t2("Meuniance retiendra ton choix pour les prochains relevés.","Meuniance will remember your choice for future statements."):t2("Ce choix ne concerne que cette opération.","This choice only applies to this transaction."));
         kids.push(cnt,pg,qn,note,choiceBlock(curChoice(sel[g.gid]||ans[g.gid]),function(ch){sel[g.gid]=ch;drawUnknown();updateOk();},g.total,recommend(g)));
+        // Beaucoup de commerçants à classer : un seul geste pour ranger tout le reste dans « Autres dépenses » / « Autres revenus ».
+        var left=unkSnap.slice(unkIdx).filter(function(x){return !ans[x.gid]&&!sel[x.gid];}).length;
+        if(left>=3){var all=el("button","gfh-link gfb-skipall",t2("Ranger les "+left+" restantes dans « Autres » et continuer","File the remaining "+left+" under “Other” and continue"));all.type="button";
+          all.addEventListener("click",function(){var i=steps.indexOf("unknown");go(steps[Math.min(i+1,steps.length-1)]);});kids.push(all);}
         uBody.replaceChildren.apply(uBody,kids);
       }
 
@@ -971,7 +977,8 @@
       }
       return preview(ops,name).then(function(res){
         if(!res)return true;
-        var FS=window.FinanceSheet,keys=[LEDGER_KEY,RULES_KEY,"personalFinanceDashboard.categoryRules","personalFinanceDashboard.subscriptions"],before={},snapBefore=null;
+        var FS=window.FinanceSheet,keys=[LEDGER_KEY,"personalFinanceDashboard.categoryRules","personalFinanceDashboard.subscriptions"]// les choix de rangement (RULES_KEY) restent appris même si l'import est annulé
+          ,before={},snapBefore=null;
         try{snapBefore=JSON.stringify(FS.getSnapshot());keys.forEach(function(k){before[k]=window.safeStore.getItem(k);});}catch(e){}
         // Les choix faits dans l'aperçu sont retenus pour les prochains imports.
         if(Object.keys(res.extra).length)saveLearned(res.extra);

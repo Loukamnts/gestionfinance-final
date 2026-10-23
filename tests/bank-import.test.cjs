@@ -483,3 +483,16 @@ test('Confidentialité : le registre des doublons ne garde aucun libellé',()=>{
   B2.write(B2.summarize(B2.parse(B2._decode(enc('Date;Libellé;Montant\n02/09/2026;CARTE BOUTIQUE SECRETE DUPONT;-25,00\n')))),'replace');
   const all=Object.values(mem).join('|');assert.ok(!/SECRETE|DUPONT|secrete|dupont/i.test(all),'un libellé est resté dans le stockage');
 });
+
+test('Un choix retenu vaut pour tout le commerçant, même avec une autre ville ou un autre numéro',()=>{
+  const {B}=setupSheet(['Loisirs']);
+  const parse=(c)=>B.parse(B._decode(enc(c)));
+  const extra={'qwerty shop':['Loisirs','Loisirs','Dépense']};
+  const s=B.summarize(parse('Date;Libellé;Montant\n11/11/2026;CARTE QWERTY SHOP LYON;-9,00\n12/11/2026;CARTE QWERTY SHOP PARIS 15;-4,00\n13/11/2026;CARTE AUTRE TRUC;-3,00\n'),extra);
+  const lo=s.groups.find(g=>g.name==='Loisirs');
+  assert.equal(lo&&lo.count,2);
+  assert.equal(s.unknown.length,1);
+  // Un même commerçant n'est demandé qu'une fois, quelle que soit la ville
+  const u=B.summarize(parse('Date;Libellé;Montant\n11/11/2026;CARTE ZORBA GRILL LYON;-9,00\n12/11/2026;CARTE ZORBA GRILL NICE;-4,00\n'));
+  assert.equal(u.unknown.length,1);assert.equal(u.unknown[0].count,2);
+});
