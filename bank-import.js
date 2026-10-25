@@ -603,8 +603,9 @@
        ["replace",t2("Remplacer le mois","Replace the month"),t2("Ces lignes sont recalculées avec toutes les opérations déjà importées pour le mois, plus celles de ce relevé. Ce que tu avais tapé à la main dans ces lignes est effacé.","These rows are recalculated from every transaction already imported for the month, plus this statement’s. Anything you typed by hand in these rows is erased.")]].forEach(function(o){
         var lab=el("label","gfb-opt"),r=document.createElement("input"),txt=el("span","gfb-opt-txt");r.type="radio";r.name="gfbMode";r.value=o[0];radios.push(r);
         r.addEventListener("change",function(){if(r.checked){mode=o[0];updateOk();}});
-        txt.append(el("strong","",o[1]),el("small","",o[2]));lab.append(r,txt);modeBox.append(lab);});
-      P.months.append(mLead,mList,modeBox,mNeed);
+        var st=el("strong","",o[1]);if(o[0]==="replace")replStrong=st;txt.append(st,el("small","",o[2]));lab.append(r,txt);modeBox.append(lab);});
+      var mWarn=el("p","gfb-warn"),replStrong=null;mWarn.hidden=true;
+      P.months.append(mLead,mWarn,mList,modeBox,mNeed);
 
       /* 5. Résumé */
       var kLead=el("p","gfb-lead"),kMonths=el("div","gfb-recap-m"),kH2=el("h4","gfb-sub"),recap=el("div","gfb-recap"),kNotes=el("ul","gfb-stats gfb-notes"),kAfter=el("p","gfb-note",t2("Tu pourras tout modifier ensuite dans le tableur, et annuler l’import pendant quelques secondes.","You can change anything afterwards in the spreadsheet, and undo the import for a few seconds."));
@@ -780,6 +781,12 @@
           if(e.rows.length>5)box.append(el("p","gfb-note",t2("… et "+(e.rows.length-5)+" autre"+(e.rows.length-5>1?"s":"")+" ligne"+(e.rows.length-5>1?"s":""),"… and "+(e.rows.length-5)+" more row"+(e.rows.length-5>1?"s":""))));
           return box;});
         mList.replaceChildren.apply(mList,nodes);
+        // Mois qui a des chiffres mais dont Meuniance n'a gardé aucun import (mémoire de l'appareil effacée, autre appareil) :
+        // « Ajouter » compterait deux fois ce qui est déjà dans le tableur.
+        var led=ledger().m,unknownM=det.filter(function(e){var k=e.d.y+"-"+e.d.m;return !(led[k]&&Object.keys(led[k]).length);});
+        mWarn.hidden=!unknownM.length;
+        mWarn.textContent=unknownM.length?t2("Attention"+NB+": Meuniance ne retrouve aucun import de "+unknownM.map(function(e){return monthLabel(e.d);}).join(", ")+" sur cet appareil. Si ces chiffres viennent déjà d’un relevé, choisis « Remplacer le mois » : « Ajouter » les compterait deux fois.","Careful: Meuniance finds no earlier import of "+unknownM.map(function(e){return monthLabel(e.d);}).join(", ")+" on this device. If those figures already come from a statement, choose “Replace the month”: “Add” would count them twice."):"";
+        if(replStrong)replStrong.textContent=t2("Remplacer le mois","Replace the month")+(unknownM.length?t2(" (conseillé)"," (recommended)"):"");
         radios.forEach(function(r){r.checked=r.value===mode;});mNeed.hidden=!!mode;
       }
 
