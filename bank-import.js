@@ -411,9 +411,12 @@
       (summary.all||[]).forEach(function(a){if(!kept[a.fp]&&L.m[a.mk])delete L.m[a.mk][a.fp];});
     }
     items.forEach(function(it){kinds[it.name]=it.kind;var M=L.m[it.mk]||(L.m[it.mk]={});
-      if(M[it.fp])dup++;else fresh++;
-      if(mode==="add"&&M[it.fp])return;
-      M[it.fp]=[it.name,it.kind,Math.round(it.v*100)/100,it.cat];
+      // « Remplacer » : une opération déjà importée qu'on réimporte REMPLACE son ancienne ligne du registre (elle n'est jamais comptée deux fois).
+      // « Ajouter » : réimporter à dessein compte une opération de plus (deux achats identiques le même jour).
+      var fk=mode!=="add"&&/~$/.test(it.fp)?it.fp.slice(0,-1):it.fp;
+      if(M[fk])dup++;else fresh++;
+      if(mode==="add"&&M[fk])return;
+      M[fk]=[it.name,it.kind,Math.round(it.v*100)/100,it.cat];
       if(mode==="add"){var o=out[it.mk]||(out[it.mk]={});o[it.name]=(o[it.name]||0)+it.v;}});
     if(mode!=="add")Object.keys(touched).forEach(function(mk){
       var o=out[mk]={};Object.keys(before[mk]||{}).forEach(function(n){o[n]=0;});
@@ -745,7 +748,7 @@
         [/edf|engie|veolia|eau\b|gaz\b|electricite/,"Énergie et eau"]];
       function recommend(g){
         var name="";
-        if(g.total>0){var inc=T.filter(function(t){return t.group==="sheet"&&t.kind==="Salaire";})[0];name=inc?inc.name:"";}
+        if(g.total>0){name=en()?OTHER_IN[1]:OTHER_IN[0];}// un virement reçu qui n'est pas clairement un salaire : « Autres revenus », pas « Salaire »
         else{var l=norm(g.label||"");for(var i=0;i<HINTS.length;i++){if(HINTS[i][0].test(l)){name=HINTS[i][1];break;}}}
         if(!name)return "";
         // Le nom d'une ligne déjà présente dans le tableur a priorité (« Alimentation » pour Courses, par exemple).

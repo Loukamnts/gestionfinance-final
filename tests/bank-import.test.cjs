@@ -496,3 +496,16 @@ test('Un choix retenu vaut pour tout le commerçant, même avec une autre ville 
   const u=B.summarize(parse('Date;Libellé;Montant\n11/11/2026;CARTE ZORBA GRILL LYON;-9,00\n12/11/2026;CARTE ZORBA GRILL NICE;-4,00\n'));
   assert.equal(u.unknown.length,1);assert.equal(u.unknown[0].count,2);
 });
+
+test('Tout réimporter en mode Remplacer : le mois reste égal au fichier, rien n’est compté deux fois',()=>{
+  const {B,imp,cell}=setupSheet(['Salaire','Courses']);
+  const csv='Date;Libellé;Montant\n02/09/2026;CARTE LIDL;-20,00\n05/09/2026;VIR SALAIRE ACME;1600,00\n07/09/2026;CARTE LIDL;-30,00\n';
+  imp(csv);assert.equal(cell('Salaire',8),1600);assert.equal(cell('Courses',8),50);
+  const ops=()=>B.parse(B._decode(enc(csv)));
+  const s0=B.summarize(ops());const inc={};s0.rows.forEach(r=>{if(r.status==='dup')inc[r.fp]=true;});
+  assert.equal(Object.keys(inc).length,3);
+  const s=B.summarize(ops(),{},{inc});B.write(s,'replace');
+  assert.equal(cell('Salaire',8),1600,'salaire non doublé');assert.equal(cell('Courses',8),50,'courses non doublées');
+  // Et le relevé suivant reste correct (le registre n'a pas gardé de doublon)
+  imp(csv);assert.equal(cell('Salaire',8),1600);assert.equal(cell('Courses',8),50);
+});
