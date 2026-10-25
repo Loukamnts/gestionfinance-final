@@ -404,6 +404,9 @@
     // Mois touchés : ceux du fichier, plus ceux du registre qui tombent dans la période du fichier.
     var touched={};(summary.all||items).forEach(function(it){touched[it.mk]=1;});
     Object.keys(touched).forEach(function(mk){var b=before[mk]={};Object.keys(L.m[mk]||{}).forEach(function(fp){var e=L.m[mk][fp],n=rowName(e,mk);b[n]=1;kinds[n]=e[1];});});
+    // « Repartir de ce relevé » : les mois du fichier ne gardent aucune opération des imports précédents (le même salaire importé
+    // deux fois par deux exports différents ne peut plus rester dans le registre). Les lignes qu'ils avaient écrites sont remises à zéro.
+    if(mode==="fresh")Object.keys(touched).forEach(function(mk){L.m[mk]={};});
     if(mode!=="add"){
       // Remplacer : une opération de ce fichier désormais ignorée sort du registre. Les opérations venues
       // d'un autre fichier (autre compte, export filtré) sont gardées.
@@ -601,13 +604,14 @@
 
       /* 4. Mois déjà remplis */
       var mLead=el("p","gfb-lead"),mList=el("div","gfb-conf"),modeBox=el("fieldset","gfb-mode"),legend=el("legend","",t2("Que faire de ces mois ?","What should happen to these months?")),mNeed=el("p","gfb-note gfb-need",t2("Choisis une option pour continuer.","Choose an option to continue."));modeBox.append(legend);
-      var radios=[];
+      var radios=[],replStrong=null;
       [["add",t2("Ajouter seulement le nouveau","Add only what’s new"),t2("Tes chiffres actuels restent. Meuniance y ajoute seulement les opérations de ce relevé qu’il n’avait encore jamais importées.","Your current figures stay. Meuniance only adds the transactions from this statement it never imported before.")],
-       ["replace",t2("Remplacer le mois","Replace the month"),t2("Ces lignes sont recalculées avec toutes les opérations déjà importées pour le mois, plus celles de ce relevé. Ce que tu avais tapé à la main dans ces lignes est effacé.","These rows are recalculated from every transaction already imported for the month, plus this statement’s. Anything you typed by hand in these rows is erased.")]].forEach(function(o){
+       ["replace",t2("Remplacer le mois","Replace the month"),t2("Ces lignes sont recalculées avec toutes les opérations déjà importées pour le mois, plus celles de ce relevé. Ce que tu avais tapé à la main dans ces lignes est effacé.","These rows are recalculated from every transaction already imported for the month, plus this statement’s. Anything you typed by hand in these rows is erased.")],
+       ["fresh",t2("Repartir de ce relevé","Start over from this statement"),t2("Ces mois ne gardent que ce relevé : les imports précédents sont oubliés pour ces mois, leurs lignes sont remises à zéro puis remplies par ce relevé. Utilise-le si un chiffre est compté deux fois.","These months keep this statement only: earlier imports are forgotten for these months, their rows are reset and filled from this statement. Use it if a figure is counted twice.")]].forEach(function(o){
         var lab=el("label","gfb-opt"),r=document.createElement("input"),txt=el("span","gfb-opt-txt");r.type="radio";r.name="gfbMode";r.value=o[0];radios.push(r);
         r.addEventListener("change",function(){if(r.checked){mode=o[0];updateOk();}});
-        var st=el("strong","",o[1]);if(o[0]==="replace")replStrong=st;txt.append(st,el("small","",o[2]));lab.append(r,txt);modeBox.append(lab);});
-      var mWarn=el("p","gfb-warn"),replStrong=null;mWarn.hidden=true;
+        var st=el("strong","",o[1]);if(o[0]==="fresh")replStrong=st;txt.append(st,el("small","",o[2]));lab.append(r,txt);modeBox.append(lab);});
+      var mWarn=el("p","gfb-warn");mWarn.hidden=true;
       P.months.append(mLead,mWarn,mList,modeBox,mNeed);
 
       /* 5. Résumé */
@@ -788,8 +792,8 @@
         // « Ajouter » compterait deux fois ce qui est déjà dans le tableur.
         var led=ledger().m,unknownM=det.filter(function(e){var k=e.d.y+"-"+e.d.m;return !(led[k]&&Object.keys(led[k]).length);});
         mWarn.hidden=!unknownM.length;
-        mWarn.textContent=unknownM.length?t2("Attention"+NB+": Meuniance ne retrouve aucun import de "+unknownM.map(function(e){return monthLabel(e.d);}).join(", ")+" sur cet appareil. Si ces chiffres viennent déjà d’un relevé, choisis « Remplacer le mois » : « Ajouter » les compterait deux fois.","Careful: Meuniance finds no earlier import of "+unknownM.map(function(e){return monthLabel(e.d);}).join(", ")+" on this device. If those figures already come from a statement, choose “Replace the month”: “Add” would count them twice."):"";
-        if(replStrong)replStrong.textContent=t2("Remplacer le mois","Replace the month")+(unknownM.length?t2(" (conseillé)"," (recommended)"):"");
+        mWarn.textContent=unknownM.length?t2("Attention"+NB+": Meuniance ne retrouve aucun import de "+unknownM.map(function(e){return monthLabel(e.d);}).join(", ")+" sur cet appareil. Si ces chiffres viennent déjà d’un relevé, choisis « Repartir de ce relevé » : « Ajouter » les compterait deux fois.","Careful: Meuniance finds no earlier import of "+unknownM.map(function(e){return monthLabel(e.d);}).join(", ")+" on this device. If those figures already come from a statement, choose “Start over from this statement”: “Add” would count them twice."):"";
+        if(replStrong)replStrong.textContent=t2("Repartir de ce relevé","Start over from this statement")+(unknownM.length?t2(" (conseillé)"," (recommended)"):"");
         radios.forEach(function(r){r.checked=r.value===mode;});mNeed.hidden=!!mode;
       }
 
@@ -820,7 +824,7 @@
         if(summary.byRule)ig.push(t2(plural(summary.byRule,"choisie par toi","choisies par toi","",""),plural(summary.byRule,"","","chosen by you","chosen by you")));
         if(ig.length)notes.push(t2("Ignorées"+NB+": "+ig.join(", ")+".","Ignored: "+ig.join(", ")+"."));
         if(summary.deferred)notes.push(t2("Une ligne de total de carte à débit différé a été ignorée"+NB+": les paiements sont déjà comptés un par un.","A deferred-debit card total line was ignored: the payments are already counted one by one."));
-        var conf0=conf.length&&mode;if(conf0)notes.push(mode==="add"?t2("Mois déjà remplis"+NB+": les nouvelles opérations s’ajoutent à tes chiffres.","Months already filled: new transactions are added to your figures."):t2("Mois déjà remplis"+NB+": ces lignes sont recalculées avec toutes les opérations importées.","Months already filled: these rows are recalculated from every imported transaction."));
+        var conf0=conf.length&&mode;if(conf0)notes.push(mode==="fresh"?t2("Mois déjà remplis"+NB+": ces mois repartent de ce relevé seul.","Months already filled: these months start over from this statement alone."):mode==="add"?t2("Mois déjà remplis"+NB+": les nouvelles opérations s’ajoutent à tes chiffres.","Months already filled: new transactions are added to your figures."):t2("Mois déjà remplis"+NB+": ces lignes sont recalculées avec toutes les opérations importées.","Months already filled: these rows are recalculated from every imported transaction."));
         kNotes.replaceChildren.apply(kNotes,notes.map(function(n){return el("li","",n);}));
       }
 

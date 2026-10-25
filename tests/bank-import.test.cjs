@@ -509,3 +509,17 @@ test('Tout réimporter en mode Remplacer : le mois reste égal au fichier, rien 
   // Et le relevé suivant reste correct (le registre n'a pas gardé de doublon)
   imp(csv);assert.equal(cell('Salaire',8),1600);assert.equal(cell('Courses',8),50);
 });
+
+test('Repartir de ce relevé : un salaire importé deux fois par deux exports différents n\u2019est plus compté deux fois',()=>{
+  const {B,imp,cell}=setupSheet(['Salaire']);
+  // Deux exports du même mois avec des libellés différents : deux empreintes, donc deux opérations dans le registre
+  imp('Date;Libellé;Montant\n05/09/2026;VIR SEPA SALAIRE ACME;1600,00\n');
+  imp('Date;Libellé;Montant\n05/09/2026;VIREMENT SALAIRE ACME SAS;1600,00\n','add');
+  assert.equal(cell('Salaire',8),3200);
+  imp('Date;Libellé;Montant\n05/09/2026;VIR SEPA SALAIRE ACME;1600,00\n','replace');
+  assert.equal(cell('Salaire',8),3200,'Remplacer garde les anciennes opérations du registre');
+  imp('Date;Libellé;Montant\n05/09/2026;VIR SEPA SALAIRE ACME;1600,00\n','fresh');
+  assert.equal(cell('Salaire',8),1600,'Repartir de ce relevé efface le doublon');
+  imp('Date;Libellé;Montant\n05/09/2026;VIR SEPA SALAIRE ACME;1600,00\n','replace');
+  assert.equal(cell('Salaire',8),1600);
+});
