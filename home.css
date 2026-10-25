@@ -689,3 +689,5 @@ body[data-mode="dark"] .gfh-bpanel{box-shadow:0 22px 48px -22px rgba(0,0,0,.75)}
 .gfb-blk>.gfb-reall.gfh-btn{display:block;width:100%;margin:8px 0 4px;min-height:44px}
 .gfb-blk>.gfb-reall.gfh-link{display:block;margin:6px 0 4px;min-height:44px;padding:0 4px;text-align:left}
 .gfb-blk>.gfb-reall[hidden]{display:none!important}
+.gfb-warn{margin:0 0 12px;padding:12px 14px;border:1px solid var(--accent-fill,var(--accent));border-radius:14px;background:color-mix(in srgb,var(--accent-fill,var(--accent)) 14%,transparent);font-size:.875rem;line-height:1.45;color:var(--text)}
+.gfb-warn[hidden]{display:none}
