@@ -523,3 +523,15 @@ test('Repartir de ce relevé : un salaire importé deux fois par deux exports di
   imp('Date;Libellé;Montant\n05/09/2026;VIR SEPA SALAIRE ACME;1600,00\n','replace');
   assert.equal(cell('Salaire',8),1600);
 });
+
+test('Registre abîmé par « Importer quand même » : Remplacer ne compte plus l’opération deux fois',()=>{
+  const {B,imp,cell}=setupSheet(['Salaire']);
+  const csv='Date;Libellé;Montant\n05/09/2026;VIR SEPA SALAIRE ACME;1600,00\n';
+  imp(csv);
+  // Ancien comportement : l'opération forcée en mode Ajouter reste dans le registre sous « empreinte~ »
+  const s0=B.summarize(B.parse(B._decode(enc(csv))));const inc={};s0.rows.forEach(r=>{if(r.status==='dup')inc[r.fp]=true;});
+  B.write(B.summarize(B.parse(B._decode(enc(csv))),{},{inc}),'add');
+  assert.equal(cell('Salaire',8),3200);
+  imp(csv,'replace');
+  assert.equal(cell('Salaire',8),1600,'le doublon du registre est retiré');
+});

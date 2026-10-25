@@ -407,6 +407,9 @@
     // « Repartir de ce relevé » : les mois du fichier ne gardent aucune opération des imports précédents (le même salaire importé
     // deux fois par deux exports différents ne peut plus rester dans le registre). Les lignes qu'ils avaient écrites sont remises à zéro.
     if(mode==="fresh")Object.keys(touched).forEach(function(mk){L.m[mk]={};});
+    // Réparation : une opération « importée quand même » avait été gardée en double dans le registre (empreinte + « ~ »).
+    // En Remplacer, cette seconde ligne est une copie de la première : on la retire pour ne pas la compter deux fois.
+    else if(mode!=="add")Object.keys(touched).forEach(function(mk){var M=L.m[mk];if(!M)return;Object.keys(M).forEach(function(fp){if(/~$/.test(fp)&&M[fp.slice(0,-1)])delete M[fp];});});
     if(mode!=="add"){
       // Remplacer : une opération de ce fichier désormais ignorée sort du registre. Les opérations venues
       // d'un autre fichier (autre compte, export filtré) sont gardées.
