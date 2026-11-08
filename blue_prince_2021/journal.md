@@ -48,3 +48,14 @@
 | Dailymotion API | api.dailymotion.com/videos?search=blue+prince+trailer | seulement un trailer 2024 (x9ac2jk) |
 | Bilibili, Reddit API | — | connexion requise / refus |
 | Recherche web → Facebook | **facebook.com/VideoGameTrailer/videos/…/2849778521935674** | ✅ **trailer 2021 téléchargé** |
+
+## Recherche de vidéos ANTÉRIEURES au trailer d'avril 2021 (2026-11-08)
+Résultat : **aucune vidéo publique antérieure trouvée.**
+| Piste | Résultat |
+|---|---|
+| Vimeo de Tonda Ros (https://vimeo.com/tondaros), métadonnées via oEmbed | 6 vidéos : 59715643 « TONDA ROS DP » (2013), 81073503 « DIRECTOR » (2013), 81479658 « MOTION ARTIST » (2013), 136826523 « Dogubomb, Our Work » (2015), 198482219 « Word Sculpture » (2017, sans lien avec le jeu), 932074668 « DIRECTOR » (08/04/2024, après la période). Rien sur Blue Prince/Bequest avant 2021. |
+| vimeo.com/dogubomb | 404 |
+| YouTube « Dogubomb », « Tonda Ros », « Bequest », « Blue Prince teaser » (logs/youtube_search3.txt) | uniquement contenus 2024-2026 (interviews, conférences) ; chaîne « Tonda Ros » = seulement Word Sculpture |
+| Prototype « Bequest » (2016-2017) | Selon intotheabyss.net/bequest/, Tonda Ros a envoyé une vidéo de gameplay à Christopher Manson, mais l'auteur n'avait pas la permission de la publier → non publique. Ros a jeté ce prototype à l'automne 2017. intotheabyss.net injoignable depuis la session. |
+| Steam | fiche créée le 03/03/2021, aucune vidéo/annonce antérieure conservée |
+| X @dogubomb, Instagram | connexion requise, non consultable |
